@@ -31,8 +31,13 @@
     
     <title>DictaMed - Où la voix rencontre les chiffres</title>
     
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css">
+    <!-- Cache Control Headers -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <!-- Stylesheet with Versioning -->
+    <link rel="stylesheet" href="style.css?v=2025.11.08.2">
     
 
     
@@ -54,33 +59,31 @@
     <!-- Skip link pour accessibilité -->
     <a href="#main-content" class="skip-link">Aller au contenu principal</a>
     
-    <!-- Header -->
+    <!-- Header avec Logo et Onglets -->
     <header role="banner">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo-section">
-                    <div class="logo">
-                        <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
-                    </div>
-                    <p class="slogan">Où la voix rencontre les chiffres</p>
+        <div class="header-container">
+            <!-- Section Logo à gauche -->
+            <div class="logo-section">
+                <div class="logo">
+                    <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
                 </div>
-
+                <p class="slogan">Où la voix rencontre les chiffres</p>
             </div>
+
+            <!-- Navigation par onglets à droite -->
+            <nav class="tabs-nav" role="navigation" aria-label="Navigation principale">
+                <div class="swipe-hint">👉 Faites glisser pour voir plus</div>
+                <div class="tabs-container">
+                    <button class="tab-btn active" data-tab="mode-normal" aria-selected="true"><span class="tab-icon">📝</span>Mode Normal</button>
+                    <button class="tab-btn" data-tab="guide" aria-selected="false"><span class="tab-icon">📖</span>Guide</button>
+                    <button class="tab-btn" data-tab="contact" aria-selected="false"><span class="tab-icon">📧</span>Contact</button>
+                    <button class="tab-btn" data-tab="faq" aria-selected="false"><span class="tab-icon">❓</span>FAQ</button>
+                    <button class="tab-btn" data-tab="mode-test" aria-selected="false"><span class="tab-icon">🧪</span>Mode Test</button>
+                    <button class="tab-btn" data-tab="mode-dmi" aria-selected="false"><span class="tab-icon">🩺</span>Mode DMI</button>
+                </div>
+            </nav>
         </div>
     </header>
-
-    <!-- Navigation par onglets -->
-    <nav class="tabs-nav" role="navigation" aria-label="Navigation principale">
-        <div class="swipe-hint">👉 Faites glisser pour voir plus</div>
-        <div class="tabs-container">
-            <button class="tab-btn active" data-tab="mode-normal" aria-selected="true"><span class="tab-icon">📝</span>Mode Normal</button>
-            <button class="tab-btn" data-tab="guide" aria-selected="false"><span class="tab-icon">📖</span>Guide</button>
-            <button class="tab-btn" data-tab="contact" aria-selected="false"><span class="tab-icon">📧</span>Contact</button>
-            <button class="tab-btn" data-tab="faq" aria-selected="false"><span class="tab-icon">❓</span>FAQ</button>
-            <button class="tab-btn" data-tab="mode-test" aria-selected="false"><span class="tab-icon">🧪</span>Mode Test</button>
-            <button class="tab-btn" data-tab="mode-dmi" aria-selected="false"><span class="tab-icon">🩺</span>Mode DMI</button>
-        </div>
-    </nav>
 
     <!-- Contenu des onglets -->
     <main class="container" id="main-content" role="main">
@@ -237,7 +240,37 @@
                 </div>
             </div>
 
-            
+            <!-- Conseils pratiques (déplacé en haut) -->
+            <div class="card">
+                <h2>💡 Conseils pour une dictée optimale</h2>
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <h3>🎤 Microphone</h3>
+                        <p>Utilisez un microphone de qualité ou les écouteurs de votre smartphone pour une meilleure reconnaissance</p>
+                    </div>
+                    <div class="step-card">
+                        <h3>🔇 Environnement</h3>
+                        <p>Privilégiez un endroit calme sans bruit de fond (fermez portes et fenêtres)</p>
+                    </div>
+                    <div class="step-card">
+                        <h3>🗣️ Élocution</h3>
+                        <p>Parlez clairement et lentement, en articulant bien chaque mot et chaque chiffre</p>
+                    </div>
+                    <div class="step-card">
+                        <h3>⏸️ Pauses</h3>
+                        <p>Marquez une courte pause entre chaque valeur pour faciliter la transcription</p>
+                    </div>
+                    <div class="step-card">
+                        <h3>📝 Structure</h3>
+                        <p>Suivez l'ordre des variables de votre plan de travail pour éviter les confusions</p>
+                    </div>
+                    <div class="step-card">
+                        <h3>✅ Vérification</h3>
+                        <p>Utilisez la fonction "Réécouter" pour valider vos enregistrements avant envoi</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Solution -->
             <div class="card solution-card">
                 <h2>✨ La Solution DictaMed</h2>
@@ -268,37 +301,6 @@
                 </div>
                 <div class="cta-buttons">
                     <button class="btn btn-primary" onclick="switchTab('mode-test')">🎯 Essayer le Mode Test</button>
-                </div>
-            </div>
-
-            <!-- Conseils pratiques (déplacé en haut) -->
-            <div class="card">
-                <h2>💡 Conseils pour une dictée optimale</h2>
-                <div class="steps-grid">
-                    <div class="step-card">
-                        <h3>🎤 Microphone</h3>
-                        <p>Utilisez un microphone de qualité ou les écouteurs de votre smartphone pour une meilleure reconnaissance</p>
-                    </div>
-                    <div class="step-card">
-                        <h3>🔇 Environnement</h3>
-                        <p>Privilégiez un endroit calme sans bruit de fond (fermez portes et fenêtres)</p>
-                    </div>
-                    <div class="step-card">
-                        <h3>🗣️ Élocution</h3>
-                        <p>Parlez clairement et lentement, en articulant bien chaque mot et chaque chiffre</p>
-                    </div>
-                    <div class="step-card">
-                        <h3>⏸️ Pauses</h3>
-                        <p>Marquez une courte pause entre chaque valeur pour faciliter la transcription</p>
-                    </div>
-                    <div class="step-card">
-                        <h3>📝 Structure</h3>
-                        <p>Suivez l'ordre des variables de votre plan de travail pour éviter les confusions</p>
-                    </div>
-                    <div class="step-card">
-                        <h3>✅ Vérification</h3>
-                        <p>Utilisez la fonction "Réécouter" pour valider vos enregistrements avant envoi</p>
-                    </div>
                 </div>
             </div>
 
@@ -391,12 +393,7 @@
             
             <div class="card">
                 <h2>Commander DictaMed</h2>
-                <p>📧 <strong>Email :</strong> 
-   <a href="mailto:DictaMed.SPSS@gmail.com">
-       DictaMed.SPSS@gmail.com
-   </a>
-</p>
->
+                <p>📧 <strong>Email :</strong> <a href="/cdn-cgi/l/email-protection#c084a9a3b4a18da5a4ee9390939380a7ada1a9aceea3afad"><span class="__cf_email__" data-cfemail="84c0ede7f0e5c9e1e0aad7d4d7d7c4e3e9e5ede8aae7ebe9">[email&#160;protected]</span></a></p>
                 <p>📘 <strong>Facebook :</strong> <a href="https://www.facebook.com/DictaMed.SPSS" target="_blank">DictaMed.SPSS</a></p>
                 <p class="info-box">💰 Tarification personnalisée selon le nombre de patients et de variables à collecter.</p>
             </div>
@@ -447,15 +444,9 @@
                 </div>
 
                 <div class="faq-item">
-    <h3>6. Comment obtenir un devis ?</h3>
-    <p>
-        Contactez-nous par email à 
-        <a href="mailto:DictaMed.SPSS@gmail.com">DictaMed.SPSS@gmail.com</a> 
-        en fournissant les informations listées dans l'onglet Contact. 
-        Nous vous répondrons sous 48 heures ouvrées avec un devis personnalisé adapté à vos besoins.
-    </p>
-</div>
-
+                    <h3>6. Comment obtenir un devis ?</h3>
+                    <p>Contactez-nous par email à <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5b1f32382f3a163e3f75080b08081b3c363a323775383436">[email&#160;protected]</a> en fournissant les informations listées dans l'onglet Contact. Nous vous répondrons sous 48 heures ouvrées avec un devis personnalisé adapté à vos besoins.</p>
+                </div>
 
                 <div class="faq-item">
                     <h3>7. Quelle est la précision de la transcription ?</h3>
@@ -497,7 +488,7 @@
                         </div>
                     </div>
                     <p style="margin: 0 0 15px 0; color: #374151; line-height: 1.6; font-size: 1.05em;">Vos dictées médicales sont automatiquement transcrites et publiées en temps réel dans notre Google Sheet public pour consultation immédiate :</p>
-                    <a href="https://docs.google.com/spreadsheets/d/1ReZHjndHc6o8O1bx1OfZXnZ8HWt8nLSo2X7IS6rcZXE/edit?gid=0#gid=0" target="_blank" class="google-sheet-link" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.1em; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                    <a href="https://docs.google.com/spreadsheets/d/1ReZHjndHc6o8O1bx1OfZXnZ8HWt8nLSo2X7IS6rcZXE/edit" target="_blank" class="google-sheet-link" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.1em; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
                         <span style="font-size: 1.3em;">📊</span>
                         <span>Ouvrir le Google Sheet Public</span>
                         <span style="margin-left: 5px;">↗</span>
@@ -552,7 +543,7 @@
                 </div>
                 <div class="form-group">
                     <label for="nomPatientTest">nom &amp; prénom</label>
-                    <input type="text" id="nomPatientTest" maxlength="50" placeholder="Ex:Flen ben Foulen">
+                    <input type="text" id="nomPatientTest" maxlength="50" placeholder="Ex: ben saleh kamel">
                     <span class="char-counter" id="nomPatientTestCounter">0/50</span>
                 </div>
             </div>
@@ -567,7 +558,7 @@
             <!-- Sections d'enregistrement -->
             <div class="recording-section" data-section="clinique">
                 <h3>📋 Données Cliniques</h3>
-                <p class="section-description">Dicter ses variables : Âge, sexe, BMI, tabac</p>
+                <p class="section-description">Âge, sexe, BMI, tabac</p>
                 <div class="recording-controls">
                     <div class="status-info">
                         <span class="status-badge" data-status="ready">Prêt</span>
@@ -587,7 +578,7 @@
 
             <div class="recording-section" data-section="antecedents">
                 <h3>🏥 Antécédents</h3>
-                <p class="section-description">Dicter ses variables : HTA, DT2, DYSLIPIDEMIE, AVC</p>
+                <p class="section-description">HTA, DT2, DYSLIPIDEMIE, AVC</p>
                 <div class="recording-controls">
                     <div class="status-info">
                         <span class="status-badge" data-status="ready">Prêt</span>
@@ -607,7 +598,7 @@
 
             <div class="recording-section" data-section="biologie">
                 <h3>🧪 Biologie</h3>
-                <p class="section-description">Dicter ses variables : Hémoglobine, globules blancs, plaquettes, ionogramme complet( sodium , potassium, chlore)</p>
+                <p class="section-description">Hémoglobine, globules blancs, plaquettes, ionogramme complet( sodium , potassium, chlore)</p>
                 <div class="recording-controls">
                     <div class="status-info">
                         <span class="status-badge" data-status="ready">Prêt</span>
@@ -708,16 +699,13 @@
         </section>
     </main>
 
-   <footer>
-    <div class="container">
-        <p>
-            &copy; 2025 DictaMed - Tous droits réservés | 
-            Contact : <a href="mailto:DictaMed.SPSS@gmail.com">DictaMed.SPSS@gmail.com</a>
-        </p>
-    </div>
-</footer>
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 DictaMed - Tous droits réservés | Contact : <a href="/cdn-cgi/l/email-protection#b8fcd1dbccd9f5dddc96ebe8ebebf8dfd5d9d1d496dbd7d5"><span class="__cf_email__" data-cfemail="f7b39e948396ba9293d9a4a7a4a4b7909a969e9bd994989a">[email&#160;protected]</span></a></p>
+        </div>
+    </footer>
 
-
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="script.js"></script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+    <script src="script.js?v=2025.11.08.2"></script>
 </body>
 </html>

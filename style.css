@@ -59,22 +59,24 @@ header {
     border-bottom: 1px solid rgba(255,255,255,0.8);
 }
 
-.header-content {
+/* Header Container - Logo à gauche, onglets à droite */
+.header-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 20px;
+    gap: 30px;
 }
 
 .logo-section {
-    flex: 1;
+    flex-shrink: 0;
 }
 
 .logo {
     font-size: 2.8rem;
     font-weight: 800;
-    text-align: center;
+    text-align: left;
     letter-spacing: -1px;
+    margin-bottom: 5px;
 }
 
 .logo-dicta {
@@ -88,10 +90,10 @@ header {
 }
 
 .slogan {
-    text-align: center;
+    text-align: left;
     color: var(--gray-medium);
     font-style: italic;
-    margin-top: 8px;
+    margin-top: 5px;
     font-size: 1.05rem;
     font-weight: 500;
 }
@@ -160,10 +162,41 @@ header {
     }
 }
 
+/* Styles pour grand écran desktop */
+@media (min-width: 1024px) {
+    /* Étendre la largeur du contenu sur desktop */
+    .tab-content {
+        max-width: none;
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        margin-right: calc(-50vw + 50%);
+        padding-left: 50vw;
+        padding-right: 50vw;
+        box-sizing: border-box;
+    }
+    
+    /* S'assurer que le header reste centré */
+    .header-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    
+    /* Maintenir la marge du header */
+    header {
+        margin-bottom: 0;
+    }
+    
+    /* Séparer le header du contenu */
+    .header-container + .tab-content {
+        margin-top: 32px;
+    }
+}
+
 .tabs-container {
     display: flex;
     gap: 8px;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
     overflow-x: auto;
     overflow-y: hidden;
@@ -1477,10 +1510,22 @@ label span[style*="color: var(--red)"] {
 /* Tablettes et petits écrans */
 @media (max-width: 768px) {
     /* Header adapté */
-    .header-content {
+    .header-container {
         flex-direction: column;
         text-align: center;
         gap: 15px;
+    }
+    
+    .logo-section {
+        flex-shrink: 1;
+    }
+    
+    .logo {
+        text-align: center;
+    }
+    
+    .slogan {
+        text-align: center;
     }
     
 
