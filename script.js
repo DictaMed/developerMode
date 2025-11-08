@@ -216,7 +216,7 @@ const AutoSave = {
                     }
                 });
                 
-                Toast.info('Identifiants restaurés', 'Reprise de session');
+                //Toast.info('Identifiants restaurés', 'Reprise de session');
             }
         } catch (error) {
             console.error('Erreur lors de la restauration:', error);
