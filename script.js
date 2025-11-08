@@ -306,8 +306,8 @@ function initCharCounters() {
         { id: 'nomPatient', counterId: 'nomPatientCounter' },
         { id: 'numeroDossierTest', counterId: 'numeroDossierTestCounter' },
         { id: 'nomPatientTest', counterId: 'nomPatientTestCounter' },
-        { id: 'numeroDossierTexte', counterId: 'numeroDossierTexteCounter' },
-        { id: 'nomPatientTexte', counterId: 'nomPatientTexteCounter' }
+        { id: 'numeroDossierDMI', counterId: 'numeroDossierDMICounter' },
+        { id: 'nomPatientDMI', counterId: 'nomPatientDMICounter' }
     ];
 
     inputs.forEach(({ id, counterId }) => {
@@ -328,9 +328,9 @@ function initCharCounters() {
                     counter.classList.add('warning');
                 }
 
-                // Validation pour le mode mode DMI
-                if (id === 'numeroDossierTexte') {
-                    validateTexteMode();
+                // Validation pour le mode DMI
+                if (id === 'numeroDossierDMI') {
+                    validateDMIMode();
                 }
             });
         }
@@ -1169,10 +1169,10 @@ function resetForm(mode) {
 
 // ===== MODE SAISIE TEXTE =====
 
-// Validation du mode mode DMI
-function validateTexteMode() {
-    const numeroDossier = document.getElementById('numeroDossier').value.trim();
-    const submitBtn = document.getElementById('submitTexte');
+// Validation du mode DMI
+function validateDMIMode() {
+    const numeroDossier = document.getElementById('numeroDossierDMI').value.trim();
+    const submitBtn = document.getElementById('submitDMI');
     
     if (submitBtn) {
         submitBtn.disabled = !numeroDossier;
@@ -1256,27 +1256,27 @@ function updatePhotosPreview() {
     });
 }
 
-// Envoi des données du mode mode DMI
-async function sendTexteData() {
+// Envoi des données du mode DMI
+async function sendDmiData() {
     try {
-        const submitBtn = document.getElementById('submitTexte');
+        const submitBtn = document.getElementById('submitDMI');
         submitBtn.disabled = true;
         submitBtn.textContent = 'Envoi en cours...';
 
         // Préparer le payload
-        const numeroDossier = document.getElementById('numeroDossierTexte').value.trim();
-        const nomPatient = document.getElementById('nomPatientTexte').value.trim();
+        const numeroDossier = document.getElementById('numeroDossierDMI').value.trim();
+        const nomPatient = document.getElementById('nomPatientDMI').value.trim();
         const texteLibre = document.getElementById('texteLibre').value.trim();
 
         if (!numeroDossier) {
             Toast.warning('Le numéro de dossier est obligatoire pour envoyer les données.', 'Champ requis');
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Envoyer les données';
+            submitBtn.textContent = 'Envoyer les données DMI';
             return;
         }
 
         const payload = {
-            mode: 'texte',
+            mode: 'dmi',
             recordedAt: new Date().toISOString(),
             NumeroDeDossier: numeroDossier,
             NomDuPatient: nomPatient,
@@ -1295,7 +1295,7 @@ async function sendTexteData() {
             });
         }
 
-        // Envoyer au webhook du mode test
+        // Envoyer au webhook du mode test (same as mode test)
         const endpoint = 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed';
 
         const response = await fetch(endpoint, {
@@ -1307,11 +1307,11 @@ async function sendTexteData() {
         });
 
         if (response.ok) {
-            Toast.success('Vos données ont été envoyées avec succès !', 'Envoi réussi');
+            Toast.success('Vos données DMI ont été envoyées avec succès !', 'Envoi réussi');
             
             // Réinitialiser le formulaire si souhaité
-            if (confirm('Voulez-vous réinitialiser le formulaire ?')) {
-                resetTexteForm();
+            if (confirm('Voulez-vous réinitialiser le formulaire DMI ?')) {
+                resetDmiForm();
             }
         } else {
             const errorText = await response.text();
@@ -1323,9 +1323,9 @@ async function sendTexteData() {
         console.error('Erreur lors de l\'envoi:', error);
         Toast.error('Impossible de contacter le serveur. Vérifiez votre connexion Internet.', 'Erreur réseau');
     } finally {
-        const submitBtn = document.getElementById('submitTexte');
+        const submitBtn = document.getElementById('submitDMI');
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Envoyer les données';
+        submitBtn.textContent = 'Envoyer les données DMI';
     }
 }
 
@@ -1343,14 +1343,14 @@ function fileToBase64(file) {
 }
 
 // Réinitialiser le formulaire mode DMI
-function resetTexteForm() {
-    document.getElementById('numeroDossierTexte').value = '';
-    document.getElementById('nomPatientTexte').value = '';
+function resetDmiForm() {
+    document.getElementById('numeroDossierDMI').value = '';
+    document.getElementById('nomPatientDMI').value = '';
     document.getElementById('texteLibre').value = '';
     document.getElementById('texteLibreCounter').textContent = '0';
     uploadedPhotos = [];
     updatePhotosPreview();
-    validateTexteMode();
+    validateDMIMode();
 }
 
 // ===== INITIALISATION =====
@@ -1371,12 +1371,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initAudioRecorders();
     initPhotosUpload();
     updateSectionCount();
-    validateTexteMode();
+    validateDMIMode();
 
     // Événements pour les boutons d'envoi
     const submitNormalBtn = document.getElementById('submitNormal');
     const submitTestBtn = document.getElementById('submitTest');
-    const submitTexteBtn = document.getElementById('submitTexte');
+    const submitDmiBtn = document.getElementById('submitDMI');
 
     if (submitNormalBtn) {
         submitNormalBtn.addEventListener('click', () => {
@@ -1392,10 +1392,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (submitTexteBtn) {
-        submitTexteBtn.addEventListener('click', () => {
+    if (submitDmiBtn) {
+        submitDmiBtn.addEventListener('click', () => {
             Loading.show('Envoi en cours...');
-            sendTexteData().finally(() => Loading.hide());
+            sendDmiData().finally(() => Loading.hide());
         });
     }
 
