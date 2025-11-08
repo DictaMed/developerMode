@@ -1171,7 +1171,7 @@ function resetForm(mode) {
 
 // Validation du mode mode DMI
 function validateTexteMode() {
-    const numeroDossier = document.getElementById('numeroDossierTest').value.trim();
+    const numeroDossier = document.getElementById('numeroDossier').value.trim();
     const submitBtn = document.getElementById('submitTexte');
     
     if (submitBtn) {
