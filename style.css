@@ -672,26 +672,41 @@ input:focus {
 .btn-record {
     background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
     color: white;
+    min-width: 140px; /* Largeur minimum pour "Enregistrer" */
+    white-space: nowrap;
+    overflow: visible;
 }
 
 .btn-pause {
     background: linear-gradient(135deg, var(--orange) 0%, #d97706 100%);
     color: white;
+    min-width: 100px;
+    white-space: nowrap;
+    overflow: visible;
 }
 
 .btn-stop {
     background: linear-gradient(135deg, var(--gray-medium) 0%, #475569 100%);
     color: white;
+    min-width: 100px;
+    white-space: nowrap;
+    overflow: visible;
 }
 
 .btn-replay {
     background: linear-gradient(135deg, var(--cyan) 0%, #0891b2 100%);
     color: white;
+    min-width: 110px;
+    white-space: nowrap;
+    overflow: visible;
 }
 
 .btn-delete {
     background: linear-gradient(135deg, var(--red-dark) 0%, #991b1b 100%);
     color: white;
+    min-width: 110px;
+    white-space: nowrap;
+    overflow: visible;
 }
 
 .btn-primary {
@@ -761,14 +776,41 @@ input:focus {
     z-index: 1;
 }
 
-/* Empêcher le débordement des éléments */
-* {
-    box-sizing: border-box;
+/* Amélioration de la gestion des débordements */
+body {
+    overflow-x: hidden; /* Évite le débordement horizontal de la page */
 }
 
-.card, .recording-section, .submit-section {
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px 120px 20px; /* Padding bottom augmenté pour éviter le chevauchement avec footer */
+    min-height: calc(100vh - 200px); /* Hauteur minimum pour éviter le débordement */
+    overflow-x: hidden; /* Évite le débordement horizontal */
+}
+
+/* Assure que les sections d'enregistrement ne déborderont pas */
+.recording-section {
+    overflow: visible; /* Permet au contenu d'être visible */
+    word-wrap: break-word; /* Évite les débordements de texte */
+}
+
+/* Contrôleur de boutons d'enregistrement */
+.recording-controls {
     overflow: visible;
-    word-wrap: break-word;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.control-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-start;
+    overflow: visible;
+    min-height: 60px; /* Hauteur minimum pour les boutons */
 }
 
 /* Amélioration des responsive pour éviter les coupures */
@@ -1036,6 +1078,7 @@ input:focus {
 }
 
 /* Footer */
+/* Footer amélioré pour éviter les débordements */
 footer {
     background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
     backdrop-filter: blur(10px);
@@ -1046,6 +1089,34 @@ footer {
     position: relative;
     z-index: 10;
     border-top: 1px solid rgba(0,0,0,0.1);
+    width: 100%;
+    overflow: hidden;
+}
+
+footer .container {
+    padding: 0 20px; /* Padding spécial pour le footer */
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--gray-medium);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+footer a {
+    color: var(--blue-primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+footer a:hover {
+    color: var(--green-secondary);
+    text-decoration: underline;
 }
 
 /* Responsive */
@@ -1112,6 +1183,24 @@ footer {
     .container {
         padding: 0 15px 140px 15px; /* Padding bottom encore plus important sur mobile */
         max-width: none; /* Supprime la max-width sur mobile */
+        overflow-x: hidden; /* Évite le débordement horizontal */
+    }
+    
+    /* Assure que les boutons d'enregistrement sont bien affichés sur mobile */
+    .recording-section {
+        padding: 15px;
+    }
+    
+    .control-buttons {
+        flex-direction: row; /* Boutons sur une seule ligne si possible */
+        justify-content: center; /* Centre les boutons */
+        flex-wrap: wrap;
+    }
+    
+    /* Prévention du débordement du conteneur de boutons */
+    .recording-controls {
+        overflow-x: auto; /* Scroll horizontal si nécessaire */
+        padding-bottom: 10px; /* Espace pour le scroll */
     }
 
     .status-info {
@@ -2070,12 +2159,28 @@ label span[style*="color: var(--red)"] {
         min-height: 44px; /* Taille minimale recommandée par Apple */
     }
 
-    /* Augmenter les zones de touch */
+    /* Boutons avec taille minimale pour affichage du texte */
     .btn-record,
     .btn-pause,
-    .btn-stop {
+    .btn-stop,
+    .btn-replay,
+    .btn-delete {
         min-height: 48px;
-        min-width: 48px;
+        min-width: 120px; /* Assure que le texte complet est visible */
+        padding: 12px 16px; /* Padding horizontal ajusté pour mobile */
+        font-size: 0.85rem; /* Taille de police ajustée pour mobile */
+        white-space: nowrap; /* Évite le retour à la ligne */
+        overflow: visible; /* Assure que le contenu n'est pas coupé */
+        flex-shrink: 0; /* Empêche la réduction automatique */
+    }
+    
+    /* Force le texte à rester sur une seule ligne */
+    .btn-record,
+    .btn-pause,
+    .btn-stop,
+    .btn-replay,
+    .btn-delete {
+        text-overflow: ellipsis;
     }
 
     /* Retour haptique visuel */
