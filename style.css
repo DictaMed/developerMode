@@ -191,24 +191,61 @@ header {
     .header-container + .tab-content {
         margin-top: 32px;
     }
+    
+    /* Améliorer les onglets sur desktop */
+    .tab-btn {
+        min-width: 150px;
+        width: 170px;
+        max-width: 220px;
+        height: 50px;
+        padding: 15px 20px;
+        font-size: 0.95rem;
+    }
+    
+    .tabs-container {
+        gap: 15px;
+        padding: 12px 25px;
+    }
+}
+
+/* Styles pour tablettes et écrans moyens */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .tab-btn {
+        min-width: 130px;
+        width: 150px;
+        max-width: 180px;
+        height: 46px;
+        padding: 12px 18px;
+        font-size: 0.9rem;
+    }
+    
+    .tabs-container {
+        gap: 10px;
+        padding: 10px 20px;
+    }
 }
 
 .tabs-container {
     display: flex;
-    gap: 8px;
     justify-content: flex-end;
     align-items: center;
+    gap: 12px;
     overflow-x: auto;
     overflow-y: hidden;
-    scrollbar-width: thin;
-    -ms-overflow-style: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     min-width: 100%;
     max-width: 100%;
-    padding: 8px 15px;
+    padding: 10px 20px;
     box-sizing: border-box;
-    scroll-snap-type: x proximity;
-    /* Permettre le défilement avec largeurs complètes */
-    width: 100%;
+    scroll-snap-type: x mandatory;
+    /* Masquer la scrollbar */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Masquer la scrollbar sur WebKit */
+.tabs-container::-webkit-scrollbar {
+    display: none;
 }
 
 .tab-icon {
@@ -231,25 +268,29 @@ header {
 .tab-btn {
     background: transparent;
     border: none;
-    padding: 14px 20px;
+    padding: 12px 18px;
     color: var(--gray-dark);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     position: relative;
-    border-radius: 12px;
-    overflow: visible; /* Changé de 'hidden' pour afficher le texte complet */
+    border-radius: 10px;
+    overflow: visible;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     scroll-snap-align: start;
-    min-width: max-content; /* Force l'affichage complet du texte */
-    width: max-content; /* Largeur basée sur le contenu */
-    max-width: none; /* Pas de limite de largeur */
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    flex-shrink: 0; /* Empêche la compression */
+    min-width: 140px;
+    width: 160px;
+    max-width: 200px;
+    height: 48px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    flex-shrink: 0;
+    text-align: center;
+    line-height: 1.2;
 }
 
 .tab-btn::before {
@@ -282,10 +323,12 @@ header {
 .tab-btn:hover {
     color: var(--blue-primary);
     background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.06) 0%, 
-        rgba(16, 185, 129, 0.06) 100%);
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+        rgba(37, 99, 235, 0.08) 0%, 
+        rgba(16, 185, 129, 0.08) 100%);
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 
+        0 6px 20px rgba(37, 99, 235, 0.15),
+        0 2px 8px rgba(16, 185, 129, 0.1);
 }
 
 .tab-btn:hover::after {
@@ -296,23 +339,18 @@ header {
 .tab-btn.active {
     font-weight: 700;
     background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.15) 0%, 
-        rgba(29, 78, 216, 0.15) 50%,
-        rgba(16, 185, 129, 0.15) 100%);
+        rgba(37, 99, 235, 0.18) 0%, 
+        rgba(29, 78, 216, 0.18) 30%,
+        rgba(16, 185, 129, 0.18) 100%);
     background-size: 200% 200%;
     animation: gradientShift 3s ease infinite;
     box-shadow: 
-        0 4px 20px rgba(37, 99, 235, 0.4),
-        0 2px 8px rgba(16, 185, 129, 0.2),
-        inset 0 1px 0 rgba(255,255,255,0.2);
-    transform: translateY(-2px) scale(1.05);
-    
-    /* Texte en gradient bleu/vert */
-    background-image: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
+        0 6px 25px rgba(37, 99, 235, 0.25),
+        0 3px 12px rgba(16, 185, 129, 0.2),
+        inset 0 1px 0 rgba(255,255,255,0.3);
+    transform: translateY(-3px) scale(1.05);
+    color: var(--blue-primary);
+    border: 1px solid rgba(37, 99, 235, 0.3);
 }
 
 .tab-btn.active::before {
@@ -1536,14 +1574,19 @@ label span[style*="color: var(--red)"] {
     }
 
     .tabs-container {
-        gap: 4px;
-        padding: 8px;
+        gap: 6px;
+        padding: 8px 15px;
+        justify-content: center;
     }
 
     .tab-btn {
-        padding: 14px 20px;
-        font-size: 0.9rem;
-        margin: 0 2px;
+        min-width: 120px;
+        width: 140px;
+        max-width: 160px;
+        height: 44px;
+        padding: 10px 16px;
+        font-size: 0.85rem;
+        margin: 0;
     }
 
     /* Cards et sections plus compactes */
@@ -1584,6 +1627,29 @@ label span[style*="color: var(--red)"] {
     .steps-grid {
         grid-template-columns: 1fr;
         gap: 16px;
+    }
+}
+
+/* Smartphones très petits */
+@media (max-width: 480px) {
+    .tab-btn {
+        min-width: 100px;
+        width: 120px;
+        max-width: 140px;
+        height: 40px;
+        padding: 8px 14px;
+        font-size: 0.8rem;
+        gap: 4px;
+    }
+    
+    .tabs-container {
+        gap: 4px;
+        padding: 6px 10px;
+    }
+    
+    .tab-icon {
+        font-size: 1em;
+    }
     }
 
     /* Header réduit */
