@@ -1597,18 +1597,21 @@ function canInstallApp() {
     return hasSW && hasBIP && notInstalled;
 }
 
-// Événement beforeinstallprompt amélioré
+// Événement beforeinstallprompt - Installation automatique
 window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('💾 Événement beforeinstallprompt déclenché');
+    console.log('💾 Événement beforeinstallprompt déclenché - Installation automatique');
     
-    // Empêcher l'affichage automatique
-    e.preventDefault();
+    // NE PAS empêcher l'affichage automatique - laisser Chrome gérer
     deferredPrompt = e;
     
-    // Afficher le bouton d'installation avec un délai
+    // Optionnel: afficher un indicateur que l'installation est disponible
+    // mais ne pas bloquer l'installation native du navigateur
     setTimeout(() => {
-        showInstallButton('DictaMed peut être installé comme une application !');
-    }, 2000);
+        // Vérifier si l'installation native s'est déjà affichée
+        if (!isAppInstalled()) {
+            showInstallButton('Appuyez pour installer DictaMed');
+        }
+    }, 5000);
 });
 
 // Gérer le clic sur le bouton d'installation
@@ -1704,15 +1707,9 @@ document.addEventListener('DOMContentLoaded', () => {
             installButton.classList.add('hidden');
         }
         console.log('📱 App déjà installée en mode standalone');
-    } else if (canInstallApp()) {
-        // Si l'app peut être installée mais que beforeinstallprompt n'a pas été déclenché
-        // (cas de certains navigateurs), afficher le bouton après un délai
-        setTimeout(() => {
-            if (!deferredPrompt) {
-                showInstallButton('DictaMed peut être installé comme une application !');
-            }
-        }, 5000);
     }
+    // Note: L'installation PWA se fait maintenant automatiquement par le navigateur
+    // Pas besoin d'afficher de bouton supplémentaire
 });
 
 // Vérification périodique du statut d'installation
