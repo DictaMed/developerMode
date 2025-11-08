@@ -41,9 +41,10 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 20px 120px 20px; /* Padding bottom augmenté pour éviter le chevauchement avec footer */
+    min-height: calc(100vh - 200px); /* Hauteur minimum pour éviter le débordement */
 }
 
 /* Header */
@@ -716,10 +717,86 @@ input:focus {
     box-shadow: 0 0 25px rgba(37, 99, 235, 0.4);
     text-transform: uppercase;
     letter-spacing: 1px;
+    width: auto;
+    min-width: 280px;
+    max-width: 100%;
+    word-wrap: break-word;
+    white-space: normal;
+    text-align: center;
+    display: inline-block;
+    margin: 20px 0;
+    position: relative;
+    z-index: 5;
 }
 
 .btn-submit:hover {
     box-shadow: 0 0 40px rgba(37, 99, 235, 0.6);
+    transform: translateY(-2px);
+}
+
+/* Section d'envoi avec meilleur espacement */
+.submit-section {
+    padding: 30px 0;
+    margin-top: 40px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 5;
+    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    margin-bottom: 30px;
+}
+
+/* Amélioration des champs de saisie avec meilleur positionnement des compteurs */
+.form-group {
+    position: relative;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+}
+
+.form-group input,
+.form-group textarea {
+    padding-right: 80px; /* Espace pour le compteur */
+    position: relative;
+    z-index: 1;
+}
+
+/* Empêcher le débordement des éléments */
+* {
+    box-sizing: border-box;
+}
+
+.card, .recording-section, .submit-section {
+    overflow: visible;
+    word-wrap: break-word;
+}
+
+/* Amélioration des responsive pour éviter les coupures */
+@media (max-width: 768px) {
+    .btn-submit {
+        width: 100%;
+        min-width: auto;
+        padding: 18px 20px;
+        font-size: 1.1rem;
+        margin: 15px 0;
+    }
+    
+    .submit-section {
+        margin-top: 30px;
+        padding: 25px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-submit {
+        padding: 16px 15px;
+        font-size: 1rem;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        padding-right: 70px;
+    }
 }
 
 .hidden {
@@ -963,9 +1040,12 @@ footer {
     background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
     backdrop-filter: blur(10px);
     padding: 25px 0;
-    margin-top: 60px;
+    margin-top: 0; /* Supprimé le margin-top pour éviter les conflits */
     text-align: center;
     box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+    position: relative;
+    z-index: 10;
+    border-top: 1px solid rgba(0,0,0,0.1);
 }
 
 /* Responsive */
@@ -1030,7 +1110,8 @@ footer {
 
 @media (max-width: 480px) {
     .container {
-        padding: 0 15px;
+        padding: 0 15px 140px 15px; /* Padding bottom encore plus important sur mobile */
+        max-width: none; /* Supprime la max-width sur mobile */
     }
 
     .status-info {
