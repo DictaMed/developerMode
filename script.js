@@ -1551,15 +1551,17 @@ if ('serviceWorker' in navigator) {
 let deferredPrompt;
 const installButton = document.getElementById('installPwaBtn');
 
-// Fonction pour afficher le bouton d'installation avec une meilleure visibilité
+// Fonction pour afficher le bouton d'installation ultra-discret (sans notification)
 function showInstallButton(message = '') {
     if (installButton) {
-        installButton.classList.remove('hidden');
+        // Utiliser la version ultra-discrète
+        installButton.classList.add('ultra-discrete');
+        installButton.style.display = 'flex';
         
-        // Animation d'apparition
+        // Animation d'apparition subtile
         installButton.style.opacity = '0';
-        installButton.style.transform = 'scale(0.8)';
-        installButton.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+        installButton.style.transform = 'scale(0.5)';
+        installButton.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
         
         // Forcer le reflow
         installButton.offsetHeight;
@@ -1569,12 +1571,8 @@ function showInstallButton(message = '') {
             installButton.style.transform = 'scale(1)';
         });
         
-        // Afficher un message d'information
-        if (message) {
-            setTimeout(() => {
-                Toast.info(message, 'PWA Disponible', 6000);
-            }, 500);
-        }
+        // SUPPRIMER complètement les notifications Toast
+        // Plus de message d'information
     }
 }
 
@@ -1597,56 +1595,61 @@ function canInstallApp() {
     return hasSW && hasBIP && notInstalled;
 }
 
-// Événement beforeinstallprompt - Installation automatique
+// Événement beforeinstallprompt - Installation automatique pure
 window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('💾 Événement beforeinstallprompt déclenché - Installation automatique');
+    console.log('💾 Événement beforeinstallprompt déclenché - Installation directe');
     
-    // NE PAS empêcher l'affichage automatique - laisser Chrome gérer
+    // NE PAS empêcher l'installation - installation automatique immédiate
     deferredPrompt = e;
     
-    // Optionnel: afficher un indicateur que l'installation est disponible
-    // mais ne pas bloquer l'installation native du navigateur
+    // Installation directe sans notification
     setTimeout(() => {
-        // Vérifier si l'installation native s'est déjà affichée
-        if (!isAppInstalled()) {
-            showInstallButton('Appuyez pour installer DictaMed');
+        if (!isAppInstalled() && deferredPrompt) {
+            // Afficher directement la popup d'installation
+            e.prompt();
+            
+            // Gérer la réponse
+            e.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('✅ PWA installée avec succès!');
+                }
+                deferredPrompt = null;
+            });
         }
-    }, 5000);
+    }, 1000); // Installation plus rapide
 });
 
-// Gérer le clic sur le bouton d'installation
+// Gérer le clic sur le bouton d'installation ultra-discret
 if (installButton) {
     installButton.addEventListener('click', async () => {
         if (!canInstallApp()) {
             if (isAppInstalled()) {
                 Toast.info('DictaMed est déjà installé sur votre appareil !', 'Déjà installé');
             } else {
-                // Afficher des instructions d'installation manuelle plus détaillées
-                showManualInstallInstructions();
+                // Installation directe avec le navigateur
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        console.log('✅ PWA installée via bouton!');
+                    }
+                    deferredPrompt = null;
+                } else {
+                    Toast.info('Installation PWA non disponible dans ce navigateur.', 'Info');
+                }
             }
             return;
         }
         
+        // Installation directe
         if (deferredPrompt) {
-            // Afficher la boîte de dialogue d'installation
             deferredPrompt.prompt();
-            
-            // Attendre la réponse de l'utilisateur
             const { outcome } = await deferredPrompt.userChoice;
-            console.log(`Installation PWA: ${outcome}`);
-            
             if (outcome === 'accepted') {
-                Toast.success('DictaMed a été installé avec succès ! Vous pouvez maintenant l\'utiliser comme une application native.', 'Installation réussie', 8000);
-            } else {
-                Toast.info('Installation annulée. Vous pouvez toujours utiliser DictaMed depuis votre navigateur.', 'Installation annulée', 5000);
+                console.log('✅ PWA installée avec succès!');
             }
-            
-            // Réinitialiser le prompt
             deferredPrompt = null;
-            installButton.classList.add('hidden');
-        } else {
-            // Fallback: afficher des instructions manuelles
-            showManualInstallInstructions();
+            installButton.style.display = 'none';
         }
     });
 }
