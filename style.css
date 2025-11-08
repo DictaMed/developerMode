@@ -25,6 +25,17 @@
     --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15), 0 10px 10px rgba(0, 0, 0, 0.04);
 }
 
+/* Suppression des scrollbars horizontales globales */
+html {
+    overflow-x: hidden;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE et Edge */
+}
+
+html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari et Opera */
+}
+
 /* Reset et base */
 * {
     margin: 0;
@@ -229,7 +240,7 @@ header {
 
 .tabs-container {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
     gap: 12px;
     overflow-x: auto;
@@ -241,13 +252,19 @@ header {
     padding: 10px 20px;
     box-sizing: border-box;
     scroll-snap-type: x mandatory;
-    /* Masquer la scrollbar */
     -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
 }
 
-/* Masquer la scrollbar sur WebKit */
+/* Masquer la scrollbar sur tous les navigateurs */
 .tabs-container::-webkit-scrollbar {
     display: none;
+}
+
+/* Ajouter un espace à la fin pour le scroll */
+.tabs-container::after {
+    content: '';
+    flex: 0 0 30px;
 }
 
 .tab-icon {
@@ -612,17 +629,18 @@ input:focus {
     display: none;
 }
 
-    /* Boutons de contrôle */
-    .control-buttons {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: center;
-        /* Prévention du débordement */
-        min-height: 50px;
-        width: 100%;
-    }
+/* Boutons de contrôle - Version unifiée */
+.control-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 50px;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
 
 .btn {
     padding: 13px 26px;
@@ -782,27 +800,7 @@ input:focus {
     z-index: 1;
 }
 
-/* Amélioration de la gestion des débordements */
-body {
-    overflow-x: hidden; /* Évite le débordement horizontal de la page */
-}
-
-.container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 20px 120px 20px; /* Padding bottom augmenté pour éviter le chevauchement avec footer */
-    min-height: calc(100vh - 200px); /* Hauteur minimum pour éviter le débordement */
-    overflow-x: hidden; /* Évite le débordement horizontal */
-}
-
-/* Assure que les sections d'enregistrement ne déborderont pas */
-.recording-section {
-    overflow: visible; /* Permet au contenu d'être visible */
-    word-wrap: break-word; /* Évite les débordements de texte */
-    /* Amélioration pour éviter les débordements */
-    max-width: 100%;
-    box-sizing: border-box;
-}
+/* Suppression des règles redondantes - nettoyage du CSS */
 
 /* Contrôleur de boutons d'enregistrement */
 .recording-controls {
@@ -813,16 +811,16 @@ body {
     align-items: center;
 }
 
-.control-buttons {
+/* Contrôleur de boutons d'enregistrement unifié */
+.recording-controls {
+    overflow: visible;
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
+    gap: 15px;
     align-items: center;
-    min-height: 50px;
-    justify-content: flex-start;
-    overflow: visible;
-    min-height: 60px; /* Hauteur minimum pour les boutons */
+    width: 100%;
+    padding: 10px 0;
+    box-sizing: border-box;
 }
 
 /* Amélioration des responsive pour éviter les coupures */
@@ -1179,11 +1177,15 @@ footer a:hover {
     }
 
     .control-buttons {
-        flex-direction: column;
+        flex-direction: row;
+        justify-content: center;
+        gap: 8px;
     }
 
     .btn {
-        width: 100%;
+        flex: 1;
+        min-width: 120px;
+        max-width: 200px;
     }
 
     .workflow {
@@ -1221,26 +1223,30 @@ footer a:hover {
 
 @media (max-width: 480px) {
     .container {
-        padding: 0 15px 140px 15px; /* Padding bottom encore plus important sur mobile */
-        max-width: none; /* Supprime la max-width sur mobile */
-        overflow-x: hidden; /* Évite le débordement horizontal */
+        padding: 0 15px 140px 15px;
+        max-width: none;
+        overflow-x: hidden;
     }
     
     /* Assure que les boutons d'enregistrement sont bien affichés sur mobile */
     .recording-section {
         padding: 15px;
+        margin-bottom: 12px;
     }
     
     .control-buttons {
-        flex-direction: row; /* Boutons sur une seule ligne si possible */
-        justify-content: center; /* Centre les boutons */
+        flex-direction: row;
+        justify-content: center;
         flex-wrap: wrap;
+        gap: 8px;
     }
     
-    /* Prévention du débordement du conteneur de boutons */
     .recording-controls {
-        overflow-x: auto; /* Scroll horizontal si nécessaire */
-        padding-bottom: 10px; /* Espace pour le scroll */
+        overflow-x: auto;
+        padding-bottom: 10px;
+        -webkit-overflow-scrolling: touch;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .status-info {
@@ -1972,7 +1978,7 @@ label span[style*="color: var(--red)"] {
         font-weight: 600;
     }
 
-    /* Boutons full width sur mobile */
+    /* Optimisation pour très petits écrans */
     .control-buttons {
         flex-direction: column;
         gap: 10px;
