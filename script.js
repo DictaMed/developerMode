@@ -1399,10 +1399,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Message de bienvenue
-    setTimeout(() => {
-        Toast.info('Bienvenue sur DictaMed ! Vos données sont sauvegardées automatiquement.', 'Bienvenue');
-    }, 1000);
+    // Message de bienvenue supprimé à la demande de l'utilisateur
 
     console.log('✅ DictaMed initialisé avec succès!');
 });
@@ -1590,9 +1587,14 @@ function isAppInstalled() {
 
 // Fonction pour vérifier si on peut installer l'app
 function canInstallApp() {
-    return 'serviceWorker' in navigator && 
-           'beforeinstallprompt' in window &&
-           !isAppInstalled();
+    // Amélioration de la détection PWA
+    const hasSW = 'serviceWorker' in navigator;
+    const hasBIP = 'beforeinstallprompt' in window;
+    const notInstalled = !isAppInstalled();
+    
+    console.log('🔍 PWA Check - Service Worker:', hasSW, 'Before Install Prompt:', hasBIP, 'Not Installed:', notInstalled);
+    
+    return hasSW && hasBIP && notInstalled;
 }
 
 // Événement beforeinstallprompt amélioré
@@ -1616,7 +1618,8 @@ if (installButton) {
             if (isAppInstalled()) {
                 Toast.info('DictaMed est déjà installé sur votre appareil !', 'Déjà installé');
             } else {
-                Toast.warning('Installation non disponible. Essayez avec un navigateur compatible (Chrome, Edge).', 'Installation impossible');
+                // Afficher des instructions d'installation manuelle plus détaillées
+                showManualInstallInstructions();
             }
             return;
         }
@@ -1649,16 +1652,38 @@ if (installButton) {
 function showManualInstallInstructions() {
     const userAgent = navigator.userAgent;
     let instructions = '';
+    let title = 'Installation manuelle';
     
     if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
-        instructions = 'Pour installer DictaMed :\n\n1. Cliquez sur le menu (⋮) en haut à droite\n2. Sélectionnez "Installer DictaMed..."\n3. Confirmez l\'installation';
+        instructions = '🔧 Installation Chrome :\n\n' +
+                      '1. Cliquez sur le menu (⋮) en haut à droite\n' +
+                      '2. Cliquez sur "Installer DictaMed..."\n' +
+                      '3. Confirmez l\'installation dans la popup\n' +
+                      '4. L\'icône apparaîtra sur votre écran d\'accueil';
+        title = '📱 Installer sur Chrome';
     } else if (userAgent.includes('Safari') || userAgent.includes('iPhone') || userAgent.includes('iPad')) {
-        instructions = 'Pour installer DictaMed :\n\n1. Appuyez sur le bouton Partage (□↑)\n2. Sélectionnez "Sur l\'écran d\'accueil"\n3. Appuyez sur "Ajouter"';
+        instructions = '📱 Installation Safari :\n\n' +
+                      '1. Appuyez sur le bouton Partage (□↑)\n' +
+                      '2. Faites défiler et sélectionnez "Sur l\'écran d\'accueil"\n' +
+                      '3. Vérifiez le nom "DictaMed" et appuyez "Ajouter"\n' +
+                      '4. L\'icône apparaîtra sur votre écran d\'accueil';
+        title = '🍎 Installer sur Safari';
+    } else if (userAgent.includes('Edge')) {
+        instructions = '🌐 Installation Edge :\n\n' +
+                      '1. Cliquez sur le menu (⋯) en haut à droite\n' +
+                      '2. Cliquez sur "Installer cet site comme application"\n' +
+                      '3. Confirmez dans la popup\n' +
+                      '4. L\'icône apparaîtra sur votre écran d\'accueil';
+        title = '⚡ Installer sur Edge';
     } else {
-        instructions = 'DictaMed fonctionne en mode PWA. Utilisez le menu de votre navigateur pour l\'installer.';
+        instructions = '💡 Installation PWA :\n\n' +
+                      'DictaMed fonctionne comme une application web progressive (PWA).\n' +
+                      'Votre navigateur devrait afficher une option d\'installation.\n\n' +
+                      'Astuce : Recherchez un icône "+ Ajouter" dans la barre d\'adresse.';
+        title = 'ℹ️ Installation PWA';
     }
     
-    Toast.info(instructions, 'Installation manuelle', 10000);
+    Toast.info(instructions, title, 15000);
 }
 
 // Événement appinstalled

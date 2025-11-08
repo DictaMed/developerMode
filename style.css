@@ -289,13 +289,27 @@ header {
     gap: 6px;
     justify-content: center;
     overflow-x: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    min-width: min-content;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+    min-width: 100%;
+    max-width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
 }
 
 .tabs-container::-webkit-scrollbar {
-    display: none;
+    height: 4px;
+}
+
+.tabs-container::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.1);
+    border-radius: 2px;
+}
+
+.tabs-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, var(--blue-primary), var(--green-primary));
+    border-radius: 2px;
 }
 
 .tab-btn {
@@ -2314,5 +2328,63 @@ textarea:focus-visible {
         left: 10px;
         font-size: 12px;
         padding: 6px 12px;
+    }
+}
+
+/* ===== STYLES AMÉLIORÉS POUR LA SECTION TEMPS RÉEL ===== */
+.enhanced-realtime-box .google-sheet-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.enhanced-realtime-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #10b981, #3b82f6);
+    background-size: 200% 100%;
+    animation: gradient-flow 3s ease-in-out infinite;
+}
+
+@keyframes gradient-flow {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* ===== STYLES POUR LA NAVIGATION DES ONGLETS AMÉLIORÉS ===== */
+.tabs-container {
+    scroll-behavior: smooth;
+}
+
+.tabs-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--blue-primary) 50%, transparent 100%);
+    transform: translateX(-100%);
+    animation: slide-glow 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes slide-glow {
+    0% {
+        transform: translateX(-100%);
+    }
+    50% {
+        transform: translateX(100%);
+    }
+    100% {
+        transform: translateX(-100%);
     }
 }
