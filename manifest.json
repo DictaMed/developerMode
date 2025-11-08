@@ -61,5 +61,29 @@
   "lang": "fr-FR",
   "dir": "ltr",
   "scope": "/",
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mode Normal",
+      "short_name": "Normal",
+      "description": "Accès direct au mode normal",
+      "url": "/?mode=normal",
+      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Mode Test",
+      "short_name": "Test",
+      "description": "Accès direct au mode test",
+      "url": "/?mode=test",
+      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ]
 }

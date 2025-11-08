@@ -1,5 +1,5 @@
-// Service Worker pour DictaMed PWA - Version améliorée
-const CACHE_NAME = 'dictamed-v2.0';
+// Service Worker pour DictaMed PWA - Version optimisée
+const CACHE_NAME = 'dictamed-v3.0';
 const OFFLINE_PAGE = '/offline.html';
 
 const urlsToCache = [
@@ -21,95 +21,84 @@ const urlsToCache = [
 
 // Installation du Service Worker
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installation en cours...');
+  console.log('[Service Worker] Installation...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[Service Worker] Mise en cache des fichiers essentiels');
+        console.log('[Service Worker] Mise en cache des fichiers');
         return cache.addAll(urlsToCache);
       })
       .catch((error) => {
-        console.error('[Service Worker] Erreur lors de la mise en cache:', error);
+        console.error('[Service Worker] Erreur:', error);
       })
   );
-  // Forcer l'activation immédiate
   self.skipWaiting();
 });
 
 // Activation du Service Worker
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activation...');
+  console.log('[Service Worker] Activation');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('[Service Worker] Suppression de l\'ancien cache:', cacheName);
+            console.log('[Service Worker] Suppression ancien cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     })
   );
-  // Prendre le contrôle immédiat de toutes les pages
   return self.clients.claim();
 });
 
-// Stratégie de cache améliorée : Network First avec timeout, fallback to Cache
+// Stratégie Network First avec fallback vers Cache
 self.addEventListener('fetch', (event) => {
-  // Ignorer les requêtes non-GET
   if (event.request.method !== 'GET') {
     return;
   }
 
   const url = new URL(event.request.url);
   
-  // Ignorer les requêtes vers des domaines externes (webhooks N8N)
+  // Ignorer les requêtes externes
   if (url.origin !== location.origin) {
     return;
   }
 
   event.respondWith(
-    // Essayer le réseau d'abord avec un timeout
     Promise.race([
       fetch(event.request)
         .then((response) => {
-          // Vérifier si c'est une réponse valide
           if (!response || response.status !== 200 || response.type === 'error') {
             return response;
           }
 
-          // Cloner la réponse car elle ne peut être consommée qu'une fois
           const responseClone = response.clone();
           
-          // Mettre à jour le cache avec la nouvelle réponse
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseClone);
           });
           
           return response;
         }),
-      // Timeout de 5 secondes
       new Promise((resolve, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), 5000)
+        setTimeout(() => reject(new Error('Timeout')), 3000)
       )
     ])
     .catch(() => {
-      // En cas d'échec réseau ou timeout, utiliser le cache
       return caches.match(event.request).then((cachedResponse) => {
         if (cachedResponse) {
-          console.log('[Service Worker] Récupération depuis le cache:', event.request.url);
+          console.log('[Service Worker] Cache:', event.request.url);
           return cachedResponse;
         }
         
-        // Si pas de cache et que c'est un document HTML, retourner la page offline
         if (event.request.headers.get('accept').includes('text/html')) {
           return caches.match(OFFLINE_PAGE).then((offlinePage) => {
             if (offlinePage) {
               return offlinePage;
             }
             
-            // Fallback ultime si la page offline n'est pas en cache
             return new Response(
               `<!DOCTYPE html>
               <html lang="fr">
@@ -166,7 +155,6 @@ self.addEventListener('fetch', (event) => {
           });
         }
         
-        // Pour les autres ressources, retourner une erreur
         return new Response('Ressource non disponible hors ligne', {
           status: 503,
           statusText: 'Service Unavailable',
@@ -177,7 +165,7 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Gestion des messages du client
+// Gestion des messages
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
@@ -188,7 +176,7 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Synchronisation en arrière-plan (si supporté)
+// Synchronisation en arrière-plan
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-recordings') {
     event.waitUntil(syncRecordings());
@@ -196,12 +184,10 @@ self.addEventListener('sync', (event) => {
 });
 
 async function syncRecordings() {
-  console.log('[Service Worker] Synchronisation des enregistrements...');
-  // Cette fonction pourrait être utilisée pour synchroniser 
-  // les enregistrements en attente quand la connexion est restaurée
+  console.log('[Service Worker] Synchronisation...');
 }
 
-// Notifications push (préparé pour futur usage)
+// Notifications push
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
   const title = data.title || 'DictaMed';
