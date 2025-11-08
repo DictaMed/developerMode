@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DictaMed – Dictée médicale intelligente</title>
+  <meta name="description" content="Transformez votre voix en données SPSS en quelques clics.">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root{--blue:#2563eb;--green:#10b981;--red:#ef4444;--gray:#64748b;--bg:#e0f2fe;--radius:12px;--shadow:0 4px 12px rgba(0,0,0,.08)}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:#1e293b;line-height:1.6}
+    .skip-link{position:absolute;top:-40px;left:0;background:var(--blue);color:#fff;padding:.5rem 1rem;border-radius:0 0 8px 0;z-index:100}.skip-link:focus{top:0}
+    header{background:#fff;box-shadow:var(--shadow);padding:1rem}
+    .header-container{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem}
+    .logo{font-size:2rem;font-weight:800}.logo span:first-child{color:var(--blue)}.logo span:last-child{color:var(--green)}
+    .slogan{font-style:italic;color:var(--gray)}
+    nav{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow-x:auto;-webkit-overflow-scrolling:touch;margin:1rem}
+    .tabs-container{display:flex;gap:.5rem;padding:.5rem}
+    .tab-btn{background:transparent;border:none;padding:.75rem 1rem;border-radius:8px;cursor:pointer;white-space:nowrap;transition:.2s}
+    .tab-btn.active{background:var(--blue);color:#fff}
+    .tab-content{display:none;padding:1rem}.tab-content.active{display:block}
+    .container{max-width:1200px;margin:auto;padding:1rem}
+    .card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem;margin-bottom:1rem}
+    label{display:block;margin-bottom:.5rem;font-weight:600}
+    input,textarea{width:100%;padding:.75rem;border:2px solid #cbd5e1;border-radius:8px;transition:border-color .2s}
+    input:focus,textarea:focus{outline:none;border-color:var(--blue)}
+    .counter{font-size:.75rem;color:var(--gray);margin-left:.25rem}
+    .recording-section{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1rem;margin-bottom:1rem;position:relative}
+    .recording-section.recorded{border:2px solid var(--green)}
+    .status-badge{display:inline-block;padding:.25rem .75rem;border-radius:999px;font-size:.75rem;font-weight:700;color:#fff}
+    .status-badge[data-status=ready]{background:var(--green)}
+    .status-badge[data-status=recording]{background:var(--red);animation:pulse 1.5s infinite}
+    @keyframes pulse{50%{opacity:.7}}
+    .timer{font-family:monospace;font-weight:700;margin-left:1rem}
+    .control-buttons{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem}
+    .btn{padding:.6rem 1.2rem;border:none;border-radius:8px;font-weight:600;cursor:pointer;transition:.2s}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn-primary{background:var(--blue);color:#fff}
+    .btn-secondary{background:#e2e8f0;color:#1e293b}
+    .btn-record{background:var(--red);color:#fff}
+    .btn-pause{background:#f59e0b;color:#fff}
+    .btn-stop{background:var(--gray);color:#fff}
+    .btn-replay{background:#06b6d4;color:#fff}
+    .btn-delete{background:var(--red);color:#fff}
+    .hidden{display:none}
+    .center{text-align:center;margin:1rem 0}
+    .submit-section{text-align:center;margin-top:2rem}
+    .sections-count{font-weight:700;margin-bottom:1rem}
+    .photos-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax 100px,1fr);gap:.5rem;margin-top:.5rem}
+    .photo-item{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:1}
+    .photo-item img{width:100%;height:100%;object-fit:cover}
+    .photo-item-remove{position:absolute;top:4px;right:4px;background:var(--red);color:#fff;border:none;border-radius:50%;width:24px;height:24px;font-size:1rem;cursor:pointer}
+    footer{background:#fff;text-align:center;padding:1rem;font-size:.875rem;margin-top:2rem}
+    @media(max-width:768px){.header-container{flex-direction:column;text-align:center}.tabs-container{justify-content:flex-start}.control-buttons{justify-content:center}}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Aller au contenu</a>
+  <header>
+    <div class="header-container">
+      <div class="logo"><span>Dicta</span><span>Med</span></div>
+      <p class="slogan">Où la voix rencontre les chiffres</p>
+    </div>
+    <nav>
+      <div class="tabs-container" role="tablist">
+        <button class="tab-btn active" role="tab" data-tab="mode-normal">📝 Mode Normal</button>
+        <button class="tab-btn" role="tab" data-tab="guide">📖 Guide</button>
+        <button class="tab-btn" role="tab" data-tab="contact">📧 Contact</button>
+        <button class="tab-btn" role="tab" data-tab="faq">❓ FAQ</button>
+        <button class="tab-btn" role="tab" data-tab="mode-test">🧪 Mode Test</button>
+        <button class="tab-btn" role="tab" data-tab="mode-dmi">🩺 Mode DMI</button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="container">
+    <!-- Mode Normal -->
+    <section id="mode-normal" class="tab-content active">
+      <div class="card">
+        <h2>Authentification</h2>
+        <label>Identifiant <input id="username" required></label>
+        <label>Code d'accès <input id="accessCode" type="password" required></label>
+        <label class="checkbox"><input type="checkbox" id="rememberAuth"> Enregistrer mes identifiants</label>
+      </div>
+      <div class="card">
+        <h2>Patient</h2>
+        <label>N° dossier <span aria-label="obligatoire">*</span><input id="numeroDossier" maxlength="50" required><span class="counter">0/50</span></label>
+        <label>Nom complet <input id="nomPatient" maxlength="50"><span class="counter">0/50</span></label>
+      </div>
+      <div class="recording-section" data-section="partie1">
+        <h3>Partie 1</h3>
+        <div class="recorder" data-max="120">
+          <div class="status-badge" data-status="ready">Prêt</div>
+          <span class="timer">00:00</span>
+          <div class="control-buttons">
+            <button class="btn btn-record">Enregistrer</button>
+            <button class="btn btn-pause hidden">Pause</button>
+            <button class="btn btn-stop hidden">Arrêter</button>
+            <button class="btn btn-replay hidden">Réécouter</button>
+            <button class="btn btn-delete hidden">Supprimer</button>
+          </div>
+          <audio class="audio-player hidden" controls></audio>
+        </div>
+      </div>
+      <div class="recording-section" data-section="partie2">
+        <h3>Partie 2</h3>
+        <div class="recorder" data-max="120">
+          <div class="status-badge" data-status="ready">Prêt</div>
+          <span class="timer">00:00</span>
+          <div class="control-buttons">
+            <button class="btn btn-record">Enregistrer</button>
+            <button class="btn btn-pause hidden">Pause</button>
+            <button class="btn btn-stop hidden">Arrêter</button>
+            <button class="btn btn-replay hidden">Réécouter</button>
+            <button class="btn btn-delete hidden">Supprimer</button>
+          </div>
+          <audio class="audio-player hidden" controls></audio>
+        </div>
+      </div>
+      <div class="recording-section" data-section="partie3">
+        <h3>Partie 3</h3>
+        <div class="recorder" data-max="120">
+          <div class="status-badge" data-status="ready">Prêt</div>
+          <span class="timer">00:00</span>
+          <div class="control-buttons">
+            <button class="btn btn-record">Enregistrer</button>
+            <button class="btn btn-pause hidden">Pause</button>
+            <button class="btn btn-stop hidden">Arrêter</button>
+            <button class="btn btn-replay hidden">Réécouter</button>
+            <button class="btn btn-delete hidden">Supprimer</button>
+          </div>
+          <audio class="audio-player hidden" controls></audio>
+        </div>
+      </div>
+      <div class="recording-section hidden" data-section="partie4">
+        <h3>Partie 4 (optionnelle)</h3>
+        <div class="recorder" data-max="120">
+          <div class="status-badge" data-status="ready">Prêt</div>
+          <span class="timer">00:00</span>
+          <div class="control-buttons">
+            <button class="btn btn-record">Enregistrer</button>
+            <button class="btn btn-pause hidden">Pause</button>
+            <button class="btn btn-stop hidden">Arrêter</button>
+            <button class="btn btn-replay hidden">Réécouter</button>
+            <button class="btn btn-delete hidden">Supprimer</button>
+          </div>
+          <audio class="audio-player hidden" controls></audio>
+        </div>
+      </div>
+      <div class="center"><button class="btn-secondary" id="togglePartie4">Afficher Partie 4</button></div>
+      <div class="submit-section">
+        <p class="sections-count" aria-live="polite">0 section(s) enregistrée(s)</p>
+        <button class="btn-primary" id="submitNormal" disabled>Envoyer les données</button>
+      </div>
+    </section>
+
+    <!-- Guide -->
+    <section id="guide" class="tab-content">
+      <h1>Guide</h1>
+      <div class="card">
+        <h2>La problématique</h2>
+        <p>40 % du temps d’un chercheur est perdu à saisir manuellement des données dans SPSS.</p>
+      </div>
+      <div class="card">
+        <h2>Conseils</h2>
+        <ul>
+          <li>Utilisez un micro de qualité</li>
+          <li>Évitez le bruit de fond</li>
+          <li>Parlez lentement</li>
+          <li>Faites une courte pause entre chaque valeur</li>
+        </ul>
+      </div>
+      <div class="card solution-card">
+        <h2>La solution DictaMed</h2>
+        <p>Économisez 70 % de temps avec une précision > 95 %.</p>
+        <div class="center"><button class="btn-primary" onclick="app.switchTab('mode-test')">Essayer le Mode Test</button></div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="tab-content">
+      <h1>Contact</h1>
+      <div class="card">
+        <p>Email : <a href="mailto:contact@dictamed.fr">contact@dictamed.fr</a></p>
+        <p>Facebook : <a href="https://fb.me/DictaMed.SPSS" target="_blank" rel="noopener">DictaMed.SPSS</a></p>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="tab-content">
+      <h1>FAQ</h1>
+      <div class="faq-list">
+        <details>
+          <summary>Qu’est-ce que DictaMed ?</summary>
+          <p>Solution de dictée médicale intelligente qui transforme vos enregistrements vocaux en données SPSS.</p>
+        </details>
+        <details>
+          <summary>Mes données sont-elles sécurisées ?</summary>
+          <p>Oui, chiffrement bout-en-bout et conformité RGPD.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- Mode Test -->
+    <section id="mode-test" class="tab-content">
+      <div class="demo-badge">DÉMO GRATUITE</div>
+      <h1>Mode Test</h1>
+      <div class="card">
+        <label>N° dossier <input id="numeroDossierTest" maxlength="50" required><span class="counter">0/50</span></label>
+        <label>Nom <input id="nomPatientTest" maxlength="50"><span class="counter">0/50</span></label>
+      </div>
+      <div class="recording-section" data-section="clinique">
+        <h3>Données cliniques</h3>
+        <div class="recorder" data-max="120">
+          <div class="status-badge" data-status="ready">Prêt</div>
+          <span class="timer">00:00</span>
+          <div class="control-buttons">
+            <button class="btn btn-record">Enregistrer</button>
+            <button class="btn btn-pause hidden">Pause</button>
+            <button class="btn btn-stop hidden">Arrêter</button>
+            <button class="btn btn-replay hidden">Réécouter</button>
+            <button class="btn btn-delete hidden">Supprimer</button>
+          </div>
+          <audio class="audio-player hidden" controls></audio>
+        </div>
+      </div>
+      <div class="recording-section" data-section="antecedents">
+        <h3>Antécédents</h3>
+        <div class="recorder" data-max="120">
+          <div class="status-badge" data-status="ready">Prêt</div>
+          <span class="timer">00:00</span>
+          <div class="control-buttons">
+            <button class="btn btn-record">Enregistrer</button>
+            <button class="btn btn-pause hidden">Pause</button>
+            <button class="btn btn-stop hidden">Arrêter</button>
+            <button class="btn btn-replay hidden">Réécouter</button>
+            <button class="btn btn-delete hidden">Supprimer</button>
+          </div>
+          <audio class="audio-player hidden" controls></audio>
+        </div>
+      </div>
+      <div class="recording-section" data-section="biologie">
+        <h3>Biologie</h3>
+        <div class="recorder" data-max="120">
+          <div class="status-badge" data-status="ready">Prêt</div>
+          <span class="timer">00:00</span>
+          <div class="control-buttons">
+            <button class="btn btn-record">Enregistrer</button>
+            <button class="btn btn-pause hidden">Pause</button>
+            <button class="btn btn-stop hidden">Arrêter</button>
+            <button class="btn btn-replay hidden">Réécouter</button>
+            <button class="btn btn-delete hidden">Supprimer</button>
+          </div>
+          <audio class="audio-player hidden" controls></audio>
+        </div>
+      </div>
+      <div class="submit-section">
+        <p class="sections-count" aria-live="polite">0 section(s) enregistrée(s)</p>
+        <button class="btn-primary" id="submitTest" disabled>Envoyer les données Test</button>
+      </div>
+      <div class="card hidden" id="googleSheetCard">
+        <h2>Résultats en temps réel</h2>
+        <a class="btn-primary" href="https://docs.google.com/spreadsheets/d/1TQX0MdXuZNL3Y8Qoz6tpR-V0FUj_DZXzLy4UvgC6E4g/edit" target="_blank" rel="noopener">Ouvrir le Google Sheet</a>
+      </div>
+    </section>
+
+    <!-- Mode DMI -->
+    <section id="mode-dmi" class="tab-content">
+      <h1>Mode DMI</h1>
+      <div class="card">
+        <p>Copiez-collez vos dossiers DMI ou photographiez-les. DictaMed extraira les données automatiquement.</p>
+      </div>
+      <div class="card">
+        <label>N° dossier <span aria-label="obligatoire">*</span><input id="numeroDossierTexte" required><span class="counter">0/50</span></label>
+        <label>Nom complet <input id="nomPatientTexte" maxlength="100"><span class="counter">0/100</span></label>
+        <label>Texte libre <textarea id="texteLibre" rows="6"></textarea><span class="counter" id="texteLibreCounter">0</span></label>
+        <label>Photos (max 5) <input type="file" id="photosUpload" accept="image/*" multiple></label>
+        <div id="photosPreview" class="photos-preview"></div>
+      </div>
+      <div class="submit-section">
+        <button class="btn-primary" id="submitTexte" disabled>Envoyer</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© 2025 DictaMed – <a href="mailto:contact@dictamed.fr">contact@dictamed.fr</a></p>
+    </div>
+  </footer>
+
+  <script src="script.js" type="module"></script>
+</body>
+</html>
