@@ -552,6 +552,14 @@ class AudioRecorder {
             if ('vibrate' in navigator) {
                 navigator.vibrate(200);
             }
+            
+            // Améliorer l'affichage sur mobile après enregistrement
+            setTimeout(() => {
+                this.section.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest' 
+                });
+            }, 100);
         }
     }
 
