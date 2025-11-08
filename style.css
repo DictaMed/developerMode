@@ -163,7 +163,7 @@ header {
 .tabs-container {
     display: flex;
     gap: 8px;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
     overflow-x: auto;
     overflow-y: hidden;

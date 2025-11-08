@@ -1452,7 +1452,7 @@ const AuthManager = {
                     rememberAuthCheckbox.checked = true;
                     
                     console.log('✅ Identifiants restaurés');
-                    Toast.info('Vos identifiants ont été restaurés automatiquement.', 'Bienvenue', 3000);
+                    // Notification de bienvenue supprimée
                 }
             }
         } catch (e) {
