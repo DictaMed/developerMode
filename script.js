@@ -216,7 +216,7 @@ const AutoSave = {
                     }
                 });
                 
-                // à notification à remttre après si je veux bien Toast.info('Identifiants restaurés', 'Reprise de session');
+                Toast.info('Identifiants restaurés', 'Reprise de session');
             }
         } catch (error) {
             console.error('Erreur lors de la restauration:', error);
@@ -845,7 +845,7 @@ async function sendData(mode) {
         // Déterminer l'endpoint
         const endpoint = mode === 'normal'
             ? 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMedNormalMode'
-            : 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed';
+            : 'https://n8n.srv1104707.hstgr.cloud/webhook/DeveloperMode';
 
         console.log('🔄 Envoi des données vers:', endpoint);
         console.log('📊 Payload:', {
@@ -1296,7 +1296,7 @@ async function sendDmiData() {
         }
 
         // Envoyer au webhook du mode test (same as mode test)
-        const endpoint = 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed';
+        const endpoint = 'https://n8n.srv1104707.hstgr.cloud/webhook/DeveloperMode';
 
         const response = await fetch(endpoint, {
             method: 'POST',
