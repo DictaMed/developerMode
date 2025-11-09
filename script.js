@@ -845,7 +845,7 @@ async function sendData(mode) {
         // Déterminer l'endpoint
         const endpoint = mode === 'normal'
             ? 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMedNormalMode'
-            : 'https://n8n.srv1104707.hstgr.cloud/webhook/DeveloperMode';
+            : 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed';
 
         console.log('🔄 Envoi des données vers:', endpoint);
         console.log('📊 Payload:', {
@@ -1296,7 +1296,7 @@ async function sendDmiData() {
         }
 
         // Envoyer au webhook du mode test (same as mode test)
-        const endpoint = 'https://n8n.srv1104707.hstgr.cloud/webhook/DeveloperMode';
+        const endpoint = 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed';
 
         const response = await fetch(endpoint, {
             method: 'POST',
