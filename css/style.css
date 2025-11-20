@@ -68,49 +68,6 @@ body {
 .app-header {
     padding: var(--spacing-md);
     text-align: center;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    z-index: 10;
-}
-
-.logo-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-xs);
-    margin-bottom: 4px;
-}
-
-.logo-icon {
-    font-size: 2rem;
-}
-
-.logo-text {
-    font-size: 1.5rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-}
-
-.text-primary {
-    color: var(--primary-color);
-}
-
-.text-secondary {
-    color: var(--secondary-color);
-}
-
-.app-tagline {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-    font-weight: 500;
-}
-
-/* Main Content */
-#main-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: var(--spacing-md);
     padding-bottom: 100px;
     /* Space for bottom nav */
     scroll-behavior: smooth;

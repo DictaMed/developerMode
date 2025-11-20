@@ -20,7 +20,7 @@
         <!-- Header -->
         <header class="app-header">
             <div class="logo-container">
-                <div class="logo-icon">📸</div>
+                <img src="assets/images/logo.png" alt="ClaimSnap Logo" class="logo-img">
                 <div class="logo-text">
                     <span class="text-primary">Claim</span><span class="text-secondary">Snap</span>
                 </div>
@@ -83,7 +83,7 @@
                 <div class="guide-container">
                     <div class="card glass-card gradient-border-red">
                         <div class="card-header">
-                            <span class="icon">⚠️</span>
+                            <img src="assets/images/problem.png" alt="Problem" class="section-icon-img">
                             <h3>The Problem</h3>
                         </div>
                         <p>Field documentation is slow, error-prone, and often lacks crucial details, leading to delayed
@@ -92,7 +92,7 @@
 
                     <div class="card glass-card gradient-border-green">
                         <div class="card-header">
-                            <span class="icon">✅</span>
+                            <img src="assets/images/solution.png" alt="Solution" class="section-icon-img">
                             <h3>The Solution</h3>
                         </div>
                         <p>ClaimSnap enables instant, voice-driven documentation with structured data capture, ensuring
@@ -138,7 +138,8 @@
             <!-- Tab 3: Contact -->
             <section id="tab-contact" class="tab-content">
                 <div class="contact-container">
-                    <div class="card glass-card">
+                    <div class="card glass-card text-center">
+                        <img src="assets/images/contact.png" alt="Contact Support" class="contact-hero-img">
                         <h3>📞 Get in Touch</h3>
                         <ul class="contact-list">
                             <li>📧 support@claimsnap.app</li>
@@ -225,217 +226,18 @@
                 <button class="nav-item" data-tab="tab-test">
                     <span class="icon">🧪</span>
                     <span class="label">Test</span>
-                    <!-- Tab 1: Normal Mode (Authenticated) -->
-                    <section id="tab-normal" class="tab-content active">
-                        <div class="auth-container" id="auth-view">
-                            <div class="card glass-card">
-                                <h2>🔐 Agent Login</h2>
-                                <div class="input-group">
-                                    <label>Agent ID</label>
-                                    <input type="text" id="agent-id" placeholder="Enter your Agent ID">
-                                </div>
-                                <div class="input-group">
-                                    <label>Access Code</label>
-                                    <input type="password" id="access-code" placeholder="••••••••">
-                                </div>
-                                <button id="login-btn" class="btn btn-primary btn-block">Access Dashboard</button>
-                            </div>
-                        </div>
-
-                        <div class="dashboard-container hidden" id="dashboard-view">
-                            <div class="card glass-card entity-details">
-                                <h3>📋 Claim Details</h3>
-                                <div class="input-group">
-                                    <label>Claim #</label>
-                                    <input type="text" id="claim-id" maxlength="50" placeholder="e.g., CLM-2024-889">
-                                    <span class="char-counter">0/50</span>
-                                </div>
-                                <div class="input-group">
-                                    <label>Policyholder Name</label>
-                                    <input type="text" id="policyholder-name" maxlength="50"
-                                        placeholder="e.g., John Doe">
-                                    <span class="char-counter">0/50</span>
-                                </div>
-                            </div>
-
-                            <!-- Dynamic Recording Sections will be injected here -->
-                            <div id="recording-sections"></div>
-
-                            <div class="submit-section card glass-card">
-                                <div class="status-dots">
-                                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                                </div>
-                                <div class="completion-status">
-                                    Sections Completed: <span id="completed-count">0</span>/3
-                                </div>
-                                <button id="submit-claim-btn" class="btn btn-success btn-block" disabled>Submit Claim
-                                    Report</button>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Tab 2: Guide -->
-                    <section id="tab-guide" class="tab-content">
-                        <div class="guide-container">
-                            <div class="card glass-card gradient-border-red">
-                                <div class="card-header">
-                                    <span class="icon">⚠️</span>
-                                    <h3>The Problem</h3>
-                                </div>
-                                <p>Field documentation is slow, error-prone, and often lacks crucial details, leading to
-                                    delayed
-                                    claim processing and disputes.</p>
-                            </div>
-
-                            <div class="card glass-card gradient-border-green">
-                                <div class="card-header">
-                                    <span class="icon">✅</span>
-                                    <h3>The Solution</h3>
-                                </div>
-                                <p>ClaimSnap enables instant, voice-driven documentation with structured data capture,
-                                    ensuring
-                                    100% accuracy and faster settlements.</p>
-                            </div>
-
-                            <div class="card glass-card gradient-border-blue">
-                                <div class="card-header">
-                                    <span class="icon">🚀</span>
-                                    <h3>How It Works</h3>
-                                </div>
-                                <div class="process-steps">
-                                    <div class="step">
-                                        <span class="step-num">1</span>
-                                        <p>Login securely</p>
-                                    </div>
-                                    <div class="connector">↓</div>
-                                    <div class="step">
-                                        <span class="step-num">2</span>
-                                        <p>Enter Claim ID</p>
-                                    </div>
-                                    <div class="connector">↓</div>
-                                    <div class="step">
-                                        <span class="step-num">3</span>
-                                        <p>Record details</p>
-                                    </div>
-                                    <div class="connector">↓</div>
-                                    <div class="step">
-                                        <span class="step-num">4</span>
-                                        <p>Review & Edit</p>
-                                    </div>
-                                    <div class="connector">↓</div>
-                                    <div class="step">
-                                        <span class="step-num">5</span>
-                                        <p>Instant Submit</p>
-                                    </div>
-                                </div>
-                                <button class="btn btn-primary btn-sm nav-to-tab" data-target="tab-test">Try Demo
-                                    Mode</button>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Tab 3: Contact -->
-                    <section id="tab-contact" class="tab-content">
-                        <div class="contact-container">
-                            <div class="card glass-card">
-                                <h3>📞 Get in Touch</h3>
-                                <ul class="contact-list">
-                                    <li>📧 support@claimsnap.app</li>
-                                    <li>🐦 @ClaimSnapApp</li>
-                                    <li>🌐 www.claimsnap.app</li>
-                                </ul>
-                            </div>
-
-                            <div class="card glass-card">
-                                <h3>💲 Enterprise Pricing</h3>
-                                <p>Tailored solutions for insurance carriers and independent adjusters.</p>
-                                <ul class="pricing-features">
-                                    <li>✓ Unlimited Claims</li>
-                                    <li>✓ API Integration</li>
-                                    <li>✓ White-labeling</li>
-                                    <li>✓ 24/7 Priority Support</li>
-                                </ul>
-                            </div>
-
-                            <div class="card glass-card">
-                                <h3>⚡ SLA Commitment</h3>
-                                <p>We guarantee 99.9% uptime and < 1hr response time for critical issues.</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Tab 4: FAQ -->
-                    <section id="tab-faq" class="tab-content">
-                        <div class="faq-container" id="faq-list">
-                            <!-- FAQ Items injected via JS -->
-                        </div>
-                    </section>
-
-                    <!-- Tab 5: Test Mode -->
-                    <section id="tab-test" class="tab-content">
-                        <div class="test-mode-banner">
-                            <span class="badge badge-test">TEST MODE</span>
-                            <p>No login required. Data is public.</p>
-                        </div>
-
-                        <div class="dashboard-container">
-                            <div class="card glass-card entity-details">
-                                <h3>🧪 Demo Claim</h3>
-                                <div class="input-group">
-                                    <label>Demo Claim #</label>
-                                    <input type="text" id="test-claim-id" value="DEMO-123" readonly>
-                                </div>
-                            </div>
-
-                            <!-- Dynamic Recording Sections (Test Mode) -->
-                            <div id="test-recording-sections"></div>
-
-                            <div class="submit-section card glass-card">
-                                <button id="test-submit-btn" class="btn btn-warning btn-block" disabled>Submit Demo
-                                    Claim</button>
-                                <div class="demo-link-container">
-                                    <a href="#" class="demo-link">View Demo Results Sheet</a>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                    </main>
-
-                    <!-- Bottom Navigation -->
-                    <nav class="bottom-nav">
-                        <div class="nav-scroll-hint">← Swipe to see more →</div>
-                        <div class="nav-items-container">
-                            <button class="nav-item active" data-tab="tab-normal">
-                                <span class="icon">🏠</span>
-                                <span class="label">App</span>
-                            </button>
-                            <button class="nav-item" data-tab="tab-guide">
-                                <span class="icon">📘</span>
-                                <span class="label">Guide</span>
-                            </button>
-                            <button class="nav-item" data-tab="tab-contact">
-                                <span class="icon">📬</span>
-                                <span class="label">Contact</span>
-                            </button>
-                            <button class="nav-item" data-tab="tab-faq">
-                                <span class="icon">❓</span>
-                                <span class="label">FAQ</span>
-                            </button>
-                            <button class="nav-item" data-tab="tab-test">
-                                <span class="icon">🧪</span>
-                                <span class="label">Test</span>
-                            </button>
-                        </div>
-                    </nav>
+                </button>
             </div>
+        </nav>
+    </div>
 
-            <!-- Scripts -->
-            <script src="js/config.js"></script>
-            <script src="js/state.js"></script>
-            <script src="js/api.js"></script>
-            <script src="js/audio.js"></script>
-            <script src="js/ui.js"></script>
-            <script src="js/main.js"></script>
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
 </body>
 
 </html>
