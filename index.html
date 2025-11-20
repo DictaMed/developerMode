@@ -1,482 +1,441 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <meta name="description"
-        content="Solution de dictée médicale intelligente pour la collecte de données et création de fichiers SPSS">
-    <meta name="keywords" content="dictée médicale, SPSS, enregistrement vocal, transcription médicale, DictaMed">
-    <meta name="author" content="DictaMed">
-    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="DictaMed">
-    <meta name="format-detection" content="telephone=no">
-
-    <!-- Open Graph -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="DictaMed - Dictée Médicale Intelligente">
-    <meta property="og:description"
-        content="Solution de dictée médicale intelligente pour la collecte de données et création de fichiers SPSS">
-    <meta property="og:image" content="/icon-512x512.png">
-    <meta property="og:url" content="https://dictamed.com">
-
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="DictaMed - Dictée Médicale Intelligente">
-    <meta name="twitter:description" content="Solution de dictée médicale intelligente pour la collecte de données">
-    <meta name="twitter:image" content="/icon-512x512.png">
-
-    <title>DictaMed - Dashboard IA</title>
-
-    <!-- Google Fonts -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ClaimSnap - Instant Claim Documentation</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap"
         rel="stylesheet">
-
-    <!-- Styles -->
-    <link rel="stylesheet" href="style.css">
-
-    <!-- Favicons -->
+    <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/svg+xml"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1'/><stop offset='100%25' style='stop-color:%231e40af;stop-opacity:1'/></linearGradient><linearGradient id='grad2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%2310b981;stop-opacity:1'/><stop offset='100%25' style='stop-color:%23059669;stop-opacity:1'/></linearGradient></defs><text x='10' y='75' font-size='70' font-weight='bold' font-family='Arial, sans-serif'><tspan fill='url(%23grad1)'>D</tspan><tspan fill='url(%23grad2)'>M</tspan></text></svg>">
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📸</text></svg>">
 </head>
 
 <body>
-    <div class="app-layout">
-        <!-- Mobile Header -->
-        <div class="mobile-header">
-            <div class="logo-mobile">
-                <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
-            </div>
-            <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-
-        <!-- Sidebar Navigation -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-container">
+                <div class="logo-icon">📸</div>
+                <div class="logo-text">
+                    <span class="text-primary">Claim</span><span class="text-secondary">Snap</span>
                 </div>
-                <p class="slogan">Dashboard IA</p>
             </div>
-
-            <nav class="sidebar-nav">
-                <button class="nav-item active" data-tab="mode-normal">
-                    <span class="nav-icon">🎙️</span>
-                    <span class="nav-text">Dictée Médicale</span>
-                </button>
-                <button class="nav-item" data-tab="mode-test">
-                    <span class="nav-icon">🧪</span>
-                    <span class="nav-text">Mode Test</span>
-                </button>
-                <button class="nav-item" data-tab="mode-dmi">
-                    <span class="nav-icon">📁</span>
-                    <span class="nav-text">Dossier DMI</span>
-                </button>
-                <div class="nav-divider"></div>
-                <button class="nav-item" data-tab="guide">
-                    <span class="nav-icon">📖</span>
-                    <span class="nav-text">Guide</span>
-                </button>
-                <button class="nav-item" data-tab="faq">
-                    <span class="nav-icon">❓</span>
-                    <span class="nav-text">FAQ</span>
-                </button>
-                <button class="nav-item" data-tab="contact">
-                    <span class="nav-icon">📧</span>
-                    <span class="nav-text">Contact</span>
-                </button>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="user-status">
-                    <div class="status-dot online"></div>
-                    <span>Système Prêt</span>
-                </div>
-                <p class="version">v2.0.0</p>
-            </div>
-        </aside>
+            <div class="app-tagline">Instant Insurance Documentation</div>
+        </header>
 
         <!-- Main Content Area -->
-        <main class="main-content" id="main-content">
+        <main id="main-content">
+            <!-- Tab 1: Normal Mode (Authenticated) -->
+            <section id="tab-normal" class="tab-content active">
+                <div class="auth-container" id="auth-view">
+                    <div class="card glass-card">
+                        <h2>🔐 Agent Login</h2>
+                        <div class="input-group">
+                            <label>Agent ID</label>
+                            <input type="text" id="agent-id" placeholder="Enter your Agent ID">
+                        </div>
+                        <div class="input-group">
+                            <label>Access Code</label>
+                            <input type="password" id="access-code" placeholder="••••••••">
+                        </div>
+                        <button id="login-btn" class="btn btn-primary btn-block">Access Dashboard</button>
+                    </div>
+                </div>
 
-            <!-- ONGLET 1: MODE NORMAL -->
-            <section id="mode-normal" class="tab-content active">
-                <header class="content-header">
-                    <h1>Dictée Médicale</h1>
-                    <p>Enregistrez et transcrivez vos observations cliniques</p>
-                </header>
+                <div class="dashboard-container hidden" id="dashboard-view">
+                    <div class="card glass-card entity-details">
+                        <h3>📋 Claim Details</h3>
+                        <div class="input-group">
+                            <label>Claim #</label>
+                            <input type="text" id="claim-id" maxlength="50" placeholder="e.g., CLM-2024-889">
+                            <span class="char-counter">0/50</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Policyholder Name</label>
+                            <input type="text" id="policyholder-name" maxlength="50" placeholder="e.g., John Doe">
+                            <span class="char-counter">0/50</span>
+                        </div>
+                    </div>
 
-                <div class="dashboard-grid">
-                    <!-- Authentification -->
-                    <div class="card auth-card">
+                    <!-- Dynamic Recording Sections will be injected here -->
+                    <div id="recording-sections"></div>
+
+                    <div class="submit-section card glass-card">
+                        <div class="status-dots">
+                            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                        </div>
+                        <div class="completion-status">
+                            Sections Completed: <span id="completed-count">0</span>/3
+                        </div>
+                        <button id="submit-claim-btn" class="btn btn-success btn-block" disabled>Submit Claim
+                            Report</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 2: Guide -->
+            <section id="tab-guide" class="tab-content">
+                <div class="guide-container">
+                    <div class="card glass-card gradient-border-red">
                         <div class="card-header">
-                            <h2>🔐 Authentification</h2>
+                            <span class="icon">⚠️</span>
+                            <h3>The Problem</h3>
                         </div>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label for="username">Identifiant</label>
-                                <input type="text" id="username" class="form-control" placeholder="Votre identifiant">
-                            </div>
-                            <div class="form-group">
-                                <label for="accessCode">Code d'accès</label>
-                                <input type="password" id="accessCode" class="form-control"
-                                    placeholder="Votre code d'accès">
-                            </div>
-                            <div class="form-check">
-                                <input type="checkbox" id="rememberAuth">
-                                <label for="rememberAuth">Se souvenir de moi</label>
-                            </div>
-                        </div>
+                        <p>Field documentation is slow, error-prone, and often lacks crucial details, leading to delayed
+                            claim processing and disputes.</p>
                     </div>
 
-                    <!-- Informations patient -->
-                    <div class="card patient-card">
+                    <div class="card glass-card gradient-border-green">
                         <div class="card-header">
-                            <h2>👤 Patient</h2>
+                            <span class="icon">✅</span>
+                            <h3>The Solution</h3>
                         </div>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label for="numeroDossier">Numéro de dossier <span class="required">*</span></label>
-                                <input type="text" id="numeroDossier" class="form-control" maxlength="50"
-                                    placeholder="Ex: D-2023-001" required>
-                                <span class="char-counter" id="numeroDossierCounter">0/50</span>
-                            </div>
-                            <div class="form-group">
-                                <label for="nomPatient">Nom complet</label>
-                                <input type="text" id="nomPatient" class="form-control" maxlength="50"
-                                    placeholder="Nom du patient">
-                                <span class="char-counter" id="nomPatientCounter">0/50</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sections d'enregistrement -->
-                <div class="recordings-container">
-                    <div class="recording-section" data-section="partie1">
-                        <div class="rec-header">
-                            <h3>📋 Partie 1</h3>
-                            <span class="status-badge" data-status="ready">Prêt</span>
-                        </div>
-                        <div class="rec-body">
-                            <div class="timer-display">00:00</div>
-                            <div class="waveform-placeholder"></div>
-                        </div>
-                        <div class="rec-controls">
-                            <button class="btn-icon btn-record" title="Enregistrer">🔴</button>
-                            <button class="btn-icon btn-pause hidden" title="Pause">⏸️</button>
-                            <button class="btn-icon btn-stop hidden" title="Arrêter">⏹️</button>
-                            <button class="btn-icon btn-replay hidden" title="Réécouter">▶️</button>
-                            <button class="btn-icon btn-delete hidden" title="Supprimer">🗑️</button>
-                        </div>
-                        <audio class="audio-player hidden"></audio>
+                        <p>ClaimSnap enables instant, voice-driven documentation with structured data capture, ensuring
+                            100% accuracy and faster settlements.</p>
                     </div>
 
-                    <div class="recording-section" data-section="partie2">
-                        <div class="rec-header">
-                            <h3>📋 Partie 2</h3>
-                            <span class="status-badge" data-status="ready">Prêt</span>
-                        </div>
-                        <div class="rec-body">
-                            <div class="timer-display">00:00</div>
-                            <div class="waveform-placeholder"></div>
-                        </div>
-                        <div class="rec-controls">
-                            <button class="btn-icon btn-record" title="Enregistrer">🔴</button>
-                            <button class="btn-icon btn-pause hidden" title="Pause">⏸️</button>
-                            <button class="btn-icon btn-stop hidden" title="Arrêter">⏹️</button>
-                            <button class="btn-icon btn-replay hidden" title="Réécouter">▶️</button>
-                            <button class="btn-icon btn-delete hidden" title="Supprimer">🗑️</button>
-                        </div>
-                        <audio class="audio-player hidden"></audio>
-                    </div>
-
-                    <div class="recording-section" data-section="partie3">
-                        <div class="rec-header">
-                            <h3>📋 Partie 3</h3>
-                            <span class="status-badge" data-status="ready">Prêt</span>
-                        </div>
-                        <div class="rec-body">
-                            <div class="timer-display">00:00</div>
-                            <div class="waveform-placeholder"></div>
-                        </div>
-                        <div class="rec-controls">
-                            <button class="btn-icon btn-record" title="Enregistrer">🔴</button>
-                            <button class="btn-icon btn-pause hidden" title="Pause">⏸️</button>
-                            <button class="btn-icon btn-stop hidden" title="Arrêter">⏹️</button>
-                            <button class="btn-icon btn-replay hidden" title="Réécouter">▶️</button>
-                            <button class="btn-icon btn-delete hidden" title="Supprimer">🗑️</button>
-                        </div>
-                        <audio class="audio-player hidden"></audio>
-                    </div>
-
-                    <div class="recording-section optional-section hidden" data-section="partie4">
-                        <div class="rec-header">
-                            <h3>💊 Partie 4 (Optionnelle)</h3>
-                            <span class="status-badge" data-status="ready">Prêt</span>
-                        </div>
-                        <div class="rec-body">
-                            <div class="timer-display">00:00</div>
-                            <div class="waveform-placeholder"></div>
-                        </div>
-                        <div class="rec-controls">
-                            <button class="btn-icon btn-record" title="Enregistrer">🔴</button>
-                            <button class="btn-icon btn-pause hidden" title="Pause">⏸️</button>
-                            <button class="btn-icon btn-stop hidden" title="Arrêter">⏹️</button>
-                            <button class="btn-icon btn-replay hidden" title="Réécouter">▶️</button>
-                            <button class="btn-icon btn-delete hidden" title="Supprimer">🗑️</button>
-                        </div>
-                        <audio class="audio-player hidden"></audio>
-                    </div>
-                </div>
-
-                <div class="actions-bar">
-                    <button class="btn btn-outline" id="togglePartie4">Afficher Partie 4</button>
-                    <div class="submit-wrapper">
-                        <span class="sections-count">0 section(s)</span>
-                        <button class="btn btn-primary btn-lg" id="submitNormal" disabled>Envoyer le dossier</button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ONGLET 2: GUIDE -->
-            <section id="guide" class="tab-content">
-                <header class="content-header">
-                    <h1>Guide d'utilisation</h1>
-                    <p>Maîtrisez DictaMed en quelques minutes</p>
-                </header>
-
-                <div class="card">
-                    <h2>✨ La Solution DictaMed</h2>
-                    <p class="lead">Transformez votre voix en données structurées grâce à l'IA.</p>
-
-                    <div class="workflow-steps">
-                        <div class="step-item">
-                            <div class="step-icon">🎤</div>
-                            <h4>Dictée</h4>
-                            <p>Parlez naturellement</p>
-                        </div>
-                        <div class="step-line"></div>
-                        <div class="step-item">
-                            <div class="step-icon">🤖</div>
-                            <h4>IA</h4>
-                            <p>Transcription auto</p>
-                        </div>
-                        <div class="step-line"></div>
-                        <div class="step-item">
-                            <div class="step-icon">📊</div>
-                            <h4>Données</h4>
-                            <p>Export SPSS/Excel</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Contenu du guide simplifié pour la démo -->
-                <div class="card">
-                    <h2>💡 Conseils Rapides</h2>
-                    <ul class="feature-list">
-                        <li>Utilisez un microphone de qualité.</li>
-                        <li>Parlez clairement et distinctement.</li>
-                        <li>Vérifiez vos enregistrements avant l'envoi.</li>
-                    </ul>
-                </div>
-            </section>
-
-            <!-- ONGLET 3: CONTACT -->
-            <section id="contact" class="tab-content">
-                <header class="content-header">
-                    <h1>Contact & Support</h1>
-                    <p>Nous sommes là pour vous aider</p>
-                </header>
-
-                <div class="card contact-card">
-                    <h2>Besoin d'aide ?</h2>
-                    <p>Contactez notre équipe support pour toute question technique ou commerciale.</p>
-                    <div class="contact-links">
-                        <a href="mailto:support@dictamed.com" class="btn btn-primary">📧 Envoyer un email</a>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ONGLET 4: FAQ -->
-            <section id="faq" class="tab-content">
-                <header class="content-header">
-                    <h1>FAQ</h1>
-                    <p>Questions fréquentes</p>
-                </header>
-
-                <div class="faq-grid">
-                    <div class="card">
-                        <h3>Comment fonctionne l'IA ?</h3>
-                        <p>Notre IA analyse votre voix et extrait les données structurées selon votre modèle SPSS.</p>
-                    </div>
-                    <div class="card">
-                        <h3>Est-ce sécurisé ?</h3>
-                        <p>Oui, toutes les données sont chiffrées de bout en bout et conformes RGPD.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ONGLET 5: MODE TEST -->
-            <section id="mode-test" class="tab-content">
-                <header class="content-header">
-                    <h1>Mode Test</h1>
-                    <p>Essayez DictaMed sans engagement</p>
-                </header>
-
-                <div class="dashboard-grid">
-                    <div class="card">
+                    <div class="card glass-card gradient-border-blue">
                         <div class="card-header">
-                            <h2>👤 Patient Test</h2>
+                            <span class="icon">🚀</span>
+                            <h3>How It Works</h3>
                         </div>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label for="numeroDossierTest">Numéro de dossier</label>
-                                <input type="text" id="numeroDossierTest" class="form-control" placeholder="Test-001">
-                                <span class="char-counter" id="numeroDossierTestCounter">0/50</span>
+                        <div class="process-steps">
+                            <div class="step">
+                                <span class="step-num">1</span>
+                                <p>Login securely</p>
                             </div>
-                            <div class="form-group">
-                                <label for="nomPatientTest">Nom du patient</label>
-                                <input type="text" id="nomPatientTest" class="form-control" placeholder="Jean Dupont">
-                                <span class="char-counter" id="nomPatientTestCounter">0/50</span>
+                            <div class="connector">↓</div>
+                            <div class="step">
+                                <span class="step-num">2</span>
+                                <p>Enter Claim ID</p>
+                            </div>
+                            <div class="connector">↓</div>
+                            <div class="step">
+                                <span class="step-num">3</span>
+                                <p>Record details</p>
+                            </div>
+                            <div class="connector">↓</div>
+                            <div class="step">
+                                <span class="step-num">4</span>
+                                <p>Review & Edit</p>
+                            </div>
+                            <div class="connector">↓</div>
+                            <div class="step">
+                                <span class="step-num">5</span>
+                                <p>Instant Submit</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="recordings-container">
-                    <div class="recording-section" data-section="clinique">
-                        <div class="rec-header">
-                            <h3>🩺 Données Cliniques</h3>
-                            <span class="status-badge" data-status="ready">Prêt</span>
-                        </div>
-                        <div class="rec-controls">
-                            <button class="btn-icon btn-record">🔴</button>
-                            <button class="btn-icon btn-pause hidden">⏸️</button>
-                            <button class="btn-icon btn-stop hidden">⏹️</button>
-                            <button class="btn-icon btn-replay hidden">▶️</button>
-                            <button class="btn-icon btn-delete hidden">🗑️</button>
-                        </div>
-                        <audio class="audio-player hidden"></audio>
-                    </div>
-
-                    <div class="recording-section" data-section="antecedents">
-                        <div class="rec-header">
-                            <h3>📝 Antécédents</h3>
-                            <span class="status-badge" data-status="ready">Prêt</span>
-                        </div>
-                        <div class="rec-controls">
-                            <button class="btn-icon btn-record">🔴</button>
-                            <button class="btn-icon btn-pause hidden">⏸️</button>
-                            <button class="btn-icon btn-stop hidden">⏹️</button>
-                            <button class="btn-icon btn-replay hidden">▶️</button>
-                            <button class="btn-icon btn-delete hidden">🗑️</button>
-                        </div>
-                        <audio class="audio-player hidden"></audio>
-                    </div>
-
-                    <div class="recording-section" data-section="biologie">
-                        <div class="rec-header">
-                            <h3>🔬 Biologie</h3>
-                            <span class="status-badge" data-status="ready">Prêt</span>
-                        </div>
-                        <div class="rec-controls">
-                            <button class="btn-icon btn-record">🔴</button>
-                            <button class="btn-icon btn-pause hidden">⏸️</button>
-                            <button class="btn-icon btn-stop hidden">⏹️</button>
-                            <button class="btn-icon btn-replay hidden">▶️</button>
-                            <button class="btn-icon btn-delete hidden">🗑️</button>
-                        </div>
-                        <audio class="audio-player hidden"></audio>
-                    </div>
-                </div>
-
-                <div class="actions-bar">
-                    <div class="submit-wrapper">
-                        <span class="sections-count">0 section(s)</span>
-                        <button class="btn btn-primary btn-lg" id="submitTest" disabled>Envoyer le test</button>
-                    </div>
-                </div>
-
-                <div class="card" id="googleSheetCard" style="display: none; margin-top: 20px;">
-                    <h2>📊 Résultats en temps réel</h2>
-                    <p>Vos données apparaissent ci-dessous :</p>
-                    <div class="iframe-container">
-                        <iframe
-                            src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQy8wI3ZqX8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8z8/pubhtml?gid=0&single=true&widget=true&headers=false"></iframe>
+                        <button class="btn btn-primary btn-sm nav-to-tab" data-target="tab-test">Try Demo Mode</button>
                     </div>
                 </div>
             </section>
 
-            <!-- ONGLET 6: MODE DMI -->
-            <section id="mode-dmi" class="tab-content">
-                <header class="content-header">
-                    <h1>Dossier DMI</h1>
-                    <p>Saisie multimodale : Texte et Photos</p>
-                </header>
-
-                <div class="dashboard-grid">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2>📄 Informations</h2>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label for="numeroDossierDMI">Numéro de dossier <span class="required">*</span></label>
-                                <input type="text" id="numeroDossierDMI" class="form-control" required>
-                                <span class="char-counter" id="numeroDossierDMICounter">0/50</span>
-                            </div>
-                            <div class="form-group">
-                                <label for="nomPatientDMI">Nom du patient</label>
-                                <input type="text" id="nomPatientDMI" class="form-control">
-                                <span class="char-counter" id="nomPatientDMICounter">0/50</span>
-                            </div>
-                        </div>
+            <!-- Tab 3: Contact -->
+            <section id="tab-contact" class="tab-content">
+                <div class="contact-container">
+                    <div class="card glass-card">
+                        <h3>📞 Get in Touch</h3>
+                        <ul class="contact-list">
+                            <li>📧 support@claimsnap.app</li>
+                            <li>🐦 @ClaimSnapApp</li>
+                            <li>🌐 www.claimsnap.app</li>
+                        </ul>
                     </div>
-                </div>
 
-                <div class="card">
-                    <h2>📝 Notes Libres</h2>
-                    <div class="form-group">
-                        <textarea id="texteLibre" class="form-control" rows="6"
-                            placeholder="Saisissez vos observations ici..."></textarea>
-                        <div class="text-right"><span id="texteLibreCounter">0</span> caractères</div>
+                    <div class="card glass-card">
+                        <h3>💲 Enterprise Pricing</h3>
+                        <p>Tailored solutions for insurance carriers and independent adjusters.</p>
+                        <ul class="pricing-features">
+                            <li>✓ Unlimited Claims</li>
+                            <li>✓ API Integration</li>
+                            <li>✓ White-labeling</li>
+                            <li>✓ 24/7 Priority Support</li>
+                        </ul>
                     </div>
-                </div>
 
-                <div class="card">
-                    <h2>📸 Photos (Max 5)</h2>
-                    <div class="upload-area">
-                        <input type="file" id="photosUpload" multiple accept="image/*" class="hidden">
-                        <label for="photosUpload" class="upload-label">
-                            <span class="upload-icon">📷</span>
-                            <span>Cliquez pour ajouter des photos</span>
-                        </label>
+                    <div class="card glass-card">
+                        <h3>⚡ SLA Commitment</h3>
+                        <p>We guarantee 99.9% uptime and < 1hr response time for critical issues.</p>
                     </div>
-                    <div id="photosPreview" class="photos-grid"></div>
-                </div>
-
-                <div class="actions-bar">
-                    <button class="btn btn-primary btn-lg" id="submitDMI" disabled>Envoyer le dossier DMI</button>
                 </div>
             </section>
 
+            <!-- Tab 4: FAQ -->
+            <section id="tab-faq" class="tab-content">
+                <div class="faq-container" id="faq-list">
+                    <!-- FAQ Items injected via JS -->
+                </div>
+            </section>
+
+            <!-- Tab 5: Test Mode -->
+            <section id="tab-test" class="tab-content">
+                <div class="test-mode-banner">
+                    <span class="badge badge-test">TEST MODE</span>
+                    <p>No login required. Data is public.</p>
+                </div>
+
+                <div class="dashboard-container">
+                    <div class="card glass-card entity-details">
+                        <h3>🧪 Demo Claim</h3>
+                        <div class="input-group">
+                            <label>Demo Claim #</label>
+                            <input type="text" id="test-claim-id" value="DEMO-123" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Recording Sections (Test Mode) -->
+                    <div id="test-recording-sections"></div>
+
+                    <div class="submit-section card glass-card">
+                        <button id="test-submit-btn" class="btn btn-warning btn-block" disabled>Submit Demo
+                            Claim</button>
+                        <div class="demo-link-container">
+                            <a href="#" class="demo-link">View Demo Results Sheet</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
-    </div>
 
-    <script type="module" src="js/main.js"></script>
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-scroll-hint">← Swipe to see more →</div>
+            <div class="nav-items-container">
+                <button class="nav-item active" data-tab="tab-normal">
+                    <span class="icon">🏠</span>
+                    <span class="label">App</span>
+                </button>
+                <button class="nav-item" data-tab="tab-guide">
+                    <span class="icon">📘</span>
+                    <span class="label">Guide</span>
+                </button>
+                <button class="nav-item" data-tab="tab-contact">
+                    <span class="icon">📬</span>
+                    <span class="label">Contact</span>
+                </button>
+                <button class="nav-item" data-tab="tab-faq">
+                    <span class="icon">❓</span>
+                    <span class="label">FAQ</span>
+                </button>
+                <button class="nav-item" data-tab="tab-test">
+                    <span class="icon">🧪</span>
+                    <span class="label">Test</span>
+                    <!-- Tab 1: Normal Mode (Authenticated) -->
+                    <section id="tab-normal" class="tab-content active">
+                        <div class="auth-container" id="auth-view">
+                            <div class="card glass-card">
+                                <h2>🔐 Agent Login</h2>
+                                <div class="input-group">
+                                    <label>Agent ID</label>
+                                    <input type="text" id="agent-id" placeholder="Enter your Agent ID">
+                                </div>
+                                <div class="input-group">
+                                    <label>Access Code</label>
+                                    <input type="password" id="access-code" placeholder="••••••••">
+                                </div>
+                                <button id="login-btn" class="btn btn-primary btn-block">Access Dashboard</button>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-container hidden" id="dashboard-view">
+                            <div class="card glass-card entity-details">
+                                <h3>📋 Claim Details</h3>
+                                <div class="input-group">
+                                    <label>Claim #</label>
+                                    <input type="text" id="claim-id" maxlength="50" placeholder="e.g., CLM-2024-889">
+                                    <span class="char-counter">0/50</span>
+                                </div>
+                                <div class="input-group">
+                                    <label>Policyholder Name</label>
+                                    <input type="text" id="policyholder-name" maxlength="50"
+                                        placeholder="e.g., John Doe">
+                                    <span class="char-counter">0/50</span>
+                                </div>
+                            </div>
+
+                            <!-- Dynamic Recording Sections will be injected here -->
+                            <div id="recording-sections"></div>
+
+                            <div class="submit-section card glass-card">
+                                <div class="status-dots">
+                                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                                </div>
+                                <div class="completion-status">
+                                    Sections Completed: <span id="completed-count">0</span>/3
+                                </div>
+                                <button id="submit-claim-btn" class="btn btn-success btn-block" disabled>Submit Claim
+                                    Report</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Tab 2: Guide -->
+                    <section id="tab-guide" class="tab-content">
+                        <div class="guide-container">
+                            <div class="card glass-card gradient-border-red">
+                                <div class="card-header">
+                                    <span class="icon">⚠️</span>
+                                    <h3>The Problem</h3>
+                                </div>
+                                <p>Field documentation is slow, error-prone, and often lacks crucial details, leading to
+                                    delayed
+                                    claim processing and disputes.</p>
+                            </div>
+
+                            <div class="card glass-card gradient-border-green">
+                                <div class="card-header">
+                                    <span class="icon">✅</span>
+                                    <h3>The Solution</h3>
+                                </div>
+                                <p>ClaimSnap enables instant, voice-driven documentation with structured data capture,
+                                    ensuring
+                                    100% accuracy and faster settlements.</p>
+                            </div>
+
+                            <div class="card glass-card gradient-border-blue">
+                                <div class="card-header">
+                                    <span class="icon">🚀</span>
+                                    <h3>How It Works</h3>
+                                </div>
+                                <div class="process-steps">
+                                    <div class="step">
+                                        <span class="step-num">1</span>
+                                        <p>Login securely</p>
+                                    </div>
+                                    <div class="connector">↓</div>
+                                    <div class="step">
+                                        <span class="step-num">2</span>
+                                        <p>Enter Claim ID</p>
+                                    </div>
+                                    <div class="connector">↓</div>
+                                    <div class="step">
+                                        <span class="step-num">3</span>
+                                        <p>Record details</p>
+                                    </div>
+                                    <div class="connector">↓</div>
+                                    <div class="step">
+                                        <span class="step-num">4</span>
+                                        <p>Review & Edit</p>
+                                    </div>
+                                    <div class="connector">↓</div>
+                                    <div class="step">
+                                        <span class="step-num">5</span>
+                                        <p>Instant Submit</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary btn-sm nav-to-tab" data-target="tab-test">Try Demo
+                                    Mode</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Tab 3: Contact -->
+                    <section id="tab-contact" class="tab-content">
+                        <div class="contact-container">
+                            <div class="card glass-card">
+                                <h3>📞 Get in Touch</h3>
+                                <ul class="contact-list">
+                                    <li>📧 support@claimsnap.app</li>
+                                    <li>🐦 @ClaimSnapApp</li>
+                                    <li>🌐 www.claimsnap.app</li>
+                                </ul>
+                            </div>
+
+                            <div class="card glass-card">
+                                <h3>💲 Enterprise Pricing</h3>
+                                <p>Tailored solutions for insurance carriers and independent adjusters.</p>
+                                <ul class="pricing-features">
+                                    <li>✓ Unlimited Claims</li>
+                                    <li>✓ API Integration</li>
+                                    <li>✓ White-labeling</li>
+                                    <li>✓ 24/7 Priority Support</li>
+                                </ul>
+                            </div>
+
+                            <div class="card glass-card">
+                                <h3>⚡ SLA Commitment</h3>
+                                <p>We guarantee 99.9% uptime and < 1hr response time for critical issues.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Tab 4: FAQ -->
+                    <section id="tab-faq" class="tab-content">
+                        <div class="faq-container" id="faq-list">
+                            <!-- FAQ Items injected via JS -->
+                        </div>
+                    </section>
+
+                    <!-- Tab 5: Test Mode -->
+                    <section id="tab-test" class="tab-content">
+                        <div class="test-mode-banner">
+                            <span class="badge badge-test">TEST MODE</span>
+                            <p>No login required. Data is public.</p>
+                        </div>
+
+                        <div class="dashboard-container">
+                            <div class="card glass-card entity-details">
+                                <h3>🧪 Demo Claim</h3>
+                                <div class="input-group">
+                                    <label>Demo Claim #</label>
+                                    <input type="text" id="test-claim-id" value="DEMO-123" readonly>
+                                </div>
+                            </div>
+
+                            <!-- Dynamic Recording Sections (Test Mode) -->
+                            <div id="test-recording-sections"></div>
+
+                            <div class="submit-section card glass-card">
+                                <button id="test-submit-btn" class="btn btn-warning btn-block" disabled>Submit Demo
+                                    Claim</button>
+                                <div class="demo-link-container">
+                                    <a href="#" class="demo-link">View Demo Results Sheet</a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    </main>
+
+                    <!-- Bottom Navigation -->
+                    <nav class="bottom-nav">
+                        <div class="nav-scroll-hint">← Swipe to see more →</div>
+                        <div class="nav-items-container">
+                            <button class="nav-item active" data-tab="tab-normal">
+                                <span class="icon">🏠</span>
+                                <span class="label">App</span>
+                            </button>
+                            <button class="nav-item" data-tab="tab-guide">
+                                <span class="icon">📘</span>
+                                <span class="label">Guide</span>
+                            </button>
+                            <button class="nav-item" data-tab="tab-contact">
+                                <span class="icon">📬</span>
+                                <span class="label">Contact</span>
+                            </button>
+                            <button class="nav-item" data-tab="tab-faq">
+                                <span class="icon">❓</span>
+                                <span class="label">FAQ</span>
+                            </button>
+                            <button class="nav-item" data-tab="tab-test">
+                                <span class="icon">🧪</span>
+                                <span class="label">Test</span>
+                            </button>
+                        </div>
+                    </nav>
+            </div>
+
+            <!-- Scripts -->
+            <script src="js/config.js"></script>
+            <script src="js/state.js"></script>
+            <script src="js/api.js"></script>
+            <script src="js/audio.js"></script>
+            <script src="js/ui.js"></script>
+            <script src="js/main.js"></script>
 </body>
 
 </html>

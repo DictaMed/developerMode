@@ -1,20 +1,57 @@
-export const CONFIG = {
-    API_ENDPOINTS: {
-        NORMAL: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMedNormalMode',
-        TEST: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed'
+const CONFIG = {
+    APP_NAME: "ClaimSnap",
+    VERSION: "1.0.0",
+
+    // API Configuration
+    // User must replace this with their actual N8N/Webhook URL
+    WEBHOOK_URL: "https://primary-production-4263.up.railway.app/webhook/claim-snap-ingest",
+
+    // Feature Flags
+    ENABLE_HAPTICS: true,
+    ENABLE_LOCAL_STORAGE: true,
+
+    // Limits
+    MAX_RECORDING_TIME_MS: 300000, // 5 minutes
+    INPUT_MAX_CHARS: 50,
+
+    // Colors for JS usage (matching CSS)
+    COLORS: {
+        PRIMARY: '#0F52BA',
+        SECONDARY: '#FF5722',
+        SUCCESS: '#10B981',
+        WARNING: '#F59E0B',
+        DANGER: '#EF4444'
     },
-    LIMITS: {
-        MAX_AUDIO_DURATION: 120, // seconds
-        MAX_PHOTO_SIZE: 10 * 1024 * 1024, // 10MB
-        MAX_AUDIO_SIZE: 50 * 1024 * 1024, // 50MB
-        MAX_PHOTOS: 5
-    },
-    SECTIONS: {
-        NORMAL: ['partie1', 'partie2', 'partie3', 'partie4'],
-        TEST: ['clinique', 'antecedents', 'biologie']
-    },
-    STORAGE_KEYS: {
-        AUTOSAVE: 'dictamed_autosave',
-        AUTH: 'dictamed_auth_credentials'
-    }
+
+    // Sections Configuration
+    SECTIONS: [
+        {
+            id: 'incident_details',
+            title: '1. Incident Details',
+            description: 'Describe what happened, when, and where.',
+            icon: '💥'
+        },
+        {
+            id: 'damage_assessment',
+            title: '2. Damage Assessment',
+            description: 'Describe the visible damage to property/vehicles.',
+            icon: '🚗'
+        },
+        {
+            id: 'witness_statements',
+            title: '3. Witness/Police Info',
+            description: 'Record witness names or police report numbers.',
+            icon: '👮'
+        },
+        {
+            id: 'additional_notes',
+            title: '4. Additional Notes',
+            description: 'Any other relevant information.',
+            icon: '📝',
+            optional: true
+        }
+    ]
 };
+
+// Freeze config to prevent accidental modifications
+Object.freeze(CONFIG);

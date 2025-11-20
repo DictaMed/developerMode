@@ -1,329 +1,248 @@
-import { appState } from './state.js';
-import { CONFIG } from './config.js';
-import { Toast } from './utils.js';
-import { AudioRecorder } from './audio.js';
+/**
+ * ui.js
+ * Handles DOM updates and rendering based on state.
+ */
 
-// ===== NAVIGATION PAR ONGLETS =====
-export function initTabs() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
-
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetTab = btn.getAttribute('data-tab');
-            switchTab(targetTab);
-        });
-    });
-}
-
-export function switchTab(tabId) {
-    // Désactiver tous les onglets et contenus
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-    // Activer l'onglet et le contenu sélectionnés
-    document.querySelector(`[data-tab="${tabId}"]`)?.classList.add('active');
-    document.getElementById(tabId)?.classList.add('active');
-
-    // Mettre à jour le mode actuel
-    if (tabId === 'mode-normal') {
-        appState.currentMode = 'normal';
-    } else if (tabId === 'mode-test') {
-        appState.currentMode = 'test';
-    }
-}
-
-// ===== COMPTEUR DE CARACTÈRES =====
-export function initCharCounters() {
-    const inputs = [
-        { id: 'numeroDossier', counterId: 'numeroDossierCounter' },
-        { id: 'nomPatient', counterId: 'nomPatientCounter' },
-        { id: 'numeroDossierTest', counterId: 'numeroDossierTestCounter' },
-        { id: 'nomPatientTest', counterId: 'nomPatientTestCounter' },
-        { id: 'numeroDossierDMI', counterId: 'numeroDossierDMICounter' },
-        { id: 'nomPatientDMI', counterId: 'nomPatientDMICounter' }
-    ];
-
-    inputs.forEach(({ id, counterId }) => {
-        const input = document.getElementById(id);
-        const counter = document.getElementById(counterId);
-
-        if (input && counter) {
-            input.addEventListener('input', () => {
-                const length = input.value.length;
-                const maxLength = input.maxLength;
-                counter.textContent = `${length}/${maxLength}`;
-
-                // Changer la couleur selon le niveau
-                counter.classList.remove('warning', 'danger');
-                if (length >= maxLength) {
-                    counter.classList.add('danger');
-                } else if (length >= maxLength * 0.8) {
-                    counter.classList.add('warning');
-                }
-
-                // Validation pour le mode DMI
-                if (id === 'numeroDossierDMI') {
-                    validateDMIMode();
-                }
-            });
+const UI = (function () {
+    // DOM Elements
+    const els = {
+        tabs: document.querySelectorAll('.tab-content'),
+        navItems: document.querySelectorAll('.nav-item'),
+        authView: document.getElementById('auth-view'),
+        dashboardView: document.getElementById('dashboard-view'),
+        recordingSections: document.getElementById('recording-sections'),
+        testRecordingSections: document.getElementById('test-recording-sections'),
+        completedCount: document.getElementById('completed-count'),
+        submitBtn: document.getElementById('submit-claim-btn'),
+        testSubmitBtn: document.getElementById('test-submit-btn'),
+        faqList: document.getElementById('faq-list'),
+        inputs: {
+            agentId: document.getElementById('agent-id'),
+            accessCode: document.getElementById('access-code'),
+            claimId: document.getElementById('claim-id'),
+            policyholderName: document.getElementById('policyholder-name')
         }
-    });
+    };
 
-    // Compteur pour le textarea
-    const texteLibre = document.getElementById('texteLibre');
-    const texteLibreCounter = document.getElementById('texteLibreCounter');
-    if (texteLibre && texteLibreCounter) {
-        texteLibre.addEventListener('input', () => {
-            texteLibreCounter.textContent = texteLibre.value.length;
-        });
-    }
-}
-
-// ===== PARTIE 4 OPTIONNELLE =====
-export function initOptionalSection() {
-    const toggleBtn = document.getElementById('togglePartie4');
-    const partie4 = document.querySelector('[data-section="partie4"]');
-
-    if (toggleBtn && partie4) {
-        toggleBtn.addEventListener('click', () => {
-            partie4.classList.toggle('hidden');
-            toggleBtn.textContent = partie4.classList.contains('hidden')
-                ? 'Afficher Partie 4 (optionnelle)'
-                : 'Masquer Partie 4';
-        });
-    }
-}
-
-// ===== COMPTEUR DE SECTIONS =====
-export function updateSectionCount() {
-    const mode = appState.currentMode;
-    const sections = CONFIG.SECTIONS[mode === 'normal' ? 'NORMAL' : 'TEST'];
-    let count = 0;
-
-    sections.forEach(sectionId => {
-        const recorder = appState.audioRecorders.get(sectionId);
-        if (recorder && recorder.hasRecording()) {
-            count++;
-        }
-    });
-
-    // Mettre à jour l'affichage
-    const countElements = document.querySelectorAll('.sections-count');
-    countElements.forEach(el => {
-        if (el.closest(`#mode-${mode}`)) {
-            el.textContent = `${count} section(s) enregistrée(s)`;
-        }
-    });
-
-    // Activer/désactiver le bouton d'envoi
-    const submitBtn = mode === 'normal'
-        ? document.getElementById('submitNormal')
-        : document.getElementById('submitTest');
-
-    if (submitBtn) {
-        submitBtn.disabled = count === 0;
-    }
-}
-
-// ===== RÉCAPITULATIF AVANT ENVOI =====
-export function showSendSummary(mode) {
-    const isTest = mode === 'test';
-    const numeroDossier = document.getElementById(isTest ? 'numeroDossierTest' : 'numeroDossier').value;
-    const nomPatient = document.getElementById(isTest ? 'nomPatientTest' : 'nomPatient').value;
-    const sections = isTest ? CONFIG.SECTIONS.TEST : CONFIG.SECTIONS.NORMAL;
-
-    let summary = `📋 Récapitulatif avant envoi (${mode.toUpperCase()}):\n\n`;
-    summary += `👤 Patient: ${numeroDossier} - ${nomPatient}\n`;
-    summary += `📊 Sections enregistrées:\n`;
-
-    let sectionCount = 0;
-    sections.forEach(sectionId => {
-        const recorder = appState.audioRecorders.get(sectionId);
-        if (recorder && recorder.hasRecording()) {
-            const validation = recorder.validateRecording();
-            sectionCount++;
-            const size = recorder.audioBlob ? (recorder.audioBlob.size / 1024).toFixed(1) : '0';
-            summary += `   ✅ ${sectionId}: ${size}KB ${validation.valid ? '' : `(⚠️ ${validation.error})`}\n`;
-        }
-    });
-
-    if (sectionCount === 0) {
-        summary += '   ❌ Aucune section enregistrée\n';
-    }
-
-    summary += `\n🎯 ${sectionCount} section(s) prête(s) pour l'envoi`;
-
-    return summary;
-}
-
-// ===== MODE SAISIE TEXTE =====
-
-// Validation du mode DMI
-export function validateDMIMode() {
-    const numeroDossier = document.getElementById('numeroDossierDMI').value.trim();
-    const submitBtn = document.getElementById('submitDMI');
-
-    if (submitBtn) {
-        submitBtn.disabled = !numeroDossier;
-    }
-}
-
-// Gestion de l'upload de photos
-export function initPhotosUpload() {
-    const photosInput = document.getElementById('photosUpload');
-    const photosPreview = document.getElementById('photosPreview');
-
-    if (!photosInput || !photosPreview) return;
-
-    photosInput.addEventListener('change', (e) => {
-        const files = Array.from(e.target.files);
-
-        // Limiter à 5 photos
-        if (appState.uploadedPhotos.length + files.length > CONFIG.LIMITS.MAX_PHOTOS) {
-            Toast.warning(`Vous avez atteint la limite de ${CONFIG.LIMITS.MAX_PHOTOS} photos. Supprimez des photos existantes pour en ajouter de nouvelles.`, 'Limite atteinte');
-            return;
-        }
-
-        // Vérifier la taille et le format de chaque fichier
-        files.forEach(file => {
-            // Vérifier le format
-            if (!file.type.startsWith('image/')) {
-                Toast.error(`Le fichier "${file.name}" n'est pas une image valide.`, 'Format non supporté');
-                return;
+    // Render Functions
+    const renderTabs = (activeTabId) => {
+        els.tabs.forEach(tab => {
+            if (tab.id === activeTabId) {
+                tab.classList.add('active');
+                // Trigger reflow for animation if needed
+            } else {
+                tab.classList.remove('active');
             }
-
-            // Vérifier la taille (max 10MB)
-            if (file.size > CONFIG.LIMITS.MAX_PHOTO_SIZE) {
-                const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-                Toast.error(`Le fichier "${file.name}" est trop volumineux (${sizeMB} MB). Limite : 10 MB.`, 'Fichier trop lourd');
-                return;
-            }
-
-            // Ajouter la photo
-            appState.uploadedPhotos.push(file);
         });
 
-        // Réinitialiser l'input
-        photosInput.value = '';
+        els.navItems.forEach(item => {
+            if (item.dataset.tab === activeTabId) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    };
 
-        // Mettre à jour la prévisualisation
-        updatePhotosPreview();
-    });
-}
+    const renderAuth = (isAuthenticated) => {
+        if (isAuthenticated) {
+            els.authView.classList.add('hidden');
+            els.dashboardView.classList.remove('hidden');
+        } else {
+            els.authView.classList.remove('hidden');
+            els.dashboardView.classList.add('hidden');
+        }
+    };
 
-// Mettre à jour la prévisualisation des photos
-export function updatePhotosPreview() {
-    const photosPreview = document.getElementById('photosPreview');
-    if (!photosPreview) return;
+    const createRecordingCard = (section, isTestMode = false) => {
+        const card = document.createElement('div');
+        card.className = 'card glass-card recording-section';
+        card.dataset.id = section.id;
 
-    photosPreview.innerHTML = '';
+        const header = `
+            <div class="card-header">
+                <span class="icon">${section.icon}</span>
+                <h3>${section.title}</h3>
+            </div>
+            <p class="text-muted">${section.description}</p>
+        `;
 
-    appState.uploadedPhotos.forEach((file, index) => {
-        const reader = new FileReader();
+        const controls = `
+            <div class="recording-controls">
+                <div class="timer-display hidden" id="timer-${section.id}">00:00</div>
+                
+                <button class="btn btn-danger btn-record" data-action="record" data-section="${section.id}">
+                    <span>●</span> Record
+                </button>
+                
+                <button class="btn btn-warning btn-pause hidden" data-action="pause" data-section="${section.id}">
+                    <span>⏸</span> Pause
+                </button>
+                
+                <button class="btn btn-secondary btn-stop hidden" data-action="stop" data-section="${section.id}">
+                    <span>⏹</span> Stop
+                </button>
+                
+                <button class="btn btn-info btn-play hidden" data-action="play" data-section="${section.id}">
+                    <span>▶</span> Play Review
+                </button>
+                
+                <button class="btn btn-danger btn-delete hidden" data-action="delete" data-section="${section.id}">
+                    <span>🗑</span>
+                </button>
+            </div>
+            <div class="status-badge hidden" id="status-${section.id}"></div>
+        `;
 
-        reader.onload = (e) => {
-            const photoItem = document.createElement('div');
-            photoItem.className = 'photo-item';
+        card.innerHTML = header + controls;
+        return card;
+    };
 
-            photoItem.innerHTML = `
-                <img src="${e.target.result}" alt="Photo ${index + 1}">
-                <button class="photo-item-remove" data-index="${index}" title="Supprimer">×</button>
-                <div class="photo-item-info">${file.name}</div>
-            `;
+    const renderRecordingSections = () => {
+        // Normal Mode
+        els.recordingSections.innerHTML = '';
+        CONFIG.SECTIONS.forEach(section => {
+            els.recordingSections.appendChild(createRecordingCard(section));
+        });
 
-            photosPreview.appendChild(photoItem);
+        // Test Mode
+        els.testRecordingSections.innerHTML = '';
+        CONFIG.SECTIONS.forEach(section => {
+            els.testRecordingSections.appendChild(createRecordingCard(section, true));
+        });
+    };
 
-            // Ajouter l'événement de suppression
-            const removeBtn = photoItem.querySelector('.photo-item-remove');
-            removeBtn.addEventListener('click', () => {
-                appState.uploadedPhotos.splice(index, 1);
-                updatePhotosPreview();
-            });
-        };
+    const updateRecordingState = (sectionId, status) => {
+        // Find controls for this section (handle both normal and test mode instances if needed, 
+        // but usually we only update the active view's controls)
+        const sectionCards = document.querySelectorAll(`.recording-section[data-id="${sectionId}"]`);
 
-        reader.readAsDataURL(file);
-    });
-}
+        sectionCards.forEach(card => {
+            const btnRecord = card.querySelector('.btn-record');
+            const btnPause = card.querySelector('.btn-pause');
+            const btnStop = card.querySelector('.btn-stop');
+            const btnPlay = card.querySelector('.btn-play');
+            const btnDelete = card.querySelector('.btn-delete');
+            const timer = card.querySelector('.timer-display');
+            const statusBadge = card.querySelector(`#status-${sectionId}`);
 
-export function resetForm(mode) {
-    if (mode === 'normal') {
-        document.getElementById('username').value = '';
-        document.getElementById('accessCode').value = '';
-        document.getElementById('numeroDossier').value = '';
-        document.getElementById('nomPatient').value = '';
+            // Reset all
+            [btnRecord, btnPause, btnStop, btnPlay, btnDelete, timer].forEach(el => el.classList.add('hidden'));
+            card.classList.remove('recording-active');
 
-        // Réinitialiser les compteurs de caractères
-        const counters = [
-            { input: 'numeroDossier', counter: 'numeroDossierCounter' },
-            { input: 'nomPatient', counter: 'nomPatientCounter' }
+            switch (status) {
+                case 'idle':
+                    btnRecord.classList.remove('hidden');
+                    btnRecord.innerHTML = '<span>●</span> Record';
+                    break;
+                case 'recording':
+                    btnPause.classList.remove('hidden');
+                    btnStop.classList.remove('hidden');
+                    timer.classList.remove('hidden');
+                    card.classList.add('recording-active');
+                    break;
+                case 'paused':
+                    btnRecord.classList.remove('hidden');
+                    btnRecord.innerHTML = '<span>●</span> Resume';
+                    btnStop.classList.remove('hidden');
+                    timer.classList.remove('hidden');
+                    break;
+                case 'completed':
+                    btnPlay.classList.remove('hidden');
+                    btnDelete.classList.remove('hidden');
+                    statusBadge.classList.remove('hidden');
+                    statusBadge.textContent = '✓ Recorded';
+                    statusBadge.style.color = CONFIG.COLORS.SUCCESS;
+                    break;
+            }
+        });
+    };
+
+    const updateProgress = (count, total) => {
+        els.completedCount.textContent = count;
+        const isComplete = count > 0; // At least one section for demo purposes, or logic as per req
+
+        els.submitBtn.disabled = !isComplete;
+        els.testSubmitBtn.disabled = !isComplete;
+
+        // Update dots
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((dot, index) => {
+            if (index < count) {
+                dot.classList.add('active');
+                dot.style.background = CONFIG.COLORS.SUCCESS;
+            } else {
+                dot.classList.remove('active');
+                dot.style.background = '#CBD5E0';
+            }
+        });
+    };
+
+    const renderFAQ = () => {
+        const faqs = [
+            { q: "What is ClaimSnap?", a: "ClaimSnap is an AI-powered tool for instantly documenting insurance claims using voice and photos." },
+            { q: "Is my data secure?", a: "Yes, all data is encrypted in transit and at rest. We use bank-grade security protocols." },
+            { q: "How does Test Mode work?", a: "Test Mode allows you to try the app features without logging in. Data is sent to a public demo sheet." },
+            { q: "Can I edit recordings?", a: "You can re-record any section before submission. Once submitted, you'll need to contact support for changes." },
+            { q: "What devices are supported?", a: "ClaimSnap works on all modern smartphones, tablets, and desktop computers with a microphone." },
+            { q: "How much does it cost?", a: "We offer flexible pricing plans for independent adjusters and enterprise licenses for carriers." },
+            { q: "How accurate is the transcription?", a: "Our AI achieves over 98% accuracy, even with background noise and technical terminology." },
+            { q: "Where is data stored?", a: "Data is securely stored in our cloud infrastructure and synced to your designated Google Sheets." }
         ];
-        counters.forEach(({ counter }) => {
-            const counterEl = document.getElementById(counter);
-            if (counterEl) counterEl.textContent = '0/50';
-        });
 
-        const sections = CONFIG.SECTIONS.NORMAL;
-        sections.forEach(sectionId => {
-            const recorder = appState.audioRecorders.get(sectionId);
-            if (recorder && recorder.hasRecording()) {
-                recorder.resetRecording();
+        els.faqList.innerHTML = faqs.map(item => `
+            <div class="faq-item">
+                <div class="faq-question">
+                    ${item.q}
+                    <span class="toggle">+</span>
+                </div>
+                <div class="faq-answer">${item.a}</div>
+            </div>
+        `).join('');
+
+        // Add click listeners
+        document.querySelectorAll('.faq-question').forEach(q => {
+            q.addEventListener('click', () => {
+                const item = q.parentElement;
+                item.classList.toggle('open');
+                const toggle = q.querySelector('.toggle');
+                toggle.textContent = item.classList.contains('open') ? '-' : '+';
+            });
+        });
+    };
+
+    // Character Counter Logic
+    const initCharCounters = () => {
+        document.querySelectorAll('input[maxlength]').forEach(input => {
+            const counter = input.parentElement.querySelector('.char-counter');
+            if (counter) {
+                input.addEventListener('input', () => {
+                    const len = input.value.length;
+                    const max = input.getAttribute('maxlength');
+                    counter.textContent = `${len}/${max}`;
+
+                    if (len >= max) {
+                        counter.classList.add('limit');
+                        counter.classList.remove('warning');
+                    } else if (len >= max * 0.8) {
+                        counter.classList.add('warning');
+                        counter.classList.remove('limit');
+                    } else {
+                        counter.classList.remove('warning', 'limit');
+                    }
+                });
             }
         });
-    } else {
-        document.getElementById('numeroDossierTest').value = '';
-        document.getElementById('nomPatientTest').value = '';
+    };
 
-        // Réinitialiser les compteurs de caractères
-        const counters = [
-            { input: 'numeroDossierTest', counter: 'numeroDossierTestCounter' },
-            { input: 'nomPatientTest', counter: 'nomPatientTestCounter' }
-        ];
-        counters.forEach(({ counter }) => {
-            const counterEl = document.getElementById(counter);
-            if (counterEl) counterEl.textContent = '0/50';
-        });
-
-        const sections = CONFIG.SECTIONS.TEST;
-        sections.forEach(sectionId => {
-            const recorder = appState.audioRecorders.get(sectionId);
-            if (recorder && recorder.hasRecording()) {
-                recorder.resetRecording();
-            }
-        });
-    }
-
-    updateSectionCount();
-}
-
-export function resetDmiForm() {
-    document.getElementById('numeroDossierDMI').value = '';
-    document.getElementById('nomPatientDMI').value = '';
-    document.getElementById('texteLibre').value = '';
-    document.getElementById('texteLibreCounter').textContent = '0';
-    appState.uploadedPhotos = [];
-    updatePhotosPreview();
-    validateDMIMode();
-}
-
-export function initAudioRecorders() {
-    const recordingSections = document.querySelectorAll('.recording-section');
-
-    recordingSections.forEach(section => {
-        const sectionId = section.getAttribute('data-section');
-        const recorder = new AudioRecorder(section);
-        appState.audioRecorders.set(sectionId, recorder);
-    });
-}
-
-export function initializeMode() {
-    const activeTab = document.querySelector('.tab-btn.active');
-    if (activeTab) {
-        const tabId = activeTab.getAttribute('data-tab');
-        if (tabId === 'mode-normal') {
-            appState.currentMode = 'normal';
-        } else if (tabId === 'mode-test') {
-            appState.currentMode = 'test';
-        }
-    }
-    console.log('Mode initial:', appState.currentMode);
-}
+    return {
+        renderTabs,
+        renderAuth,
+        renderRecordingSections,
+        updateRecordingState,
+        updateProgress,
+        renderFAQ,
+        initCharCounters,
+        els // Expose elements for event binding
+    };
+})();
