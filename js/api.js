@@ -10,9 +10,18 @@ const API = (function () {
     const saveLocal = (data) => {
         if (!CONFIG.ENABLE_LOCAL_STORAGE) return;
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            const serialized = JSON.stringify(data);
+            // Check for quota (approximate)
+            if (serialized.length > 4500000) { // ~4.5MB safety limit
+                console.warn('LocalStorage quota nearing limit. Clearing old data or warning user.');
+                // In a real app, we might implement LRU or prompt user
+            }
+            localStorage.setItem(STORAGE_KEY, serialized);
         } catch (e) {
             console.error('Error saving to localStorage:', e);
+            if (e.name === 'QuotaExceededError') {
+                alert('Local storage is full. Please clear some space or submit pending claims.');
+            }
         }
     };
 
@@ -53,7 +62,11 @@ const API = (function () {
             return { success: true, data: result };
         } catch (error) {
             console.error('Submission error:', error);
-            return { success: false, error: error.message };
+            let errorMessage = error.message;
+            if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+                errorMessage = 'Network error. Please check your internet connection.';
+            }
+            return { success: false, error: errorMessage };
         }
     };
 

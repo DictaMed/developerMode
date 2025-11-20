@@ -22,6 +22,13 @@ const AudioRecorder = (function () {
             return true;
         } catch (error) {
             console.error('Error starting recording:', error);
+            if (error.name === 'NotAllowedError') {
+                alert('Microphone access denied. Please enable microphone permissions in your browser settings.');
+            } else if (error.name === 'NotFoundError') {
+                alert('No microphone found. Please ensure a microphone is connected.');
+            } else {
+                alert('Could not start recording: ' + error.message);
+            }
             return false;
         }
     };
@@ -35,7 +42,9 @@ const AudioRecorder = (function () {
                 const base64Audio = await blobToBase64(audioBlob);
 
                 // Stop all tracks to release microphone
-                stream.getTracks().forEach(track => track.stop());
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
 
                 mediaRecorder = null;
                 stream = null;
@@ -44,7 +53,12 @@ const AudioRecorder = (function () {
                 resolve(base64Audio);
             };
 
-            mediaRecorder.stop();
+            if (mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            } else {
+                // Already stopped
+                resolve(null);
+            }
         });
     };
 

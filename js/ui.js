@@ -59,42 +59,52 @@ const UI = (function () {
         card.className = 'card glass-card recording-section';
         card.dataset.id = section.id;
 
-        const header = `
-            <div class="card-header">
-                <span class="icon">${section.icon}</span>
-                <h3>${section.title}</h3>
-            </div>
-            <p class="text-muted">${section.description}</p>
+        const header = document.createElement('div');
+        header.className = 'card-header';
+        header.innerHTML = `
+            <span class="icon">${section.icon}</span>
+            <h3>${section.title}</h3>
         `;
 
-        const controls = `
-            <div class="recording-controls">
-                <div class="timer-display hidden" id="timer-${section.id}">00:00</div>
-                
-                <button class="btn btn-danger btn-record" data-action="record" data-section="${section.id}">
-                    <span>●</span> Record
-                </button>
-                
-                <button class="btn btn-warning btn-pause hidden" data-action="pause" data-section="${section.id}">
-                    <span>⏸</span> Pause
-                </button>
-                
-                <button class="btn btn-secondary btn-stop hidden" data-action="stop" data-section="${section.id}">
-                    <span>⏹</span> Stop
-                </button>
-                
-                <button class="btn btn-info btn-play hidden" data-action="play" data-section="${section.id}">
-                    <span>▶</span> Play Review
-                </button>
-                
-                <button class="btn btn-danger btn-delete hidden" data-action="delete" data-section="${section.id}">
-                    <span>🗑</span>
-                </button>
-            </div>
-            <div class="status-badge hidden" id="status-${section.id}"></div>
+        const desc = document.createElement('p');
+        desc.className = 'text-muted';
+        desc.textContent = section.description;
+
+        const controls = document.createElement('div');
+        controls.className = 'recording-controls';
+        controls.innerHTML = `
+            <div class="timer-display hidden" id="timer-${section.id}">00:00</div>
+            
+            <button class="btn btn-danger btn-record" data-action="record" data-section="${section.id}">
+                <span>●</span> Record
+            </button>
+            
+            <button class="btn btn-warning btn-pause hidden" data-action="pause" data-section="${section.id}">
+                <span>⏸</span> Pause
+            </button>
+            
+            <button class="btn btn-secondary btn-stop hidden" data-action="stop" data-section="${section.id}">
+                <span>⏹</span> Stop
+            </button>
+            
+            <button class="btn btn-info btn-play hidden" data-action="play" data-section="${section.id}">
+                <span>▶</span> Play Review
+            </button>
+            
+            <button class="btn btn-danger btn-delete hidden" data-action="delete" data-section="${section.id}">
+                <span>🗑</span>
+            </button>
         `;
 
-        card.innerHTML = header + controls;
+        const statusBadge = document.createElement('div');
+        statusBadge.className = 'status-badge hidden';
+        statusBadge.id = `status-${section.id}`;
+
+        card.appendChild(header);
+        card.appendChild(desc);
+        card.appendChild(controls);
+        card.appendChild(statusBadge);
+
         return card;
     };
 
