@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="fr">
 
 <head>
@@ -47,38 +46,49 @@
     <link rel="icon" type="image/svg+xml"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1'/><stop offset='100%25' style='stop-color:%231e40af;stop-opacity:1'/></linearGradient><linearGradient id='grad2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%2310b981;stop-opacity:1'/><stop offset='100%25' style='stop-color:%23059669;stop-opacity:1'/></linearGradient></defs><text x='10' y='75' font-size='70' font-weight='bold' font-family='Arial, sans-serif'><tspan fill='url(%23grad1)'>D</tspan><tspan fill='url(%23grad2)'>M</tspan></text></svg>">
 
+    <!-- 1️⃣ PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+</head>
 
-    <!-- Header -->
+<body>
+    <!-- 2️⃣ Skip Link pour accessibilité -->
+    <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+    <!-- 3️⃣ Header avec navigation intégrée (Remplacement complet) -->
     <header role="banner">
         <div class="container">
-            <div class="header-content">
+            <div class="header-nav-container">
+                <!-- Logo à gauche -->
                 <div class="logo-section">
                     <div class="logo">
                         <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
                     </div>
                     <p class="slogan">Où la voix rencontre les chiffres</p>
                 </div>
+
+                <!-- Navigation à droite -->
+                <nav class="tabs-nav" role="navigation" aria-label="Navigation principale">
+                    <div class="swipe-hint">👉 Faites glisser pour voir plus</div>
+                    <div class="tabs-container">
+                        <button class="tab-btn active" data-tab="mode-normal" aria-selected="true"><span
+                                class="tab-icon">📝</span>Mode Normal</button>
+                        <button class="tab-btn" data-tab="guide" aria-selected="false"><span
+                                class="tab-icon">📖</span>Guide</button>
+                        <button class="tab-btn" data-tab="contact" aria-selected="false"><span
+                                class="tab-icon">📧</span>Contact</button>
+                        <button class="tab-btn" data-tab="faq" aria-selected="false"><span
+                                class="tab-icon">❓</span>FAQ</button>
+                        <button class="tab-btn" data-tab="mode-test" aria-selected="false"><span
+                                class="tab-icon">🧪</span>Mode
+                            Test</button>
+                        <button class="tab-btn" data-tab="mode-dmi" aria-selected="false"><span
+                                class="tab-icon">📋</span>Mode
+                            DMI</button>
+                    </div>
+                </nav>
             </div>
         </div>
     </header>
-
-    <!-- Navigation par onglets -->
-    <nav class="tabs-nav" role="navigation" aria-label="Navigation principale">
-        <div class="swipe-hint">👉 Faites glisser pour voir plus</div>
-        <div class="tabs-container">
-            <button class="tab-btn active" data-tab="mode-normal" aria-selected="true"><span
-                    class="tab-icon">📝</span>Mode Normal</button>
-            <button class="tab-btn" data-tab="guide" aria-selected="false"><span
-                    class="tab-icon">📖</span>Guide</button>
-            <button class="tab-btn" data-tab="contact" aria-selected="false"><span
-                    class="tab-icon">📧</span>Contact</button>
-            <button class="tab-btn" data-tab="faq" aria-selected="false"><span class="tab-icon">❓</span>FAQ</button>
-            <button class="tab-btn" data-tab="mode-test" aria-selected="false"><span class="tab-icon">🧪</span>Mode
-                Test</button>
-            <button class="tab-btn" data-tab="mode-dmi" aria-selected="false"><span class="tab-icon">📋</span>Mode
-                DMI</button>
-        </div>
-    </nav>
 
     <!-- Contenu des onglets -->
     <main class="container" id="main-content" role="main">
@@ -686,6 +696,16 @@
 
         <!-- ONGLET 6: MODE DMI -->
         <section id="mode-dmi" class="tab-content">
+            <!-- 4️⃣ Badge En Développement -->
+            <div class="development-badge">
+                <span class="badge-icon">🚧</span>
+                <div class="badge-content">
+                    <h2>Mode en Développement</h2>
+                    <p>Cette fonctionnalité est actuellement en cours de développement et n'est pas encore disponible.
+                    </p>
+                </div>
+            </div>
+
             <h1>📋 Mode DMI</h1>
 
             <div class="card solution-card">
@@ -747,12 +767,14 @@
                 <div id="dmiPhotosPreview" class="photos-preview"></div>
             </div>
 
-            <!-- Envoi des données DMI -->
+            <!-- 5️⃣ Envoi des données DMI (Modifié pour DMI) -->
             <div class="submit-section">
-                <p class="info-box" style="display: inline-block; margin-bottom: 20px;">
-                    ⚠️ Le numéro de dossier est <strong>obligatoire</strong> pour envoyer les données.
+                <p class="info-box warning-box" style="display: inline-block; margin-bottom: 20px;">
+                    🚧 <strong>Mode en développement</strong> - L'envoi de données n'est pas encore disponible.
                 </p>
-                <button class="btn btn-submit" id="submitDMI" disabled>Envoyer les données DMI</button>
+                <button class="btn btn-submit" id="submitDMI" disabled title="Fonction en cours de développement">
+                    Envoyer les données DMI (Indisponible)
+                </button>
             </div>
         </section>
     </main>
@@ -767,6 +789,6 @@
     </footer>
 
     <script src="script.js" defer></script>
-    </body>
+</body>
 
 </html>
