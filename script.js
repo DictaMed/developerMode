@@ -58,80 +58,7 @@ function initializeMode() {
     console.log('Mode initial:', appState.currentMode);
 }
 
-// ===== SYSTÈME DE TOAST NOTIFICATIONS =====
-const Toast = {
-    container: null,
 
-    init() {
-        if (!this.container) {
-            this.container = document.createElement('div');
-            this.container.className = 'toast-container';
-            document.body.appendChild(this.container);
-        }
-    },
-
-    show(message, type = 'info', title = '', duration = 5000) {
-        this.init();
-
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-
-        const icons = {
-            success: '✓',
-            error: '✕',
-            warning: '⚠',
-            info: 'ℹ'
-        };
-
-        const defaultTitles = {
-            success: 'Succès',
-            error: 'Erreur',
-            warning: 'Attention',
-            info: 'Information'
-        };
-
-        const toastTitle = title || defaultTitles[type];
-
-        toast.innerHTML = `
-            <div class="toast-icon">${icons[type]}</div>
-            <div class="toast-content">
-                <div class="toast-title">${toastTitle}</div>
-                <div class="toast-message">${message}</div>
-            </div>
-            <button class="toast-close" aria-label="Fermer">×</button>
-        `;
-
-        this.container.appendChild(toast);
-
-        const closeBtn = toast.querySelector('.toast-close');
-        closeBtn.addEventListener('click', () => this.remove(toast));
-        toast.addEventListener('click', (e) => {
-            if (e.target !== closeBtn) {
-                this.remove(toast);
-            }
-        });
-
-        if (duration > 0) {
-            setTimeout(() => this.remove(toast), duration);
-        }
-
-        return toast;
-    },
-
-    remove(toast) {
-        toast.style.animation = 'fadeOut 0.3s ease forwards';
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-            }
-        }, 300);
-    },
-
-    success(message, title = '') { return this.show(message, 'success', title); },
-    error(message, title = '') { return this.show(message, 'error', title); },
-    warning(message, title = '') { return this.show(message, 'warning', title); },
-    info(message, title = '') { return this.show(message, 'info', title); }
-};
 
 // ===== LOADING OVERLAY =====
 const Loading = {
@@ -457,7 +384,7 @@ class AudioRecorder {
 
             this.mediaRecorder.addEventListener('error', (event) => {
                 console.error('Erreur MediaRecorder:', event.error);
-                Toast.error('Une erreur est survenue lors de l\'enregistrement.', 'Erreur');
+                console.error('Une erreur est survenue lors de l\'enregistrement.');
                 this.resetRecording();
             });
 
@@ -489,7 +416,7 @@ class AudioRecorder {
                 errorMessage = error.message;
             }
 
-            Toast.error(errorMessage, 'Accès au microphone');
+            alert(errorMessage);
             this.resetRecording();
         }
     }
@@ -601,7 +528,7 @@ class AudioRecorder {
                 `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
 
             if (seconds >= CONFIG.MAX_RECORDING_DURATION) {
-                Toast.info('Durée maximale atteinte. Enregistrement arrêté.', 'Limite atteinte', 5000);
+                console.info('Durée maximale atteinte. Enregistrement arrêté.');
                 this.stopRecording();
             }
         }, 1000);
@@ -781,7 +708,7 @@ async function sendData(mode) {
 
         const summary = showSendSummary(mode);
         console.log('📋', summary);
-        Toast.info('Vérification des données...', 'Préparation', 2000);
+
 
         const payload = await preparePayload(mode);
 
@@ -790,7 +717,7 @@ async function sendData(mode) {
                 ? 'Veuillez remplir tous les champs obligatoires et enregistrer au moins une section.'
                 : 'Veuillez remplir le numéro de dossier et le nom du patient, et enregistrer au moins une section.';
 
-            Toast.warning(errorMsg, 'Champs manquants');
+            alert(errorMsg);
             submitBtn.disabled = false;
             submitBtn.textContent = mode === 'normal' ? 'Envoyer les données' : 'Envoyer les données Test';
             return;
