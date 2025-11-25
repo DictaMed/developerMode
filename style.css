@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ===== DICTAMED - STYLESHEET =====
  * Application de dictée médicale intelligente
  * Design moderne et accessible
@@ -2623,7 +2623,7 @@ label {
     }
 }
 
-/* ===== BADGE EN D�VELOPPEMENT ===== */
+/* ===== BADGE EN D�VELOPPEMENT ===== */
 .development-badge {
     background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
     border: 2px solid #f59e0b;
@@ -2716,4 +2716,11 @@ label {
     .slogan {
         font-size: 0.75rem;
     }
+}
+
+/* Icônes des onglets */
+.tab-icon {
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 1.2em;
 }

@@ -61,7 +61,7 @@ function initializeMode() {
 // ===== SYSTÈME DE TOAST NOTIFICATIONS =====
 const Toast = {
     container: null,
-    
+
     init() {
         if (!this.container) {
             this.container = document.createElement('div');
@@ -69,29 +69,29 @@ const Toast = {
             document.body.appendChild(this.container);
         }
     },
-    
+
     show(message, type = 'info', title = '', duration = 5000) {
         this.init();
-        
+
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        
+
         const icons = {
             success: '✓',
             error: '✕',
             warning: '⚠',
             info: 'ℹ'
         };
-        
+
         const defaultTitles = {
             success: 'Succès',
             error: 'Erreur',
             warning: 'Attention',
             info: 'Information'
         };
-        
+
         const toastTitle = title || defaultTitles[type];
-        
+
         toast.innerHTML = `
             <div class="toast-icon">${icons[type]}</div>
             <div class="toast-content">
@@ -100,9 +100,9 @@ const Toast = {
             </div>
             <button class="toast-close" aria-label="Fermer">×</button>
         `;
-        
+
         this.container.appendChild(toast);
-        
+
         const closeBtn = toast.querySelector('.toast-close');
         closeBtn.addEventListener('click', () => this.remove(toast));
         toast.addEventListener('click', (e) => {
@@ -110,14 +110,14 @@ const Toast = {
                 this.remove(toast);
             }
         });
-        
+
         if (duration > 0) {
             setTimeout(() => this.remove(toast), duration);
         }
-        
+
         return toast;
     },
-    
+
     remove(toast) {
         toast.style.animation = 'fadeOut 0.3s ease forwards';
         setTimeout(() => {
@@ -126,7 +126,7 @@ const Toast = {
             }
         }, 300);
     },
-    
+
     success(message, title = '') { return this.show(message, 'success', title); },
     error(message, title = '') { return this.show(message, 'error', title); },
     warning(message, title = '') { return this.show(message, 'warning', title); },
@@ -136,7 +136,7 @@ const Toast = {
 // ===== LOADING OVERLAY =====
 const Loading = {
     overlay: null,
-    
+
     show(text = 'Chargement...') {
         if (!this.overlay) {
             this.overlay = document.createElement('div');
@@ -150,7 +150,7 @@ const Loading = {
             document.body.appendChild(this.overlay);
         }
     },
-    
+
     hide() {
         if (this.overlay) {
             this.overlay.style.animation = 'fadeOut 0.2s ease forwards';
@@ -168,7 +168,7 @@ const Loading = {
 const AutoSave = {
     indicator: null,
     debounceTimer: null,
-    
+
     init() {
         if (!this.indicator) {
             this.indicator = document.createElement('div');
@@ -176,11 +176,11 @@ const AutoSave = {
             this.indicator.innerHTML = '<div class="icon"></div><span class="text">Sauvegarde automatique</span>';
             document.body.appendChild(this.indicator);
         }
-        
+
         this.restore();
         this.startAutoSave();
     },
-    
+
     save() {
         try {
             const mode = appState.currentMode;
@@ -189,7 +189,7 @@ const AutoSave = {
                 timestamp: Date.now(),
                 forms: {}
             };
-            
+
             // Sauvegarder UNIQUEMENT l'authentification en mode normal
             if (mode === 'normal') {
                 data.forms = {
@@ -197,30 +197,30 @@ const AutoSave = {
                     accessCode: document.getElementById('accessCode')?.value || ''
                 };
             }
-            
+
             localStorage.setItem('dictamed_autosave', JSON.stringify(data));
             appState.lastSaveTime = Date.now();
-            
+
             this.showIndicator('saved');
         } catch (error) {
             console.error('Erreur lors de la sauvegarde:', error);
         }
     },
-    
+
     restore() {
         try {
             const saved = localStorage.getItem('dictamed_autosave');
             if (!saved) return;
-            
+
             const data = JSON.parse(saved);
-            
+
             // Vérifier si les données ne sont pas trop anciennes (24h)
             const dayInMs = 24 * 60 * 60 * 1000;
             if (Date.now() - data.timestamp > dayInMs) {
                 localStorage.removeItem('dictamed_autosave');
                 return;
             }
-            
+
             // Restaurer UNIQUEMENT l'authentification en mode normal
             if (data.mode === 'normal' && document.getElementById('username')) {
                 Object.entries(data.forms).forEach(([key, value]) => {
@@ -230,17 +230,17 @@ const AutoSave = {
                         element.dispatchEvent(new Event('input'));
                     }
                 });
-                
-                Toast.info('Identifiants restaurés', 'Reprise de session');
+
+                // Toast notification removed as per user request
             }
         } catch (error) {
             console.error('Erreur lors de la restauration:', error);
         }
     },
-    
+
     startAutoSave() {
         appState.autoSaveInterval = setInterval(() => this.save(), CONFIG.AUTOSAVE_INTERVAL);
-        
+
         const authInputs = document.querySelectorAll('#username, #accessCode');
         authInputs.forEach(input => {
             input.addEventListener('input', () => {
@@ -250,17 +250,17 @@ const AutoSave = {
             });
         });
     },
-    
+
     showIndicator(state) {
         if (!this.indicator) return;
-        
+
         this.indicator.className = 'autosave-indicator show ' + state;
-        
+
         setTimeout(() => {
             this.indicator.classList.remove('show');
         }, 2000);
     },
-    
+
     clear() {
         localStorage.removeItem('dictamed_autosave');
     }
@@ -289,7 +289,7 @@ function switchTab(tabId) {
     // Activer l'onglet et le contenu sélectionnés
     const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
     const tabContent = document.getElementById(tabId);
-    
+
     if (tabBtn) {
         tabBtn.classList.add('active');
         tabBtn.setAttribute('aria-selected', 'true');
@@ -304,7 +304,7 @@ function switchTab(tabId) {
     } else if (tabId === 'mode-test') {
         appState.currentMode = 'test';
     }
-    
+
     // Mettre à jour le compteur de sections pour le mode
     updateSectionCount();
 }
@@ -326,7 +326,7 @@ function initCharCounters() {
     inputs.forEach(({ id, counterId }) => {
         const input = document.getElementById(id);
         const counter = document.getElementById(counterId);
-        
+
         if (input && counter) {
             input.addEventListener('input', () => {
                 const length = input.value.length;
@@ -362,12 +362,12 @@ function initCharCounters() {
 function initOptionalSection() {
     const toggleBtn = document.getElementById('togglePartie4');
     const partie4 = document.querySelector('[data-section="partie4"]');
-    
+
     if (toggleBtn && partie4) {
         toggleBtn.addEventListener('click', () => {
             partie4.classList.toggle('hidden');
-            toggleBtn.textContent = partie4.classList.contains('hidden') 
-                ? 'Afficher Partie 4 (optionnelle)' 
+            toggleBtn.textContent = partie4.classList.contains('hidden')
+                ? 'Afficher Partie 4 (optionnelle)'
                 : 'Masquer Partie 4';
         });
     }
@@ -386,7 +386,7 @@ class AudioRecorder {
         this.pausedTime = 0;
         this.timerInterval = null;
         this.audioBlob = null;
-        
+
         this.initElements();
         this.initEventListeners();
     }
@@ -432,7 +432,7 @@ class AudioRecorder {
 
             const mimeType = this.getSupportedMimeType();
             console.log(`🎙️ Section ${this.sectionId} - Format audio: ${mimeType}`);
-            
+
             const options = mimeType ? { mimeType, audioBitsPerSecond: 128000 } : {};
             this.mediaRecorder = new MediaRecorder(this.stream, options);
             this.audioChunks = [];
@@ -448,10 +448,10 @@ class AudioRecorder {
                 const audioUrl = URL.createObjectURL(this.audioBlob);
                 this.audioPlayer.src = audioUrl;
                 this.audioPlayer.classList.remove('hidden');
-                
+
                 const sizeMB = (this.audioBlob.size / (1024 * 1024)).toFixed(2);
                 console.log(`✅ Section ${this.sectionId} - Enregistrement terminé: ${sizeMB} MB`);
-                
+
                 updateSectionCount();
             });
 
@@ -462,23 +462,23 @@ class AudioRecorder {
             });
 
             this.mediaRecorder.start(1000);
-            
+
             this.startTime = Date.now() - this.pausedTime;
             this.startTimer();
-            
+
             this.updateStatus('recording', '🔴 En cours');
             this.btnRecord.classList.add('hidden');
             this.btnRecord.disabled = false;
             this.btnPause.classList.remove('hidden');
             this.btnStop.classList.remove('hidden');
-            
+
             this.section.classList.add('is-recording');
 
         } catch (error) {
             console.error('Erreur d\'accès au microphone:', error);
-            
+
             let errorMessage = 'Erreur : Impossible d\'accéder au microphone.';
-            
+
             if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
                 errorMessage = '🎤 Accès refusé au microphone.\n\nVeuillez autoriser l\'accès dans les paramètres.';
             } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
@@ -488,7 +488,7 @@ class AudioRecorder {
             } else if (error.message) {
                 errorMessage = error.message;
             }
-            
+
             Toast.error(errorMessage, 'Accès au microphone');
             this.resetRecording();
         }
@@ -520,7 +520,7 @@ class AudioRecorder {
         if (this.mediaRecorder) {
             this.mediaRecorder.stop();
             this.stopTimer();
-            
+
             if (this.stream) {
                 this.stream.getTracks().forEach(track => track.stop());
                 this.stream = null;
@@ -535,10 +535,10 @@ class AudioRecorder {
             this.btnReplay.classList.remove('hidden');
             this.btnDelete.classList.remove('hidden');
             this.recordedBadge.classList.remove('hidden');
-            
+
             this.section.classList.remove('is-recording', 'is-paused');
             this.section.classList.add('recorded');
-            
+
             if ('vibrate' in navigator) {
                 navigator.vibrate(200);
             }
@@ -574,7 +574,7 @@ class AudioRecorder {
         this.audioPlayer.src = '';
         this.audioPlayer.classList.add('hidden');
         this.stopTimer();
-        
+
         this.updateStatus('ready', '⚪ Prêt');
         this.btnRecord.classList.remove('hidden');
         this.btnRecord.disabled = false;
@@ -585,9 +585,9 @@ class AudioRecorder {
         this.btnReplay.classList.add('hidden');
         this.btnDelete.classList.add('hidden');
         this.recordedBadge.classList.add('hidden');
-        
+
         this.section.classList.remove('recorded', 'is-recording', 'is-paused');
-        
+
         updateSectionCount();
     }
 
@@ -597,9 +597,9 @@ class AudioRecorder {
             const seconds = Math.floor(elapsed / 1000);
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = seconds % 60;
-            this.timer.textContent = 
+            this.timer.textContent =
                 `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-            
+
             if (seconds >= CONFIG.MAX_RECORDING_DURATION) {
                 Toast.info('Durée maximale atteinte. Enregistrement arrêté.', 'Limite atteinte', 5000);
                 this.stopRecording();
@@ -654,7 +654,7 @@ class AudioRecorder {
 
     getAudioFormat() {
         if (!this.audioBlob) return 'webm';
-        
+
         const type = this.audioBlob.type;
         if (type.includes('webm')) return 'webm';
         if (type.includes('ogg')) return 'ogg';
@@ -695,7 +695,7 @@ const audioRecorders = new Map();
 
 function initAudioRecorders() {
     const recordingSections = document.querySelectorAll('.recording-section');
-    
+
     recordingSections.forEach(section => {
         const sectionId = section.getAttribute('data-section');
         const recorder = new AudioRecorder(section);
@@ -707,9 +707,9 @@ function initAudioRecorders() {
 function updateSectionCount() {
     const mode = appState.currentMode;
     const sections = sectionsConfig[mode];
-    
+
     if (!sections) return;
-    
+
     let count = 0;
 
     sections.forEach(sectionId => {
@@ -726,10 +726,10 @@ function updateSectionCount() {
     }
 
     // Activer/désactiver le bouton d'envoi
-    const submitBtn = mode === 'normal' 
+    const submitBtn = mode === 'normal'
         ? document.getElementById('submitNormal')
         : document.getElementById('submitTest');
-    
+
     if (submitBtn) {
         submitBtn.disabled = count === 0;
     }
@@ -741,11 +741,11 @@ function showSendSummary(mode) {
     const numeroDossier = document.getElementById(isTest ? 'numeroDossierTest' : 'numeroDossier')?.value || '';
     const nomPatient = document.getElementById(isTest ? 'nomPatientTest' : 'nomPatient')?.value || '';
     const sections = isTest ? ['clinique', 'antecedents', 'biologie'] : ['partie1', 'partie2', 'partie3', 'partie4'];
-    
+
     let summary = `📋 Récapitulatif (${mode.toUpperCase()}):\n\n`;
     summary += `👤 Patient: ${numeroDossier} - ${nomPatient}\n`;
     summary += `📊 Sections enregistrées:\n`;
-    
+
     let sectionCount = 0;
     sections.forEach(sectionId => {
         const recorder = audioRecorders.get(sectionId);
@@ -756,26 +756,26 @@ function showSendSummary(mode) {
             summary += `   ✅ ${sectionId}: ${size}KB\n`;
         }
     });
-    
+
     if (sectionCount === 0) {
         summary += '   ❌ Aucune section enregistrée\n';
     }
-    
+
     return summary;
 }
 
 // ===== ENVOI DES DONNÉES =====
 async function sendData(mode) {
     try {
-        const submitBtn = mode === 'normal' 
+        const submitBtn = mode === 'normal'
             ? document.getElementById('submitNormal')
             : document.getElementById('submitTest');
-        
+
         if (!submitBtn) {
             console.error('Bouton d\'envoi non trouvé pour le mode:', mode);
             return;
         }
-        
+
         submitBtn.disabled = true;
         submitBtn.textContent = 'Envoi en cours...';
 
@@ -784,12 +784,12 @@ async function sendData(mode) {
         Toast.info('Vérification des données...', 'Préparation', 2000);
 
         const payload = await preparePayload(mode);
-        
+
         if (!payload) {
-            const errorMsg = mode === 'normal' 
+            const errorMsg = mode === 'normal'
                 ? 'Veuillez remplir tous les champs obligatoires et enregistrer au moins une section.'
                 : 'Veuillez remplir le numéro de dossier et le nom du patient, et enregistrer au moins une section.';
-            
+
             Toast.warning(errorMsg, 'Champs manquants');
             submitBtn.disabled = false;
             submitBtn.textContent = mode === 'normal' ? 'Envoyer les données' : 'Envoyer les données Test';
@@ -818,21 +818,21 @@ async function sendData(mode) {
                 },
                 body: JSON.stringify(payload)
             }),
-            new Promise((_, reject) => 
+            new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Timeout')), CONFIG.REQUEST_TIMEOUT)
             )
         ]);
 
         if (response.ok) {
             Toast.success('Vos données ont été envoyées avec succès !', 'Envoi réussi');
-            
+
             if (mode === 'test') {
                 const googleSheetCard = document.getElementById('googleSheetCard');
                 if (googleSheetCard) {
                     googleSheetCard.style.display = 'block';
                     googleSheetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
-                
+
                 setTimeout(() => {
                     Toast.info('Consultez le Google Sheet pour voir vos données.', 'Résultats disponibles', 8000);
                 }, 1000);
@@ -843,7 +843,7 @@ async function sendData(mode) {
             }
         } else {
             let errorMessage = `Erreur serveur (${response.status})`;
-            
+
             if (response.status === 413) {
                 errorMessage = 'Fichiers audio trop volumineux.';
             } else if (response.status === 400) {
@@ -851,13 +851,13 @@ async function sendData(mode) {
             } else if (response.status >= 500) {
                 errorMessage = 'Erreur serveur. Veuillez réessayer.';
             }
-            
+
             Toast.error(errorMessage, 'Erreur d\'envoi');
         }
 
     } catch (error) {
         console.error('Erreur lors de l\'envoi:', error);
-        
+
         if (error.name === 'TypeError' && error.message.includes('fetch')) {
             Toast.error('Impossible de contacter le serveur.', 'Erreur réseau');
         } else if (error.message.includes('Timeout')) {
@@ -866,10 +866,10 @@ async function sendData(mode) {
             Toast.error(`Erreur: ${error.message}`, 'Erreur technique');
         }
     } finally {
-        const submitBtn = mode === 'normal' 
+        const submitBtn = mode === 'normal'
             ? document.getElementById('submitNormal')
             : document.getElementById('submitTest');
-        
+
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.textContent = mode === 'normal' ? 'Envoyer les données' : 'Envoyer les données Test';
@@ -910,21 +910,21 @@ async function preparePayload(mode) {
             const sections = ['partie1', 'partie2', 'partie3', 'partie4'];
             let index = 0;
             let hasValidRecording = false;
-            
+
             for (const sectionId of sections) {
                 const recorder = audioRecorders.get(sectionId);
                 if (recorder && recorder.hasRecording()) {
                     try {
                         const validation = recorder.validateRecording();
                         if (!validation.valid) continue;
-                        
+
                         index++;
                         const base64 = await recorder.getBase64Audio();
                         const format = recorder.getAudioFormat();
                         const mimeType = recorder.getMimeType();
-                        
+
                         if (!base64 || base64.length === 0) continue;
-                        
+
                         payload.sections[sectionId] = {
                             audioBase64: base64,
                             fileName: `msgVocal${index}.${format}`,
@@ -933,7 +933,7 @@ async function preparePayload(mode) {
                             sectionName: sectionId,
                             fileSize: recorder.audioBlob.size
                         };
-                        
+
                         hasValidRecording = true;
                     } catch (sectionError) {
                         console.error(`Erreur section ${sectionId}:`, sectionError);
@@ -959,21 +959,21 @@ async function preparePayload(mode) {
             const sections = ['clinique', 'antecedents', 'biologie'];
             let index = 0;
             let hasValidRecording = false;
-            
+
             for (const sectionId of sections) {
                 const recorder = audioRecorders.get(sectionId);
                 if (recorder && recorder.hasRecording()) {
                     try {
                         const validation = recorder.validateRecording();
                         if (!validation.valid) continue;
-                        
+
                         index++;
                         const base64 = await recorder.getBase64Audio();
                         const format = recorder.getAudioFormat();
                         const mimeType = recorder.getMimeType();
-                        
+
                         if (!base64 || base64.length === 0) continue;
-                        
+
                         payload.sections[sectionId] = {
                             audioBase64: base64,
                             fileName: `msgVocal${index}.${format}`,
@@ -982,7 +982,7 @@ async function preparePayload(mode) {
                             sectionName: sectionId,
                             fileSize: recorder.audioBlob.size
                         };
-                        
+
                         hasValidRecording = true;
                     } catch (sectionError) {
                         console.error(`Erreur section ${sectionId}:`, sectionError);
@@ -996,7 +996,7 @@ async function preparePayload(mode) {
         if (Object.keys(payload.sections).length === 0) return null;
 
         return payload;
-        
+
     } catch (error) {
         console.error('Erreur préparation payload:', error);
         return null;
@@ -1009,12 +1009,12 @@ function resetForm(mode) {
         document.getElementById('accessCode').value = '';
         document.getElementById('numeroDossier').value = '';
         document.getElementById('nomPatient').value = '';
-        
+
         ['numeroDossierCounter', 'nomPatientCounter'].forEach(counterId => {
             const counter = document.getElementById(counterId);
             if (counter) counter.textContent = '0/50';
         });
-        
+
         ['partie1', 'partie2', 'partie3', 'partie4'].forEach(sectionId => {
             const recorder = audioRecorders.get(sectionId);
             if (recorder && recorder.hasRecording()) {
@@ -1024,12 +1024,12 @@ function resetForm(mode) {
     } else {
         document.getElementById('numeroDossierTest').value = '';
         document.getElementById('nomPatientTest').value = '';
-        
+
         ['numeroDossierTestCounter', 'nomPatientTestCounter'].forEach(counterId => {
             const counter = document.getElementById(counterId);
             if (counter) counter.textContent = '0/50';
         });
-        
+
         ['clinique', 'antecedents', 'biologie'].forEach(sectionId => {
             const recorder = audioRecorders.get(sectionId);
             if (recorder && recorder.hasRecording()) {
@@ -1037,7 +1037,7 @@ function resetForm(mode) {
             }
         });
     }
-    
+
     updateSectionCount();
 }
 
@@ -1047,7 +1047,7 @@ function resetForm(mode) {
 function validateDMIMode() {
     const numeroDossier = document.getElementById('numeroDossierDMI')?.value.trim();
     const submitBtn = document.getElementById('submitDMI');
-    
+
     if (submitBtn) {
         submitBtn.disabled = !numeroDossier;
     }
@@ -1057,32 +1057,32 @@ function initDMIPhotosUpload() {
     // CORRECTION: ID renommé de 'photosUpload' à 'dmiPhotosUpload'
     const photosInput = document.getElementById('dmiPhotosUpload');
     const photosPreview = document.getElementById('dmiPhotosPreview');
-    
+
     if (!photosInput || !photosPreview) return;
-    
+
     photosInput.addEventListener('change', (e) => {
         const files = Array.from(e.target.files);
-        
+
         if (dmiUploadedPhotos.length + files.length > CONFIG.MAX_PHOTOS) {
             Toast.warning(`Limite de ${CONFIG.MAX_PHOTOS} photos atteinte.`, 'Limite atteinte');
             return;
         }
-        
+
         files.forEach(file => {
             if (!file.type.startsWith('image/')) {
                 Toast.error(`"${file.name}" n'est pas une image valide.`, 'Format non supporté');
                 return;
             }
-            
+
             if (file.size > CONFIG.MAX_PHOTO_SIZE) {
                 const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
                 Toast.error(`"${file.name}" est trop volumineux (${sizeMB} MB).`, 'Fichier trop lourd');
                 return;
             }
-            
+
             dmiUploadedPhotos.push(file);
         });
-        
+
         photosInput.value = '';
         updateDMIPhotosPreview();
     });
@@ -1091,31 +1091,31 @@ function initDMIPhotosUpload() {
 function updateDMIPhotosPreview() {
     const photosPreview = document.getElementById('dmiPhotosPreview');
     if (!photosPreview) return;
-    
+
     photosPreview.innerHTML = '';
-    
+
     dmiUploadedPhotos.forEach((file, index) => {
         const reader = new FileReader();
-        
+
         reader.onload = (e) => {
             const photoItem = document.createElement('div');
             photoItem.className = 'photo-item';
-            
+
             photoItem.innerHTML = `
                 <img src="${e.target.result}" alt="Photo ${index + 1}">
                 <button class="photo-item-remove" data-index="${index}" title="Supprimer">×</button>
                 <div class="photo-item-info">${file.name}</div>
             `;
-            
+
             photosPreview.appendChild(photoItem);
-            
+
             const removeBtn = photoItem.querySelector('.photo-item-remove');
             removeBtn.addEventListener('click', () => {
                 dmiUploadedPhotos.splice(index, 1);
                 updateDMIPhotosPreview();
             });
         };
-        
+
         reader.readAsDataURL(file);
     });
 }
@@ -1199,14 +1199,14 @@ async function sendDmiData() {
                 },
                 body: JSON.stringify(payload)
             }),
-            new Promise((_, reject) => 
+            new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Timeout')), CONFIG.REQUEST_TIMEOUT)
             )
         ]);
 
         if (response.ok) {
             Toast.success('Données DMI envoyées avec succès !', 'Envoi réussi');
-            
+
             if (confirm('Voulez-vous réinitialiser le formulaire DMI ?')) {
                 resetDmiForm();
             }
@@ -1218,7 +1218,7 @@ async function sendDmiData() {
 
     } catch (error) {
         console.error('Erreur lors de l\'envoi DMI:', error);
-        
+
         if (error.message.includes('Timeout')) {
             Toast.error('La connexion a pris trop de temps.', 'Timeout');
         } else {
@@ -1239,7 +1239,7 @@ function resetDmiForm() {
     document.getElementById('dmiTexteLibreCounter').textContent = '0';
     document.getElementById('numeroDossierDMICounter').textContent = '0/50';
     document.getElementById('nomPatientDMICounter').textContent = '0/100';
-    
+
     dmiUploadedPhotos = [];
     updateDMIPhotosPreview();
     validateDMIMode();
@@ -1248,19 +1248,19 @@ function resetDmiForm() {
 // ===== GESTION DE LA SAUVEGARDE DES DONNÉES D'AUTHENTIFICATION =====
 const AuthManager = {
     STORAGE_KEY: 'dictamed_auth_credentials',
-    
+
     saveCredentials() {
         const username = document.getElementById('username')?.value.trim();
         const accessCode = document.getElementById('accessCode')?.value.trim();
         const rememberAuth = document.getElementById('rememberAuth')?.checked;
-        
+
         if (rememberAuth && username && accessCode) {
             const credentials = {
                 username: username,
                 accessCode: accessCode,
                 savedAt: new Date().toISOString()
             };
-            
+
             try {
                 localStorage.setItem(this.STORAGE_KEY, JSON.stringify(credentials));
                 Toast.success('Identifiants enregistrés.', 'Sauvegarde réussie');
@@ -1272,7 +1272,7 @@ const AuthManager = {
             this.clearCredentials();
         }
     },
-    
+
     restoreCredentials() {
         try {
             const saved = localStorage.getItem(this.STORAGE_KEY);
@@ -1281,7 +1281,7 @@ const AuthManager = {
                 const usernameInput = document.getElementById('username');
                 const accessCodeInput = document.getElementById('accessCode');
                 const rememberAuthCheckbox = document.getElementById('rememberAuth');
-                
+
                 if (usernameInput && accessCodeInput && rememberAuthCheckbox) {
                     usernameInput.value = credentials.username || '';
                     accessCodeInput.value = credentials.accessCode || '';
@@ -1292,7 +1292,7 @@ const AuthManager = {
             console.error('Erreur restauration:', e);
         }
     },
-    
+
     clearCredentials() {
         try {
             localStorage.removeItem(this.STORAGE_KEY);
@@ -1300,10 +1300,10 @@ const AuthManager = {
             console.error('Erreur effacement:', e);
         }
     },
-    
+
     init() {
         this.restoreCredentials();
-        
+
         const rememberAuthCheckbox = document.getElementById('rememberAuth');
         if (rememberAuthCheckbox) {
             rememberAuthCheckbox.addEventListener('change', () => {
@@ -1315,10 +1315,10 @@ const AuthManager = {
                 }
             });
         }
-        
+
         const usernameInput = document.getElementById('username');
         const accessCodeInput = document.getElementById('accessCode');
-        
+
         [usernameInput, accessCodeInput].forEach(input => {
             if (input) {
                 input.addEventListener('blur', () => {
@@ -1339,7 +1339,7 @@ function initSwipeHint() {
 
     if (tabsContainer && swipeHint) {
         let hasScrolled = false;
-        
+
         tabsContainer.addEventListener('scroll', () => {
             if (!hasScrolled) {
                 hasScrolled = true;
@@ -1349,7 +1349,7 @@ function initSwipeHint() {
                 }, 500);
             }
         });
-        
+
         // Masquer après 10 secondes si pas de scroll
         setTimeout(() => {
             if (!hasScrolled && swipeHint) {
@@ -1365,14 +1365,14 @@ function initSwipeHint() {
 // ===== INITIALISATION PRINCIPALE =====
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Initialisation de DictaMed...');
-    
+
     // Initialiser le mode selon l'onglet actif
     initializeMode();
-    
+
     // Initialiser les systèmes de base
     Toast.init();
     AutoSave.init();
-    
+
     // Initialiser les composants
     initTabs();
     initCharCounters();
@@ -1380,7 +1380,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initAudioRecorders();
     initDMIPhotosUpload(); // CORRECTION: Fonction renommée
     initSwipeHint();
-    
+
     updateSectionCount();
     validateDMIMode();
 
