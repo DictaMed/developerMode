@@ -1,22 +1,35 @@
-/* Variables CSS */
+/**
+ * ===== DICTAMED - STYLESHEET =====
+ * Application de dictée médicale intelligente
+ * Design moderne et accessible
+ */
+
+/* ===== VARIABLES CSS ===== */
 :root {
+    /* Couleurs primaires */
     --blue-primary: #2563eb;
     --blue-light: #3b82f6;
     --blue-dark: #1e40af;
     --green-secondary: #10b981;
     --green-light: #34d399;
     --green-dark: #059669;
+    
+    /* Couleurs de base */
     --white: #ffffff;
     --gray-dark: #1e293b;
     --gray-light: #f1f5f9;
     --gray-lighter: #f8fafc;
-    --red: #ef4444;
-    --orange: #f59e0b;
     --gray-medium: #64748b;
-    --cyan: #06b6d4;
+    
+    /* Couleurs d'état */
+    --red: #ef4444;
     --red-dark: #dc2626;
+    --orange: #f59e0b;
+    --cyan: #06b6d4;
     --green-bg: #d1fae5;
     --green-border: #10b981;
+    
+    /* Utilitaires */
     --transition: 0.3s ease;
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -44,6 +57,66 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
+}
+
+/* ===== ACCESSIBILITÉ ===== */
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* Skip link pour navigation clavier */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--blue-primary);
+    color: white;
+    padding: 8px;
+    text-decoration: none;
+    z-index: 10000;
+    border-radius: 0 0 4px 0;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* Focus visible moderne */
+*:focus {
+    outline: 2px solid var(--blue-primary);
+    outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+    outline: none;
+}
+
+*:focus-visible {
+    outline: 3px solid var(--blue-primary);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15);
+}
+
+/* Support des préférences utilisateur */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 /* Header */
