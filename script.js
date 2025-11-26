@@ -1,6 +1,32 @@
-// État global de l'application
+/**
+ * DictaMed - Application de dictée médicale intelligente
+ * Version améliorée avec correction du bug DMI
+ * 
+ * CORRECTION IMPORTANTE: 
+ * - Variable 'texteLibre' renommée en 'dmiTexteLibre' pour éviter les conflits
+ * - Variable 'photosUpload' renommée en 'dmiPhotosUpload'
+ * - Stockage des photos DMI séparé dans 'dmiUploadedPhotos'
+ */
+
+'use strict';
+
+// ===== CONFIGURATION =====
+const CONFIG = {
+    ENDPOINTS: {
+        NORMAL: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMedNormalMode',
+        TEST: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed',
+        DMI: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMedDMI' // Endpoint séparé pour DMI
+    },
+    MAX_RECORDING_DURATION: 120, // 2 minutes en secondes
+    MAX_PHOTO_SIZE: 10 * 1024 * 1024, // 10 MB
+    MAX_PHOTOS: 5,
+    AUTOSAVE_INTERVAL: 30000, // 30 secondes
+    REQUEST_TIMEOUT: 30000 // 30 secondes
+};
+
+// ===== ÉTAT GLOBAL =====
 const appState = {
-    currentMode: 'normal', // 'normal' ou 'test'
+    currentMode: 'normal',
     recordings: {
         normal: {},
         test: {}
@@ -9,7 +35,16 @@ const appState = {
     lastSaveTime: null
 };
 
-// Initialiser le mode actuel au démarrage selon l'onglet actif
+// Configuration des sections par mode
+const sectionsConfig = {
+    normal: ['partie1', 'partie2', 'partie3', 'partie4'],
+    test: ['clinique', 'antecedents', 'biologie']
+};
+
+// Stockage des photos DMI (variable séparée pour éviter les conflits)
+let dmiUploadedPhotos = [];
+
+// ===== INITIALISATION DU MODE =====
 function initializeMode() {
     const activeTab = document.querySelector('.tab-btn.active');
     if (activeTab) {
@@ -41,7 +76,6 @@ const Toast = {
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         
-        // Icônes selon le type
         const icons = {
             success: '✓',
             error: '✕',
@@ -49,7 +83,6 @@ const Toast = {
             info: 'ℹ'
         };
         
-        // Titres par défaut
         const defaultTitles = {
             success: 'Succès',
             error: 'Erreur',
@@ -70,7 +103,6 @@ const Toast = {
         
         this.container.appendChild(toast);
         
-        // Fermeture au clic
         const closeBtn = toast.querySelector('.toast-close');
         closeBtn.addEventListener('click', () => this.remove(toast));
         toast.addEventListener('click', (e) => {
@@ -79,7 +111,6 @@ const Toast = {
             }
         });
         
-        // Auto-suppression
         if (duration > 0) {
             setTimeout(() => this.remove(toast), duration);
         }
@@ -96,21 +127,10 @@ const Toast = {
         }, 300);
     },
     
-    success(message, title = '') {
-        return this.show(message, 'success', title);
-    },
-    
-    error(message, title = '') {
-        return this.show(message, 'error', title);
-    },
-    
-    warning(message, title = '') {
-        return this.show(message, 'warning', title);
-    },
-    
-    info(message, title = '') {
-        return this.show(message, 'info', title);
-    }
+    success(message, title = '') { return this.show(message, 'success', title); },
+    error(message, title = '') { return this.show(message, 'error', title); },
+    warning(message, title = '') { return this.show(message, 'warning', title); },
+    info(message, title = '') { return this.show(message, 'info', title); }
 };
 
 // ===== LOADING OVERLAY =====
@@ -150,7 +170,6 @@ const AutoSave = {
     debounceTimer: null,
     
     init() {
-        // Créer l'indicateur
         if (!this.indicator) {
             this.indicator = document.createElement('div');
             this.indicator.className = 'autosave-indicator';
@@ -158,10 +177,7 @@ const AutoSave = {
             document.body.appendChild(this.indicator);
         }
         
-        // Restaurer les données sauvegardées
         this.restore();
-        
-        // Démarrer l'auto-save
         this.startAutoSave();
     },
     
@@ -181,7 +197,6 @@ const AutoSave = {
                     accessCode: document.getElementById('accessCode')?.value || ''
                 };
             }
-            // Ne rien sauvegarder en mode test
             
             localStorage.setItem('dictamed_autosave', JSON.stringify(data));
             appState.lastSaveTime = Date.now();
@@ -224,20 +239,14 @@ const AutoSave = {
     },
     
     startAutoSave() {
-        // Sauvegarder toutes les 30 secondes
-        appState.autoSaveInterval = setInterval(() => {
-            this.save();
-        }, 30000);
+        appState.autoSaveInterval = setInterval(() => this.save(), CONFIG.AUTOSAVE_INTERVAL);
         
-        // Sauvegarder UNIQUEMENT pour les champs d'authentification
         const authInputs = document.querySelectorAll('#username, #accessCode');
         authInputs.forEach(input => {
             input.addEventListener('input', () => {
                 clearTimeout(this.debounceTimer);
                 this.showIndicator('saving');
-                this.debounceTimer = setTimeout(() => {
-                    this.save();
-                }, 2000);
+                this.debounceTimer = setTimeout(() => this.save(), 2000);
             });
         });
     },
@@ -257,19 +266,9 @@ const AutoSave = {
     }
 };
 
-// Configuration des sections par mode
-const sectionsConfig = {
-    normal: ['partie1', 'partie2', 'partie3', 'partie4'],
-    test: ['clinique', 'antecedents', 'biologie']
-};
-
-// Gestion des photos pour le mode mode DMI
-let uploadedPhotos = [];
-
 // ===== NAVIGATION PAR ONGLETS =====
 function initTabs() {
     const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
 
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -281,12 +280,23 @@ function initTabs() {
 
 function switchTab(tabId) {
     // Désactiver tous les onglets et contenus
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+    });
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
     // Activer l'onglet et le contenu sélectionnés
-    document.querySelector(`[data-tab="${tabId}"]`)?.classList.add('active');
-    document.getElementById(tabId)?.classList.add('active');
+    const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
+    const tabContent = document.getElementById(tabId);
+    
+    if (tabBtn) {
+        tabBtn.classList.add('active');
+        tabBtn.setAttribute('aria-selected', 'true');
+    }
+    if (tabContent) {
+        tabContent.classList.add('active');
+    }
 
     // Mettre à jour le mode actuel
     if (tabId === 'mode-normal') {
@@ -294,6 +304,9 @@ function switchTab(tabId) {
     } else if (tabId === 'mode-test') {
         appState.currentMode = 'test';
     }
+    
+    // Mettre à jour le compteur de sections pour le mode
+    updateSectionCount();
 }
 
 // Rendre la fonction switchTab globale pour les boutons CTA
@@ -320,7 +333,6 @@ function initCharCounters() {
                 const maxLength = input.maxLength;
                 counter.textContent = `${length}/${maxLength}`;
 
-                // Changer la couleur selon le niveau
                 counter.classList.remove('warning', 'danger');
                 if (length >= maxLength) {
                     counter.classList.add('danger');
@@ -336,12 +348,12 @@ function initCharCounters() {
         }
     });
 
-    // Compteur pour le textarea
-    const texteLibre = document.getElementById('texteLibre');
-    const texteLibreCounter = document.getElementById('texteLibreCounter');
-    if (texteLibre && texteLibreCounter) {
-        texteLibre.addEventListener('input', () => {
-            texteLibreCounter.textContent = texteLibre.value.length;
+    // Compteur pour le textarea DMI (variable renommée)
+    const dmiTexteLibre = document.getElementById('dmiTexteLibre');
+    const dmiTexteLibreCounter = document.getElementById('dmiTexteLibreCounter');
+    if (dmiTexteLibre && dmiTexteLibreCounter) {
+        dmiTexteLibre.addEventListener('input', () => {
+            dmiTexteLibreCounter.textContent = dmiTexteLibre.value.length;
         });
     }
 }
@@ -366,6 +378,7 @@ class AudioRecorder {
     constructor(sectionElement) {
         this.section = sectionElement;
         this.sectionId = sectionElement.getAttribute('data-section');
+        this.sectionMode = sectionElement.getAttribute('data-mode') || 'normal';
         this.mediaRecorder = null;
         this.audioChunks = [];
         this.stream = null;
@@ -400,94 +413,78 @@ class AudioRecorder {
 
     async startRecording() {
         try {
-            // Vérifier la compatibilité du navigateur
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                throw new Error('Votre navigateur ne supporte pas l\'enregistrement audio. Veuillez utiliser un navigateur moderne (Chrome, Firefox, Edge, Safari).');
+                throw new Error('Votre navigateur ne supporte pas l\'enregistrement audio.');
             }
 
-            // Afficher un indicateur de chargement
             this.updateStatus('loading', '⏳ Accès au microphone...');
             this.btnRecord.disabled = true;
 
-            // Demander l'accès au microphone avec paramètres optimisés
             this.stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     echoCancellation: true,
                     noiseSuppression: true,
                     autoGainControl: true,
                     sampleRate: 44100,
-                    channelCount: 1  // Mono pour réduire la taille
+                    channelCount: 1
                 }
             });
 
-            // Déterminer le format audio supporté
             const mimeType = this.getSupportedMimeType();
-            console.log('Format audio utilisé:', mimeType);
+            console.log(`🎙️ Section ${this.sectionId} - Format audio: ${mimeType}`);
             
-            // Créer le MediaRecorder avec options optimisées
             const options = mimeType ? { mimeType, audioBitsPerSecond: 128000 } : {};
             this.mediaRecorder = new MediaRecorder(this.stream, options);
             this.audioChunks = [];
 
-            // Événement pour collecter les données audio
             this.mediaRecorder.addEventListener('dataavailable', event => {
                 if (event.data.size > 0) {
                     this.audioChunks.push(event.data);
-                    console.log(`📦 Partie 1 - Chunk audio capturé: ${event.data.size} bytes, Total chunks: ${this.audioChunks.length}`);
                 }
             });
 
-            // Événement de fin d'enregistrement
             this.mediaRecorder.addEventListener('stop', () => {
                 this.audioBlob = new Blob(this.audioChunks, { type: mimeType || 'audio/webm' });
                 const audioUrl = URL.createObjectURL(this.audioBlob);
                 this.audioPlayer.src = audioUrl;
                 this.audioPlayer.classList.remove('hidden');
                 
-                // Afficher la taille du fichier
                 const sizeMB = (this.audioBlob.size / (1024 * 1024)).toFixed(2);
-                console.log(`✅ Partie 1 - Enregistrement terminé: ${sizeMB} MB, Chunks collectés: ${this.audioChunks.length}`);
+                console.log(`✅ Section ${this.sectionId} - Enregistrement terminé: ${sizeMB} MB`);
                 
-                // Mettre à jour le compteur de sections maintenant que audioBlob est défini
                 updateSectionCount();
             });
 
-            // Gestion des erreurs pendant l'enregistrement
             this.mediaRecorder.addEventListener('error', (event) => {
                 console.error('Erreur MediaRecorder:', event.error);
-                Toast.error('Une erreur est survenue lors de l\'enregistrement. Veuillez réessayer.', 'Erreur d\'enregistrement');
+                Toast.error('Une erreur est survenue lors de l\'enregistrement.', 'Erreur');
                 this.resetRecording();
             });
 
-            // Commencer l'enregistrement avec timeslice pour capturer les données toutes les secondes
             this.mediaRecorder.start(1000);
-            console.log(`🎙️ Partie 1 - Enregistrement démarré avec timeslice=1000ms`);
             
             this.startTime = Date.now() - this.pausedTime;
             this.startTimer();
             
-            // Mettre à jour l'UI
             this.updateStatus('recording', '🔴 En cours');
             this.btnRecord.classList.add('hidden');
             this.btnRecord.disabled = false;
             this.btnPause.classList.remove('hidden');
             this.btnStop.classList.remove('hidden');
             
-            // Ajouter un indicateur visuel d'enregistrement
             this.section.classList.add('is-recording');
 
         } catch (error) {
             console.error('Erreur d\'accès au microphone:', error);
             
-            // Messages d'erreur personnalisés
             let errorMessage = 'Erreur : Impossible d\'accéder au microphone.';
             
             if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-                errorMessage = '🎤 Accès refusé au microphone.\n\nVeuillez autoriser l\'accès au microphone dans les paramètres de votre navigateur et réessayer.';
+                errorMessage = '🎤 Accès refusé au microphone.\n\nVeuillez autoriser l\'accès dans les paramètres.';
             } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-                errorMessage = '🎤 Aucun microphone détecté.\n\nVeuillez connecter un microphone et réessayer.';
+                errorMessage = '🎤 Aucun microphone détecté.\n\nVeuillez connecter un microphone.';
             } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-                errorMessage = '🎤 Microphone déjà utilisé.\n\nFermez les autres applications utilisant le microphone et réessayer.';
+                errorMessage = '🎤 Microphone déjà utilisé.\n\nFermez les autres applications.';
             } else if (error.message) {
                 errorMessage = error.message;
             }
@@ -524,31 +521,24 @@ class AudioRecorder {
             this.mediaRecorder.stop();
             this.stopTimer();
             
-            // Arrêter tous les tracks du stream
             if (this.stream) {
                 this.stream.getTracks().forEach(track => track.stop());
                 this.stream = null;
             }
 
-            // Mettre à jour l'UI (correction: ne plus afficher "Enregistré" dans le status badge)
             this.updateStatus('ready', 'Prêt');
             this.btnRecord.classList.add('hidden');
             this.btnPause.classList.add('hidden');
-            this.btnPause.textContent = '⏸️ Pause'; // Reset le texte
+            this.btnPause.textContent = '⏸️ Pause';
             this.btnPause.classList.remove('btn-resume');
             this.btnStop.classList.add('hidden');
             this.btnReplay.classList.remove('hidden');
             this.btnDelete.classList.remove('hidden');
-            this.recordedBadge.classList.remove('hidden'); // Badge vert unique
+            this.recordedBadge.classList.remove('hidden');
             
-            // Marquer la section comme enregistrée
             this.section.classList.remove('is-recording', 'is-paused');
             this.section.classList.add('recorded');
             
-            // NOTE: updateSectionCount() est appelé dans l'événement 'stop' du MediaRecorder
-            // pour s'assurer que audioBlob est défini avant de compter
-            
-            // Feedback sonore optionnel (vibration sur mobile)
             if ('vibrate' in navigator) {
                 navigator.vibrate(200);
             }
@@ -562,24 +552,21 @@ class AudioRecorder {
     }
 
     deleteRecording() {
-        if (confirm('⚠️ Êtes-vous sûr de vouloir supprimer cet enregistrement ?\n\nCette action est irréversible.')) {
+        if (confirm('⚠️ Êtes-vous sûr de vouloir supprimer cet enregistrement ?')) {
             this.resetRecording();
         }
     }
 
     resetRecording() {
-        // Arrêter le stream si actif
         if (this.stream) {
             this.stream.getTracks().forEach(track => track.stop());
             this.stream = null;
         }
 
-        // Arrêter le MediaRecorder si actif
         if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
             this.mediaRecorder.stop();
         }
 
-        // Réinitialiser l'état
         this.audioBlob = null;
         this.audioChunks = [];
         this.pausedTime = 0;
@@ -588,7 +575,6 @@ class AudioRecorder {
         this.audioPlayer.classList.add('hidden');
         this.stopTimer();
         
-        // Réinitialiser l'UI
         this.updateStatus('ready', '⚪ Prêt');
         this.btnRecord.classList.remove('hidden');
         this.btnRecord.disabled = false;
@@ -600,16 +586,12 @@ class AudioRecorder {
         this.btnDelete.classList.add('hidden');
         this.recordedBadge.classList.add('hidden');
         
-        // Retirer tous les marquages
         this.section.classList.remove('recorded', 'is-recording', 'is-paused');
         
-        // Mettre à jour le compteur de sections
         updateSectionCount();
     }
 
     startTimer() {
-        const MAX_DURATION = 120; // 2 minutes = 120 secondes
-        
         this.timerInterval = setInterval(() => {
             const elapsed = Date.now() - this.startTime;
             const seconds = Math.floor(elapsed / 1000);
@@ -618,9 +600,8 @@ class AudioRecorder {
             this.timer.textContent = 
                 `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
             
-            // Arrêt automatique après 2 minutes
-            if (seconds >= MAX_DURATION) {
-                Toast.info('Durée maximale de 2 minutes atteinte. Enregistrement arrêté automatiquement.', 'Limite atteinte', 5000);
+            if (seconds >= CONFIG.MAX_RECORDING_DURATION) {
+                Toast.info('Durée maximale atteinte. Enregistrement arrêté.', 'Limite atteinte', 5000);
                 this.stopRecording();
             }
         }, 1000);
@@ -639,14 +620,13 @@ class AudioRecorder {
     }
 
     getSupportedMimeType() {
-        // Liste des formats par ordre de préférence (MP3 en priorité)
         const types = [
-            'audio/mpeg',              // MP3 - Priorité maximale
-            'audio/mp4',               // M4A/AAC
-            'audio/webm;codecs=opus',  // WebM Opus
-            'audio/webm',              // WebM
-            'audio/ogg;codecs=opus',   // Ogg Opus
-            'audio/wav'                // WAV (fallback)
+            'audio/mpeg',
+            'audio/mp4',
+            'audio/webm;codecs=opus',
+            'audio/webm',
+            'audio/ogg;codecs=opus',
+            'audio/wav'
         ];
 
         for (const type of types) {
@@ -655,7 +635,6 @@ class AudioRecorder {
             }
         }
 
-        // Fallback : laisser le navigateur choisir
         return '';
     }
 
@@ -682,42 +661,29 @@ class AudioRecorder {
         if (type.includes('mp4')) return 'mp4';
         if (type.includes('mpeg')) return 'mp3';
         if (type.includes('wav')) return 'wav';
-        return 'webm'; // Format par défaut moderne
+        return 'webm';
     }
 
     getMimeType() {
-        return this.audioBlob ? this.audioBlob.type : 'audio/mpeg';
+        return this.audioBlob ? this.audioBlob.type : 'audio/webm';
     }
 
     hasRecording() {
         return this.audioBlob !== null;
     }
 
-    // Nouvelle méthode pour valider l'enregistrement avant envoi
     validateRecording() {
         if (!this.audioBlob) {
             return { valid: false, error: 'Aucun enregistrement disponible' };
         }
 
-        // Vérifier la taille (max 50MB pour éviter les timeouts)
         const maxSize = 50 * 1024 * 1024; // 50MB
         if (this.audioBlob.size > maxSize) {
-            const sizeMB = (this.audioBlob.size / (1024 * 1024)).toFixed(1);
-            return { 
-                valid: false, 
-                error: `Enregistrement trop volumineux (${sizeMB}MB). Limite: 50MB.` 
-            };
+            return { valid: false, error: `Fichier trop volumineux` };
         }
 
-        // Vérifier que le blob n'est pas vide
         if (this.audioBlob.size === 0) {
             return { valid: false, error: 'Enregistrement vide' };
-        }
-
-        // Vérifier le format audio
-        const validTypes = ['audio/webm', 'audio/ogg', 'audio/mp4', 'audio/mpeg', 'audio/wav'];
-        if (!validTypes.includes(this.audioBlob.type)) {
-            console.warn(`Format audio non standard: ${this.audioBlob.type}, mais continuation...`);
         }
 
         return { valid: true, error: null };
@@ -741,6 +707,9 @@ function initAudioRecorders() {
 function updateSectionCount() {
     const mode = appState.currentMode;
     const sections = sectionsConfig[mode];
+    
+    if (!sections) return;
+    
     let count = 0;
 
     sections.forEach(sectionId => {
@@ -750,13 +719,11 @@ function updateSectionCount() {
         }
     });
 
-    // Mettre à jour l'affichage
-    const countElements = document.querySelectorAll('.sections-count');
-    countElements.forEach(el => {
-        if (el.closest(`#mode-${mode}`)) {
-            el.textContent = `${count} section(s) enregistrée(s)`;
-        }
-    });
+    // Mettre à jour l'affichage pour le mode courant
+    const countElement = document.querySelector(`.sections-count[data-mode="${mode}"]`);
+    if (countElement) {
+        countElement.textContent = `${count} section(s) enregistrée(s)`;
+    }
 
     // Activer/désactiver le bouton d'envoi
     const submitBtn = mode === 'normal' 
@@ -771,11 +738,11 @@ function updateSectionCount() {
 // ===== RÉCAPITULATIF AVANT ENVOI =====
 function showSendSummary(mode) {
     const isTest = mode === 'test';
-    const numeroDossier = document.getElementById(isTest ? 'numeroDossierTest' : 'numeroDossier').value;
-    const nomPatient = document.getElementById(isTest ? 'nomPatientTest' : 'nomPatient').value;
+    const numeroDossier = document.getElementById(isTest ? 'numeroDossierTest' : 'numeroDossier')?.value || '';
+    const nomPatient = document.getElementById(isTest ? 'nomPatientTest' : 'nomPatient')?.value || '';
     const sections = isTest ? ['clinique', 'antecedents', 'biologie'] : ['partie1', 'partie2', 'partie3', 'partie4'];
     
-    let summary = `📋 Récapitulatif avant envoi (${mode.toUpperCase()}):\n\n`;
+    let summary = `📋 Récapitulatif (${mode.toUpperCase()}):\n\n`;
     summary += `👤 Patient: ${numeroDossier} - ${nomPatient}\n`;
     summary += `📊 Sections enregistrées:\n`;
     
@@ -786,7 +753,7 @@ function showSendSummary(mode) {
             const validation = recorder.validateRecording();
             sectionCount++;
             const size = recorder.audioBlob ? (recorder.audioBlob.size / 1024).toFixed(1) : '0';
-            summary += `   ✅ ${sectionId}: ${size}KB ${validation.valid ? '' : `(⚠️ ${validation.error})`}\n`;
+            summary += `   ✅ ${sectionId}: ${size}KB\n`;
         }
     });
     
@@ -794,12 +761,10 @@ function showSendSummary(mode) {
         summary += '   ❌ Aucune section enregistrée\n';
     }
     
-    summary += `\n🎯 ${sectionCount} section(s) prête(s) pour l'envoi`;
-    
     return summary;
 }
 
-// ===== ENVOI DES DONNÉES AMÉLIORÉ =====
+// ===== ENVOI DES DONNÉES =====
 async function sendData(mode) {
     try {
         const submitBtn = mode === 'normal' 
@@ -814,17 +779,15 @@ async function sendData(mode) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Envoi en cours...';
 
-        // Afficher le récapitulatif avant envoi
         const summary = showSendSummary(mode);
         console.log('📋', summary);
-        Toast.info('Vérification des données avant envoi...', 'Préparation', 2000);
+        Toast.info('Vérification des données...', 'Préparation', 2000);
 
-        // Préparer le payload avec gestion d'erreur améliorée
         const payload = await preparePayload(mode);
         
         if (!payload) {
             const errorMsg = mode === 'normal' 
-                ? 'Veuillez remplir tous les champs obligatoires (identifiant, code d\'accès, numéro de dossier et nom du patient) et enregistrer au moins une section.'
+                ? 'Veuillez remplir tous les champs obligatoires et enregistrer au moins une section.'
                 : 'Veuillez remplir le numéro de dossier et le nom du patient, et enregistrer au moins une section.';
             
             Toast.warning(errorMsg, 'Champs manquants');
@@ -833,31 +796,19 @@ async function sendData(mode) {
             return;
         }
 
-        // Vérifier qu'il y a des sections enregistrées
         const hasRecordings = Object.keys(payload.sections || {}).length > 0;
         if (!hasRecordings) {
-            Toast.warning('Veuillez enregistrer au moins une section avant d\'envoyer.', 'Aucun enregistrement');
+            Toast.warning('Veuillez enregistrer au moins une section.', 'Aucun enregistrement');
             submitBtn.disabled = false;
             submitBtn.textContent = mode === 'normal' ? 'Envoyer les données' : 'Envoyer les données Test';
             return;
         }
 
-        // Déterminer l'endpoint
-        const endpoint = mode === 'normal'
-            ? 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMedNormalMode'
-            : 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed';
+        const endpoint = mode === 'normal' ? CONFIG.ENDPOINTS.NORMAL : CONFIG.ENDPOINTS.TEST;
 
-        console.log('🔄 Envoi des données vers:', endpoint);
-        console.log('📊 Payload:', {
-            mode: payload.mode,
-            patient: payload.NumeroDeDossier ? `${payload.NumeroDeDossier} - ${payload.NomDuPatient || 'N/A'}` : 'N/A',
-            sectionsCount: Object.keys(payload.sections || {}).length
-        });
-
-        // Mettre à jour le statut
+        console.log('🔄 Envoi vers:', endpoint);
         submitBtn.textContent = 'Transmission en cours...';
 
-        // Envoyer les données avec timeout et retry
         const response = await Promise.race([
             fetch(endpoint, {
                 method: 'POST',
@@ -868,57 +819,37 @@ async function sendData(mode) {
                 body: JSON.stringify(payload)
             }),
             new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Timeout après 30 secondes')), 30000)
+                setTimeout(() => reject(new Error('Timeout')), CONFIG.REQUEST_TIMEOUT)
             )
         ]);
 
-        console.log('📡 Réponse reçue:', {
-            status: response.status,
-            statusText: response.statusText,
-            ok: response.ok
-        });
-
         if (response.ok) {
-            Toast.success('Votre dossier a été envoyé et traité avec succès !', 'Envoi réussi');
+            Toast.success('Vos données ont été envoyées avec succès !', 'Envoi réussi');
             
             if (mode === 'test') {
-                // Mode Test : Afficher le Google Sheet et notification
                 const googleSheetCard = document.getElementById('googleSheetCard');
                 if (googleSheetCard) {
                     googleSheetCard.style.display = 'block';
-                    // Faire défiler vers la carte Google Sheet
                     googleSheetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
                 
-                // Notification pour consulter le Google Sheet
                 setTimeout(() => {
-                    Toast.info('Consultez le Google Sheet pour voir vos données transcrites en temps réel.', 'Résultats disponibles', 8000);
+                    Toast.info('Consultez le Google Sheet pour voir vos données.', 'Résultats disponibles', 8000);
                 }, 1000);
-                
-                // NE PAS réinitialiser en mode test pour permettre de voir les résultats
             } else {
-                // Mode Normal : Réinitialiser automatiquement
                 resetForm(mode);
                 AutoSave.clear();
-                Toast.success('Formulaire réinitialisé pour un nouveau patient.', 'Prêt', 3000);
+                Toast.success('Formulaire réinitialisé.', 'Prêt', 3000);
             }
         } else {
-            // Gérer les erreurs HTTP
-            let errorMessage = `Le serveur a renvoyé une erreur (${response.status})`;
+            let errorMessage = `Erreur serveur (${response.status})`;
             
-            try {
-                const errorText = await response.text();
-                console.error('Détails de l\'erreur:', errorText);
-                
-                if (response.status === 413) {
-                    errorMessage = 'Les fichiers audio sont trop volumineux. Veuillez enregistrer des sections plus courtes.';
-                } else if (response.status === 400) {
-                    errorMessage = 'Les données envoyées ne sont pas valides. Vérifiez vos enregistrements.';
-                } else if (response.status >= 500) {
-                    errorMessage = 'Erreur serveur. Veuillez réessayer dans quelques instants.';
-                }
-            } catch (e) {
-                console.error('Erreur lors de la lecture de la réponse:', e);
+            if (response.status === 413) {
+                errorMessage = 'Fichiers audio trop volumineux.';
+            } else if (response.status === 400) {
+                errorMessage = 'Données non valides.';
+            } else if (response.status >= 500) {
+                errorMessage = 'Erreur serveur. Veuillez réessayer.';
             }
             
             Toast.error(errorMessage, 'Erreur d\'envoi');
@@ -927,13 +858,12 @@ async function sendData(mode) {
     } catch (error) {
         console.error('Erreur lors de l\'envoi:', error);
         
-        // Messages d'erreur plus spécifiques
         if (error.name === 'TypeError' && error.message.includes('fetch')) {
-            Toast.error('Impossible de contacter le serveur. Vérifiez votre connexion Internet et réessayez.', 'Erreur réseau');
+            Toast.error('Impossible de contacter le serveur.', 'Erreur réseau');
         } else if (error.message.includes('Timeout')) {
-            Toast.error('La connexion a pris trop de temps. Vérifiez votre connexion et réessayez.', 'Timeout');
+            Toast.error('La connexion a pris trop de temps.', 'Timeout');
         } else {
-            Toast.error(`Une erreur inattendue s'est produite: ${error.message}`, 'Erreur technique');
+            Toast.error(`Erreur: ${error.message}`, 'Erreur technique');
         }
     } finally {
         const submitBtn = mode === 'normal' 
@@ -956,13 +886,11 @@ async function preparePayload(mode) {
 
     try {
         if (mode === 'normal') {
-            // Mode Normal - Validation complète
             const username = document.getElementById('username')?.value.trim();
             const accessCode = document.getElementById('accessCode')?.value.trim();
             const numeroDossier = document.getElementById('numeroDossier')?.value.trim();
             const nomPatient = document.getElementById('nomPatient')?.value.trim();
 
-            // Validation des champs obligatoires
             const missingFields = [];
             if (!username) missingFields.push('identifiant');
             if (!accessCode) missingFields.push('code d\'accès');
@@ -979,7 +907,6 @@ async function preparePayload(mode) {
             payload.NumeroDeDossier = numeroDossier;
             payload.NomDuPatient = nomPatient;
 
-            // Collecter les enregistrements avec gestion d'erreur
             const sections = ['partie1', 'partie2', 'partie3', 'partie4'];
             let index = 0;
             let hasValidRecording = false;
@@ -988,23 +915,15 @@ async function preparePayload(mode) {
                 const recorder = audioRecorders.get(sectionId);
                 if (recorder && recorder.hasRecording()) {
                     try {
-                        // Validation de l'enregistrement
                         const validation = recorder.validateRecording();
-                        if (!validation.valid) {
-                            console.warn(`Section ${sectionId} invalide:`, validation.error);
-                            continue;
-                        }
+                        if (!validation.valid) continue;
                         
                         index++;
                         const base64 = await recorder.getBase64Audio();
                         const format = recorder.getAudioFormat();
                         const mimeType = recorder.getMimeType();
                         
-                        // Vérifications de sécurité supplémentaires
-                        if (!base64 || base64.length === 0) {
-                            console.warn(`Enregistrement vide pour la section: ${sectionId}`);
-                            continue;
-                        }
+                        if (!base64 || base64.length === 0) continue;
                         
                         payload.sections[sectionId] = {
                             audioBase64: base64,
@@ -1016,21 +935,15 @@ async function preparePayload(mode) {
                         };
                         
                         hasValidRecording = true;
-                        console.log(`✅ Section ${sectionId} préparée (${format}, ${(base64.length/1024).toFixed(1)}KB, ${(recorder.audioBlob.size/1024).toFixed(1)}KB)`);
                     } catch (sectionError) {
-                        console.error(`Erreur lors de la préparation de la section ${sectionId}:`, sectionError);
-                        // Continuer avec les autres sections
+                        console.error(`Erreur section ${sectionId}:`, sectionError);
                     }
                 }
             }
 
-            if (!hasValidRecording) {
-                console.warn('Aucune section enregistrée trouvée');
-                return null;
-            }
+            if (!hasValidRecording) return null;
 
         } else {
-            // Mode Test - Validation simplifiée
             const numeroDossier = document.getElementById('numeroDossierTest')?.value.trim();
             const nomPatient = document.getElementById('nomPatientTest')?.value.trim();
 
@@ -1038,15 +951,11 @@ async function preparePayload(mode) {
             if (!numeroDossier) missingFields.push('numéro de dossier');
             if (!nomPatient) missingFields.push('nom du patient');
 
-            if (missingFields.length > 0) {
-                console.warn('Champs manquants en mode test:', missingFields);
-                return null;
-            }
+            if (missingFields.length > 0) return null;
 
             payload.NumeroDeDossier = numeroDossier;
             payload.NomDuPatient = nomPatient;
 
-            // Collecter les enregistrements avec gestion d'erreur
             const sections = ['clinique', 'antecedents', 'biologie'];
             let index = 0;
             let hasValidRecording = false;
@@ -1055,23 +964,15 @@ async function preparePayload(mode) {
                 const recorder = audioRecorders.get(sectionId);
                 if (recorder && recorder.hasRecording()) {
                     try {
-                        // Validation de l'enregistrement
                         const validation = recorder.validateRecording();
-                        if (!validation.valid) {
-                            console.warn(`Section ${sectionId} invalide:`, validation.error);
-                            continue;
-                        }
+                        if (!validation.valid) continue;
                         
                         index++;
                         const base64 = await recorder.getBase64Audio();
                         const format = recorder.getAudioFormat();
                         const mimeType = recorder.getMimeType();
                         
-                        // Vérifications de sécurité supplémentaires
-                        if (!base64 || base64.length === 0) {
-                            console.warn(`Enregistrement vide pour la section: ${sectionId}`);
-                            continue;
-                        }
+                        if (!base64 || base64.length === 0) continue;
                         
                         payload.sections[sectionId] = {
                             audioBase64: base64,
@@ -1083,36 +984,21 @@ async function preparePayload(mode) {
                         };
                         
                         hasValidRecording = true;
-                        console.log(`✅ Section ${sectionId} préparée (${format}, ${(base64.length/1024).toFixed(1)}KB, ${(recorder.audioBlob.size/1024).toFixed(1)}KB)`);
                     } catch (sectionError) {
-                        console.error(`Erreur lors de la préparation de la section ${sectionId}:`, sectionError);
-                        // Continuer avec les autres sections
+                        console.error(`Erreur section ${sectionId}:`, sectionError);
                     }
                 }
             }
 
-            if (!hasValidRecording) {
-                console.warn('Aucune section enregistrée trouvée en mode test');
-                return null;
-            }
+            if (!hasValidRecording) return null;
         }
 
-        // Validation finale du payload
-        if (Object.keys(payload.sections).length === 0) {
-            console.warn('Payload créé mais sans sections valides');
-            return null;
-        }
-
-        console.log(`🎯 Payload préparé pour le mode ${mode}:`, {
-            patient: `${payload.NumeroDeDossier} - ${payload.NomDuPatient}`,
-            sections: Object.keys(payload.sections).length,
-            timestamp: payload.recordedAt
-        });
+        if (Object.keys(payload.sections).length === 0) return null;
 
         return payload;
         
     } catch (error) {
-        console.error('Erreur lors de la préparation du payload:', error);
+        console.error('Erreur préparation payload:', error);
         return null;
     }
 }
@@ -1124,18 +1010,12 @@ function resetForm(mode) {
         document.getElementById('numeroDossier').value = '';
         document.getElementById('nomPatient').value = '';
         
-        // Réinitialiser les compteurs de caractères
-        const counters = [
-            { input: 'numeroDossier', counter: 'numeroDossierCounter' },
-            { input: 'nomPatient', counter: 'nomPatientCounter' }
-        ];
-        counters.forEach(({ counter }) => {
-            const counterEl = document.getElementById(counter);
-            if (counterEl) counterEl.textContent = '0/50';
+        ['numeroDossierCounter', 'nomPatientCounter'].forEach(counterId => {
+            const counter = document.getElementById(counterId);
+            if (counter) counter.textContent = '0/50';
         });
         
-        const sections = ['partie1', 'partie2', 'partie3', 'partie4'];
-        sections.forEach(sectionId => {
+        ['partie1', 'partie2', 'partie3', 'partie4'].forEach(sectionId => {
             const recorder = audioRecorders.get(sectionId);
             if (recorder && recorder.hasRecording()) {
                 recorder.resetRecording();
@@ -1145,18 +1025,12 @@ function resetForm(mode) {
         document.getElementById('numeroDossierTest').value = '';
         document.getElementById('nomPatientTest').value = '';
         
-        // Réinitialiser les compteurs de caractères
-        const counters = [
-            { input: 'numeroDossierTest', counter: 'numeroDossierTestCounter' },
-            { input: 'nomPatientTest', counter: 'nomPatientTestCounter' }
-        ];
-        counters.forEach(({ counter }) => {
-            const counterEl = document.getElementById(counter);
-            if (counterEl) counterEl.textContent = '0/50';
+        ['numeroDossierTestCounter', 'nomPatientTestCounter'].forEach(counterId => {
+            const counter = document.getElementById(counterId);
+            if (counter) counter.textContent = '0/50';
         });
         
-        const sections = ['clinique', 'antecedents', 'biologie'];
-        sections.forEach(sectionId => {
+        ['clinique', 'antecedents', 'biologie'].forEach(sectionId => {
             const recorder = audioRecorders.get(sectionId);
             if (recorder && recorder.hasRecording()) {
                 recorder.resetRecording();
@@ -1167,11 +1041,11 @@ function resetForm(mode) {
     updateSectionCount();
 }
 
-// ===== MODE SAISIE TEXTE =====
+// ===== MODE DMI - FONCTIONS SPÉCIFIQUES =====
+// CORRECTION: Variables renommées pour éviter les conflits avec le mode Test
 
-// Validation du mode DMI
 function validateDMIMode() {
-    const numeroDossier = document.getElementById('numeroDossierDMI').value.trim();
+    const numeroDossier = document.getElementById('numeroDossierDMI')?.value.trim();
     const submitBtn = document.getElementById('submitDMI');
     
     if (submitBtn) {
@@ -1179,57 +1053,48 @@ function validateDMIMode() {
     }
 }
 
-// Gestion de l'upload de photos
-function initPhotosUpload() {
-    const photosInput = document.getElementById('photosUpload');
-    const photosPreview = document.getElementById('photosPreview');
+function initDMIPhotosUpload() {
+    // CORRECTION: ID renommé de 'photosUpload' à 'dmiPhotosUpload'
+    const photosInput = document.getElementById('dmiPhotosUpload');
+    const photosPreview = document.getElementById('dmiPhotosPreview');
     
     if (!photosInput || !photosPreview) return;
     
     photosInput.addEventListener('change', (e) => {
         const files = Array.from(e.target.files);
         
-        // Limiter à 5 photos
-        if (uploadedPhotos.length + files.length > 5) {
-            Toast.warning(`Vous avez atteint la limite de 5 photos. Supprimez des photos existantes pour en ajouter de nouvelles.`, 'Limite atteinte');
+        if (dmiUploadedPhotos.length + files.length > CONFIG.MAX_PHOTOS) {
+            Toast.warning(`Limite de ${CONFIG.MAX_PHOTOS} photos atteinte.`, 'Limite atteinte');
             return;
         }
         
-        // Vérifier la taille et le format de chaque fichier
         files.forEach(file => {
-            // Vérifier le format
             if (!file.type.startsWith('image/')) {
-                Toast.error(`Le fichier "${file.name}" n'est pas une image valide.`, 'Format non supporté');
+                Toast.error(`"${file.name}" n'est pas une image valide.`, 'Format non supporté');
                 return;
             }
             
-            // Vérifier la taille (max 10MB)
-            if (file.size > 10 * 1024 * 1024) {
+            if (file.size > CONFIG.MAX_PHOTO_SIZE) {
                 const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-                Toast.error(`Le fichier "${file.name}" est trop volumineux (${sizeMB} MB). Limite : 10 MB.`, 'Fichier trop lourd');
+                Toast.error(`"${file.name}" est trop volumineux (${sizeMB} MB).`, 'Fichier trop lourd');
                 return;
             }
             
-            // Ajouter la photo
-            uploadedPhotos.push(file);
+            dmiUploadedPhotos.push(file);
         });
         
-        // Réinitialiser l'input
         photosInput.value = '';
-        
-        // Mettre à jour la prévisualisation
-        updatePhotosPreview();
+        updateDMIPhotosPreview();
     });
 }
 
-// Mettre à jour la prévisualisation des photos
-function updatePhotosPreview() {
-    const photosPreview = document.getElementById('photosPreview');
+function updateDMIPhotosPreview() {
+    const photosPreview = document.getElementById('dmiPhotosPreview');
     if (!photosPreview) return;
     
     photosPreview.innerHTML = '';
     
-    uploadedPhotos.forEach((file, index) => {
+    dmiUploadedPhotos.forEach((file, index) => {
         const reader = new FileReader();
         
         reader.onload = (e) => {
@@ -1244,89 +1109,15 @@ function updatePhotosPreview() {
             
             photosPreview.appendChild(photoItem);
             
-            // Ajouter l'événement de suppression
             const removeBtn = photoItem.querySelector('.photo-item-remove');
             removeBtn.addEventListener('click', () => {
-                uploadedPhotos.splice(index, 1);
-                updatePhotosPreview();
+                dmiUploadedPhotos.splice(index, 1);
+                updateDMIPhotosPreview();
             });
         };
         
         reader.readAsDataURL(file);
     });
-}
-
-// Envoi des données du mode DMI
-async function sendDmiData() {
-    try {
-        const submitBtn = document.getElementById('submitDMI');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Envoi en cours...';
-
-        // Préparer le payload
-        const numeroDossier = document.getElementById('numeroDossierDMI').value.trim();
-        const nomPatient = document.getElementById('nomPatientDMI').value.trim();
-        const texteLibre = document.getElementById('texteLibre').value.trim();
-
-        if (!numeroDossier) {
-            Toast.warning('Le numéro de dossier est obligatoire pour envoyer les données.', 'Champ requis');
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Envoyer les données DMI';
-            return;
-        }
-
-        const payload = {
-            mode: 'dmi',
-            recordedAt: new Date().toISOString(),
-            NumeroDeDossier: numeroDossier,
-            NomDuPatient: nomPatient,
-            texte: texteLibre,
-            photos: []
-        };
-
-        // Convertir les photos en Base64
-        for (const file of uploadedPhotos) {
-            const base64 = await fileToBase64(file);
-            payload.photos.push({
-                fileName: file.name,
-                mimeType: file.type,
-                size: file.size,
-                base64: base64
-            });
-        }
-
-        // Envoyer au webhook du mode test (same as mode test)
-        const endpoint = 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed';
-
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-            Toast.success('Vos données DMI ont été envoyées avec succès !', 'Envoi réussi');
-            
-            // Réinitialiser le formulaire si souhaité
-            if (confirm('Voulez-vous réinitialiser le formulaire DMI ?')) {
-                resetDmiForm();
-            }
-        } else {
-            const errorText = await response.text();
-            Toast.error(`Le serveur a renvoyé une erreur (${response.status}). Veuillez réessayer ou contactez le support.`, 'Erreur d\'envoi');
-            console.error('Détails:', errorText);
-        }
-
-    } catch (error) {
-        console.error('Erreur lors de l\'envoi:', error);
-        Toast.error('Impossible de contacter le serveur. Vérifiez votre connexion Internet.', 'Erreur réseau');
-    } finally {
-        const submitBtn = document.getElementById('submitDMI');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Envoyer les données DMI';
-    }
 }
 
 // Convertir un fichier en Base64
@@ -1342,20 +1133,238 @@ function fileToBase64(file) {
     });
 }
 
+// Envoi des données DMI
+async function sendDmiData() {
+    try {
+        const submitBtn = document.getElementById('submitDMI');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Envoi en cours...';
+
+        // CORRECTION: Variables renommées
+        const numeroDossier = document.getElementById('numeroDossierDMI')?.value.trim();
+        const nomPatient = document.getElementById('nomPatientDMI')?.value.trim();
+        const dmiTexte = document.getElementById('dmiTexteLibre')?.value.trim(); // Variable renommée
+
+        if (!numeroDossier) {
+            Toast.warning('Le numéro de dossier est obligatoire.', 'Champ requis');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Envoyer les données DMI';
+            return;
+        }
+
+        // Vérifier qu'il y a du contenu à envoyer
+        if (!dmiTexte && dmiUploadedPhotos.length === 0) {
+            Toast.warning('Veuillez saisir du texte ou ajouter des photos.', 'Contenu requis');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Envoyer les données DMI';
+            return;
+        }
+
+        const payload = {
+            mode: 'dmi',
+            recordedAt: new Date().toISOString(),
+            NumeroDeDossier: numeroDossier,
+            NomDuPatient: nomPatient,
+            dmiTexte: dmiTexte, // CORRECTION: Variable renommée de 'texte' à 'dmiTexte'
+            photos: []
+        };
+
+        // Convertir les photos en Base64
+        for (const file of dmiUploadedPhotos) {
+            const base64 = await fileToBase64(file);
+            payload.photos.push({
+                fileName: file.name,
+                mimeType: file.type,
+                size: file.size,
+                base64: base64
+            });
+        }
+
+        console.log('🔄 Envoi DMI vers:', CONFIG.ENDPOINTS.DMI);
+        console.log('📊 Payload DMI:', {
+            mode: payload.mode,
+            patient: `${payload.NumeroDeDossier} - ${payload.NomDuPatient || 'N/A'}`,
+            texteLength: payload.dmiTexte?.length || 0,
+            photosCount: payload.photos.length
+        });
+
+        submitBtn.textContent = 'Transmission en cours...';
+
+        const response = await Promise.race([
+            fetch(CONFIG.ENDPOINTS.DMI, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            }),
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout')), CONFIG.REQUEST_TIMEOUT)
+            )
+        ]);
+
+        if (response.ok) {
+            Toast.success('Données DMI envoyées avec succès !', 'Envoi réussi');
+            
+            if (confirm('Voulez-vous réinitialiser le formulaire DMI ?')) {
+                resetDmiForm();
+            }
+        } else {
+            const errorText = await response.text();
+            Toast.error(`Erreur serveur (${response.status}). Veuillez réessayer.`, 'Erreur d\'envoi');
+            console.error('Détails:', errorText);
+        }
+
+    } catch (error) {
+        console.error('Erreur lors de l\'envoi DMI:', error);
+        
+        if (error.message.includes('Timeout')) {
+            Toast.error('La connexion a pris trop de temps.', 'Timeout');
+        } else {
+            Toast.error('Impossible de contacter le serveur.', 'Erreur réseau');
+        }
+    } finally {
+        const submitBtn = document.getElementById('submitDMI');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Envoyer les données DMI';
+    }
+}
+
 // Réinitialiser le formulaire mode DMI
 function resetDmiForm() {
     document.getElementById('numeroDossierDMI').value = '';
     document.getElementById('nomPatientDMI').value = '';
-    document.getElementById('texteLibre').value = '';
-    document.getElementById('texteLibreCounter').textContent = '0';
-    uploadedPhotos = [];
-    updatePhotosPreview();
+    document.getElementById('dmiTexteLibre').value = ''; // Variable renommée
+    document.getElementById('dmiTexteLibreCounter').textContent = '0';
+    document.getElementById('numeroDossierDMICounter').textContent = '0/50';
+    document.getElementById('nomPatientDMICounter').textContent = '0/100';
+    
+    dmiUploadedPhotos = [];
+    updateDMIPhotosPreview();
     validateDMIMode();
 }
 
-// ===== INITIALISATION =====
+// ===== GESTION DE LA SAUVEGARDE DES DONNÉES D'AUTHENTIFICATION =====
+const AuthManager = {
+    STORAGE_KEY: 'dictamed_auth_credentials',
+    
+    saveCredentials() {
+        const username = document.getElementById('username')?.value.trim();
+        const accessCode = document.getElementById('accessCode')?.value.trim();
+        const rememberAuth = document.getElementById('rememberAuth')?.checked;
+        
+        if (rememberAuth && username && accessCode) {
+            const credentials = {
+                username: username,
+                accessCode: accessCode,
+                savedAt: new Date().toISOString()
+            };
+            
+            try {
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(credentials));
+                Toast.success('Identifiants enregistrés.', 'Sauvegarde réussie');
+            } catch (e) {
+                console.error('Erreur sauvegarde:', e);
+                Toast.error('Impossible de sauvegarder.', 'Erreur');
+            }
+        } else if (!rememberAuth) {
+            this.clearCredentials();
+        }
+    },
+    
+    restoreCredentials() {
+        try {
+            const saved = localStorage.getItem(this.STORAGE_KEY);
+            if (saved) {
+                const credentials = JSON.parse(saved);
+                const usernameInput = document.getElementById('username');
+                const accessCodeInput = document.getElementById('accessCode');
+                const rememberAuthCheckbox = document.getElementById('rememberAuth');
+                
+                if (usernameInput && accessCodeInput && rememberAuthCheckbox) {
+                    usernameInput.value = credentials.username || '';
+                    accessCodeInput.value = credentials.accessCode || '';
+                    rememberAuthCheckbox.checked = true;
+                }
+            }
+        } catch (e) {
+            console.error('Erreur restauration:', e);
+        }
+    },
+    
+    clearCredentials() {
+        try {
+            localStorage.removeItem(this.STORAGE_KEY);
+        } catch (e) {
+            console.error('Erreur effacement:', e);
+        }
+    },
+    
+    init() {
+        this.restoreCredentials();
+        
+        const rememberAuthCheckbox = document.getElementById('rememberAuth');
+        if (rememberAuthCheckbox) {
+            rememberAuthCheckbox.addEventListener('change', () => {
+                if (rememberAuthCheckbox.checked) {
+                    this.saveCredentials();
+                } else {
+                    this.clearCredentials();
+                    Toast.info('Identifiants ne seront plus enregistrés.', 'Information');
+                }
+            });
+        }
+        
+        const usernameInput = document.getElementById('username');
+        const accessCodeInput = document.getElementById('accessCode');
+        
+        [usernameInput, accessCodeInput].forEach(input => {
+            if (input) {
+                input.addEventListener('blur', () => {
+                    const rememberAuth = document.getElementById('rememberAuth')?.checked;
+                    if (rememberAuth) {
+                        this.saveCredentials();
+                    }
+                });
+            }
+        });
+    }
+};
+
+// ===== MASQUER LE MESSAGE DE SWIPE APRÈS INTERACTION =====
+function initSwipeHint() {
+    const tabsContainer = document.querySelector('.tabs-container');
+    const swipeHint = document.querySelector('.swipe-hint');
+
+    if (tabsContainer && swipeHint) {
+        let hasScrolled = false;
+        
+        tabsContainer.addEventListener('scroll', () => {
+            if (!hasScrolled) {
+                hasScrolled = true;
+                swipeHint.style.animation = 'fadeOut 0.5s ease forwards';
+                setTimeout(() => {
+                    swipeHint.style.display = 'none';
+                }, 500);
+            }
+        });
+        
+        // Masquer après 10 secondes si pas de scroll
+        setTimeout(() => {
+            if (!hasScrolled && swipeHint) {
+                swipeHint.style.animation = 'fadeOut 0.5s ease forwards';
+                setTimeout(() => {
+                    swipeHint.style.display = 'none';
+                }, 500);
+            }
+        }, 10000);
+    }
+}
+
+// ===== INITIALISATION PRINCIPALE =====
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Initialisation de DictaMed...');
+    console.log('🚀 Initialisation de DictaMed...');
     
     // Initialiser le mode selon l'onglet actif
     initializeMode();
@@ -1369,7 +1378,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initCharCounters();
     initOptionalSection();
     initAudioRecorders();
-    initPhotosUpload();
+    initDMIPhotosUpload(); // CORRECTION: Fonction renommée
+    initSwipeHint();
+    
     updateSectionCount();
     validateDMIMode();
 
@@ -1399,144 +1410,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Message de bienvenue supprimé à la demande de l'utilisateur
+    // Initialiser AuthManager
+    AuthManager.init();
 
     console.log('✅ DictaMed initialisé avec succès!');
 });
-
-
-// ===== GESTION DE LA SAUVEGARDE DES DONNÉES D'AUTHENTIFICATION =====
-const AuthManager = {
-    STORAGE_KEY: 'dictamed_auth_credentials',
-    
-    // Sauvegarder les identifiants
-    saveCredentials() {
-        const username = document.getElementById('username')?.value.trim();
-        const accessCode = document.getElementById('accessCode')?.value.trim();
-        const rememberAuth = document.getElementById('rememberAuth')?.checked;
-        
-        if (rememberAuth && username && accessCode) {
-            const credentials = {
-                username: username,
-                accessCode: accessCode,
-                savedAt: new Date().toISOString()
-            };
-            
-            try {
-                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(credentials));
-                Toast.success('Vos informations d\'authentification ont été enregistrées.', 'Sauvegarde réussie');
-                console.log('✅ Identifiants sauvegardés');
-            } catch (e) {
-                console.error('Erreur lors de la sauvegarde:', e);
-                Toast.error('Impossible de sauvegarder vos identifiants.', 'Erreur');
-            }
-        } else if (!rememberAuth) {
-            // Si la case est décochée, supprimer les identifiants sauvegardés
-            this.clearCredentials();
-        }
-    },
-    
-    // Restaurer les identifiants au chargement
-    restoreCredentials() {
-        try {
-            const saved = localStorage.getItem(this.STORAGE_KEY);
-            if (saved) {
-                const credentials = JSON.parse(saved);
-                const usernameInput = document.getElementById('username');
-                const accessCodeInput = document.getElementById('accessCode');
-                const rememberAuthCheckbox = document.getElementById('rememberAuth');
-                
-                if (usernameInput && accessCodeInput && rememberAuthCheckbox) {
-                    usernameInput.value = credentials.username || '';
-                    accessCodeInput.value = credentials.accessCode || '';
-                    rememberAuthCheckbox.checked = true;
-                    
-                    console.log('✅ Identifiants restaurés');
-                    // Notification de bienvenue supprimée
-                }
-            }
-        } catch (e) {
-            console.error('Erreur lors de la restauration:', e);
-        }
-    },
-    
-    // Effacer les identifiants
-    clearCredentials() {
-        try {
-            localStorage.removeItem(this.STORAGE_KEY);
-            console.log('🗑️ Identifiants effacés');
-        } catch (e) {
-            console.error('Erreur lors de l\'effacement:', e);
-        }
-    },
-    
-    // Initialiser les event listeners
-    init() {
-        // Restaurer au chargement
-        this.restoreCredentials();
-        
-        // Sauvegarder quand la checkbox change
-        const rememberAuthCheckbox = document.getElementById('rememberAuth');
-        if (rememberAuthCheckbox) {
-            rememberAuthCheckbox.addEventListener('change', () => {
-                if (rememberAuthCheckbox.checked) {
-                    this.saveCredentials();
-                } else {
-                    this.clearCredentials();
-                    Toast.info('Vos identifiants ne seront plus enregistrés.', 'Information');
-                }
-            });
-        }
-        
-        // Sauvegarder quand les champs changent (si checkbox cochée)
-        const usernameInput = document.getElementById('username');
-        const accessCodeInput = document.getElementById('accessCode');
-        
-        [usernameInput, accessCodeInput].forEach(input => {
-            if (input) {
-                input.addEventListener('blur', () => {
-                    const rememberAuth = document.getElementById('rememberAuth')?.checked;
-                    if (rememberAuth) {
-                        this.saveCredentials();
-                    }
-                });
-            }
-        });
-    }
-};
-
-// Initialiser AuthManager après le chargement du DOM
-document.addEventListener('DOMContentLoaded', () => {
-    AuthManager.init();
-});
-
-
-
-
-// ===== MASQUER LE MESSAGE DE SWIPE APRÈS INTERACTION =====
-const tabsContainer = document.querySelector('.tabs-container');
-const swipeHint = document.querySelector('.swipe-hint');
-
-if (tabsContainer && swipeHint) {
-    let hasScrolled = false;
-    
-    tabsContainer.addEventListener('scroll', () => {
-        if (!hasScrolled) {
-            hasScrolled = true;
-            swipeHint.style.animation = 'fadeOut 0.5s ease forwards';
-            setTimeout(() => {
-                swipeHint.style.display = 'none';
-            }, 500);
-        }
-    });
-    
-    // Masquer également après 10 secondes si pas de scroll
-    setTimeout(() => {
-        if (!hasScrolled && swipeHint) {
-            swipeHint.style.animation = 'fadeOut 0.5s ease forwards';
-            setTimeout(() => {
-                swipeHint.style.display = 'none';
-            }, 500);
-        }
-    }, 10000);
-}

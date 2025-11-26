@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-
     <meta name="description" content="Solution de dictée médicale intelligente pour la collecte de données et création de fichiers SPSS">
     <meta name="keywords" content="dictée médicale, SPSS, enregistrement vocal, transcription médicale, DictaMed">
     <meta name="author" content="DictaMed">
@@ -34,11 +33,8 @@
     <!-- Stylesheet -->
     <link rel="stylesheet" href="style.css">
     
-
-    
     <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1'/><stop offset='100%25' style='stop-color:%231e40af;stop-opacity:1'/></linearGradient><linearGradient id='grad2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%2310b981;stop-opacity:1'/><stop offset='100%25' style='stop-color:%23059669;stop-opacity:1'/></linearGradient></defs><text x='10' y='75' font-size='70' font-weight='bold' font-family='Arial, sans-serif'><tspan fill='url(%23grad1)'>D</tspan><tspan fill='url(%23grad2)'>M</tspan></text></svg>">
-    <link rel="shortcut icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1'/><stop offset='100%25' style='stop-color:%231e40af;stop-opacity:1'/></linearGradient><linearGradient id='grad2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%2310b981;stop-opacity:1'/><stop offset='100%25' style='stop-color:%23059669;stop-opacity:1'/></linearGradient></defs><text x='10' y='75' font-size='70' font-weight='bold' font-family='Arial, sans-serif'><tspan fill='url(%23grad1)'>D</tspan><tspan fill='url(%23grad2)'>M</tspan></text></svg>">
     
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" sizes="180x180" href="icon-192x192.png">
@@ -64,7 +60,6 @@
                     </div>
                     <p class="slogan">Où la voix rencontre les chiffres</p>
                 </div>
-
             </div>
         </div>
     </header>
@@ -78,7 +73,7 @@
             <button class="tab-btn" data-tab="contact" aria-selected="false"><span class="tab-icon">📧</span>Contact</button>
             <button class="tab-btn" data-tab="faq" aria-selected="false"><span class="tab-icon">❓</span>FAQ</button>
             <button class="tab-btn" data-tab="mode-test" aria-selected="false"><span class="tab-icon">🧪</span>Mode Test</button>
-            <button class="tab-btn" data-tab="mode-dmi" aria-selected="false"><span class="tab-icon">📝</span>Mode DMI</button>
+            <button class="tab-btn" data-tab="mode-dmi" aria-selected="false"><span class="tab-icon">📋</span>Mode DMI</button>
         </div>
     </nav>
 
@@ -92,11 +87,11 @@
                 <h2>🔐 Authentification</h2>
                 <div class="form-group">
                     <label for="username">🔐 Identifiant</label>
-                    <input type="text" id="username" placeholder="Votre identifiant">
+                    <input type="text" id="username" placeholder="Votre identifiant" autocomplete="username">
                 </div>
                 <div class="form-group">
                     <label for="accessCode">🔑 Code d'accès</label>
-                    <input type="password" id="accessCode" placeholder="Votre code d'accès">
+                    <input type="password" id="accessCode" placeholder="Votre code d'accès" autocomplete="current-password">
                 </div>
                 <div class="form-group" style="margin-top: 15px;">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
@@ -110,7 +105,7 @@
             <div class="card">
                 <h2>👤 Informations du patient :</h2>
                 <div class="form-group">
-                    <label for="numeroDossier">📝 Numéro de dossier <span style="color: var(--red);">*</span></label>
+                    <label for="numeroDossier">📝 Numéro de dossier <span class="required">*</span></label>
                     <input type="text" id="numeroDossier" maxlength="50" placeholder="Numéro de dossier (max 50 caractères)" required>
                     <span class="char-counter" id="numeroDossierCounter">0/50</span>
                 </div>
@@ -122,7 +117,7 @@
             </div>
 
             <!-- Sections d'enregistrement -->
-            <div class="recording-section" data-section="partie1">
+            <div class="recording-section" data-section="partie1" data-mode="normal">
                 <h3>📋 Partie 1</h3>
                 <div class="recording-controls">
                     <div class="status-info">
@@ -141,7 +136,7 @@
                 </div>
             </div>
 
-            <div class="recording-section" data-section="partie2">
+            <div class="recording-section" data-section="partie2" data-mode="normal">
                 <h3>📋 Partie 2</h3>
                 <div class="recording-controls">
                     <div class="status-info">
@@ -160,7 +155,7 @@
                 </div>
             </div>
 
-            <div class="recording-section" data-section="partie3">
+            <div class="recording-section" data-section="partie3" data-mode="normal">
                 <h3>📋 Partie 3</h3>
                 <div class="recording-controls">
                     <div class="status-info">
@@ -179,7 +174,7 @@
                 </div>
             </div>
 
-            <div class="recording-section optional-section hidden" data-section="partie4">
+            <div class="recording-section optional-section hidden" data-section="partie4" data-mode="normal">
                 <h3>💊 Partie 4 (optionnelle)</h3>
                 <div class="recording-controls">
                     <div class="status-info">
@@ -205,7 +200,7 @@
 
             <!-- Envoi des données -->
             <div class="submit-section">
-                <p class="sections-count">0 section(s) enregistrée(s)</p>
+                <p class="sections-count" data-mode="normal">0 section(s) enregistrée(s)</p>
                 <button class="btn btn-submit" id="submitNormal" disabled>Envoyer les données</button>
             </div>
         </section>
@@ -229,37 +224,36 @@
                     <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(37, 99, 235, 0.2);">
                         <strong>📚 Études scientifiques :</strong>
                         <ul style="margin-top: 10px; margin-left: 20px; line-height: 1.8;">
-                            <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2656002/" target="_blank" style="color: var(--blue-primary); text-decoration: underline;">PMC - Impact of data entry errors on research outcomes</a></li>
-                            <li><a href="https://www.researchgate.net/publication/220495402_Preventing_human_error_The_impact_of_data_entry_methods_on_data_accuracy_and_statistical_results" target="_blank" style="color: var(--blue-primary); text-decoration: underline;">ResearchGate - Preventing human error in data entry</a></li>
-                            <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6239225/" target="_blank" style="color: var(--blue-primary); text-decoration: underline;">PMC - Data accuracy and statistical analysis</a></li>
+                            <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2656002/" target="_blank" rel="noopener noreferrer">PMC - Impact of data entry errors on research outcomes</a></li>
+                            <li><a href="https://www.researchgate.net/publication/220495402_Preventing_human_error_The_impact_of_data_entry_methods_on_data_accuracy_and_statistical_results" target="_blank" rel="noopener noreferrer">ResearchGate - Preventing human error in data entry</a></li>
+                            <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6239225/" target="_blank" rel="noopener noreferrer">PMC - Data accuracy and statistical analysis</a></li>
                         </ul>
                     </div>
                 </div>
             </div>
 
-            
             <!-- Solution -->
             <div class="card solution-card">
                 <h2>✨ La Solution DictaMed</h2>
                 <p style="font-size: 1.1em; margin-bottom: 25px;">Transformez votre voix en données structurées grâce à l'intelligence artificielle :</p>
                 <div class="workflow">
                     <div class="workflow-step">
-                        <h4>Dictée vocale</h4>
+                        <h4>🎤 Dictée vocale</h4>
                         <p>Parlez naturellement vos observations</p>
                     </div>
                     <div class="workflow-arrow">→</div>
                     <div class="workflow-step">
-                        <h4>IA transcrit</h4>
+                        <h4>🤖 IA transcrit</h4>
                         <p>Traitement automatique par l'IA</p>
                     </div>
                     <div class="workflow-arrow">→</div>
                     <div class="workflow-step">
-                        <h4>Google Sheets</h4>
+                        <h4>📊 Google Sheets</h4>
                         <p>Données structurées en temps réel</p>
                     </div>
                     <div class="workflow-arrow">→</div>
                     <div class="workflow-step">
-                        <h4>SPSS</h4>
+                        <h4>📈 SPSS</h4>
                         <p>Prêt pour l'analyse statistique</p>
                     </div>
                 </div>
@@ -271,7 +265,7 @@
                 </div>
             </div>
 
-            <!-- Conseils pratiques (déplacé en haut) -->
+            <!-- Conseils pratiques -->
             <div class="card">
                 <h2>💡 Conseils pour une dictée optimale</h2>
                 <div class="steps-grid">
@@ -302,7 +296,7 @@
                 </div>
             </div>
 
-            <!-- Processus -->
+            <!-- Processus en 7 étapes -->
             <div class="card">
                 <h2>📋 Processus en 7 étapes</h2>
                 <p style="margin-bottom: 25px;">De la commande à l'analyse : voici comment fonctionne DictaMed</p>
@@ -310,42 +304,40 @@
                     <div class="step-card">
                         <div class="step-number">1</div>
                         <h3>Fixez vos variables</h3>
-                        <p>Définissez précisément les variables que vous souhaitez collecter (données démographiques, cliniques, biologiques, etc.)</p>
+                        <p>Définissez précisément les variables que vous souhaitez collecter</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">2</div>
                         <h3>Envoyez votre fichier SPSS</h3>
-                        <p>Partagez votre template SPSS avec la structure de vos variables. Nous l'adaptons à DictaMed.</p>
+                        <p>Partagez votre template SPSS avec la structure de vos variables</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">3</div>
                         <h3>Recevez vos identifiants</h3>
-                        <p>Obtenez vos identifiants personnels sécurisés pour accéder au Mode Normal (sous 48h)</p>
+                        <p>Obtenez vos identifiants personnels sécurisés (sous 48h)</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">4</div>
                         <h3>Plan de travail organisé</h3>
-                        <p>Structure optimisée en 3-4 parties thématiques adaptée à votre flux de travail</p>
+                        <p>Structure optimisée en 3-4 parties thématiques</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">5</div>
                         <h3>Google Sheet personnalisé</h3>
-                        <p>Accès direct à votre feuille de données en temps réel pour vérification et correction si nécessaire</p>
+                        <p>Accès direct à votre feuille de données en temps réel</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">6</div>
                         <h3>Dictez vos données</h3>
-                        <p>Enregistrez vocalement vos observations patient par patient. Pausez et reprenez à votre rythme.</p>
+                        <p>Enregistrez vocalement vos observations patient par patient</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">7</div>
                         <h3>Fichier SPSS complet</h3>
-                        <p>Recevez votre fichier SPSS avec toutes les données transcrites, prêtes pour l'analyse statistique</p>
+                        <p>Recevez votre fichier prêt pour l'analyse statistique</p>
                     </div>
                 </div>
             </div>
-
-
 
             <!-- Avantages -->
             <div class="card solution-card">
@@ -391,13 +383,8 @@
             
             <div class="card">
                 <h2>Commander DictaMed</h2>
-                <p>📧 <strong>Email :</strong> 
-   <a href="/cdn-cgi/l/email-protection#17537e7463765a7273394447444457707a767e7b3974787a">
-       <span class="__cf_email__" data-cfemail="bafed3d9cedbf7dfde94e9eae9e9faddd7dbd3d694d9d5d7">[email&#160;protected]</span>
-   </a>
-</p>
->
-                <p>📘 <strong>Facebook :</strong> <a href="https://www.facebook.com/DictaMed.SPSS" target="_blank">DictaMed.SPSS</a></p>
+                <p>📧 <strong>Email :</strong> <a href="mailto:dictamed.contact@gmail.com">dictamed.contact@gmail.com</a></p>
+                <p>📘 <strong>Facebook :</strong> <a href="https://www.facebook.com/DictaMed.SPSS" target="_blank" rel="noopener noreferrer">DictaMed.SPSS</a></p>
                 <p class="info-box">💰 Tarification personnalisée selon le nombre de patients et de variables à collecter.</p>
             </div>
 
@@ -428,12 +415,12 @@
 
                 <div class="faq-item">
                     <h3>2. Comment fonctionne le Mode Test ?</h3>
-                    <p>Le Mode Test est une démonstration gratuite accessible sans authentification. Il vous permet d'enregistrer des données fictives et de voir en temps réel comment elles sont transcrites dans un Google Sheet public. C'est l'occasion idéale pour découvrir DictaMed avant de vous engager.</p>
+                    <p>Le Mode Test est une démonstration gratuite accessible sans authentification. Il vous permet d'enregistrer des données fictives et de voir en temps réel comment elles sont transcrites dans un Google Sheet public.</p>
                 </div>
 
                 <div class="faq-item">
                     <h3>3. Mes données sont-elles sécurisées ?</h3>
-                    <p>Absolument. DictaMed est conforme au RGPD et utilise un chiffrement de bout en bout pour toutes les données en Mode Normal. Les enregistrements sont stockés de manière sécurisée et ne sont accessibles qu'aux personnes autorisées avec leurs identifiants personnels.</p>
+                    <p>Absolument. DictaMed est conforme au RGPD et utilise un chiffrement de bout en bout pour toutes les données en Mode Normal. Les enregistrements sont stockés de manière sécurisée et ne sont accessibles qu'aux personnes autorisées.</p>
                 </div>
 
                 <div class="faq-item">
@@ -443,38 +430,32 @@
 
                 <div class="faq-item">
                     <h3>5. Puis-je mettre en pause un enregistrement ?</h3>
-                    <p>Oui, chaque section d'enregistrement dispose d'une fonction pause qui vous permet d'interrompre temporairement votre dictée et de la reprendre ensuite. Le timer exclut automatiquement le temps de pause.</p>
+                    <p>Oui, chaque section d'enregistrement dispose d'une fonction pause qui vous permet d'interrompre temporairement votre dictée et de la reprendre ensuite.</p>
                 </div>
 
                 <div class="faq-item">
-    <h3>6. Comment obtenir un devis ?</h3>
-    <p>
-        Contactez-nous par email à 
-        <a href="/cdn-cgi/l/email-protection#0f4b666c7b6e426a6b215c5f5c5c4f68626e6663216c6062"><span class="__cf_email__" data-cfemail="bcf8d5dfc8ddf1d9d892efecefeffcdbd1ddd5d092dfd3d1">[email&#160;protected]</span></a> 
-        en fournissant les informations listées dans l'onglet Contact. 
-        Nous vous répondrons sous 48 heures ouvrées avec un devis personnalisé adapté à vos besoins.
-    </p>
-</div>
-
+                    <h3>6. Comment obtenir un devis ?</h3>
+                    <p>Contactez-nous par email à <a href="mailto:dictamed.contact@gmail.com">dictamed.contact@gmail.com</a> en fournissant les informations listées dans l'onglet Contact. Nous vous répondrons sous 48 heures ouvrées.</p>
+                </div>
 
                 <div class="faq-item">
                     <h3>7. Quelle est la précision de la transcription ?</h3>
-                    <p>Notre système d'intelligence artificielle atteint une précision supérieure à 95% pour les données médicales structurées, particulièrement lorsque les consignes de dictée sont respectées (parler clairement, environnement calme).</p>
+                    <p>Notre système d'intelligence artificielle atteint une précision supérieure à 95% pour les données médicales structurées, particulièrement lorsque les consignes de dictée sont respectées.</p>
                 </div>
 
                 <div class="faq-item">
                     <h3>8. Puis-je personnaliser les paramètres ?</h3>
-                    <p>Oui, chaque client en Mode Normal reçoit une configuration personnalisée adaptée à ses variables SPSS spécifiques. Le nombre de sections et les champs peuvent être ajustés selon vos besoins.</p>
+                    <p>Oui, chaque client en Mode Normal reçoit une configuration personnalisée adaptée à ses variables SPSS spécifiques.</p>
                 </div>
 
                 <div class="faq-item">
                     <h3>9. Y a-t-il une limite au nombre d'enregistrements ?</h3>
-                    <p>En Mode Test, vous pouvez effectuer un nombre illimité d'essais. En Mode Normal, le nombre d'enregistrements est défini selon votre forfait (nombre de patients de votre étude).</p>
+                    <p>En Mode Test, vous pouvez effectuer un nombre illimité d'essais. En Mode Normal, le nombre d'enregistrements est défini selon votre forfait.</p>
                 </div>
 
                 <div class="faq-item">
                     <h3>10. Que se passe-t-il après la transcription ?</h3>
-                    <p>Les données transcrites sont automatiquement ajoutées à votre Google Sheet personnalisé où vous pouvez les vérifier et les corriger si nécessaire. Une fois validées, elles sont exportées vers votre fichier SPSS prêt pour l'analyse statistique.</p>
+                    <p>Les données transcrites sont automatiquement ajoutées à votre Google Sheet personnalisé où vous pouvez les vérifier et les corriger si nécessaire.</p>
                 </div>
             </div>
         </section>
@@ -488,7 +469,7 @@
             <div class="card solution-card">
                 <h2>🎉 Bienvenue dans le Mode Test !</h2>
                 <p style="font-size: 1.1em; line-height: 1.8;">Testez gratuitement DictaMed avec des données fictives. Aucune inscription requise !</p>
-                <div class="info-box enhanced-realtime-box" style="margin-top: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #ecfdf5 100%); border: 2px solid #3b82f6; border-radius: 12px; padding: 20px; position: relative; overflow: hidden;">
+                <div class="info-box enhanced-realtime-box" style="margin-top: 20px;">
                     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
                         <span style="font-size: 1.8em;">📊</span>
                         <div>
@@ -496,13 +477,12 @@
                             <p style="margin: 5px 0 0 0; color: #1e40af; font-size: 1em; font-weight: 500;">Transcription immédiate dans Google Sheets</p>
                         </div>
                     </div>
-                    <p style="margin: 0 0 15px 0; color: #374151; line-height: 1.6; font-size: 1.05em;">Vos dictées médicales sont automatiquement transcrites et publiées en temps réel dans notre Google Sheet public pour consultation immédiate :</p>
-                    <a href="https://docs.google.com/spreadsheets/d/1ReZHjndHc6o8O1bx1OfZXnZ8HWt8nLSo2X7IS6rcZXE/edit?gid=0#gid=0" target="_blank" class="google-sheet-link" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.1em; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-                        <span style="font-size: 1.3em;">📊</span>
+                    <p style="margin: 0 0 15px 0; color: #374151; line-height: 1.6;">Vos dictées sont automatiquement transcrites et publiées en temps réel :</p>
+                    <a href="https://docs.google.com/spreadsheets/d/1ReZHjndHc6o8O1bx1OfZXnZ8HWt8nLSo2X7IS6rcZXE/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer" class="google-sheet-link">
+                        <span>📊</span>
                         <span>Ouvrir le Google Sheet Public</span>
-                        <span style="margin-left: 5px;">↗</span>
+                        <span>↗</span>
                     </a>
-                    <div style="position: absolute; top: -20px; right: -20px; width: 60px; height: 60px; background: linear-gradient(135deg, #3b82f6, #10b981); opacity: 0.1; border-radius: 50%;"></div>
                 </div>
             </div>
             
@@ -528,7 +508,7 @@
                     <div class="example-item">
                         <strong>🏥 Section 2 - Antécédents :</strong>
                         <p style="font-size: 1.1em; color: #2563eb; font-weight: 600;">"HTA oui, DT2 non, DYSLIPIDEMIE oui, AVC non"</p>
-                        <p class="note">💡 Astuce : vous pouvez dire : pas d'HTA ou patient non hypertendu ou HTA oui , etc</p>
+                        <p class="note">💡 Astuce : vous pouvez dire : pas d'HTA ou patient non hypertendu</p>
                     </div>
                     <div class="example-item">
                         <strong>🧪 Section 3 - Biologie :</strong>
@@ -537,8 +517,8 @@
                     </div>
                 </div>
                 
-                <div class="info-box" style="margin-top: 25px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                    <strong>✅ Conseil important :</strong> Avant d'envoyer, utilisez le bouton "Réécouter" pour vérifier chaque enregistrement. Vous pouvez supprimer et recommencer si nécessaire !
+                <div class="info-box" style="margin-top: 25px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                    <strong>✅ Conseil important :</strong> Avant d'envoyer, utilisez le bouton "Réécouter" pour vérifier chaque enregistrement !
                 </div>
             </div>
 
@@ -551,8 +531,8 @@
                     <span class="char-counter" id="numeroDossierTestCounter">0/50</span>
                 </div>
                 <div class="form-group">
-                    <label for="nomPatientTest">nom &amp; prénom</label>
-                    <input type="text" id="nomPatientTest" maxlength="50" placeholder="Ex:Flen ben Foulen">
+                    <label for="nomPatientTest">Nom &amp; prénom</label>
+                    <input type="text" id="nomPatientTest" maxlength="50" placeholder="Ex: Flen ben Foulen">
                     <span class="char-counter" id="nomPatientTestCounter">0/50</span>
                 </div>
             </div>
@@ -561,11 +541,11 @@
             <div class="card google-sheet-result" id="googleSheetCard" style="display: none;">
                 <h2>📊 Résultats de Transcription</h2>
                 <p>Vos données ont été envoyées avec succès ! Consultez la transcription en temps réel :</p>
-                <a href="https://docs.google.com/spreadsheets/d/1TQX0MdXuZNL3Y8Qoz6tpR-V0FUj_DZXzLy4UvgC6E4g/edit?gid=0#gid=0" target="_blank" class="btn btn-primary">📊 Voir le Google Sheet</a>
+                <a href="https://docs.google.com/spreadsheets/d/1ReZHjndHc6o8O1bx1OfZXnZ8HWt8nLSo2X7IS6rcZXE/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer" class="btn btn-primary">📊 Voir le Google Sheet</a>
             </div>
 
             <!-- Sections d'enregistrement -->
-            <div class="recording-section" data-section="clinique">
+            <div class="recording-section" data-section="clinique" data-mode="test">
                 <h3>📋 Données Cliniques</h3>
                 <p class="section-description">Dicter ses variables : Âge, sexe, BMI, tabac</p>
                 <div class="recording-controls">
@@ -585,7 +565,7 @@
                 </div>
             </div>
 
-            <div class="recording-section" data-section="antecedents">
+            <div class="recording-section" data-section="antecedents" data-mode="test">
                 <h3>🏥 Antécédents</h3>
                 <p class="section-description">Dicter ses variables : HTA, DT2, DYSLIPIDEMIE, AVC</p>
                 <div class="recording-controls">
@@ -605,9 +585,9 @@
                 </div>
             </div>
 
-            <div class="recording-section" data-section="biologie">
+            <div class="recording-section" data-section="biologie" data-mode="test">
                 <h3>🧪 Biologie</h3>
-                <p class="section-description">Dicter ses variables : Hémoglobine, globules blancs, plaquettes, ionogramme complet( sodium , potassium, chlore)</p>
+                <p class="section-description">Dicter ses variables : Hémoglobine, globules blancs, plaquettes, ionogramme complet</p>
                 <div class="recording-controls">
                     <div class="status-info">
                         <span class="status-badge" data-status="ready">Prêt</span>
@@ -627,42 +607,37 @@
 
             <!-- Envoi des données -->
             <div class="submit-section">
-                <p class="sections-count">0 section(s) enregistrée(s)</p>
+                <p class="sections-count" data-mode="test">0 section(s) enregistrée(s)</p>
                 <button class="btn btn-submit" id="submitTest" disabled>Envoyer les données Test</button>
             </div>
         </section>
 
         <!-- ONGLET 6: MODE DMI -->
         <section id="mode-dmi" class="tab-content">
-            <h1>📝 Mode DMI</h1>
+            <h1>📋 Mode DMI</h1>
             
-            <div class="card" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1)); border-left: 4px solid #f59e0b;">
-                <h2>🚧 En cours de développement</h2>
-                <p style="font-size: 1.1em; font-weight: 600; color: #f59e0b; margin-bottom: 15px;">Cette fonctionnalité sera bientôt disponible.</p>
-                <p style="margin-top: 20px;">Nous travaillons activement sur cette nouvelle fonctionnalité pour vous offrir la meilleure expérience possible.</p>
-            </div>
-
-            <div class="card">
-                <h2>À propos du Mode DMI</h2>
-                <p style="line-height: 1.8; font-size: 1.05em;">
-                    Ce mode permet de <strong>copier-coller directement les dossiers issus du DMI</strong>. DictaMed se charge ensuite d'<strong>analyser, de trier et de structurer automatiquement</strong> les informations et données des patients dans le fichier SPSS.
+            <div class="card solution-card">
+                <h2>✨ Import direct de dossiers</h2>
+                <p style="font-size: 1.1em; line-height: 1.8;">
+                    Ce mode permet de <strong>copier-coller directement les dossiers issus du DMI</strong>. 
+                    DictaMed se charge ensuite d'<strong>analyser, trier et structurer automatiquement</strong> 
+                    les informations dans le fichier SPSS.
                 </p>
-                <p style="line-height: 1.8; font-size: 1.05em; margin-top: 15px;">
-                    L'utilisateur peut également <strong>photographier les dossiers ou les résultats biologiques</strong> et les transmettre à DictaMed. Grâce à son système d'<strong>intelligence artificielle</strong>, l'application reconnaît et interprète les données contenues sur les images.
-                </p>
-                <p style="line-height: 1.8; font-size: 1.05em; margin-top: 15px;">
-                    La <strong>mise à jour d'un dossier patient</strong> est tout aussi simple : il suffit d'ajouter, par exemple, la photo d'un nouveau bilan biologique, à condition d'indiquer le <strong>même numéro de dossier</strong>.
+                <p style="line-height: 1.8; margin-top: 15px;">
+                    Vous pouvez également <strong>photographier les dossiers ou les résultats biologiques</strong>. 
+                    Grâce à l'<strong>intelligence artificielle</strong>, l'application reconnaît et interprète 
+                    les données contenues sur les images.
                 </p>
                 <div class="info-box" style="margin-top: 20px;">
                     <strong>💡 Avantage :</strong> Gain de temps considérable en important directement vos dossiers existants sans ressaisie manuelle !
                 </div>
             </div>
 
-            <!-- Informations patient -->
+            <!-- Informations patient DMI -->
             <div class="card">
-                <h2>Informations Patient</h2>
+                <h2>👤 Informations Patient</h2>
                 <div class="form-group">
-                    <label for="numeroDossierDMI">Numéro de dossier <span style="color: var(--red);">*</span></label>
+                    <label for="numeroDossierDMI">Numéro de dossier <span class="required">*</span></label>
                     <input type="text" id="numeroDossierDMI" maxlength="50" placeholder="Ex: 14/2024" required>
                     <span class="char-counter" id="numeroDossierDMICounter">0/50</span>
                 </div>
@@ -673,51 +648,50 @@
                 </div>
             </div>
 
-            <!-- Saisie du texte -->
+            <!-- Saisie du texte DMI -->
             <div class="card">
-                <h2>📄 Texte libre</h2>
+                <h2>📄 Texte du dossier</h2>
                 <div class="form-group">
-                    <label for="texteLibre">Votre texte (sans limite de caractères)</label>
-                    <textarea id="texteLibre" rows="12" placeholder="Saisissez vos observations, notes, données cliniques, etc."></textarea>
+                    <label for="dmiTexteLibre">Collez ici le contenu du dossier DMI (sans limite de caractères)</label>
+                    <textarea id="dmiTexteLibre" rows="12" placeholder="Collez ici les informations du dossier médical (observations, données cliniques, résultats biologiques, etc.)"></textarea>
                     <div style="margin-top: 10px; text-align: right; font-size: 0.9rem; color: var(--gray-medium);">
-                        <span id="texteLibreCounter">0</span> caractères
+                        <span id="dmiTexteLibreCounter">0</span> caractères
                     </div>
                 </div>
             </div>
 
-            <!-- Upload de photos -->
+            <!-- Upload de photos DMI -->
             <div class="card">
-                <h2>📷 Photos (Maximum 5)</h2>
+                <h2>📷 Photos du dossier (Maximum 5)</h2>
                 <div class="form-group">
-                    <label for="photosUpload">Sélectionnez jusqu'à 5 photos</label>
-                    <input type="file" id="photosUpload" accept="image/*" multiple max="5">
+                    <label for="dmiPhotosUpload">Sélectionnez jusqu'à 5 photos</label>
+                    <input type="file" id="dmiPhotosUpload" accept="image/*" multiple>
                     <p style="margin-top: 10px; font-size: 0.9rem; color: var(--gray-medium);">
-                        Formats acceptés : JPG, PNG, WEBP, GIF
+                        Formats acceptés : JPG, PNG, WEBP, GIF (max 10 MB par photo)
                     </p>
                 </div>
-                <div id="photosPreview" class="photos-preview"></div>
+                <div id="dmiPhotosPreview" class="photos-preview"></div>
             </div>
 
-            <!-- Envoi des données -->
+            <!-- Envoi des données DMI -->
             <div class="submit-section">
                 <p class="info-box" style="display: inline-block; margin-bottom: 20px;">
                     ⚠️ Le numéro de dossier est <strong>obligatoire</strong> pour envoyer les données.
                 </p>
-                <button class="btn btn-submit" id="submitDMI">Envoyer les données DMI ( non encore disponible)</button>
+                <button class="btn btn-submit" id="submitDMI" disabled>Envoyer les données DMI</button>
             </div>
         </section>
     </main>
 
-   <footer>
-    <div class="container">
-        <p>
-            &copy; 2025 DictaMed - Tous droits réservés | 
-            Contact : <a href="/cdn-cgi/l/email-protection#5a1e33392e3b173f3e74090a09091a3d373b333674393537"><span class="__cf_email__" data-cfemail="abefc2c8dfcae6cecf85f8fbf8f8ebccc6cac2c785c8c4c6">[email&#160;protected]</span></a>
-        </p>
-    </div>
-</footer>
+    <footer>
+        <div class="container">
+            <p>
+                &copy; 2025 DictaMed - Tous droits réservés | 
+                Contact : <a href="mailto:dictamed.contact@gmail.com">dictamed.contact@gmail.com</a>
+            </p>
+        </div>
+    </footer>
 
-
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
