@@ -222,191 +222,177 @@
             <div class="optional-toggle">
                 <button class="btn btn-secondary" id="togglePartie4">Afficher Partie 4 (optionnelle)</button>
             </div>
+            fictives.
+            Aucune inscription requise !</p>
+            <div class="info-box enhanced-realtime-box" style="margin-top: 20px;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+                    <span style="font-size: 1.8em;">📊</span>
+                    <div>
+                        <h3 style="margin: 0; color: #1e40af; font-size: 1.2em; font-weight: 700;">Résultats
+                            en
+                            temps réel</h3>
+                        <p style="margin: 5px 0 0 0; color: #1e40af; font-size: 1em; font-weight: 500;">
+                            Transcription immédiate dans Google Sheets</p>
+                    </div>
+                </div>
+                <p style="margin: 0 0 15px 0; color: #374151; line-height: 1.6;">Vos dictées sont
+                    automatiquement
+                    transcrites et publiées en temps réel :</p>
+                <a href="https://docs.google.com/spreadsheets/d/1ReZHjndHc6o8O1bx1OfZXnZ8HWt8nLSo2X7IS6rcZXE/edit?gid=0#gid=0"
+                    target="_blank" rel="noopener noreferrer" class="google-sheet-link">
+                    <span>📊</span>
+                    <span>Ouvrir le Google Sheet Public</span>
+                    <span>↗</span>
+                </a>
+            </div>
+            </div>
+
+            <!-- Consignes -->
+            <div class="card instructions-card">
+                <h2>📝 Consignes d'utilisation</h2>
+                <p style="font-size: 1.05em; margin-bottom: 20px;"><strong>Pour une reconnaissance optimale,
+                        suivez ces
+                        recommandations :</strong></p>
+
+                <div style="margin-bottom: 25px; line-height: 2;">
+                    <p><strong>1/</strong> Autorisez l'accès au microphone quand le navigateur vous le demande
+                        🎤</p>
+                    <p><strong>2/</strong> Parlez à haute voix, clairement et lentement 🗣️</p>
+                    <p><strong>3/</strong> Privilégiez un environnement calme sans bruit de fond 🔇</p>
+                    <p><strong>4/</strong> Marquez une courte pause entre chaque valeur dictée ⏸️</p>
+                </div>
+
+                <h3 style="margin-top: 30px; margin-bottom: 15px;">💬 Exemples de dictée par section :</h3>
+                <div class="examples">
+                    <div class="example-item">
+                        <strong>📋 Section 1 - Données cliniques :</strong>
+                        <p style="font-size: 1.1em; color: #2563eb; font-weight: 600;">"Âge 45 ans, sexe
+                            masculin, BMI
+                            28, tabac oui"</p>
+                        <p class="note">💡 Astuce : vous pouvez dire : Pas de tabac, patient non tabagique,
+                            tabac non
+                        </p>
+                    </div>
+                    <div class="example-item">
+                        <strong>🏥 Section 2 - Antécédents :</strong>
+                        <p style="font-size: 1.1em; color: #2563eb; font-weight: 600;">"HTA oui, DT2 non,
+                            DYSLIPIDEMIE
+                            oui, AVC non"</p>
+                        <p class="note">💡 Astuce : vous pouvez dire : pas d'HTA ou patient non hypertendu</p>
+                    </div>
+                    <div class="example-item">
+                        <strong>🧪 Section 3 - Biologie :</strong>
+                        <p style="font-size: 1.1em; color: #2563eb; font-weight: 600;">"Hémoglobine 13.5,
+                            globules
+                            blancs 7000, plaquettes 250000"</p>
+                        <p class="note">💡 Astuce : Dictez les valeurs sans les unités.</p>
+                    </div>
+                </div>
+
+                <div class="info-box"
+                    style="margin-top: 25px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                    <strong>✅ Conseil important :</strong> Avant d'envoyer, utilisez le bouton "Réécouter" pour
+                    vérifier
+                    chaque enregistrement !
+                </div>
+            </div>
+
+            <!-- Informations patient -->
+            <div class="card">
+                <h2>Informations Patient</h2>
+                <div class="form-group">
+                    <label for="numeroDossierTest">Numéro de dossier</label>
+                    <input type="text" id="numeroDossierTest" maxlength="50" placeholder="Ex: 14/2024">
+                    <span class="char-counter" id="numeroDossierTestCounter">0/50</span>
+                </div>
+                <div class="form-group">
+                    <label for="nomPatientTest">Nom &amp; prénom</label>
+                    <input type="text" id="nomPatientTest" maxlength="50" placeholder="Ex: Flen ben Foulen">
+                    <span class="char-counter" id="nomPatientTestCounter">0/50</span>
+                </div>
+            </div>
+
+            <!-- Lien Google Sheet (caché par défaut) -->
+            <div class="card google-sheet-result" id="googleSheetCard" style="display: none;">
+                <h2>📊 Résultats de Transcription</h2>
+                <p>Vos données ont été envoyées avec succès ! Consultez la transcription en temps réel :</p>
+                <a href="https://docs.google.com/spreadsheets/d/1ReZHjndHc6o8O1bx1OfZXnZ8HWt8nLSo2X7IS6rcZXE/edit?gid=0#gid=0"
+                    target="_blank" rel="noopener noreferrer" class="btn btn-primary">📊 Voir le Google
+                    Sheet</a>
+            </div>
+
+            <!-- Sections d'enregistrement -->
+            <div class="recording-section" data-section="clinique" data-mode="test">
+                <h3>📋 Données Cliniques</h3>
+                <p class="section-description">Dicter ses variables : Âge, sexe, BMI, tabac</p>
+                <div class="recording-controls">
+                    <div class="status-info">
+                        <span class="status-badge" data-status="ready">Prêt</span>
+                        <span class="timer">00:00</span>
+                        <span class="recorded-badge hidden">Enregistré ✓</span>
+                    </div>
+                    <div class="control-buttons">
+                        <button class="btn btn-record">Enregistrer</button>
+                        <button class="btn btn-pause hidden">Pause</button>
+                        <button class="btn btn-stop hidden">Arrêter</button>
+                        <button class="btn btn-replay hidden">Réécouter</button>
+                        <button class="btn btn-delete hidden">Supprimer</button>
+                    </div>
+                    <audio class="audio-player hidden"></audio>
+                </div>
+            </div>
+
+            <div class="recording-section" data-section="antecedents" data-mode="test">
+                <h3>🏥 Antécédents</h3>
+                <p class="section-description">Dicter ses variables : HTA, DT2, DYSLIPIDEMIE, AVC</p>
+                <div class="recording-controls">
+                    <div class="status-info">
+                        <span class="status-badge" data-status="ready">Prêt</span>
+                        <span class="timer">00:00</span>
+                        <span class="recorded-badge hidden">Enregistré ✓</span>
+                    </div>
+                    <div class="control-buttons">
+                        <button class="btn btn-record">Enregistrer</button>
+                        <button class="btn btn-pause hidden">Pause</button>
+                        <button class="btn btn-stop hidden">Arrêter</button>
+                        <button class="btn btn-replay hidden">Réécouter</button>
+                        <button class="btn btn-delete hidden">Supprimer</button>
+                    </div>
+                    <audio class="audio-player hidden"></audio>
+                </div>
+            </div>
+
+            <div class="recording-section" data-section="biologie" data-mode="test">
+                <h3>🧪 Biologie</h3>
+                <p class="section-description">Dicter ses variables : Hémoglobine, globules blancs, plaquettes,
+                    ionogramme complet</p>
+                <div class="recording-controls">
+                    <div class="status-info">
+                        <span class="status-badge" data-status="ready">Prêt</span>
+                        <span class="timer">00:00</span>
+                        <span class="recorded-badge hidden">Enregistré ✓</span>
+                    </div>
+                    <div class="control-buttons">
+                        <button class="btn btn-record">Enregistrer</button>
+                        <button class="btn btn-pause hidden">Pause</button>
+                        <button class="btn btn-stop hidden">Arrêter</button>
+                        <button class="btn btn-replay hidden">Réécouter</button>
+                        <button class="btn btn-delete hidden">Supprimer</button>
+                    </div>
+                    <audio class="audio-player hidden"></audio>
+                </div>
+            </div>
 
             <!-- Envoi des données -->
             <div class="submit-section">
-                <p class="sections-count" data-mode="normal" aria-live="polite" aria-atomic="true">0 section(s)
+                <p class="sections-count" data-mode="test" aria-live="polite" aria-atomic="true">0 section(s)
                     enregistrée(s)</p>
-                <button class="btn btn-submit" id="submitNormal" disabled
-                    aria-label="Envoyer les données enregistrées au serveur" aria-describedby="submit-hint">
-                    Envoyer les données
-                    <h1>Mode Test - Découvrez DictaMed</h1>
-
-                    <!-- Introduction -->
-                    <div class="card solution-card">
-                        <h2>🎉 Bienvenue dans le Mode Test !</h2>
-                        <p style="font-size: 1.1em; line-height: 1.8;">Testez gratuitement DictaMed avec des données
-                            fictives.
-                            Aucune inscription requise !</p>
-                        <div class="info-box enhanced-realtime-box" style="margin-top: 20px;">
-                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
-                                <span style="font-size: 1.8em;">📊</span>
-                                <div>
-                                    <h3 style="margin: 0; color: #1e40af; font-size: 1.2em; font-weight: 700;">Résultats
-                                        en
-                                        temps réel</h3>
-                                    <p style="margin: 5px 0 0 0; color: #1e40af; font-size: 1em; font-weight: 500;">
-                                        Transcription immédiate dans Google Sheets</p>
-                                </div>
-                            </div>
-                            <p style="margin: 0 0 15px 0; color: #374151; line-height: 1.6;">Vos dictées sont
-                                automatiquement
-                                transcrites et publiées en temps réel :</p>
-                            <a href="https://docs.google.com/spreadsheets/d/1ReZHjndHc6o8O1bx1OfZXnZ8HWt8nLSo2X7IS6rcZXE/edit?gid=0#gid=0"
-                                target="_blank" rel="noopener noreferrer" class="google-sheet-link">
-                                <span>📊</span>
-                                <span>Ouvrir le Google Sheet Public</span>
-                                <span>↗</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Consignes -->
-                    <div class="card instructions-card">
-                        <h2>📝 Consignes d'utilisation</h2>
-                        <p style="font-size: 1.05em; margin-bottom: 20px;"><strong>Pour une reconnaissance optimale,
-                                suivez ces
-                                recommandations :</strong></p>
-
-                        <div style="margin-bottom: 25px; line-height: 2;">
-                            <p><strong>1/</strong> Autorisez l'accès au microphone quand le navigateur vous le demande
-                                🎤</p>
-                            <p><strong>2/</strong> Parlez à haute voix, clairement et lentement 🗣️</p>
-                            <p><strong>3/</strong> Privilégiez un environnement calme sans bruit de fond 🔇</p>
-                            <p><strong>4/</strong> Marquez une courte pause entre chaque valeur dictée ⏸️</p>
-                        </div>
-
-                        <h3 style="margin-top: 30px; margin-bottom: 15px;">💬 Exemples de dictée par section :</h3>
-                        <div class="examples">
-                            <div class="example-item">
-                                <strong>📋 Section 1 - Données cliniques :</strong>
-                                <p style="font-size: 1.1em; color: #2563eb; font-weight: 600;">"Âge 45 ans, sexe
-                                    masculin, BMI
-                                    28, tabac oui"</p>
-                                <p class="note">💡 Astuce : vous pouvez dire : Pas de tabac, patient non tabagique,
-                                    tabac non
-                                </p>
-                            </div>
-                            <div class="example-item">
-                                <strong>🏥 Section 2 - Antécédents :</strong>
-                                <p style="font-size: 1.1em; color: #2563eb; font-weight: 600;">"HTA oui, DT2 non,
-                                    DYSLIPIDEMIE
-                                    oui, AVC non"</p>
-                                <p class="note">💡 Astuce : vous pouvez dire : pas d'HTA ou patient non hypertendu</p>
-                            </div>
-                            <div class="example-item">
-                                <strong>🧪 Section 3 - Biologie :</strong>
-                                <p style="font-size: 1.1em; color: #2563eb; font-weight: 600;">"Hémoglobine 13.5,
-                                    globules
-                                    blancs 7000, plaquettes 250000"</p>
-                                <p class="note">💡 Astuce : Dictez les valeurs sans les unités.</p>
-                            </div>
-                        </div>
-
-                        <div class="info-box"
-                            style="margin-top: 25px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
-                            <strong>✅ Conseil important :</strong> Avant d'envoyer, utilisez le bouton "Réécouter" pour
-                            vérifier
-                            chaque enregistrement !
-                        </div>
-                    </div>
-
-                    <!-- Informations patient -->
-                    <div class="card">
-                        <h2>Informations Patient</h2>
-                        <div class="form-group">
-                            <label for="numeroDossierTest">Numéro de dossier</label>
-                            <input type="text" id="numeroDossierTest" maxlength="50" placeholder="Ex: 14/2024">
-                            <span class="char-counter" id="numeroDossierTestCounter">0/50</span>
-                        </div>
-                        <div class="form-group">
-                            <label for="nomPatientTest">Nom &amp; prénom</label>
-                            <input type="text" id="nomPatientTest" maxlength="50" placeholder="Ex: Flen ben Foulen">
-                            <span class="char-counter" id="nomPatientTestCounter">0/50</span>
-                        </div>
-                    </div>
-
-                    <!-- Lien Google Sheet (caché par défaut) -->
-                    <div class="card google-sheet-result" id="googleSheetCard" style="display: none;">
-                        <h2>📊 Résultats de Transcription</h2>
-                        <p>Vos données ont été envoyées avec succès ! Consultez la transcription en temps réel :</p>
-                        <a href="https://docs.google.com/spreadsheets/d/1ReZHjndHc6o8O1bx1OfZXnZ8HWt8nLSo2X7IS6rcZXE/edit?gid=0#gid=0"
-                            target="_blank" rel="noopener noreferrer" class="btn btn-primary">📊 Voir le Google
-                            Sheet</a>
-                    </div>
-
-                    <!-- Sections d'enregistrement -->
-                    <div class="recording-section" data-section="clinique" data-mode="test">
-                        <h3>📋 Données Cliniques</h3>
-                        <p class="section-description">Dicter ses variables : Âge, sexe, BMI, tabac</p>
-                        <div class="recording-controls">
-                            <div class="status-info">
-                                <span class="status-badge" data-status="ready">Prêt</span>
-                                <span class="timer">00:00</span>
-                                <span class="recorded-badge hidden">Enregistré ✓</span>
-                            </div>
-                            <div class="control-buttons">
-                                <button class="btn btn-record">Enregistrer</button>
-                                <button class="btn btn-pause hidden">Pause</button>
-                                <button class="btn btn-stop hidden">Arrêter</button>
-                                <button class="btn btn-replay hidden">Réécouter</button>
-                                <button class="btn btn-delete hidden">Supprimer</button>
-                            </div>
-                            <audio class="audio-player hidden"></audio>
-                        </div>
-                    </div>
-
-                    <div class="recording-section" data-section="antecedents" data-mode="test">
-                        <h3>🏥 Antécédents</h3>
-                        <p class="section-description">Dicter ses variables : HTA, DT2, DYSLIPIDEMIE, AVC</p>
-                        <div class="recording-controls">
-                            <div class="status-info">
-                                <span class="status-badge" data-status="ready">Prêt</span>
-                                <span class="timer">00:00</span>
-                                <span class="recorded-badge hidden">Enregistré ✓</span>
-                            </div>
-                            <div class="control-buttons">
-                                <button class="btn btn-record">Enregistrer</button>
-                                <button class="btn btn-pause hidden">Pause</button>
-                                <button class="btn btn-stop hidden">Arrêter</button>
-                                <button class="btn btn-replay hidden">Réécouter</button>
-                                <button class="btn btn-delete hidden">Supprimer</button>
-                            </div>
-                            <audio class="audio-player hidden"></audio>
-                        </div>
-                    </div>
-
-                    <div class="recording-section" data-section="biologie" data-mode="test">
-                        <h3>🧪 Biologie</h3>
-                        <p class="section-description">Dicter ses variables : Hémoglobine, globules blancs, plaquettes,
-                            ionogramme complet</p>
-                        <div class="recording-controls">
-                            <div class="status-info">
-                                <span class="status-badge" data-status="ready">Prêt</span>
-                                <span class="timer">00:00</span>
-                                <span class="recorded-badge hidden">Enregistré ✓</span>
-                            </div>
-                            <div class="control-buttons">
-                                <button class="btn btn-record">Enregistrer</button>
-                                <button class="btn btn-pause hidden">Pause</button>
-                                <button class="btn btn-stop hidden">Arrêter</button>
-                                <button class="btn btn-replay hidden">Réécouter</button>
-                                <button class="btn btn-delete hidden">Supprimer</button>
-                            </div>
-                            <audio class="audio-player hidden"></audio>
-                        </div>
-                    </div>
-
-                    <!-- Envoi des données -->
-                    <div class="submit-section">
-                        <p class="sections-count" data-mode="test" aria-live="polite" aria-atomic="true">0 section(s)
-                            enregistrée(s)</p>
-                        <button class="btn btn-submit" id="submitTest" disabled
-                            aria-label="Envoyer les données de test au serveur" aria-describedby="submit-test-hint">
-                            Envoyer les données Test
-                        </button>
-                        <span id="submit-test-hint" class="sr-only">Version de démonstration gratuite</span>
-                    </div>
+                <button class="btn btn-submit" id="submitTest" disabled
+                    aria-label="Envoyer les données de test au serveur" aria-describedby="submit-test-hint">
+                    Envoyer les données Test
+                </button>
+                <span id="submit-test-hint" class="sr-only">Version de démonstration gratuite</span>
+            </div>
         </section>
 
         <!-- ONGLET 6: MODE DMI -->
