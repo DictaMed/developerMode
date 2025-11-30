@@ -33,6 +33,11 @@
 
     <title>DictaMed - Où la voix rencontre les chiffres</title>
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <!-- Stylesheet -->
     <link rel="stylesheet" href="style.css">
 
@@ -52,6 +57,11 @@
 </head>
 
 <body>
+    <!-- Floating Glass Background Elements -->
+    <div class="glass-bg-element"></div>
+    <div class="glass-bg-element"></div>
+    <div class="glass-bg-element"></div>
+
     <!-- Skip link pour accessibilité -->
     <a href="#main-content" class="skip-link">Aller au contenu principal</a>
 
@@ -209,10 +219,16 @@
                 <button class="btn btn-secondary" id="togglePartie4">Afficher Partie 4 (optionnelle)</button>
             </div>
 
-            <!-- Envoi des données -->
-            <div class="submit-section">
+            <!-- Envoi des données - Enhanced Design -->
+            <div class="submit-section card-3d">
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" style="width: 0%"></div>
+                </div>
                 <p class="sections-count" data-mode="normal">0 section(s) enregistrée(s)</p>
-                <button class="btn btn-submit" id="submitNormal" disabled>Envoyer les données</button>
+                <button class="btn btn-submit" id="submitNormal" disabled>
+                    <span class="btn-text">Envoyer les données</span>
+                    <span class="btn-icon">🚀</span>
+                </button>
             </div>
         </section>
 
@@ -662,10 +678,16 @@
                 </div>
             </div>
 
-            <!-- Envoi des données -->
-            <div class="submit-section">
+            <!-- Envoi des données - Enhanced Design -->
+            <div class="submit-section card-3d">
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" style="width: 0%"></div>
+                </div>
                 <p class="sections-count" data-mode="test">0 section(s) enregistrée(s)</p>
-                <button class="btn btn-submit" id="submitTest" disabled>Envoyer les données Test</button>
+                <button class="btn btn-submit" id="submitTest" disabled>
+                    <span class="btn-text">Envoyer les données Test</span>
+                    <span class="btn-icon">🧪</span>
+                </button>
             </div>
         </section>
 
@@ -732,12 +754,18 @@
                 <div id="dmiPhotosPreview" class="photos-preview"></div>
             </div>
 
-            <!-- Envoi des données DMI -->
-            <div class="submit-section">
+            <!-- Envoi des données DMI - Enhanced Design -->
+            <div class="submit-section card-3d">
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" style="width: 0%"></div>
+                </div>
                 <p class="info-box" style="display: inline-block; margin-bottom: 20px;">
                     ⚠️ Le numéro de dossier est <strong>obligatoire</strong> pour envoyer les données.
                 </p>
-                <button class="btn btn-submit" id="submitDMI" disabled>Envoyer les données DMI</button>
+                <button class="btn btn-submit" id="submitDMI" disabled>
+                    <span class="btn-text">Envoyer les données DMI</span>
+                    <span class="btn-icon">📋</span>
+                </button>
             </div>
         </section>
     </main>
