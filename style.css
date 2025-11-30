@@ -1,66 +1,127 @@
-/* Variables CSS - DictaMed Design System selon spécifications UX/UI */
+/* Variables CSS - DictaMed Design System AVANCÉ avec gradients directionnels */
 :root {
-    /* Palette principale - DictaMed Brand Colors selon spécifications */
-    --primary-blue: #2563eb;          /* Bleu principal de la marque (D) */
-    --primary-blue-dark: #1d4ed8;     /* Bleu foncé pour dégradés */
-    --primary-green: #10b981;         /* Vert principal de la marque (M) */
-    --primary-green-dark: #059669;    /* Vert foncé pour dégradés */
+    /* ============================
+       COULEURS DE BASE EXISTANTES - Mises à jour
+       ============================ */
+    --medical-blue: #2563eb;          /* Bleu principal existant */
+    --medical-blue-light: #3b82f6;    /* Variante claire */
+    --medical-blue-dark: #1d4ed8;     /* Variante foncée */
+    --medical-blue-ultra-dark: #1e40af; /* Version ultra-foncée */
     
-    /* Couleurs de texte selon spécifications */
-    --text-primary: #1e293b;          /* Texte principal */
-    --text-secondary: #64748b;        /* Texte secondaire */
-    --text-light: #f8fafc;           /* Texte clair sur fonds colorés */
-    --text-white: #ffffff;           /* Texte blanc */
+    --health-green: #10b981;          /* Vert principal existant */
+    --health-green-light: #22c55e;    /* Variante claire */
+    --health-green-dark: #059669;     /* Variante foncée */
+    --health-green-ultra-dark: #047857; /* Version ultra-foncée */
     
-    /* Couleurs de fond selon spécifications */
-    --bg-card: #f8fafc;              /* Fond des cartes */
-    --bg-page: #ffffff;              /* Fond principal de page */
-    --bg-light: #f8fafc;             /* Fond clair */
+    /* ============================
+       GRADIENTS DIRECTIONNELS - Spécifiés
+       ============================ */
+    /* Gradient principal 135deg - médical vers santé */
+    --gradient-primary: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-blue) 50%, var(--health-green) 100%);
     
-    /* Bordures selon spécifications */
-    --border-color: #e2e8f0;         /* Bordures des éléments */
-    --border-light: #f1f5f9;         /* Bordures claires */
+    /* Gradient diagonal 45deg - hero et petits écrans */
+    --gradient-diagonal: linear-gradient(45deg, #2563eb 0%, #1d4ed8 25%, #10b981 100%);
     
-    /* Couleurs fonctionnelles - Boutons de contrôle selon spécifications */
-    --control-red-light: #ef4444;    /* Bouton Enregistrer (rouge clair) */
-    --control-red-dark: #dc2626;     /* Bouton Enregistrer (rouge foncé) */
-    --control-orange-light: #f59e0b; /* Bouton Pause (orange clair) */
-    --control-orange-dark: #d97706;  /* Bouton Pause (orange foncé) */
-    --control-gray-light: #64748b;   /* Bouton Stop (gris clair) */
-    --control-gray-dark: #475569;    /* Bouton Stop (gris foncé) */
-    --control-cyan-light: #06b6d4;   /* Bouton Réécouter (cyan clair) */
-    --control-cyan-dark: #0891b2;    /* Bouton Réécouter (cyan foncé) */
+    /* Gradient radial pour surfaces */
+    --gradient-radial: radial-gradient(circle at center, var(--medical-blue-light) 0%, var(--medical-blue) 50%, var(--health-green) 100%);
     
-    /* États et messages système selon spécifications */
-    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    --error-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    --warning-bg: #fef3c7;
-    --warning-border: #f59e0b;
+    /* Gradients directionnels par direction */
+    --gradient-to-right: linear-gradient(to right, var(--medical-blue), var(--health-green));
+    --gradient-to-bottom: linear-gradient(to bottom, var(--medical-blue), var(--health-green));
+    --gradient-to-left: linear-gradient(to left, var(--medical-blue), var(--health-green));
+    --gradient-to-top: linear-gradient(to top, var(--medical-blue), var(--health-green));
     
-    /* Dégradés principaux obligatoires selon spécifications */
-    --gradient-hero: linear-gradient(90deg, #2563eb 0%, #1d4ed8 50%, #10b981 100%);
-    --gradient-primary: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
-    --gradient-record: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    --gradient-pause: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    --gradient-stop: linear-gradient(135deg, #64748b 0%, #475569 100%);
-    --gradient-replay: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-    --gradient-recorded: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    /* ============================
+       COULEURS FONCTIONNELLES COMPLÈTES
+       ============================ */
+    --support-blue: #06b6d4;          /* Cyan pour support */
+    --support-orange: #f59e0b;        /* Orange d'accent */
+    --support-purple: #8b5cf6;        /* Violet d'accent */
+    --support-red: #ef4444;           /* Rouge d'alerte */
+    --support-gray: #64748b;          /* Gris de support */
     
-    /* Legacy variables for backward compatibility */
-    --medical-blue: var(--primary-blue);
-    --medical-teal: var(--control-cyan-dark);
-    --health-green: var(--primary-green);
-    --warm-amber: var(--control-orange-dark);
-    --medical-red: var(--control-red-dark);
-    --professional-gray: var(--text-secondary);
-    --pure-white: var(--text-white);
-    --blue-primary: var(--primary-blue);
-    --blue-secondary: var(--control-cyan-dark);
-    --green-success: var(--primary-green);
-    --amber-warning: var(--control-orange-dark);
-    --red-error: var(--control-red-dark);
-    --gray-neutral: var(--text-secondary);
-    --white-base: var(--text-white);
+    /* Couleurs d'état */
+    --state-success: var(--health-green);
+    --state-warning: var(--support-orange);
+    --state-error: var(--support-red);
+    --state-info: var(--support-blue);
+    
+    /* Dégradés d'état */
+    --gradient-success: linear-gradient(135deg, var(--health-green-light) 0%, var(--health-green) 100%);
+    --gradient-warning: linear-gradient(135deg, #fbbf24 0%, var(--support-orange) 100%);
+    --gradient-error: linear-gradient(135deg, #f87171 0%, var(--support-red) 100%);
+    --gradient-info: linear-gradient(135deg, #22d3ee 0%, var(--support-blue) 100%);
+    
+    /* ============================
+       SURFACES ET ARRIÈRE-PLANS
+       ============================ */
+    --surface-primary: #ffffff;        /* Surface principale */
+    --surface-secondary: #f8fafc;      /* Surface secondaire */
+    --surface-tertiary: #f1f5f9;       /* Surface tertiaire */
+    --surface-elevated: #ffffff;       /* Surface surélevée */
+    --surface-hero: var(--gradient-diagonal); /* Surface hero */
+    
+    /* Bordures */
+    --border-primary: #e2e8f0;         /* Bordure principale */
+    --border-secondary: #cbd5e1;       /* Bordure secondaire */
+    --border-accent: var(--medical-blue); /* Bordure d'accent */
+    --border-focus: var(--medical-blue); /* Bordure de focus */
+    
+    /* ============================
+       TEXTES ET TYPOGRAPHIE
+       ============================ */
+    /* Couleurs de texte améliorées */
+    --text-primary: #0f172a;           /* Texte principal (plus foncé) */
+    --text-secondary: #334155;         /* Texte secondaire */
+    --text-tertiary: #64748b;          /* Texte tertiaire */
+    --text-quaternary: #94a3b8;        /* Texte de support */
+    --text-inverse: #ffffff;           /* Texte sur fond coloré */
+    --text-accent: var(--medical-blue); /* Texte d'accent */
+    
+    /* Couleurs legacy pour compatibilité */
+    --primary-blue: var(--medical-blue);
+    --primary-blue-dark: var(--medical-blue-dark);
+    --primary-green: var(--health-green);
+    --primary-green-dark: var(--health-green-dark);
+    --text-light: #f8fafc;
+    --text-white: #ffffff;
+    --bg-card: var(--surface-secondary);
+    --bg-page: var(--surface-primary);
+    --bg-light: var(--surface-secondary);
+    --border-color: var(--border-primary);
+    --border-light: var(--surface-tertiary);
+    
+    /* Couleurs fonctionnelles legacy */
+    --control-red-light: #ef4444;
+    --control-red-dark: var(--support-red);
+    --control-orange-light: #f59e0b;
+    --control-orange-dark: var(--support-orange);
+    --control-gray-light: var(--support-gray);
+    --control-gray-dark: #475569;
+    --control-cyan-light: var(--support-blue);
+    --control-cyan-dark: var(--support-blue);
+    
+    /* Legacy gradients */
+    --gradient-hero: var(--gradient-diagonal);
+    --gradient-record: var(--gradient-error);
+    --gradient-pause: var(--gradient-warning);
+    --gradient-stop: linear-gradient(135deg, var(--support-gray) 0%, #475569 100%);
+    --gradient-replay: var(--gradient-info);
+    --gradient-recorded: var(--gradient-success);
+    
+    /* Legacy system compatibility */
+    --medical-teal: var(--support-blue);
+    --warm-amber: var(--support-orange);
+    --medical-red: var(--support-red);
+    --professional-gray: var(--text-tertiary);
+    --pure-white: var(--surface-primary);
+    --blue-primary: var(--medical-blue);
+    --blue-secondary: var(--support-blue);
+    --green-success: var(--health-green);
+    --amber-warning: var(--support-orange);
+    --red-error: var(--support-red);
+    --gray-neutral: var(--text-tertiary);
+    --white-base: var(--surface-primary);
     
     /* Shadows - Updated with new color system */
     --shadow-xs: 0 1px 2px 0 rgba(30, 64, 175, 0.05);

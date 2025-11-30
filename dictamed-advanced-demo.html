@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DictaMed - Démonstration Système de Design Avancé</title>
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Design System CSS Avancé -->
+    <link rel="stylesheet" href="dictamed-advanced-design-system.css">
+    
+    <style>
+        /* Styles supplémentaires pour la démonstration */
+        .demo-section {
+            margin-bottom: var(--space-12);
+            padding: var(--space-8);
+            background: var(--surface-secondary);
+            border-radius: var(--radius-xl);
+        }
+        
+        .gradient-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin: var(--space-6) 0;
+        }
+        
+        .gradient-sample {
+            height: 100px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: var(--font-semibold);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .states-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-6);
+        }
+        
+        .component-demo {
+            padding: var(--space-6);
+            background: var(--surface-primary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-primary);
+        }
+        
+        .interactive-demo {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .interactive-demo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+        
+        .interactive-demo:hover::before {
+            left: 100%;
+        }
+    </style>
+</head>
+<body class="bg-primary">
+    
+    <!-- Header avec gradient hero -->
+    <header class="hero-section text-center p-8 mb-8">
+        <div class="container">
+            <h1 class="text-5xl font-bold text-inverse mb-4">
+                DictaMed Design System
+                <span class="text-gradient-hero block text-3xl mt-2">Avancé</span>
+            </h1>
+            <p class="text-xl text-inverse opacity-90 mb-6">
+                Refonte complète avec gradients directionnels et états d'interaction
+            </p>
+            <div class="flex justify-center gap-4">
+                <button class="btn btn-hero btn-lg">
+                    <span>🚀</span>
+                    <span>Explorer le Système</span>
+                </button>
+                <button class="btn btn-secondary btn-lg">
+                    <span>📚</span>
+                    <span>Documentation</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <!-- Section Palette de Couleurs -->
+        <section class="demo-section">
+            <h2 class="text-3xl font-bold text-primary mb-6">🎨 Palette de Couleurs Avancée</h2>
+            <p class="text-lg text-secondary mb-6">
+                Système basé sur les couleurs existantes avec gradients directionnels cohérents
+            </p>
+            
+            <div class="gradient-showcase">
+                <div class="gradient-sample" style="background: linear-gradient(135deg, #2563eb 0%, #2563eb 50%, #10b981 100%);">
+                    Gradient Principal 135°
+                </div>
+                <div class="gradient-sample" style="background: linear-gradient(45deg, #2563eb 0%, #1d4ed8 25%, #10b981 100%);">
+                    Gradient Diagonal 45°
+                </div>
+                <div class="gradient-sample" style="background: var(--gradient-primary);">
+                    CSS Variable Primary
+                </div>
+                <div class="gradient-sample" style="background: var(--gradient-diagonal);">
+                    CSS Variable Diagonal
+                </div>
+            </div>
+            
+            <!-- Couleurs de base -->
+            <div class="grid grid-cols-4 gap-4 mt-8">
+                <div class="text-center">
+                    <div style="width: 100%; height: 80px; background: #2563eb; border-radius: var(--radius-lg); margin-bottom: var(--space-2);"></div>
+                    <h4 class="font-semibold">Medical Blue</h4>
+                    <p class="text-sm text-secondary">#2563eb</p>
+                </div>
+                <div class="text-center">
+                    <div style="width: 100%; height: 80px; background: #10b981; border-radius: var(--radius-lg); margin-bottom: var(--space-2);"></div>
+                    <h4 class="font-semibold">Health Green</h4>
+                    <p class="text-sm text-secondary">#10b981</p>
+                </div>
+                <div class="text-center">
+                    <div style="width: 100%; height: 80px; background: #0f172a; border-radius: var(--radius-lg); margin-bottom: var(--space-2);"></div>
+                    <h4 class="font-semibold">Text Primary</h4>
+                    <p class="text-sm text-secondary">#0f172a</p>
+                </div>
+                <div class="text-center">
+                    <div style="width: 100%; height: 80px; background: #64748b; border-radius: var(--radius-lg); margin-bottom: var(--space-2);"></div>
+                    <h4 class="font-semibold">Text Secondary</h4>
+                    <p class="text-sm text-secondary">#64748b</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section États d'Interaction -->
+        <section class="demo-section">
+            <h2 class="text-3xl font-bold text-primary mb-6">⚡ États d'Interaction Cohérents</h2>
+            <p class="text-lg text-secondary mb-6">
+                Variables d'état standardisées pour tous les composants interactifs
+            </p>
+            
+            <div class="states-demo">
+                <div class="component-demo">
+                    <h4 class="font-semibold mb-4">Boutons - Tous les États</h4>
+                    <div class="flex flex-col gap-3">
+                        <button class="btn btn-primary">État Normal</button>
+                        <button class="btn btn-primary" style="background-color: var(--state-hover-bg); border-color: var(--state-hover-border); color: var(--state-hover-text);">Hover State</button>
+                        <button class="btn btn-primary" style="background-color: var(--state-focus-bg); border-color: var(--state-focus-border); box-shadow: 0 0 0 4px var(--state-focus-ring);">Focus State</button>
+                        <button class="btn btn-primary" style="background-color: var(--state-active-bg); border-color: var(--state-active-border); color: var(--state-active-text);">Active State</button>
+                        <button class="btn btn-primary" disabled>Disabled State</button>
+                    </div>
+                </div>
+                
+                <div class="component-demo">
+                    <h4 class="font-semibold mb-4">Formulaires - Validation</h4>
+                    <div class="form-group">
+                        <label class="form-label">Champ Normal</label>
+                        <input class="form-input" type="text" placeholder="Texte normal">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Champ Focus</label>
+                        <input class="form-input" type="text" placeholder="État focus" style="border-color: var(--state-focus-border); box-shadow: 0 0 0 4px var(--state-focus-ring);">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Champ Invalide</label>
+                        <input class="form-input" type="text" placeholder="Erreur" style="border-color: var(--state-error); box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Composants avec Gradients -->
+        <section class="demo-section">
+            <h2 class="text-3xl font-bold text-primary mb-6">🧩 Composants avec Gradients</h2>
+            
+            <div class="grid grid-cols-2 gap-6">
+                <div class="card card-hero interactive-demo">
+                    <h3 class="text-2xl font-bold text-inverse mb-4">Carte Hero Animée</h3>
+                    <p class="text-inverse opacity-90 mb-4">
+                        Gradient diagonal avec animation de gradient-shift sur 6 secondes
+                    </p>
+                    <button class="btn btn-secondary">Action sur Hero</button>
+                </div>
+                
+                <div class="card">
+                    <h3 class="text-xl font-semibold mb-4">Carte Standard</h3>
+                    <p class="text-secondary mb-4">
+                        Surface élevée avec ombre et bordure de accent
+                    </p>
+                    <div class="flex gap-3">
+                        <button class="btn btn-sm btn-primary">Action</button>
+                        <button class="btn btn-sm btn-secondary">Secondaire</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Boutons spécialisés -->
+            <div class="mt-8">
+                <h4 class="font-semibold mb-4">Boutons de Contrôle Spécialisés</h4>
+                <div class="flex flex-wrap gap-4">
+                    <button class="btn btn-record">
+                        <span>🎙️</span>
+                        <span>Enregistrer</span>
+                    </button>
+                    <button class="btn btn-pause">
+                        <span>⏸️</span>
+                        <span>Pause</span>
+                    </button>
+                    <button class="btn btn-success">
+                        <span>✅</span>
+                        <span>Succès</span>
+                    </button>
+                    <button class="btn btn-lg btn-primary">
+                        <span>🔥</span>
+                        <span>Action Importante</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Responsive Design -->
+        <section class="demo-section">
+            <h2 class="text-3xl font-bold text-primary mb-6">📱 Design Responsive Adaptatif</h2>
+            <p class="text-lg text-secondary mb-6">
+                Gradients directionnels adaptés selon la taille d'écran
+            </p>
+            
+            <!-- Simuler les différents breakpoints -->
+            <div class="space-y-6">
+                <div class="p-6 bg-tertiary rounded-lg">
+                    <h4 class="font-semibold mb-2">Mobile (< 600px)</h4>
+                    <p class="text-secondary mb-4">Gradient diagonal obligatoire (45°)</p>
+                    <div style="height: 80px; background: var(--gradient-diagonal); border-radius: var(--radius-lg);" class="w-full"></div>
+                </div>
+                
+                <div class="p-6 bg-tertiary rounded-lg">
+                    <h4 class="font-semibold mb-2">Desktop (> 960px)</h4>
+                    <p class="text-secondary mb-4">Gradient principal optimisé (135°)</p>
+                    <div style="height: 80px; background: var(--gradient-primary); border-radius: var(--radius-lg);" class="w-full"></div>
+                </div>
+                
+                <div class="p-6 bg-tertiary rounded-lg">
+                    <h4 class="font-semibold mb-2">Animation (6 secondes)</h4>
+                    <p class="text-secondary mb-4">Gradient avec mouvement fluide</p>
+                    <div style="height: 80px; background: var(--gradient-diagonal); border-radius: var(--radius-lg); animation: gradient-shift 6s ease-in-out infinite; background-size: 200% 200%;" class="w-full"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Accessibilité -->
+        <section class="demo-section">
+            <h2 class="text-3xl font-bold text-primary mb-6">♿ Accessibilité et Contraste</h2>
+            
+            <div class="grid grid-cols-2 gap-6">
+                <div class="card">
+                    <h4 class="font-semibold mb-4">Test de Contraste</h4>
+                    <div class="space-y-3">
+                        <div style="padding: var(--space-3); background: var(--text-primary); color: var(--surface-primary); border-radius: var(--radius-sm);">
+                            Texte principal sur fond clair (AAA: 7:1+)
+                        </div>
+                        <div style="padding: var(--space-3); background: var(--surface-primary); color: var(--text-primary); border-radius: var(--radius-sm); border: 1px solid var(--border-primary);">
+                            Texte principal sur fond clair (AA: 4.5:1+)
+                        </div>
+                        <div style="padding: var(--space-3); background: var(--gradient-primary); color: var(--text-inverse); border-radius: var(--radius-sm);">
+                            Texte sur gradient (Blanc garanti)
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h4 class="font-semibold mb-4">Focus Visible</h4>
+                    <div class="space-y-3">
+                        <button class="btn btn-secondary">Focus Normal</button>
+                        <button class="btn btn-primary" style="outline: 2px solid var(--medical-blue); outline-offset: 2px;">Focus Personnalisé</button>
+                        <a href="#" class="text-accent">Lien avec focus</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Animations -->
+        <section class="demo-section">
+            <h2 class="text-3xl font-bold text-primary mb-6">🎭 Animations et Micro-interactions</h2>
+            
+            <div class="grid grid-cols-3 gap-6">
+                <div class="card text-center">
+                    <h4 class="font-semibold mb-4">Micro Bounce</h4>
+                    <button class="btn btn-primary micro-bounce">Hover Me</button>
+                </div>
+                
+                <div class="card text-center">
+                    <h4 class="font-semibold mb-4">Micro Lift</h4>
+                    <button class="btn btn-secondary micro-lift">Hover Me</button>
+                </div>
+                
+                <div class="card text-center">
+                    <h4 class="font-semibold mb-4">Micro Glow</h4>
+                    <button class="btn btn-hero micro-glow">Hover Me</button>
+                </div>
+            </div>
+            
+            <!-- Progress et Loading -->
+            <div class="mt-8 grid grid-cols-2 gap-6">
+                <div class="card">
+                    <h4 class="font-semibold mb-4">Barre de Progression</h4>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 65%;"></div>
+                    </div>
+                </div>
+                
+                <div class="card text-center">
+                    <h4 class="font-semibold mb-4">Loading Spinner</h4>
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Thèmes -->
+        <section class="demo-section">
+            <h2 class="text-3xl font-bold text-primary mb-6">🎨 Thèmes et Variantes</h2>
+            
+            <div class="grid grid-cols-3 gap-6">
+                <div class="card theme-medical">
+                    <h4 class="font-semibold mb-2">Thème Médical</h4>
+                    <p class="text-sm text-secondary mb-4">Bleu ciel et vert santé</p>
+                    <button class="btn btn-primary w-full">Action</button>
+                </div>
+                
+                <div class="card theme-emergency">
+                    <h4 class="font-semibold mb-2">Thème Urgence</h4>
+                    <p class="text-sm text-secondary mb-4">Rouge et orange</p>
+                    <button class="btn btn-primary w-full">Action</button>
+                </div>
+                
+                <div class="card theme-lab">
+                    <h4 class="font-semibold mb-2">Thème Laboratoire</h4>
+                    <p class="text-sm text-secondary mb-4">Indigo et cyan</p>
+                    <button class="btn btn-primary w-full">Action</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer avec gradient -->
+    <footer class="hero-section mt-12 p-8">
+        <div class="container text-center">
+            <p class="text-inverse opacity-90">
+                © 2025 DictaMed - Système de Design Avancé
+            </p>
+            <p class="text-inverse opacity-70 text-sm mt-2">
+                Gradients directionnels • États d'interaction • Responsive design
+            </p>
+        </div>
+    </footer>
+
+    <!-- Script de démonstration -->
+    <script>
+        // Démonstration des interactions
+        console.log('%c🎨 DictaMed Advanced Design System', 'color: #2563eb; font-size: 18px; font-weight: bold;');
+        console.log('%cSystème de design avancé chargé:', 'color: #10b981; font-size: 14px;');
+        console.log('• Gradients directionnels (135°, 45°)');
+        console.log('• États d\'interaction cohérents');
+        console.log('• Responsive design adaptatif');
+        console.log('• Animations fluides (6s)');
+        console.log('• Accessibilité WCAG 2.1 AA/AAA');
+
+        // Animation de la barre de progression
+        setTimeout(() => {
+            const progressBar = document.querySelector('.progress-bar');
+            if (progressBar) {
+                progressBar.style.width = '85%';
+            }
+        }, 2000);
+
+        // Démonstration des micro-interactions
+        document.querySelectorAll('.micro-bounce, .micro-lift, .micro-glow').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+
+        // Info responsive
+        function updateResponsiveInfo() {
+            const width = window.innerWidth;
+            let breakpoint;
+            
+            if (width < 600) breakpoint = 'Mobile (< 600px)';
+            else if (width < 960) breakpoint = 'Tablette (600-960px)';
+            else if (width < 1280) breakpoint = 'Desktop (960-1280px)';
+            else breakpoint = 'XL Desktop (> 1280px)';
+            
+            console.log(`📱 Breakpoint actuel: ${breakpoint} (${width}px)`);
+        }
+        
+        window.addEventListener('resize', updateResponsiveInfo);
+        updateResponsiveInfo();
+
+        // Changement de thème démonstration
+        function changeTheme(themeName) {
+            const body = document.body;
+            body.className = body.className.replace(/theme-\w+/g, '');
+            body.classList.add(`theme-${themeName}`);
+            console.log(`🎨 Thème changé vers: ${themeName}`);
+        }
+
+        // Exposer les fonctions pour test
+        window.changeTheme = changeTheme;
+    </script>
+
+</body>
+</html>
