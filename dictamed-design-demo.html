@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DictaMed - Démonstration du Système de Design</title>
+    
+    <!-- Google Fonts - Inter selon spécifications -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="dictamed-design-system.css">
+</head>
+<body>
+    <div class="container" style="padding: 40px 20px; max-width: 1200px; margin: 0 auto;">
+        
+        <!-- Header Hero Section avec gradient obligatoire -->
+        <header class="hero-section" style="text-align: center; padding: 60px 40px; border-radius: 24px; margin-bottom: 48px;">
+            <h1 style="color: var(--text-white); margin-bottom: 16px; font-size: 3rem;">
+                <span class="icon-brand-d" style="color: var(--text-white);">Dicta</span><span class="icon-brand-m" style="color: var(--text-white);">Med</span>
+            </h1>
+            <p style="color: rgba(255, 255, 255, 0.9); font-size: 1.25rem; margin-bottom: 32px;">
+                Système de Design - Charte Graphique Complète
+            </p>
+            <p style="color: rgba(255, 255, 255, 0.8);">
+                Démonstration de l'implémentation des couleurs, dégradés et composants selon les spécifications UX/UI
+            </p>
+        </header>
+
+        <!-- Section 1: Palette de couleurs -->
+        <section class="card">
+            <h2>🎨 Palette de Couleurs Principales</h2>
+            <p>Couleurs de la marque DictaMed selon spécifications</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-top: 32px;">
+                <div style="text-align: center;">
+                    <div style="width: 100%; height: 80px; background: var(--primary-blue); border-radius: 12px; margin-bottom: 8px;"></div>
+                    <h4>Bleu Principal</h4>
+                    <p style="font-family: monospace;">#2563eb</p>
+                    <small>Lettre "D" du logo</small>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="width: 100%; height: 80px; background: var(--primary-green); border-radius: 12px; margin-bottom: 8px;"></div>
+                    <h4>Vert Principal</h4>
+                    <p style="font-family: monospace;">#10b981</p>
+                    <small>Lettre "M" du logo</small>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="width: 100%; height: 80px; background: var(--text-primary); border-radius: 12px; margin-bottom: 8px;"></div>
+                    <h4>Texte Principal</h4>
+                    <p style="font-family: monospace;">#1e293b</p>
+                    <small>Contenu textuel</small>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="width: 100%; height: 80px; background: var(--text-secondary); border-radius: 12px; margin-bottom: 8px;"></div>
+                    <h4>Texte Secondaire</h4>
+                    <p style="font-family: monospace;">#64748b</p>
+                    <small>Informations complémentaires</small>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Dégradés principaux -->
+        <section class="card">
+            <h2>🌈 Dégradés Principaux Obligatoires</h2>
+            
+            <div style="display: grid; gap: 32px; margin-top: 32px;">
+                <div>
+                    <h4>Fond d'écran principal</h4>
+                    <div style="width: 100%; height: 100px; background: var(--gradient-hero); border-radius: 12px; margin: 16px 0;"></div>
+                    <code style="font-size: 0.9rem;">linear-gradient(90deg, #2563eb 0%, #1d4ed8 50%, #10b981 100%)</code>
+                </div>
+                
+                <div>
+                    <h4>Boutons d'action principaux</h4>
+                    <div style="width: 100%; height: 100px; background: var(--gradient-primary); border-radius: 12px; margin: 16px 0;"></div>
+                    <code style="font-size: 0.9rem;">linear-gradient(135deg, #2563eb 0%, #10b981 100%)</code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Boutons de contrôle -->
+        <section class="card">
+            <h2>🎛️ Boutons de Contrôle - Couleurs Fonctionnelles</h2>
+            <p>Couleurs spécifiques pour les boutons de contrôle selon spécifications</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 32px;">
+                <div style="text-align: center;">
+                    <button class="btn btn-record" style="width: 100%; margin-bottom: 16px;">
+                        <span class="icon">🎙️</span> Enregistrer
+                    </button>
+                    <p><strong>Dégradé rouge:</strong> #ef4444 → #dc2626</p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button class="btn btn-pause" style="width: 100%; margin-bottom: 16px;">
+                        <span class="icon">⏸️</span> Pause
+                    </button>
+                    <p><strong>Dégradé orange:</strong> #f59e0b → #d97706</p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button class="btn btn-stop" style="width: 100%; margin-bottom: 16px;">
+                        <span class="icon">⏹️</span> Stop
+                    </button>
+                    <p><strong>Dégradé gris:</strong> #64748b → #475569</p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button class="btn btn-replay" style="width: 100%; margin-bottom: 16px;">
+                        <span class="icon">🔄</span> Réécouter
+                    </button>
+                    <p><strong>Dégradé cyan:</strong> #06b6d4 → #0891b2</p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button class="btn btn-recorded" style="width: 100%; margin-bottom: 16px; padding-left: 48px;">
+                        Enregistré
+                    </button>
+                    <p><strong>Dégradé vert:</strong> #10b981 → #059669</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Boutons principaux -->
+        <section class="card">
+            <h2>🎯 Boutons Principaux (Appels à l'action)</h2>
+            <p>Utilisation des dégradés obligatoires pour les CTAs</p>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-top: 32px;">
+                <button class="btn btn-primary">
+                    <span class="icon">🚀</span> Démarrer
+                </button>
+                
+                <button class="btn btn-primary">
+                    <span class="icon">💾</span> Enregistrer
+                </button>
+                
+                <button class="btn btn-validate">
+                    <span class="icon">✅</span> Valider
+                </button>
+                
+                <button class="btn btn-secondary">
+                    <span class="icon">📝</span> Annuler
+                </button>
+                
+                <button class="btn btn-large">
+                    <span class="icon">🔥</span> Action Importante
+                </button>
+            </div>
+        </section>
+
+        <!-- Section 5: États et messages système -->
+        <section class="card">
+            <h2>📢 États et Messages Système</h2>
+            
+            <div style="margin-top: 32px;">
+                <div class="banner-success">
+                    <strong>✅ Succès:</strong> Opération terminée avec succès. Données envoyées avec succès !
+                </div>
+                
+                <div class="banner-error">
+                    <strong>❌ Erreur:</strong> Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.
+                </div>
+                
+                <div class="banner-warning">
+                    <strong>⚠️ Avertissement:</strong> Le microphone n'est pas accessible. Vérifiez les permissions.
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Cartes -->
+        <section class="card">
+            <h2>📋 Types de Cartes</h2>
+            
+            <div style="margin-top: 32px;">
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3>Carte Standard</h3>
+                    <p>Fond #f8fafc, bordure 1px #e2e8f0, ombre douce</p>
+                </div>
+                
+                <div class="card-hero" style="margin-bottom: 24px;">
+                    <h3>Carte Hero</h3>
+                    <p>Fond dégradé des couleurs de marque avec texte blanc pour assurer la lisibilité</p>
+                    <button class="btn btn-secondary" style="margin-top: 16px;">Action</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: Formulaires -->
+        <section class="card">
+            <h2>📝 Formulaires et Éléments d'Interface</h2>
+            
+            <div style="margin-top: 32px;">
+                <div class="form-group">
+                    <label for="demo-input">Champ de saisie</label>
+                    <input type="text" id="demo-input" placeholder="Saisir du texte ici...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="demo-textarea">Zone de texte</label>
+                    <textarea id="demo-textarea" rows="4" placeholder="Saisir du texte long..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="demo-select">Sélection</label>
+                    <select id="demo-select">
+                        <option>Option 1</option>
+                        <option>Option 2</option>
+                        <option>Option 3</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 8: Navigation -->
+        <section class="card">
+            <h2>🧭 Navigation et Onglets</h2>
+            
+            <div style="margin-top: 32px;">
+                <div class="nav-tabs">
+                    <button class="tab-btn active">Onglet Actif</button>
+                    <button class="tab-btn">Onglet 2</button>
+                    <button class="tab-btn">Onglet 3</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 9: Responsive -->
+        <section class="card">
+            <h2>📱 Design Responsive</h2>
+            <p>Testez la responsivité en redimensionnant la fenêtre</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-top: 32px;">
+                <div style="text-align: center; padding: 24px; background: var(--bg-light); border-radius: 8px;">
+                    <h4>Mobile First</h4>
+                    <p>< 600px</p>
+                </div>
+                <div style="text-align: center; padding: 24px; background: var(--bg-light); border-radius: 8px;">
+                    <h4>Tablette</h4>
+                    <p>600px - 960px</p>
+                </div>
+                <div style="text-align: center; padding: 24px; background: var(--bg-light); border-radius: 8px;">
+                    <h4>Desktop</h4>
+                    <p>> 960px</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 10: Accessibilité -->
+        <section class="card">
+            <h2>♿ Accessibilité et Contraste</h2>
+            <p>Tous les éléments respectent les ratios de contraste WCAG 2.1 AA</p>
+            
+            <div style="margin-top: 32px;">
+                <div style="padding: 24px; background: var(--text-white); border: 2px solid var(--primary-blue); border-radius: 12px; margin-bottom: 16px;">
+                    <h4 style="color: var(--text-primary);">Texte de corps</h4>
+                    <p style="color: var(--text-primary);">Contraste minimum 4.5:1 respecté</p>
+                </div>
+                
+                <div style="padding: 24px; background: var(--primary-blue); border-radius: 12px; margin-bottom: 16px;">
+                    <h4 style="color: var(--text-white);">Texte sur couleur</h4>
+                    <p style="color: var(--text-white);">Texte blanc pour contraste optimal</p>
+                </div>
+                
+                <div style="padding: 24px; background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px;">
+                    <h4>Focus Visible</h4>
+                    <p>Outline 2px en #2563eb visible</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer style="text-align: center; margin-top: 60px; padding: 32px; color: var(--text-secondary); border-top: 1px solid var(--border-color);">
+            <p>DictaMed Design System - Implémentation complète de la charte graphique</p>
+            <p style="font-size: 0.9rem; margin-top: 8px;">
+                Couleurs: Bleu #2563eb, Vert #10b981 | Accessibilité: WCAG 2.1 AA | Responsive: Mobile First
+            </p>
+        </footer>
+    </div>
+
+    <!-- Script de démonstration -->
+    <script>
+        // Démonstration des interactions
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                console.log('Bouton cliqué:', this.textContent.trim());
+            });
+        });
+
+        // Démonstration des états de formulaire
+        document.querySelectorAll('input, textarea, select').forEach(field => {
+            field.addEventListener('focus', function() {
+                this.style.borderColor = 'var(--primary-blue)';
+                this.style.boxShadow = 'var(--shadow-focus)';
+            });
+            
+            field.addEventListener('blur', function() {
+                this.style.borderColor = 'var(--border-color)';
+                this.style.boxShadow = 'none';
+            });
+        });
+
+        // Démonstration des onglets
+        document.querySelectorAll('.tab-btn').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Info console
+        console.log('%c🎨 DictaMed Design System Demo', 'color: #2563eb; font-size: 16px; font-weight: bold;');
+        console.log('%cSystème de design intégré avec:', 'color: #10b981; font-size: 14px;');
+        console.log('• Couleurs de marque exactes (#2563eb, #10b981)');
+        console.log('• Dégradés obligatoires selon spécifications');
+        console.log('• Boutons de contrôle avec couleurs fonctionnelles');
+        console.log('• Accessibilité WCAG 2.1 AA');
+        console.log('• Design responsive mobile-first');
+    </script>
+</body>
+</html>

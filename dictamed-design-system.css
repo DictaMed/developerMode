@@ -1,0 +1,783 @@
+/* ==============================================
+   DICTAMED DESIGN SYSTEM - CHARTE GRAPHIQUE COMPLÈTE
+   Implémentation selon les spécifications UX/UI détaillées
+   
+   Palette de couleurs principales et secondaires :
+   - Bleu principal (D): #2563eb
+   - Vert principal (M): #10b981
+   - Texte principal: #1e293b
+   - Texte secondaire: #64748b
+   - Bordures: #e2e8f0
+   - Fond des cartes: #f8fafc
+   ============================================== */
+
+/* Variables CSS - Système de couleurs DictaMed */
+:root {
+  /* Palette principale - DictaMed Brand Colors */
+  --primary-blue: #2563eb;          /* Bleu principal de la marque (D) */
+  --primary-blue-dark: #1d4ed8;     /* Bleu foncé pour dégradés */
+  --primary-green: #10b981;         /* Vert principal de la marque (M) */
+  --primary-green-dark: #059669;    /* Vert foncé pour dégradés */
+  
+  /* Couleurs de texte */
+  --text-primary: #1e293b;          /* Texte principal */
+  --text-secondary: #64748b;        /* Texte secondaire */
+  --text-light: #f8fafc;           /* Texte clair sur fonds colorés */
+  --text-white: #ffffff;           /* Texte blanc */
+  
+  /* Couleurs de fond */
+  --bg-card: #f8fafc;              /* Fond des cartes */
+  --bg-page: #ffffff;              /* Fond principal de page */
+  --bg-light: #f8fafc;             /* Fond clair */
+  --bg-hero: linear-gradient(90deg, #2563eb 0%, #1d4ed8 50%, #10b981 100%);
+  
+  /* Bordures et séparateurs */
+  --border-color: #e2e8f0;         /* Bordures des éléments */
+  --border-light: #f1f5f9;         /* Bordures claires */
+  
+  /* Couleurs fonctionnelles - Boutons de contrôle */
+  --control-red-light: #ef4444;    /* Bouton Enregistrer (rouge clair) */
+  --control-red-dark: #dc2626;     /* Bouton Enregistrer (rouge foncé) */
+  --control-orange-light: #f59e0b; /* Bouton Pause (orange clair) */
+  --control-orange-dark: #d97706;  /* Bouton Pause (orange foncé) */
+  --control-gray-light: #64748b;   /* Bouton Stop (gris clair) */
+  --control-gray-dark: #475569;    /* Bouton Stop (gris foncé) */
+  --control-cyan-light: #06b6d4;   /* Bouton Réécouter (cyan clair) */
+  --control-cyan-dark: #0891b2;    /* Bouton Réécouter (cyan foncé) */
+  
+  /* États et messages système */
+  --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --error-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  --warning-bg: #fef3c7;
+  --warning-border: #f59e0b;
+  
+  /* Dégradés principaux obligatoires */
+  --gradient-hero: linear-gradient(90deg, #2563eb 0%, #1d4ed8 50%, #10b981 100%);
+  --gradient-primary: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
+  --gradient-record: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  --gradient-pause: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --gradient-stop: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  --gradient-replay: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  --gradient-recorded: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  
+  /* Ombres */
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.1);
+  --shadow-strong: 0 12px 40px rgba(0, 0, 0, 0.12);
+  --shadow-focus: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  
+  /* Animations et transitions */
+  --transition-fast: 0.2s ease-out;
+  --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Rayons de bordure */
+  --radius-sm: 8px;
+  --radius-base: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  
+  /* Espacement système (multiples de 8px) */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  
+  /* Typographie - Police Inter */
+  --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-size-xs: 0.875rem;    /* Petite taille */
+  --font-size-sm: 0.95rem;
+  --font-size-base: 1rem;      /* Texte de corps */
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;     /* H3 */
+  --font-size-3xl: 2rem;       /* H2 */
+  --font-size-4xl: 2.5rem;     /* H1 */
+  
+  /* Hauteur de ligne */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.6;
+  --line-height-loose: 1.8;
+  
+  /* Z-index */
+  --z-dropdown: 1000;
+  --z-modal: 1050;
+  --z-toast: 1100;
+}
+
+/* ==============================================
+   RESET ET BASE STYLES
+   ============================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
+  background: var(--bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==============================================
+   TYPOGRAPHIE
+   Hiérarchie selon spécifications DictaMed
+   ============================================== */
+
+h1 {
+  font-size: var(--font-size-4xl);
+  font-weight: 800;
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
+}
+
+h3 {
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+p {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+/* ==============================================
+   BACKGROUND GRADIENTS - Sections Hero et Cartes
+   ============================================== */
+
+.hero-section,
+.card-hero {
+  background: var(--gradient-hero);
+  color: var(--text-white);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before,
+.card-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Fond alternatif diagonal pour responsive (petits écrans) */
+@media (max-width: 600px) {
+  .hero-section,
+  .card-hero {
+    background: linear-gradient(45deg, #2563eb 0%, #1d4ed8 25%, #10b981 100%);
+  }
+}
+
+/* ==============================================
+   COMPOSANTS CARTES
+   Style selon spécifications DictaMed
+   ============================================== */
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-base);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  box-shadow: var(--shadow-soft);
+  transition: all var(--transition-base);
+  position: relative;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+  border-color: var(--primary-blue);
+}
+
+.card-hero {
+  background: var(--gradient-hero);
+  color: var(--text-white);
+  border: none;
+  padding: var(--space-5);
+  text-align: center;
+}
+
+.card-hero h2,
+.card-hero h3 {
+  color: var(--text-white);
+  margin-bottom: var(--space-3);
+}
+
+.card-hero p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--font-size-lg);
+}
+
+/* ==============================================
+   BOUTONS - Système complet DictaMed
+   ============================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: 12px 24px;
+  min-height: 44px; /* Hauteur minimale selon spécifications */
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--primary-blue);
+  outline-offset: 2px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1); /* Augmente la luminosité de 10% */
+  box-shadow: var(--shadow-medium);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.98);
+  transition: all 0.1s ease;
+}
+
+/* Bouton avec icône */
+.btn .icon {
+  font-size: var(--font-size-lg);
+  margin-right: var(--space-1);
+}
+
+/* ==============================================
+   BOUTONS PRINCIPAUX (Appels à l'action)
+   Dégradé linéaire du bleu principal vers le vert principal
+   ============================================== */
+
+.btn-primary,
+.btn-start,
+.btn-validate {
+  background: var(--gradient-primary);
+  color: var(--text-white);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-primary:hover,
+.btn-start:hover,
+.btn-validate:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #22c55e 100%);
+  box-shadow: var(--shadow-medium);
+}
+
+/* ==============================================
+   BOUTONS DE CONTRÔLE SPÉCIFIQUES
+   Couleurs fonctionnelles selon DictaMed
+   ============================================== */
+
+/* Bouton Enregistrer - Dégradé rouge */
+.btn-record {
+  background: var(--gradient-record);
+  color: var(--text-white);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.btn-record:hover {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+}
+
+/* Bouton Pause - Dégradé orange */
+.btn-pause {
+  background: var(--gradient-pause);
+  color: var(--text-white);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+}
+
+.btn-pause:hover {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+}
+
+/* Bouton Stop - Dégradé gris */
+.btn-stop {
+  background: var(--gradient-stop);
+  color: var(--text-white);
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25);
+}
+
+.btn-stop:hover {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+  box-shadow: 0 6px 20px rgba(100, 116, 139, 0.35);
+}
+
+/* Bouton Réécouter - Dégradé cyan */
+.btn-replay {
+  background: var(--gradient-replay);
+  color: var(--text-white);
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.25);
+}
+
+.btn-replay:hover {
+  background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.35);
+}
+
+/* Bouton Enregistré (état final) - Dégradé vert */
+.btn-recorded {
+  background: var(--gradient-recorded);
+  color: var(--text-white);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-recorded::before {
+  content: '✓';
+  position: absolute;
+  left: var(--space-2);
+  font-weight: bold;
+  font-size: var(--font-size-lg);
+  animation: checkmark 0.6s ease-out 0.3s both;
+}
+
+@keyframes checkmark {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-180deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2) rotate(-10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* ==============================================
+   BOUTONS SECONDAIRES
+   ============================================== */
+
+.btn-secondary {
+  background: var(--text-white);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-light);
+  border-color: var(--primary-blue);
+  color: var(--primary-blue);
+}
+
+/* ==============================================
+   BOUTONS DE GRANDE TAILLE (CTAs)
+   ============================================== */
+
+.btn-large {
+  padding: 16px 32px;
+  min-height: 52px;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.btn-large .icon {
+  font-size: var(--font-size-xl);
+}
+
+/* ==============================================
+   BANNIÈRES D'ÉTAT ET MESSAGES SYSTÈME
+   ============================================== */
+
+.banner {
+  padding: var(--space-3);
+  border-radius: var(--radius-base);
+  margin-bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+  position: relative;
+}
+
+.banner::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Bannière de succès */
+.banner-success {
+  background: var(--success-gradient);
+  color: var(--text-white);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.banner-success::before {
+  background: rgba(255, 255, 255, 0.9);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20,6 9,17 4,12'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center;
+}
+
+/* Bannière d'erreur */
+.banner-error {
+  background: var(--error-gradient);
+  color: var(--text-white);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.banner-error::before {
+  background: rgba(255, 255, 255, 0.9);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'%3E%3C/line%3E%3Cline x1='6' y1='6' x2='18' y2='18'%3E%3C/line%3E%3C/svg%3E") no-repeat center;
+}
+
+/* Bannière d'avertissement */
+.banner-warning {
+  background: var(--warning-bg);
+  color: var(--text-primary);
+  border: 2px solid var(--warning-border);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+.banner-warning::before {
+  background: var(--warning-border);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z'%3E%3C/path%3E%3Cpath d='M12 9v4'%3E%3C/path%3E%3Cpath d='m12 17 .01 0'%3E%3C/path%3E%3C/svg%3E") no-repeat center;
+}
+
+/* ==============================================
+   FORMULAIRES ET ÉLÉMENTS D'INTERFACE
+   ============================================== */
+
+.form-group {
+  margin-bottom: var(--space-3);
+}
+
+label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  background: var(--text-white);
+  transition: all var(--transition-base);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: var(--shadow-focus);
+  background: var(--text-white);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+/* ==============================================
+   NAVIGATION ET ONGLETS
+   Indicateur d'élément actif en #2563eb
+   ============================================== */
+
+.nav-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tab-btn {
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.tab-btn.active {
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border-bottom: 3px solid var(--primary-blue);
+}
+
+.tab-btn:hover:not(.active) {
+  color: var(--primary-blue);
+  background: rgba(37, 99, 235, 0.05);
+}
+
+/* ==============================================
+   ICÔNES DE MARQUE
+   Couleur de la marque pour les lettres du logo
+   ============================================== */
+
+.icon-brand-d {
+  color: var(--primary-blue);
+  font-weight: 800;
+}
+
+.icon-brand-m {
+  color: var(--primary-green);
+  font-weight: 800;
+}
+
+/* ==============================================
+   RESPONSIVE DESIGN
+   Breakpoints selon spécifications
+   ============================================== */
+
+/* Petits écrans < 600px */
+@media (max-width: 600px) {
+  :root {
+    --font-size-4xl: 2rem;
+    --font-size-3xl: 1.75rem;
+    --font-size-2xl: 1.375rem;
+  }
+  
+  .card {
+    padding: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 14px 20px;
+    min-height: 44px; /* Respecter la hauteur minimale */
+  }
+  
+  .banner {
+    padding: var(--space-2);
+    font-size: var(--font-size-sm);
+  }
+  
+  /* Fond diagonal pour petits écrans */
+  .hero-section {
+    background: linear-gradient(45deg, #2563eb 0%, #1d4ed8 25%, #10b981 100%);
+  }
+}
+
+/* Moyens écrans 600px - 960px */
+@media (min-width: 600px) and (max-width: 960px) {
+  .card {
+    padding: calc(var(--space-4) + var(--space-1));
+  }
+  
+  .btn {
+    min-width: 120px;
+  }
+}
+
+/* Grands écrans > 960px */
+@media (min-width: 960px) {
+  .card {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* ==============================================
+   ÉTATS SPÉCIAUX ET ANIMATIONS
+   ============================================== */
+
+/* État de chargement */
+.loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid transparent;
+  border-top: 2px solid var(--primary-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* États d'accessibilité */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus amélioré pour l'accessibilité */
+*:focus-visible {
+  outline: 2px solid var(--primary-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Contraste élevé pour l'accessibilité */
+@media (prefers-contrast: high) {
+  :root {
+    --primary-blue: #1d4ed8;
+    --text-primary: #000000;
+    --border-color: #000000;
+  }
+  
+  .btn {
+    border: 2px solid currentColor;
+  }
+}
+
+/* ==============================================
+   UTILITAIRES ET CLASSES D'ASSISTANCE
+   ============================================== */
+
+/* Classes de visibilité */
+.hidden {
+  display: none !important;
+}
+
+.visible {
+  display: block !important;
+}
+
+/* Classes de texte */
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Classes d'espacement */
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--space-1); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+.mb-4 { margin-bottom: var(--space-4); }
+
+.p-1 { padding: var(--space-1); }
+.p-2 { padding: var(--space-2); }
+.p-3 { padding: var(--space-3); }
+.p-4 { padding: var(--space-4); }
+
+/* Classes de couleur */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-blue { color: var(--primary-blue); }
+.text-green { color: var(--primary-green); }
+
+/* Classes de fond */
+.bg-primary { background-color: var(--primary-blue); }
+.bg-green { background-color: var(--primary-green); }
+.bg-light { background-color: var(--bg-light); }
+
+/* ==============================================
+   IMPRESSION
+   ============================================== */
+
+@media print {
+  .btn,
+  .nav-tabs,
+  .banner {
+    display: none !important;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid #000;
+    break-inside: avoid;
+  }
+  
+  body {
+    background: white;
+    color: black;
+  }
+}

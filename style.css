@@ -1,30 +1,66 @@
-/* Variables CSS - Sophisticated Seven Color Design System */
+/* Variables CSS - DictaMed Design System selon spécifications UX/UI */
 :root {
-    /* Primary Brand Colors - Medical Context */
-    --medical-blue: #1e40af;        /* Primary brand, trust, reliability */
-    --medical-blue-light: #3b82f6;   /* Hover states, accessibility */
-    --medical-blue-dark: #1e3a8a;    /* Pressed states, depth */
+    /* Palette principale - DictaMed Brand Colors selon spécifications */
+    --primary-blue: #2563eb;          /* Bleu principal de la marque (D) */
+    --primary-blue-dark: #1d4ed8;     /* Bleu foncé pour dégradés */
+    --primary-green: #10b981;         /* Vert principal de la marque (M) */
+    --primary-green-dark: #059669;    /* Vert foncé pour dégradés */
     
-    /* Secondary Brand Colors */
-    --medical-teal: #0891b2;         /* Secondary actions, navigation */
-    --health-green: #059669;         /* Success states, positive feedback */
+    /* Couleurs de texte selon spécifications */
+    --text-primary: #1e293b;          /* Texte principal */
+    --text-secondary: #64748b;        /* Texte secondaire */
+    --text-light: #f8fafc;           /* Texte clair sur fonds colorés */
+    --text-white: #ffffff;           /* Texte blanc */
     
-    /* Alert & Warning System */
-    --warm-amber: #d97706;           /* Warnings, cautions, attention */
-    --medical-red: #dc2626;          /* Errors, critical alerts */
+    /* Couleurs de fond selon spécifications */
+    --bg-card: #f8fafc;              /* Fond des cartes */
+    --bg-page: #ffffff;              /* Fond principal de page */
+    --bg-light: #f8fafc;             /* Fond clair */
     
-    /* Neutral Foundation */
-    --professional-gray: #475569;    /* Text, borders, structural */
-    --pure-white: #ffffff;           /* Primary background */
+    /* Bordures selon spécifications */
+    --border-color: #e2e8f0;         /* Bordures des éléments */
+    --border-light: #f1f5f9;         /* Bordures claires */
     
-    /* Comprehensive Color System - 7 Color Palette */
-    --blue-primary: var(--medical-blue);
-    --blue-secondary: var(--medical-teal);
-    --green-success: var(--health-green);
-    --amber-warning: var(--warm-amber);
-    --red-error: var(--medical-red);
-    --gray-neutral: var(--professional-gray);
-    --white-base: var(--pure-white);
+    /* Couleurs fonctionnelles - Boutons de contrôle selon spécifications */
+    --control-red-light: #ef4444;    /* Bouton Enregistrer (rouge clair) */
+    --control-red-dark: #dc2626;     /* Bouton Enregistrer (rouge foncé) */
+    --control-orange-light: #f59e0b; /* Bouton Pause (orange clair) */
+    --control-orange-dark: #d97706;  /* Bouton Pause (orange foncé) */
+    --control-gray-light: #64748b;   /* Bouton Stop (gris clair) */
+    --control-gray-dark: #475569;    /* Bouton Stop (gris foncé) */
+    --control-cyan-light: #06b6d4;   /* Bouton Réécouter (cyan clair) */
+    --control-cyan-dark: #0891b2;    /* Bouton Réécouter (cyan foncé) */
+    
+    /* États et messages système selon spécifications */
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --error-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    --warning-bg: #fef3c7;
+    --warning-border: #f59e0b;
+    
+    /* Dégradés principaux obligatoires selon spécifications */
+    --gradient-hero: linear-gradient(90deg, #2563eb 0%, #1d4ed8 50%, #10b981 100%);
+    --gradient-primary: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
+    --gradient-record: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    --gradient-pause: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    --gradient-stop: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    --gradient-replay: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    --gradient-recorded: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    
+    /* Legacy variables for backward compatibility */
+    --medical-blue: var(--primary-blue);
+    --medical-teal: var(--control-cyan-dark);
+    --health-green: var(--primary-green);
+    --warm-amber: var(--control-orange-dark);
+    --medical-red: var(--control-red-dark);
+    --professional-gray: var(--text-secondary);
+    --pure-white: var(--text-white);
+    --blue-primary: var(--primary-blue);
+    --blue-secondary: var(--control-cyan-dark);
+    --green-success: var(--primary-green);
+    --amber-warning: var(--control-orange-dark);
+    --red-error: var(--control-red-dark);
+    --gray-neutral: var(--text-secondary);
+    --white-base: var(--text-white);
     
     /* Shadows - Updated with new color system */
     --shadow-xs: 0 1px 2px 0 rgba(30, 64, 175, 0.05);
@@ -189,18 +225,28 @@ header {
     letter-spacing: -3px;
     white-space: nowrap;
     position: relative;
-    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-blue) 50%, var(--health-green) 100%);
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-    animation: logoGradientShift 6s ease-in-out infinite;
-    text-shadow: none;
-    filter: drop-shadow(0 8px 32px rgba(30, 64, 175, 0.4));
-    transform: perspective(500px) rotateX(3deg) translateZ(0);
     transition: all var(--transition-slow);
     user-select: none;
+}
+
+.logo-dicta {
+    color: var(--primary-blue); /* Bleu principal pour le "D" de DictaMed */
+    filter: drop-shadow(0 8px 32px rgba(37, 99, 235, 0.4));
+}
+
+.logo-med {
+    color: var(--primary-green); /* Vert principal pour le "M" de Med */
+    filter: drop-shadow(0 8px 32px rgba(16, 185, 129, 0.4));
+}
+
+.logo:hover .logo-dicta {
+    transform: scale(1.05);
+    filter: drop-shadow(0 8px 16px rgba(37, 99, 235, 0.5));
+}
+
+.logo:hover .logo-med {
+    transform: scale(1.05);
+    filter: drop-shadow(0 8px 16px rgba(16, 185, 129, 0.5));
 }
 
 @keyframes logoGradientShift {
@@ -547,14 +593,14 @@ h3 {
     font-weight: 600;
 }
 
-/* Cards - Modern Design */
+/* Cards - DictaMed Design System selon spécifications */
 .card {
-    background: #ffffff;
-    border-radius: var(--radius-2xl);
+    background: var(--bg-card);
+    border-radius: 12px;
     padding: 32px;
     margin-bottom: 28px;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--blue-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-color);
     transition: all var(--transition-base);
     position: relative;
 }
@@ -566,14 +612,43 @@ h3 {
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--blue-primary);
+    background: var(--primary-blue);
     opacity: 0.8;
+    border-radius: 12px 12px 0 0;
 }
 
 .card:hover {
-    box-shadow: var(--shadow-xl);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
-    border-color: var(--blue-primary);
+    border-color: var(--primary-blue);
+}
+
+/* Cartes avec fond dégradé selon spécifications */
+.card-hero {
+    background: var(--gradient-hero);
+    color: var(--text-white);
+    border: none;
+    padding: 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-hero::before {
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+    height: auto;
+    border-radius: 0;
+}
+
+.card-hero h2,
+.card-hero h3 {
+    color: var(--text-white);
+    margin-bottom: 24px;
+}
+
+.card-hero p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.125rem;
 }
 
 /* Formulaires - Enhanced Modern Design */
@@ -938,51 +1013,131 @@ textarea:focus::placeholder {
     z-index: 2;
 }
 
-/* Button Color Variants - Enhanced Medical Color System */
-.btn-record {
-    background: var(--medical-blue);
-    color: white;
+/* Button Color Variants - DictaMed Design System selon spécifications */
+
+/* Boutons principaux (Appels à l'action) - Dégradé linéaire du bleu principal vers le vert principal */
+.btn-primary,
+.btn-start,
+.btn-validate {
+    background: var(--gradient-primary);
+    color: var(--text-white);
     box-shadow: var(--shadow-lg);
+    filter: brightness(1) saturate(1);
+    transition: all var(--transition-base);
+}
+
+.btn-primary:hover,
+.btn-start:hover,
+.btn-validate:hover {
+    background: linear-gradient(135deg, #3b82f6 0%, #22c55e 100%);
+    filter: brightness(1.1) saturate(1.1); /* Augmente la luminosité de 10% */
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-2px);
+}
+
+/* Bouton Enregistrer - Dégradé rouge selon spécifications */
+.btn-record {
+    background: var(--gradient-record);
+    color: var(--text-white);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
 }
 
 .btn-record:hover {
-    background: var(--medical-blue-dark);
-    box-shadow: var(--shadow-xl);
+    background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+    filter: brightness(1.1);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+    transform: translateY(-2px);
 }
 
+/* Bouton Pause - Dégradé orange selon spécifications */
+.btn-pause {
+    background: var(--gradient-pause);
+    color: var(--text-white);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+}
+
+.btn-pause:hover {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    filter: brightness(1.1);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+    transform: translateY(-2px);
+}
+
+/* Bouton Stop - Dégradé gris selon spécifications */
 .btn-stop {
-    background: var(--medical-red);
-    color: white;
-    box-shadow: var(--shadow-error);
+    background: var(--gradient-stop);
+    color: var(--text-white);
+    box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25);
 }
 
 .btn-stop:hover {
-    background: #b91c1c;
-    box-shadow: var(--shadow-xl);
+    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+    filter: brightness(1.1);
+    box-shadow: 0 6px 20px rgba(100, 116, 139, 0.35);
+    transform: translateY(-2px);
 }
 
-.btn-primary {
-    background: var(--medical-blue);
-    color: white;
-    box-shadow: var(--shadow-lg);
+/* Bouton Réécouter - Dégradé cyan selon spécifications */
+.btn-replay {
+    background: var(--gradient-replay);
+    color: var(--text-white);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.25);
 }
 
-.btn-primary:hover {
-    background: var(--medical-blue-dark);
-    box-shadow: var(--shadow-xl);
+.btn-replay:hover {
+    background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+    filter: brightness(1.1);
+    box-shadow: 0 6px 20px rgba(6, 182, 212, 0.35);
+    transform: translateY(-2px);
+}
+
+/* Bouton Enregistré (état final) - Dégradé vert selon spécifications */
+.btn-delete.btn-recorded,
+.btn-recorded {
+    background: var(--gradient-recorded);
+    color: var(--text-white);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-recorded::before {
+    content: '✓';
+    position: absolute;
+    left: 16px;
+    font-weight: bold;
+    font-size: 1.2em;
+    animation: checkmark 0.6s ease-out 0.3s both;
+}
+
+@keyframes checkmark {
+    0% {
+        opacity: 0;
+        transform: scale(0) rotate(-180deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2) rotate(-10deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
 }
 
 .btn-secondary {
-    background: var(--pure-white);
-    color: var(--medical-teal);
-    border: 1px solid var(--medical-teal);
+    background: var(--text-white);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
     box-shadow: var(--shadow-md);
 }
 
 .btn-secondary:hover {
-    background: var(--medical-teal);
-    border-color: var(--medical-teal);
-    color: white;
+    background: var(--bg-light);
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
 .btn-submit {
@@ -1041,15 +1196,104 @@ textarea:focus::placeholder {
     margin-bottom: 24px;
 }
 
-/* Envoi des données */
+/* Submit Section - DictaMed Design System */
 .submit-section {
     text-align: center;
     margin-top: 35px;
     padding: 35px;
-    background: #ffffff;
+    background: var(--bg-card);
     border-radius: 16px;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--blue-primary);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    position: relative;
+}
+
+.submit-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    border-radius: 16px 16px 0 0;
+}
+
+.submit-section .btn-submit {
+    background: var(--gradient-primary);
+    color: var(--text-white);
+    font-size: 1.1rem;
+    padding: 18px 48px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    min-height: 48px;
+}
+
+.submit-section .btn-submit:hover {
+    background: linear-gradient(135deg, #3b82f6 0%, #22c55e 100%);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+/* Bannières d'état selon spécifications */
+.banner {
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: 600;
+    position: relative;
+}
+
+.banner::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Succès - fond utilisant le dégradé vert du bouton "Enregistré" */
+.banner-success {
+    background: var(--success-gradient);
+    color: var(--text-white);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.banner-success::before {
+    background: rgba(255, 255, 255, 0.9);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20,6 9,17 4,12'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center;
+}
+
+/* Erreur - fond utilisant le dégradé rouge du bouton "Enregistrer" */
+.banner-error {
+    background: var(--error-gradient);
+    color: var(--text-white);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.banner-error::before {
+    background: rgba(255, 255, 255, 0.9);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'%3E%3C/line%3E%3Cline x1='6' y1='6' x2='18' y2='18'%3E%3C/line%3E%3C/svg%3E") no-repeat center;
+}
+
+/* Avertissement - fond clair combiné à une bordure orange */
+.banner-warning {
+    background: var(--warning-bg);
+    color: var(--text-primary);
+    border: 2px solid var(--warning-border);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+.banner-warning::before {
+    background: var(--warning-border);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z'%3E%3C/path%3E%3Cpath d='M12 9v4'%3E%3C/path%3E%3Cpath d='m12 17 .01 0'%3E%3C/path%3E%3C/svg%3E") no-repeat center;
 }
 
 .sections-count {
@@ -1284,6 +1528,58 @@ footer a:hover {
 
 footer a:hover::after {
     width: 100%;
+}
+
+/* Responsive Design - Selon spécifications DictaMed */
+
+/* Petits écrans < 600px */
+@media (max-width: 600px) {
+    /* Fond diagonal pour petits écrans selon spécifications */
+    .hero-section,
+    .card-hero {
+        background: linear-gradient(45deg, #2563eb 0%, #1d4ed8 25%, #10b981 100%);
+    }
+    
+    .card {
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+    
+    .btn {
+        width: 100%;
+        padding: 14px 20px;
+        min-height: 44px; /* Respecter la hauteur minimale selon spécifications */
+    }
+    
+    .banner {
+        padding: 16px;
+        font-size: 0.95rem;
+    }
+    
+    /* Typographie responsive selon spécifications */
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.375rem; }
+}
+
+/* Moyens écrans 600px - 960px */
+@media (min-width: 600px) and (max-width: 960px) {
+    .card {
+        padding: calc(32px + 8px);
+    }
+    
+    .btn {
+        min-width: 120px;
+    }
+}
+
+/* Grands écrans > 960px */
+@media (min-width: 960px) {
+    .card {
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
 }
 
 /* Responsive - Full viewport maintenance */
