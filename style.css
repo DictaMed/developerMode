@@ -37,6 +37,14 @@ html, body {
     overflow-x: hidden;
 }
 
+/* Ensure main and container elements use full viewport */
+main, .container {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     color: var(--gray-dark);
@@ -49,9 +57,11 @@ body {
 }
 
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: none;
+    margin: 0;
     padding: 0 20px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* Header */
@@ -59,12 +69,14 @@ header {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
     backdrop-filter: blur(10px);
     box-shadow: var(--shadow-md);
-    padding: 15px 30px;
-    margin-bottom: 30px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
     position: sticky;
     top: 0;
     z-index: 1000;
     border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .header-content {
@@ -557,10 +569,13 @@ header {
     }
 }
 
-/* Enhanced tab content transitions */
+/* Enhanced tab content transitions - Full viewport */
 .tab-content {
     display: none;
     animation: fadeIn 0.4s ease;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 20px;
 }
 
 .tab-content.active {
@@ -1200,9 +1215,11 @@ footer {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
     backdrop-filter: blur(10px);
     padding: 25px 0;
-    margin-top: 60px;
+    margin-top: 40px;
     text-align: center;
     box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* Responsive */
