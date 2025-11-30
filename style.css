@@ -24,7 +24,7 @@
     --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15), 0 10px 10px rgba(0, 0, 0, 0.04);
 }
 
-/* Reset et base - Full viewport */
+/* Reset et base - Complete full viewport occupation */
 * {
     margin: 0;
     padding: 0;
@@ -35,14 +35,23 @@ html, body {
     height: 100%;
     width: 100%;
     overflow-x: hidden;
-}
-
-/* Ensure main and container elements use full viewport */
-main, .container {
-    width: 100%;
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+/* Universal full viewport constraints */
+html, body, main, .container, section, .tab-content {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box;
+}
+
+/* Remove any potential restrictive constraints */
+.container, main {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 
 body {
@@ -64,18 +73,45 @@ body {
     box-sizing: border-box;
 }
 
-/* Header */
+/* Root container elements - Full viewport occupation - FORCE OVERRIDE */
+main, .container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box;
+}
+
+/* Header - Full viewport sticky */
 header {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
     backdrop-filter: blur(10px);
     box-shadow: var(--shadow-md);
     padding: 15px 20px;
+    margin: 0;
     margin-bottom: 20px;
     position: sticky;
     top: 0;
     z-index: 1000;
     border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+    width: 100vw;
+    left: 0;
+    right: 0;
+    box-sizing: border-box;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+}
+
+/* Header content - Full width */
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
     width: 100%;
+    max-width: none;
+    margin: 0 auto;
+    padding: 0 20px;
     box-sizing: border-box;
 }
 
@@ -569,18 +605,30 @@ header {
     }
 }
 
-/* Enhanced tab content transitions - Full viewport */
+/* Tab content - Complete viewport coverage */
 .tab-content {
     display: none;
     animation: fadeIn 0.4s ease;
     width: 100%;
+    max-width: none;
     box-sizing: border-box;
     padding: 0 20px;
+    margin: 0;
+    position: relative;
 }
 
 .tab-content.active {
     display: block;
     animation: slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Main content area - Full viewport */
+main.container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
 /* Entrance animation for tabs */
@@ -1210,20 +1258,48 @@ input:focus {
     box-shadow: 0 0 20px rgba(37, 99, 235, 0.15);
 }
 
-/* Footer */
+/* Footer - Full viewport */
 footer {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
     backdrop-filter: blur(10px);
     padding: 25px 0;
-    margin-top: 40px;
+    margin: 40px 0 0 0;
     text-align: center;
     box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
-    width: 100%;
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
     box-sizing: border-box;
 }
 
-/* Responsive */
+/* Responsive - Full viewport maintenance */
 @media (max-width: 768px) {
+    /* Maintain full viewport on mobile */
+    .container {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0 20px;
+    }
+
+    .header-content {
+        flex-direction: column;
+        gap: 16px;
+        align-items: center;
+        padding: 0 20px;
+    }
+
+    main.container {
+        padding: 0 20px;
+    }
+
+    .tab-content {
+        padding: 0 20px;
+    }
+
     .logo {
         font-size: 2.2rem;
     }
@@ -1234,6 +1310,7 @@ footer {
 
     .tabs-container {
         justify-content: flex-start;
+        margin: 0 -8px;
     }
 
     .tab-btn {
@@ -1283,7 +1360,23 @@ footer {
 }
 
 @media (max-width: 480px) {
+    /* Maintain full viewport on small mobile */
     .container {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0 15px;
+    }
+
+    main.container {
+        padding: 0 15px;
+    }
+
+    .tab-content {
+        padding: 0 15px;
+    }
+
+    .header-content {
         padding: 0 15px;
     }
 
