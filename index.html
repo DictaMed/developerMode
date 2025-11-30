@@ -64,52 +64,16 @@
         </div>
     </header>
 
-    <!-- Navigation flottante -->
-    <nav class="floating-nav" role="navigation" aria-label="Navigation principale">
-        <div class="fab-container">
-            <button class="fab" id="fab-main" aria-label="Menu de navigation" aria-expanded="false" aria-controls="fab-menu">
-                <svg class="fab-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </button>
-            
-            <div class="fab-menu" id="fab-menu" role="menu" aria-labelledby="fab-main">
-                <div class="fab-menu-header">
-                    <span class="fab-menu-title">Choisir un mode</span>
-                    <button class="fab-close" id="fab-close" aria-label="Fermer le menu">×</button>
-                </div>
-                <div class="fab-menu-items">
-                    <button class="fab-menu-item active" data-tab="mode-normal" role="menuitem">
-                        <span class="fab-menu-icon">📝</span>
-                        <span class="fab-menu-text">Mode Normal</span>
-                    </button>
-                    <button class="fab-menu-item" data-tab="mode-test" role="menuitem">
-                        <span class="fab-menu-icon">🧪</span>
-                        <span class="fab-menu-text">Mode Test</span>
-                    </button>
-                    <button class="fab-menu-item" data-tab="mode-dmi" role="menuitem">
-                        <span class="fab-menu-icon">📋</span>
-                        <span class="fab-menu-text">Mode DMI</span>
-                    </button>
-                    <hr class="fab-menu-separator">
-                    <button class="fab-menu-item" data-tab="guide" role="menuitem">
-                        <span class="fab-menu-icon">📖</span>
-                        <span class="fab-menu-text">Guide</span>
-                    </button>
-                    <button class="fab-menu-item" data-tab="faq" role="menuitem">
-                        <span class="fab-menu-icon">❓</span>
-                        <span class="fab-menu-text">FAQ</span>
-                    </button>
-                    <button class="fab-menu-item" data-tab="contact" role="menuitem">
-                        <span class="fab-menu-icon">📧</span>
-                        <span class="fab-menu-text">Contact</span>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="fab-backdrop" id="fab-backdrop"></div>
+    <!-- Navigation par onglets -->
+    <nav class="tabs-nav" role="navigation" aria-label="Navigation principale">
+        <div class="swipe-hint">👉 Faites glisser pour voir plus</div>
+        <div class="tabs-container">
+            <button class="tab-btn active" data-tab="mode-normal" aria-selected="true"><span class="tab-icon">📝</span>Mode Normal</button>
+            <button class="tab-btn" data-tab="guide" aria-selected="false"><span class="tab-icon">📖</span>Guide</button>
+            <button class="tab-btn" data-tab="contact" aria-selected="false"><span class="tab-icon">📧</span>Contact</button>
+            <button class="tab-btn" data-tab="faq" aria-selected="false"><span class="tab-icon">❓</span>FAQ</button>
+            <button class="tab-btn" data-tab="mode-test" aria-selected="false"><span class="tab-icon">🧪</span>Mode Test</button>
+            <button class="tab-btn" data-tab="mode-dmi" aria-selected="false"><span class="tab-icon">📋</span>Mode DMI</button>
         </div>
     </nav>
 
