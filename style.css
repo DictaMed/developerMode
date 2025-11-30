@@ -1,17 +1,44 @@
-/* Variables CSS - Simplified Three Color Design */
+/* Variables CSS - Sophisticated Seven Color Design System */
 :root {
-    /* Color Palette - Only Three Colors */
-    --blue-primary: #3b82f6;
-    --green-dark: #059669;
-    --white: #ffffff;
+    /* Primary Brand Colors - Medical Context */
+    --medical-blue: #1e40af;        /* Primary brand, trust, reliability */
+    --medical-blue-light: #3b82f6;   /* Hover states, accessibility */
+    --medical-blue-dark: #1e3a8a;    /* Pressed states, depth */
     
-    /* Shadows */
-    --shadow-xs: 0 1px 2px 0 rgba(59, 130, 246, 0.05);
-    --shadow-sm: 0 1px 3px 0 rgba(59, 130, 246, 0.1), 0 1px 2px 0 rgba(59, 130, 246, 0.06);
-    --shadow-md: 0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(59, 130, 246, 0.1), 0 4px 6px -2px rgba(59, 130, 246, 0.05);
-    --shadow-xl: 0 20px 25px -5px rgba(59, 130, 246, 0.1), 0 10px 10px -5px rgba(59, 130, 246, 0.04);
-    --shadow-2xl: 0 25px 50px -12px rgba(59, 130, 246, 0.25);
+    /* Secondary Brand Colors */
+    --medical-teal: #0891b2;         /* Secondary actions, navigation */
+    --health-green: #059669;         /* Success states, positive feedback */
+    
+    /* Alert & Warning System */
+    --warm-amber: #d97706;           /* Warnings, cautions, attention */
+    --medical-red: #dc2626;          /* Errors, critical alerts */
+    
+    /* Neutral Foundation */
+    --professional-gray: #475569;    /* Text, borders, structural */
+    --pure-white: #ffffff;           /* Primary background */
+    
+    /* Comprehensive Color System - 7 Color Palette */
+    --blue-primary: var(--medical-blue);
+    --blue-secondary: var(--medical-teal);
+    --green-success: var(--health-green);
+    --amber-warning: var(--warm-amber);
+    --red-error: var(--medical-red);
+    --gray-neutral: var(--professional-gray);
+    --white-base: var(--pure-white);
+    
+    /* Shadows - Updated with new color system */
+    --shadow-xs: 0 1px 2px 0 rgba(30, 64, 175, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(30, 64, 175, 0.1), 0 1px 2px 0 rgba(30, 64, 175, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(30, 64, 175, 0.1), 0 2px 4px -1px rgba(30, 64, 175, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(30, 64, 175, 0.1), 0 4px 6px -2px rgba(30, 64, 175, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(30, 64, 175, 0.1), 0 10px 10px -5px rgba(30, 64, 175, 0.04);
+    --shadow-2xl: 0 25px 50px -12px rgba(30, 64, 175, 0.25);
+    
+    /* Semantic Shadow Colors */
+    --shadow-success: 0 4px 14px 0 rgba(5, 150, 105, 0.25);
+    --shadow-warning: 0 4px 14px 0 rgba(217, 119, 6, 0.25);
+    --shadow-error: 0 4px 14px 0 rgba(220, 38, 38, 0.25);
+    --shadow-teal: 0 4px 14px 0 rgba(8, 145, 178, 0.25);
     
     /* Transitions */
     --transition-fast: 0.15s ease-out;
@@ -68,8 +95,8 @@ html, body, main, .container, section, .tab-content {
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    color: var(--blue-primary);
-    background: var(--white);
+    color: var(--professional-gray);
+    background: var(--pure-white);
     min-height: 100vh;
     line-height: 1.6;
     margin: 0;
@@ -80,23 +107,23 @@ body {
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-/* Modern Scrollbar Styling */
+/* Modern Scrollbar Styling - Enhanced Color System */
 ::-webkit-scrollbar {
     width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(30, 64, 175, 0.1);
     border-radius: var(--radius-base);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, var(--blue-primary), var(--green-dark));
+    background: linear-gradient(135deg, var(--medical-blue), var(--medical-teal));
     border-radius: var(--radius-base);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, var(--blue-primary), var(--green-dark));
+    background: linear-gradient(135deg, var(--medical-blue-dark), var(--medical-teal));
 }
 
 .container {
@@ -116,11 +143,11 @@ main, .container {
     box-sizing: border-box;
 }
 
-/* Header - Simplified Design */
+/* Header - Enhanced Professional Medical Design */
 header {
-    background: var(--white);
+    background: var(--pure-white);
     box-shadow: var(--shadow-lg);
-    border-bottom: 1px solid var(--blue-primary);
+    border-bottom: 1px solid var(--medical-blue);
     padding: 20px;
     margin: 0;
     position: sticky;
@@ -162,7 +189,7 @@ header {
     letter-spacing: -3px;
     white-space: nowrap;
     position: relative;
-    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--blue-primary) 50%, var(--green-dark) 100%);
+    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-blue) 50%, var(--health-green) 100%);
     background-size: 200% 200%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -170,7 +197,7 @@ header {
     color: transparent;
     animation: logoGradientShift 6s ease-in-out infinite;
     text-shadow: none;
-    filter: drop-shadow(0 8px 32px rgba(59, 130, 246, 0.4));
+    filter: drop-shadow(0 8px 32px rgba(30, 64, 175, 0.4));
     transform: perspective(500px) rotateX(3deg) translateZ(0);
     transition: all var(--transition-slow);
     user-select: none;
@@ -192,13 +219,13 @@ header {
 
 .slogan {
     text-align: left;
-    color: var(--blue-primary);
+    color: var(--professional-gray);
     font-style: italic;
     margin-top: 6px;
     font-size: 0.95rem;
     font-weight: 600;
     white-space: nowrap;
-    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--blue-primary) 50%, var(--green-dark) 100%);
+    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-blue) 50%, var(--health-green) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -214,7 +241,7 @@ header {
     left: 0;
     width: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--blue-primary), var(--green-dark));
+    background: linear-gradient(90deg, var(--medical-blue), var(--health-green));
     transition: width 0.3s ease;
 }
 
@@ -352,11 +379,11 @@ header {
 
 .tab-btn.active {
     font-weight: 800;
-    background: var(--blue-primary);
+    background: var(--medical-blue);
     color: white;
     box-shadow: var(--shadow-lg);
     transform: translateY(-3px) scale(1.05);
-    border-color: var(--blue-primary);
+    border-color: var(--medical-blue);
     position: relative;
 }
 
@@ -368,7 +395,7 @@ header {
     transform: translateX(-50%);
     width: 60%;
     height: 3px;
-    background: var(--green-dark);
+    background: var(--health-green);
     border-radius: 2px;
 }
 
@@ -496,25 +523,25 @@ main.container {
     }
 }
 
-/* Titres */
+/* Titres - Enhanced Color Hierarchy */
 h1 {
-    color: var(--blue-primary);
+    color: var(--medical-blue);
     margin-bottom: 35px;
     font-size: 2.25rem;
     font-weight: 800;
-    text-shadow: 2px 2px 4px rgba(59, 130, 246, 0.1);
+    text-shadow: 2px 2px 4px rgba(30, 64, 175, 0.1);
     letter-spacing: -0.5px;
 }
 
 h2 {
-    color: var(--blue-primary);
+    color: var(--medical-blue);
     margin-bottom: 20px;
     font-size: 1.6rem;
     font-weight: 700;
 }
 
 h3 {
-    color: var(--blue-primary);
+    color: var(--medical-teal);
     margin-bottom: 15px;
     font-size: 1.3rem;
     font-weight: 600;
@@ -559,13 +586,13 @@ label {
     display: block;
     margin-bottom: 12px;
     font-weight: 600;
-    color: var(--blue-primary);
+    color: var(--medical-teal);
     font-size: 0.95rem;
     transition: color var(--transition-base);
 }
 
 label:hover {
-    color: var(--blue-primary);
+    color: var(--medical-blue);
 }
 
 input[type="text"],
@@ -574,11 +601,11 @@ input[type="email"],
 textarea {
     width: 100%;
     padding: 16px 20px;
-    border: 2px solid var(--blue-primary);
+    border: 2px solid var(--professional-gray);
     border-radius: var(--radius-lg);
     font-size: 1rem;
     transition: all var(--transition-base);
-    background: #ffffff;
+    background: var(--pure-white);
     font-family: inherit;
     box-shadow: var(--shadow-sm);
 }
@@ -586,15 +613,15 @@ textarea {
 input:focus,
 textarea:focus {
     outline: none;
-    border-color: var(--blue-primary);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), var(--shadow-md);
+    border-color: var(--medical-blue);
+    box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1), var(--shadow-md);
     transform: translateY(-2px);
-    background: #ffffff;
+    background: var(--pure-white);
 }
 
 input::placeholder,
 textarea::placeholder {
-    color: var(--blue-primary);
+    color: var(--professional-gray);
     transition: opacity var(--transition-base);
 }
 
@@ -693,9 +720,9 @@ textarea:focus::placeholder {
 }
 
 .status-badge[data-status="ready"] {
-    background: var(--green-dark);
+    background: var(--health-green);
     color: white;
-    box-shadow: 0 4px 20px rgba(5, 150, 105, 0.4);
+    box-shadow: var(--shadow-success);
 }
 
 .status-badge[data-status="ready"]::before {
@@ -703,10 +730,10 @@ textarea:focus::placeholder {
 }
 
 .status-badge[data-status="recording"] {
-    background: var(--blue-primary);
+    background: var(--medical-blue);
     color: white;
     animation: pulse 1.5s ease-in-out infinite;
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: var(--shadow-lg);
 }
 
 .status-badge[data-status="recording"]::before {
@@ -715,9 +742,9 @@ textarea:focus::placeholder {
 }
 
 .status-badge[data-status="stopped"] {
-    background: var(--blue-primary);
+    background: var(--medical-teal);
     color: white;
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: var(--shadow-teal);
 }
 
 .status-badge[data-status="stopped"]::before {
@@ -911,67 +938,67 @@ textarea:focus::placeholder {
     z-index: 2;
 }
 
-/* Button Color Variants */
+/* Button Color Variants - Enhanced Medical Color System */
 .btn-record {
-    background: var(--blue-primary);
+    background: var(--medical-blue);
     color: white;
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    box-shadow: var(--shadow-lg);
 }
 
 .btn-record:hover {
-    background: var(--blue-primary);
-    box-shadow: 0 6px 30px rgba(59, 130, 246, 0.4);
+    background: var(--medical-blue-dark);
+    box-shadow: var(--shadow-xl);
 }
 
 .btn-stop {
-    background: var(--blue-primary);
+    background: var(--medical-red);
     color: white;
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    box-shadow: var(--shadow-error);
 }
 
 .btn-stop:hover {
-    background: var(--blue-primary);
-    box-shadow: 0 6px 30px rgba(59, 130, 246, 0.4);
+    background: #b91c1c;
+    box-shadow: var(--shadow-xl);
 }
 
 .btn-primary {
-    background: var(--blue-primary);
+    background: var(--medical-blue);
     color: white;
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    box-shadow: var(--shadow-lg);
 }
 
 .btn-primary:hover {
-    background: var(--green-dark);
-    box-shadow: 0 6px 30px rgba(59, 130, 246, 0.4);
+    background: var(--medical-blue-dark);
+    box-shadow: var(--shadow-xl);
 }
 
 .btn-secondary {
-    background: #ffffff;
-    color: var(--blue-primary);
-    border: 1px solid var(--blue-primary);
+    background: var(--pure-white);
+    color: var(--medical-teal);
+    border: 1px solid var(--medical-teal);
     box-shadow: var(--shadow-md);
 }
 
 .btn-secondary:hover {
-    background: var(--blue-primary);
-    border-color: var(--blue-primary);
+    background: var(--medical-teal);
+    border-color: var(--medical-teal);
     color: white;
 }
 
 .btn-submit {
-    background: var(--blue-primary);
+    background: var(--medical-blue);
     color: white;
     font-size: 1.1rem;
     padding: 18px 48px;
-    box-shadow: 0 4px 25px rgba(59, 130, 246, 0.4);
+    box-shadow: var(--shadow-lg);
     text-transform: uppercase;
     letter-spacing: 1px;
     font-weight: 700;
 }
 
 .btn-submit:hover {
-    background: var(--green-dark);
-    box-shadow: 0 6px 40px rgba(59, 130, 246, 0.5);
+    background: var(--medical-teal);
+    box-shadow: var(--shadow-xl);
     transform: translateY(-2px);
 }
 
@@ -1197,14 +1224,14 @@ textarea:focus::placeholder {
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
 }
 
-/* Footer - Modern Design */
+/* Footer - Enhanced Professional Design */
 footer {
-    background: var(--white);
+    background: var(--pure-white);
     padding: 32px 0;
     margin: 60px 0 0 0;
     text-align: center;
     box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.1);
-    border-top: 1px solid var(--blue-primary);
+    border-top: 1px solid var(--medical-blue);
     width: 100vw;
     position: relative;
     left: 50%;
@@ -1221,18 +1248,18 @@ footer::before {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--blue-primary) 0%, var(--green-dark) 100%);
+    background: linear-gradient(90deg, var(--medical-blue) 0%, var(--health-green) 100%);
 }
 
 footer p {
-    color: var(--blue-primary);
+    color: var(--professional-gray);
     font-size: 0.95rem;
     margin: 0;
     font-weight: 500;
 }
 
 footer a {
-    color: var(--blue-primary);
+    color: var(--medical-blue);
     text-decoration: none;
     font-weight: 600;
     transition: all var(--transition-base);
@@ -1246,12 +1273,12 @@ footer a::after {
     left: 0;
     width: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--blue-primary), var(--green-dark));
+    background: linear-gradient(90deg, var(--medical-blue), var(--health-green));
     transition: width var(--transition-base);
 }
 
 footer a:hover {
-    color: var(--blue-primary);
+    color: var(--medical-teal);
     transform: translateY(-1px);
 }
 
