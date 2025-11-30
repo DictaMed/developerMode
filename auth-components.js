@@ -451,9 +451,20 @@ export class AuthComponents {
         
         const modal = document.getElementById(modalId);
         if (modal) {
+            // FIX: Ensure modal doesn't block other clicks when shown
             modal.style.display = 'flex';
+            modal.style.zIndex = '10000'; // Proper z-index
+            modal.style.pointerEvents = 'auto';
+            
+            // Ensure modal content is clickable
+            const content = modal.querySelector('.auth-modal-content');
+            if (content) {
+                content.style.zIndex = '10001';
+                content.style.pointerEvents = 'auto';
+            }
+            
             this.currentModal = modalId;
-            console.log('AuthComponents: Modal shown successfully');
+            console.log('AuthComponents: Modal shown successfully with proper z-index');
             return true;
         } else {
             console.error('AuthComponents: Modal not found', modalId);
@@ -468,9 +479,15 @@ export class AuthComponents {
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.style.display = 'none';
+            // FIX: Clean up any potential blocking states
+            modal.style.pointerEvents = 'none';
+            modal.style.zIndex = 'auto';
+            
             if (this.currentModal === modalId) {
                 this.currentModal = null;
             }
+            
+            console.log('AuthComponents: Modal closed successfully', modalId);
         }
     }
 

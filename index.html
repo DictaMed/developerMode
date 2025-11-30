@@ -756,7 +756,22 @@
     <script type="module" src="firebase-auth-service.js"></script>
     <script type="module" src="auth-components.js"></script>
     
+    <!-- Button Debug System -->
+    <script src="button-debug-fix.js"></script>
+    
+    <!-- Main Application Script -->
     <script src="script.js"></script>
+    
+    <!-- Debug Console Helper -->
+    <script>
+        // Add debug helper to console
+        console.log('%c🔧 DictaMed Button Debug System', 'color: #10b981; font-size: 16px; font-weight: bold;');
+        console.log('Available debug commands:');
+        console.log('  - window.buttonDebug.generateReport()  // Get debug report');
+        console.log('  - window.buttonDebug.fixSpecificIssue("loading")  // Fix specific issues');
+        console.log('  - document.querySelector(".loading-overlay")?.remove()  // Remove blocking overlays');
+        console.log('  - document.querySelectorAll(".auth-modal").forEach(m => m.style.display = "none")  // Close all modals');
+    </script>
 </body>
 
 </html>

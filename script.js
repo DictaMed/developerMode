@@ -15,6 +15,14 @@
 import { firebaseAuth } from './firebase-auth-service.js';
 import { authComponents } from './auth-components.js';
 
+// Button Debug System (load first to catch all issues)
+try {
+    await import('./button-debug-fix.js');
+    console.log('✅ Button debug system loaded');
+} catch (error) {
+    console.warn('⚠️ Button debug system not available:', error);
+}
+
 // ===== CONFIGURATION =====
 const CONFIG = {
     ENDPOINTS: {
@@ -92,7 +100,13 @@ const Loading = {
                     <div class="loading-text">${text}</div>
                 </div>
             `;
+            
+            // FIX: Ensure overlay doesn't block clicks when hidden
+            this.overlay.style.pointerEvents = 'none';
+            this.overlay.style.zIndex = '9998'; // Lower z-index to prevent blocking
+            
             document.body.appendChild(this.overlay);
+            console.log('🔧 Loading overlay shown (non-blocking)');
         }
     },
 
@@ -103,6 +117,7 @@ const Loading = {
                 if (this.overlay && this.overlay.parentNode) {
                     this.overlay.parentNode.removeChild(this.overlay);
                     this.overlay = null;
+                    console.log('🔧 Loading overlay hidden and removed');
                 }
             }, 200);
         }
@@ -1513,52 +1528,103 @@ document.addEventListener('DOMContentLoaded', () => {
             showMigrationBtn: !!showMigrationBtn
         });
 
+        // FIX: Add click debugging and ensure buttons are properly enabled
         if (loginBtn) {
+            // Ensure button is clickable
+            loginBtn.style.pointerEvents = 'auto';
+            loginBtn.style.cursor = 'pointer';
+            
             loginBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('Login button clicked');
+                console.log('🔐 Login button clicked successfully');
+                
+                // Check if auth components are ready
                 if (typeof authComponents !== 'undefined' && authComponents.showModal && authComponents.isReady()) {
                     const success = authComponents.showModal('loginModal');
                     if (!success) {
+                        console.error('Failed to show login modal');
                         alert('Erreur lors de l\'ouverture de la fenêtre de connexion.');
+                    } else {
+                        console.log('✅ Login modal shown successfully');
                     }
                 } else {
-                    console.error('Auth components not ready');
-                    alert('Système d\'authentification en cours de chargement. Veuillez réessayer dans quelques secondes.');
+                    console.warn('Auth components not ready, retrying...');
+                    // Retry after short delay
+                    setTimeout(() => {
+                        if (typeof authComponents !== 'undefined' && authComponents.isReady()) {
+                            authComponents.showModal('loginModal');
+                        } else {
+                            alert('Système d\'authentification en cours de chargement. Veuillez réessayer dans quelques secondes.');
+                        }
+                    }, 500);
                 }
             });
+            
+            console.log('✅ Login button event listener attached');
         }
 
         if (registerBtn) {
+            // Ensure button is clickable
+            registerBtn.style.pointerEvents = 'auto';
+            registerBtn.style.cursor = 'pointer';
+            
             registerBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('Register button clicked');
+                console.log('✨ Register button clicked successfully');
+                
                 if (typeof authComponents !== 'undefined' && authComponents.showModal && authComponents.isReady()) {
                     const success = authComponents.showModal('registerModal');
                     if (!success) {
+                        console.error('Failed to show register modal');
                         alert('Erreur lors de l\'ouverture de la fenêtre d\'inscription.');
+                    } else {
+                        console.log('✅ Register modal shown successfully');
                     }
                 } else {
-                    console.error('Auth components not ready');
-                    alert('Système d\'authentification en cours de chargement. Veuillez réessayer dans quelques secondes.');
+                    console.warn('Auth components not ready, retrying...');
+                    setTimeout(() => {
+                        if (typeof authComponents !== 'undefined' && authComponents.isReady()) {
+                            authComponents.showModal('registerModal');
+                        } else {
+                            alert('Système d\'authentification en cours de chargement. Veuillez réessayer dans quelques secondes.');
+                        }
+                    }, 500);
                 }
             });
+            
+            console.log('✅ Register button event listener attached');
         }
 
         if (showMigrationBtn) {
+            // Ensure button is clickable
+            showMigrationBtn.style.pointerEvents = 'auto';
+            showMigrationBtn.style.cursor = 'pointer';
+            
             showMigrationBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('Migration button clicked');
+                console.log('🔄 Migration button clicked successfully');
+                
                 if (typeof authComponents !== 'undefined' && authComponents.showModal && authComponents.isReady()) {
                     const success = authComponents.showModal('migrationModal');
                     if (!success) {
+                        console.error('Failed to show migration modal');
                         alert('Erreur lors de l\'ouverture de la fenêtre de migration.');
+                    } else {
+                        console.log('✅ Migration modal shown successfully');
                     }
                 } else {
-                    console.error('Auth components not ready');
-                    alert('Système d\'authentification en cours de chargement. Veuillez réessayer dans quelques secondes.');
+                    console.warn('Auth components not ready, retrying...');
+                    setTimeout(() => {
+                        if (typeof authComponents !== 'undefined' && authComponents.isReady()) {
+                            authComponents.showModal('migrationModal');
+                        } else {
+                            alert('Système d\'authentification en cours de chargement. Veuillez réessayer dans quelques secondes.');
+                        }
+                    }, 500);
                 }
             });
+            
+            console.log('✅ Migration button event listener attached');
         }
     }
 
