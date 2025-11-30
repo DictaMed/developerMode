@@ -266,7 +266,190 @@ const AutoSave = {
     }
 };
 
-// ===== NAVIGATION PAR ONGLETS =====
+// ===== NAVIGATION FLOTTANTE (FAB) =====
+const FloatingNav = {
+    fab: null,
+    menu: null,
+    backdrop: null,
+    isOpen: false,
+    
+    init() {
+        this.fab = document.getElementById('fab-main');
+        this.menu = document.getElementById('fab-menu');
+        this.backdrop = document.getElementById('fab-backdrop');
+        this.closeBtn = document.getElementById('fab-close');
+        
+        if (!this.fab || !this.menu || !this.backdrop) {
+            console.warn('FAB elements not found');
+            return;
+        }
+        
+        this.bindEvents();
+        this.updateActiveTab();
+    },
+    
+    bindEvents() {
+        // Open/close menu
+        this.fab.addEventListener('click', () => this.toggleMenu());
+        this.closeBtn.addEventListener('click', () => this.closeMenu());
+        this.backdrop.addEventListener('click', () => this.closeMenu());
+        
+        // Menu item clicks
+        const menuItems = this.menu.querySelectorAll('.fab-menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const targetTab = item.getAttribute('data-tab');
+                this.navigateToTab(targetTab);
+            });
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+        
+        // Window resize handler
+        window.addEventListener('resize', () => {
+            if (this.isOpen) {
+                this.closeMenu();
+            }
+        });
+    },
+    
+    toggleMenu() {
+        if (this.isOpen) {
+            this.closeMenu();
+        } else {
+            this.openMenu();
+        }
+    },
+    
+    openMenu() {
+        this.isOpen = true;
+        this.menu.classList.add('active');
+        this.backdrop.classList.add('active');
+        this.fab.setAttribute('aria-expanded', 'true');
+        this.fab.setAttribute('aria-label', 'Fermer le menu de navigation');
+        
+        // Prevent body scrolling
+        document.body.classList.add('fab-menu-open');
+        
+        // Focus first menu item for accessibility
+        setTimeout(() => {
+            const firstMenuItem = this.menu.querySelector('.fab-menu-item');
+            if (firstMenuItem) {
+                firstMenuItem.focus();
+            }
+        }, 100);
+    },
+    
+    closeMenu() {
+        this.isOpen = false;
+        this.menu.classList.remove('active');
+        this.backdrop.classList.remove('active');
+        this.fab.setAttribute('aria-expanded', 'false');
+        this.fab.setAttribute('aria-label', 'Menu de navigation');
+        
+        // Restore body scrolling
+        document.body.classList.remove('fab-menu-open');
+        
+        // Return focus to FAB
+        this.fab.focus();
+    },
+    
+    navigateToTab(tabId) {
+        this.closeMenu();
+        
+        // Get tab label for screen reader announcement
+        const menuItem = this.menu.querySelector(`[data-tab="${tabId}"]`);
+        const tabLabel = menuItem ? menuItem.querySelector('.fab-menu-text').textContent : tabId;
+        
+        // Use existing switchTab function
+        if (typeof switchTab === 'function') {
+            switchTab(tabId);
+        } else {
+            console.warn('switchTab function not found');
+        }
+        
+        this.updateActiveTab();
+        
+        // Announce navigation to screen readers
+        this.announceNavigation(tabLabel);
+    },
+    
+    announceNavigation(tabLabel) {
+        // Create or update live region for screen reader announcements
+        let liveRegion = document.getElementById('fab-live-region');
+        if (!liveRegion) {
+            liveRegion = document.createElement('div');
+            liveRegion.id = 'fab-live-region';
+            liveRegion.setAttribute('aria-live', 'polite');
+            liveRegion.setAttribute('aria-atomic', 'true');
+            liveRegion.style.position = 'absolute';
+            liveRegion.style.left = '-10000px';
+            liveRegion.style.width = '1px';
+            liveRegion.style.height = '1px';
+            liveRegion.style.overflow = 'hidden';
+            document.body.appendChild(liveRegion);
+        }
+        
+        liveRegion.textContent = `Navigation vers ${tabLabel}`;
+        
+        // Clear after announcement
+        setTimeout(() => {
+            liveRegion.textContent = '';
+        }, 1000);
+    },
+    
+    updateActiveTab() {
+        // Update active state in FAB menu
+        const menuItems = this.menu.querySelectorAll('.fab-menu-item');
+        menuItems.forEach(item => {
+            item.classList.remove('active');
+            const targetTab = item.getAttribute('data-tab');
+            const tabContent = document.getElementById(targetTab);
+            if (tabContent && tabContent.classList.contains('active')) {
+                item.classList.add('active');
+            }
+        });
+    },
+    
+    handleKeyboard(e) {
+        if (!this.isOpen) return;
+        
+        const menuItems = Array.from(this.menu.querySelectorAll('.fab-menu-item'));
+        const currentIndex = menuItems.findIndex(item => item === document.activeElement);
+        
+        switch (e.key) {
+            case 'Escape':
+                e.preventDefault();
+                this.closeMenu();
+                break;
+                
+            case 'ArrowDown':
+                e.preventDefault();
+                const nextIndex = currentIndex < menuItems.length - 1 ? currentIndex + 1 : 0;
+                menuItems[nextIndex].focus();
+                break;
+                
+            case 'ArrowUp':
+                e.preventDefault();
+                const prevIndex = currentIndex > 0 ? currentIndex - 1 : menuItems.length - 1;
+                menuItems[prevIndex].focus();
+                break;
+                
+            case 'Home':
+                e.preventDefault();
+                menuItems[0].focus();
+                break;
+                
+            case 'End':
+                e.preventDefault();
+                menuItems[menuItems.length - 1].focus();
+                break;
+        }
+    }
+};
+
+// ===== NAVIGATION PAR ONGLETS (Legacy Support) =====
 function initTabs() {
     const tabButtons = document.querySelectorAll('.tab-btn');
 
@@ -307,6 +490,11 @@ function switchTab(tabId) {
     
     // Mettre à jour le compteur de sections pour le mode
     updateSectionCount();
+    
+    // Update FAB menu active state
+    if (typeof FloatingNav.updateActiveTab === 'function') {
+        FloatingNav.updateActiveTab();
+    }
 }
 
 // Rendre la fonction switchTab globale pour les boutons CTA
@@ -1380,6 +1568,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initAudioRecorders();
     initDMIPhotosUpload(); // CORRECTION: Fonction renommée
     initSwipeHint();
+    
+    // Initialiser la navigation flottante (FAB)
+    FloatingNav.init();
     
     updateSectionCount();
     validateDMIMode();
