@@ -1450,31 +1450,117 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Événements pour les boutons d'authentification Firebase
-    const loginBtn = document.getElementById('loginBtn');
-    const registerBtn = document.getElementById('registerBtn');
-    const showMigrationBtn = document.getElementById('showMigrationBtn');
+    initFirebaseAuthButtons();
 
-    if (loginBtn) {
-        loginBtn.addEventListener('click', () => {
-            authComponents.showModal('loginModal');
+    // Initialize Firebase authentication event handlers
+    function initFirebaseAuth() {
+        // Set up authentication state change listeners
+        firebaseAuth.onAuthStateChange((state, user) => {
+            console.log('Firebase auth state changed:', state);
+            
+            if (state === 'signed_in') {
+                appState.isAuthenticated = true;
+                appState.currentUser = user;
+                appState.userRole = firebaseAuth.getCurrentUserRole();
+                appState.isFirebaseReady = true;
+                
+                console.log('User signed in:', {
+                    uid: user.uid,
+                    email: user.email,
+                    role: appState.userRole
+                });
+                
+                // Update UI to show authenticated state
+                updateAuthUI();
+                
+                // Save authentication state
+                saveAuthState();
+                
+            } else if (state === 'signed_out') {
+                appState.isAuthenticated = false;
+                appState.currentUser = null;
+                appState.userRole = null;
+                appState.isFirebaseReady = true;
+                
+                console.log('User signed out');
+                
+                // Update UI to show unauthenticated state
+                updateAuthUI();
+                
+                // Clear authentication state
+                clearAuthState();
+            }
         });
     }
 
-    if (registerBtn) {
-        registerBtn.addEventListener('click', () => {
-            authComponents.showModal('registerModal');
-        });
-    }
-
-    if (showMigrationBtn) {
-        showMigrationBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            authComponents.showModal('migrationModal');
-        });
+    // Initialize authentication UI components
+    if (typeof authComponents !== 'undefined') {
+        authComponents.init();
     }
 
     // Initialize Firebase Authentication
     initFirebaseAuth();
+
+    // Initialize Firebase authentication buttons
+    function initFirebaseAuthButtons() {
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const showMigrationBtn = document.getElementById('showMigrationBtn');
+
+        console.log('Initializing Firebase auth buttons...', {
+            loginBtn: !!loginBtn,
+            registerBtn: !!registerBtn,
+            showMigrationBtn: !!showMigrationBtn
+        });
+
+        if (loginBtn) {
+            loginBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Login button clicked');
+                if (typeof authComponents !== 'undefined' && authComponents.showModal && authComponents.isReady()) {
+                    const success = authComponents.showModal('loginModal');
+                    if (!success) {
+                        alert('Erreur lors de l\'ouverture de la fenêtre de connexion.');
+                    }
+                } else {
+                    console.error('Auth components not ready');
+                    alert('Système d\'authentification en cours de chargement. Veuillez réessayer dans quelques secondes.');
+                }
+            });
+        }
+
+        if (registerBtn) {
+            registerBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Register button clicked');
+                if (typeof authComponents !== 'undefined' && authComponents.showModal && authComponents.isReady()) {
+                    const success = authComponents.showModal('registerModal');
+                    if (!success) {
+                        alert('Erreur lors de l\'ouverture de la fenêtre d\'inscription.');
+                    }
+                } else {
+                    console.error('Auth components not ready');
+                    alert('Système d\'authentification en cours de chargement. Veuillez réessayer dans quelques secondes.');
+                }
+            });
+        }
+
+        if (showMigrationBtn) {
+            showMigrationBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Migration button clicked');
+                if (typeof authComponents !== 'undefined' && authComponents.showModal && authComponents.isReady()) {
+                    const success = authComponents.showModal('migrationModal');
+                    if (!success) {
+                        alert('Erreur lors de l\'ouverture de la fenêtre de migration.');
+                    }
+                } else {
+                    console.error('Auth components not ready');
+                    alert('Système d\'authentification en cours de chargement. Veuillez réessayer dans quelques secondes.');
+                }
+            });
+        }
+    }
 
     // Initialize authentication UI components
     if (typeof authComponents !== 'undefined') {

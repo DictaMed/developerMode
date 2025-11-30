@@ -8,6 +8,7 @@ import { firebaseAuth } from './firebase-auth-service.js';
 export class AuthComponents {
     constructor() {
         this.currentModal = null;
+        this.isInitialized = false;
         this.init();
     }
 
@@ -15,8 +16,18 @@ export class AuthComponents {
      * Initialize authentication components
      */
     init() {
+        console.log('AuthComponents: Initializing...');
         this.createAuthModals();
         this.bindEvents();
+        this.isInitialized = true;
+        console.log('AuthComponents: Initialization complete');
+    }
+
+    /**
+     * Check if component is initialized
+     */
+    isReady() {
+        return this.isInitialized;
     }
 
     /**
@@ -432,10 +443,21 @@ export class AuthComponents {
      * Show modal
      */
     showModal(modalId) {
+        console.log('AuthComponents: Showing modal', modalId);
+        if (!this.isReady()) {
+            console.error('AuthComponents: Not initialized yet');
+            return false;
+        }
+        
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.style.display = 'flex';
             this.currentModal = modalId;
+            console.log('AuthComponents: Modal shown successfully');
+            return true;
+        } else {
+            console.error('AuthComponents: Modal not found', modalId);
+            return false;
         }
     }
 
