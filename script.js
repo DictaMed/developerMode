@@ -246,17 +246,40 @@ const AutoSave = {
 
 // ===== NAVIGATION PAR ONGLETS =====
 function initTabs() {
+    console.log('🔧 DEBUG: initTabs() called');
     const tabButtons = document.querySelectorAll('.tab-btn');
+    console.log('🔧 DEBUG: Found tab buttons:', tabButtons.length);
 
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
+    tabButtons.forEach((btn, index) => {
+        console.log(`🔧 DEBUG: Attaching listener to tab button ${index}:`, {
+            id: btn.id,
+            className: btn.className,
+            dataTab: btn.getAttribute('data-tab'),
+            text: btn.textContent.trim(),
+            style: {
+                pointerEvents: window.getComputedStyle(btn).pointerEvents,
+                cursor: window.getComputedStyle(btn).cursor,
+                zIndex: window.getComputedStyle(btn).zIndex
+            }
+        });
+
+        btn.addEventListener('click', (e) => {
+            console.log('🔧 DEBUG: Tab button clicked:', {
+                target: e.target,
+                dataTab: btn.getAttribute('data-tab'),
+                buttonIndex: index
+            });
             const targetTab = btn.getAttribute('data-tab');
             switchTab(targetTab);
         });
     });
+
+    console.log('🔧 DEBUG: initTabs() completed');
 }
 
 function switchTab(tabId) {
+    console.log('🔧 DEBUG: switchTab() called with tabId:', tabId);
+
     // Désactiver tous les onglets et contenus
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
@@ -268,23 +291,40 @@ function switchTab(tabId) {
     const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
     const tabContent = document.getElementById(tabId);
 
+    console.log('🔧 DEBUG: switchTab elements found:', {
+        tabBtn: !!tabBtn,
+        tabContent: !!tabContent,
+        tabBtnId: tabBtn?.id,
+        tabContentId: tabContent?.id
+    });
+
     if (tabBtn) {
         tabBtn.classList.add('active');
         tabBtn.setAttribute('aria-selected', 'true');
+        console.log('🔧 DEBUG: Activated tab button:', tabBtn.textContent.trim());
+    } else {
+        console.error('🔧 DEBUG: Tab button not found for tabId:', tabId);
     }
+
     if (tabContent) {
         tabContent.classList.add('active');
+        console.log('🔧 DEBUG: Activated tab content:', tabId);
+    } else {
+        console.error('🔧 DEBUG: Tab content not found for tabId:', tabId);
     }
 
     // Mettre à jour le mode actuel
     if (tabId === 'mode-normal') {
         appState.currentMode = 'normal';
+        console.log('🔧 DEBUG: Switched to normal mode');
     } else if (tabId === 'mode-test') {
         appState.currentMode = 'test';
+        console.log('🔧 DEBUG: Switched to test mode');
     }
 
     // Mettre à jour le compteur de sections pour le mode
     updateSectionCount();
+    console.log('🔧 DEBUG: switchTab() completed');
 }
 
 // Rendre la fonction switchTab globale pour les boutons CTA
@@ -1413,6 +1453,24 @@ function initSwipeHint() {
 // ===== INITIALISATION PRINCIPALE =====
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Initialisation de DictaMed...');
+
+    // DEBUG: Check for potential blocking elements
+    console.log('🔧 DEBUG: Checking for blocking elements...');
+    const potentialBlockers = document.querySelectorAll('.loading-overlay, .auth-modal, [style*="position: fixed"], [style*="z-index"]');
+    potentialBlockers.forEach((el, i) => {
+        const style = window.getComputedStyle(el);
+        if (style.position === 'fixed' || parseInt(style.zIndex) > 1000) {
+            console.log(`🔧 DEBUG: Potential blocker ${i}:`, {
+                tagName: el.tagName,
+                className: el.className,
+                id: el.id,
+                zIndex: style.zIndex,
+                position: style.position,
+                display: style.display,
+                pointerEvents: style.pointerEvents
+            });
+        }
+    });
 
     // Initialiser le mode selon l'onglet actif
     initializeMode();
