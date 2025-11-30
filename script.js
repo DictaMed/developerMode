@@ -44,19 +44,7 @@ const sectionsConfig = {
 // Stockage des photos DMI (variable séparée pour éviter les conflits)
 let dmiUploadedPhotos = [];
 
-// ===== INITIALISATION DU MODE =====
-function initializeMode() {
-    const activeTab = document.querySelector('.tab-btn.active');
-    if (activeTab) {
-        const tabId = activeTab.getAttribute('data-tab');
-        if (tabId === 'mode-normal') {
-            appState.currentMode = 'normal';
-        } else if (tabId === 'mode-test') {
-            appState.currentMode = 'test';
-        }
-    }
-    console.log('Mode initial:', appState.currentMode);
-}
+
 
 // ===== SYSTÈME DE TOAST NOTIFICATIONS =====
 const Toast = {
@@ -266,42 +254,90 @@ const AutoSave = {
     }
 };
 
-// ===== NAVIGATION PAR ONGLETS =====
-function initTabs() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
+// ===== NAVIGATION HORIZONTALE =====
+function initMenu() {
+    const menuLinks = document.querySelectorAll('.menu-link');
+    const menuToggle = document.getElementById('menuToggle');
+    const menuList = document.getElementById('menuList');
 
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetTab = btn.getAttribute('data-tab');
-            switchTab(targetTab);
+    // Handle menu link clicks
+    menuLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetSection = link.getAttribute('data-section');
+            switchSection(targetSection);
+            
+            // Close mobile menu after selection
+            if (window.innerWidth <= 768) {
+                toggleMobileMenu(false);
+            }
         });
+    });
+
+    // Handle mobile menu toggle
+    if (menuToggle) {
+        menuToggle.addEventListener('click', () => {
+            toggleMobileMenu();
+        });
+    }
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+            if (!e.target.closest('.horizontal-nav')) {
+                toggleMobileMenu(false);
+            }
+        }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            toggleMobileMenu(false);
+        }
     });
 }
 
-function switchTab(tabId) {
-    // Désactiver tous les onglets et contenus
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-        btn.setAttribute('aria-selected', 'false');
+// Toggle mobile menu
+function toggleMobileMenu(forceState = null) {
+    const menuToggle = document.getElementById('menuToggle');
+    const menuList = document.getElementById('menuList');
+    
+    if (!menuToggle || !menuList) return;
+    
+    const isActive = forceState !== null ? forceState : !menuList.classList.contains('active');
+    
+    if (isActive) {
+        menuList.classList.add('active');
+        menuToggle.classList.add('active');
+    } else {
+        menuList.classList.remove('active');
+        menuToggle.classList.remove('active');
+    }
+}
+
+function switchSection(sectionId) {
+    // Désactiver tous les liens de menu et contenus
+    document.querySelectorAll('.menu-link').forEach(link => {
+        link.classList.remove('active');
     });
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-    // Activer l'onglet et le contenu sélectionnés
-    const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
-    const tabContent = document.getElementById(tabId);
+    // Activer le lien de menu et le contenu sélectionnés
+    const menuLink = document.querySelector(`[data-section="${sectionId}"]`);
+    const sectionContent = document.getElementById(sectionId);
     
-    if (tabBtn) {
-        tabBtn.classList.add('active');
-        tabBtn.setAttribute('aria-selected', 'true');
+    if (menuLink) {
+        menuLink.classList.add('active');
     }
-    if (tabContent) {
-        tabContent.classList.add('active');
+    if (sectionContent) {
+        sectionContent.classList.add('active');
     }
 
     // Mettre à jour le mode actuel
-    if (tabId === 'mode-normal') {
+    if (sectionId === 'mode-normal') {
         appState.currentMode = 'normal';
-    } else if (tabId === 'mode-test') {
+    } else if (sectionId === 'mode-test') {
         appState.currentMode = 'test';
     }
     
@@ -309,8 +345,9 @@ function switchTab(tabId) {
     updateSectionCount();
 }
 
-// Rendre la fonction switchTab globale pour les boutons CTA
-window.switchTab = switchTab;
+// Rendre la fonction switchSection globale pour les boutons CTA
+window.switchTab = switchSection; // Keep for backward compatibility
+window.switchSection = switchSection;
 
 // ===== COMPTEUR DE CARACTÈRES =====
 function initCharCounters() {
@@ -1332,34 +1369,25 @@ const AuthManager = {
     }
 };
 
-// ===== MASQUER LE MESSAGE DE SWIPE APRÈS INTERACTION =====
-function initSwipeHint() {
-    const tabsContainer = document.querySelector('.tabs-container');
-    const swipeHint = document.querySelector('.swipe-hint');
-
-    if (tabsContainer && swipeHint) {
-        let hasScrolled = false;
-        
-        tabsContainer.addEventListener('scroll', () => {
-            if (!hasScrolled) {
-                hasScrolled = true;
-                swipeHint.style.animation = 'fadeOut 0.5s ease forwards';
-                setTimeout(() => {
-                    swipeHint.style.display = 'none';
-                }, 500);
-            }
-        });
-        
-        // Masquer après 10 secondes si pas de scroll
-        setTimeout(() => {
-            if (!hasScrolled && swipeHint) {
-                swipeHint.style.animation = 'fadeOut 0.5s ease forwards';
-                setTimeout(() => {
-                    swipeHint.style.display = 'none';
-                }, 500);
-            }
-        }, 10000);
+// ===== INITIALISATION DU MODE =====
+function initializeMode() {
+    const activeMenuLink = document.querySelector('.menu-link.active');
+    if (activeMenuLink) {
+        const sectionId = activeMenuLink.getAttribute('data-section');
+        if (sectionId === 'mode-normal') {
+            appState.currentMode = 'normal';
+        } else if (sectionId === 'mode-test') {
+            appState.currentMode = 'test';
+        }
+    } else {
+        // Default to normal mode if no active link found
+        const defaultLink = document.querySelector('[data-section="mode-normal"]');
+        if (defaultLink) {
+            defaultLink.classList.add('active');
+            appState.currentMode = 'normal';
+        }
     }
+    console.log('Mode initial:', appState.currentMode);
 }
 
 // ===== INITIALISATION PRINCIPALE =====
@@ -1374,12 +1402,11 @@ document.addEventListener('DOMContentLoaded', () => {
     AutoSave.init();
     
     // Initialiser les composants
-    initTabs();
+    initMenu();
     initCharCounters();
     initOptionalSection();
     initAudioRecorders();
     initDMIPhotosUpload(); // CORRECTION: Fonction renommée
-    initSwipeHint();
     
     updateSectionCount();
     validateDMIMode();

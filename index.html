@@ -64,16 +64,24 @@
         </div>
     </header>
 
-    <!-- Navigation par onglets -->
-    <nav class="tabs-nav" role="navigation" aria-label="Navigation principale">
-        <div class="swipe-hint">👉 Faites glisser pour voir plus</div>
-        <div class="tabs-container">
-            <button class="tab-btn active" data-tab="mode-normal" aria-selected="true"><span class="tab-icon">📝</span>Mode Normal</button>
-            <button class="tab-btn" data-tab="guide" aria-selected="false"><span class="tab-icon">📖</span>Guide</button>
-            <button class="tab-btn" data-tab="contact" aria-selected="false"><span class="tab-icon">📧</span>Contact</button>
-            <button class="tab-btn" data-tab="faq" aria-selected="false"><span class="tab-icon">❓</span>FAQ</button>
-            <button class="tab-btn" data-tab="mode-test" aria-selected="false"><span class="tab-icon">🧪</span>Mode Test</button>
-            <button class="tab-btn" data-tab="mode-dmi" aria-selected="false"><span class="tab-icon">📋</span>Mode DMI</button>
+    <!-- Navigation horizontale -->
+    <nav class="horizontal-nav" role="navigation" aria-label="Navigation principale">
+        <div class="container">
+            <div class="menu-container">
+                <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+                    <span class="hamburger"></span>
+                    <span class="hamburger"></span>
+                    <span class="hamburger"></span>
+                </button>
+                <ul class="menu-list" id="menuList">
+                    <li><a href="#" class="menu-link active" data-section="mode-normal"><span class="menu-icon">📝</span>Mode Normal</a></li>
+                    <li><a href="#" class="menu-link" data-section="guide"><span class="menu-icon">📖</span>Guide</a></li>
+                    <li><a href="#" class="menu-link" data-section="contact"><span class="menu-icon">📧</span>Contact</a></li>
+                    <li><a href="#" class="menu-link" data-section="faq"><span class="menu-icon">❓</span>FAQ</a></li>
+                    <li><a href="#" class="menu-link" data-section="mode-test"><span class="menu-icon">🧪</span>Mode Test</a></li>
+                    <li><a href="#" class="menu-link" data-section="mode-dmi"><span class="menu-icon">📋</span>Mode DMI</a></li>
+                </ul>
+            </div>
         </div>
     </nav>
 
