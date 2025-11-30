@@ -759,6 +759,9 @@
     <!-- Button Debug System -->
     <script src="button-debug-fix.js"></script>
     
+    <!-- Authentication Button Specific Fix -->
+    <script src="auth-button-fix.js"></script>
+    
     <!-- Main Application Script -->
     <script src="script.js"></script>
     
@@ -766,11 +769,14 @@
     <script>
         // Add debug helper to console
         console.log('%c🔧 DictaMed Button Debug System', 'color: #10b981; font-size: 16px; font-weight: bold;');
+        console.log('%c🔐 Authentication Button Fix Active', 'color: #3b82f6; font-size: 14px; font-weight: bold;');
         console.log('Available debug commands:');
         console.log('  - window.buttonDebug.generateReport()  // Get debug report');
+        console.log('  - window.authButtonFix.fixAuthButtons()  // Retry auth button fix');
         console.log('  - window.buttonDebug.fixSpecificIssue("loading")  // Fix specific issues');
         console.log('  - document.querySelector(".loading-overlay")?.remove()  // Remove blocking overlays');
         console.log('  - document.querySelectorAll(".auth-modal").forEach(m => m.style.display = "none")  // Close all modals');
+        console.log('Auth button status:', document.querySelectorAll('#loginBtn, #registerBtn, #showMigrationBtn').length, 'buttons found');
     </script>
 </body>
 
