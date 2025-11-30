@@ -1,14 +1,19 @@
 /**
  * DictaMed - Application de dictée médicale intelligente
- * Version améliorée avec correction du bug DMI
+ * Version avec Firebase Authentication
  * 
- * CORRECTION IMPORTANTE: 
- * - Variable 'texteLibre' renommée en 'dmiTexteLibre' pour éviter les conflits
- * - Variable 'photosUpload' renommée en 'dmiPhotosUpload'
- * - Stockage des photos DMI séparé dans 'dmiUploadedPhotos'
+ * NOUVELLES FONCTIONNALITÉS: 
+ * - Authentification Firebase avec Email/Password et Google Sign-In
+ * - Système de rôles maintenu avec Firebase custom claims
+ * - Migration des comptes existants
+ * - Profils utilisateur avancés
  */
 
 'use strict';
+
+// Firebase Authentication Integration
+import { firebaseAuth } from './firebase-auth-service.js';
+import { authComponents } from './auth-components.js';
 
 // ===== CONFIGURATION =====
 const CONFIG = {
@@ -21,7 +26,14 @@ const CONFIG = {
     MAX_PHOTO_SIZE: 10 * 1024 * 1024, // 10 MB
     MAX_PHOTOS: 5,
     AUTOSAVE_INTERVAL: 30000, // 30 secondes
-    REQUEST_TIMEOUT: 30000 // 30 secondes
+    REQUEST_TIMEOUT: 30000, // 30 secondes
+    
+    // Firebase Configuration
+    FIREBASE: {
+        AUTH_REQUIRED_FOR_NORMAL_MODE: true,
+        AUTH_REQUIRED_FOR_DMI_MODE: true,
+        PUBLIC_MODES: ['test'] // Modes qui ne nécessitent pas d'authentification
+    }
 };
 
 // ===== ÉTAT GLOBAL =====
@@ -32,7 +44,13 @@ const appState = {
         test: {}
     },
     autoSaveInterval: null,
-    lastSaveTime: null
+    lastSaveTime: null,
+    
+    // Firebase Authentication State
+    isAuthenticated: false,
+    currentUser: null,
+    userRole: null,
+    isFirebaseReady: false
 };
 
 // Configuration des sections par mode
@@ -114,15 +132,25 @@ const AutoSave = {
             const data = {
                 mode,
                 timestamp: Date.now(),
-                forms: {}
+                forms: {},
+                // Save current user info if authenticated
+                userInfo: appState.isAuthenticated ? {
+                    uid: appState.currentUser?.uid,
+                    email: appState.currentUser?.email,
+                    displayName: appState.currentUser?.displayName,
+                    role: appState.userRole
+                } : null
             };
 
-            // Sauvegarder UNIQUEMENT l'authentification en mode normal
-            if (mode === 'normal') {
-                data.forms = {
-                    username: document.getElementById('username')?.value || '',
-                    accessCode: document.getElementById('accessCode')?.value || ''
-                };
+            // Save form data for non-auth modes
+            if (CONFIG.FIREBASE.PUBLIC_MODES.includes(mode)) {
+                if (mode === 'test') {
+                    data.forms = {
+                        numeroDossierTest: document.getElementById('numeroDossierTest')?.value || '',
+                        nomPatientTest: document.getElementById('nomPatientTest')?.value || ''
+                    };
+                }
+                // Add other public modes as needed
             }
 
             localStorage.setItem('dictamed_autosave', JSON.stringify(data));
@@ -148,17 +176,22 @@ const AutoSave = {
                 return;
             }
 
-            // Restaurer UNIQUEMENT l'authentification en mode normal
-            if (data.mode === 'normal' && document.getElementById('username')) {
-                Object.entries(data.forms).forEach(([key, value]) => {
-                    const element = document.getElementById(key);
-                    if (element && value) {
-                        element.value = value;
-                        element.dispatchEvent(new Event('input'));
+            // Restore form data for public modes
+            if (data.userInfo && appState.isAuthenticated) {
+                // User is authenticated and has saved data
+                if (data.mode === appState.currentMode && CONFIG.FIREBASE.PUBLIC_MODES.includes(data.mode)) {
+                    Object.entries(data.forms).forEach(([key, value]) => {
+                        const element = document.getElementById(key);
+                        if (element && value) {
+                            element.value = value;
+                            element.dispatchEvent(new Event('input'));
+                        }
+                    });
+                    
+                    if (data.mode === 'test') {
+                        Toast.info('Données de session restaurées', 'Reprise');
                     }
-                });
-
-                Toast.info('Identifiants restaurés', 'Reprise de session');
+                }
             }
         } catch (error) {
             console.error('Erreur lors de la restauration:', error);
@@ -168,13 +201,16 @@ const AutoSave = {
     startAutoSave() {
         appState.autoSaveInterval = setInterval(() => this.save(), CONFIG.AUTOSAVE_INTERVAL);
 
-        const authInputs = document.querySelectorAll('#username, #accessCode');
-        authInputs.forEach(input => {
-            input.addEventListener('input', () => {
-                clearTimeout(this.debounceTimer);
-                this.showIndicator('saving');
-                this.debounceTimer = setTimeout(() => this.save(), 2000);
-            });
+        // Add auto-save listeners for public mode forms
+        const publicInputs = document.querySelectorAll('#numeroDossierTest, #nomPatientTest');
+        publicInputs.forEach(input => {
+            if (input) {
+                input.addEventListener('input', () => {
+                    clearTimeout(this.debounceTimer);
+                    this.showIndicator('saving');
+                    this.debounceTimer = setTimeout(() => this.save(), 2000);
+                });
+            }
         });
     },
 
@@ -813,14 +849,16 @@ async function preparePayload(mode) {
 
     try {
         if (mode === 'normal') {
-            const username = document.getElementById('username')?.value.trim();
-            const accessCode = document.getElementById('accessCode')?.value.trim();
+            // Check authentication first
+            if (!appState.isAuthenticated) {
+                console.error('Utilisateur non authentifié');
+                return null;
+            }
+
             const numeroDossier = document.getElementById('numeroDossier')?.value.trim();
             const nomPatient = document.getElementById('nomPatient')?.value.trim();
 
             const missingFields = [];
-            if (!username) missingFields.push('identifiant');
-            if (!accessCode) missingFields.push('code d\'accès');
             if (!numeroDossier) missingFields.push('numéro de dossier');
             if (!nomPatient) missingFields.push('nom du patient');
 
@@ -829,8 +867,11 @@ async function preparePayload(mode) {
                 return null;
             }
 
-            payload.username = username;
-            payload.accessCode = accessCode;
+            // Add Firebase user information
+            payload.userId = appState.currentUser.uid;
+            payload.userEmail = appState.currentUser.email;
+            payload.userDisplayName = appState.currentUser.displayName;
+            payload.userRole = appState.userRole;
             payload.NumeroDeDossier = numeroDossier;
             payload.NomDuPatient = nomPatient;
 
@@ -932,8 +973,7 @@ async function preparePayload(mode) {
 
 function resetForm(mode) {
     if (mode === 'normal') {
-        document.getElementById('username').value = '';
-        document.getElementById('accessCode').value = '';
+        // Only reset patient info, authentication is handled by Firebase
         document.getElementById('numeroDossier').value = '';
         document.getElementById('nomPatient').value = '';
 
@@ -1093,7 +1133,13 @@ async function sendDmiData() {
             NumeroDeDossier: numeroDossier,
             NomDuPatient: nomPatient,
             dmiTexte: dmiTexte, // CORRECTION: Variable renommée de 'texte' à 'dmiTexte'
-            photos: []
+            photos: [],
+            
+            // Add Firebase user information for DMI mode
+            userId: appState.isAuthenticated ? appState.currentUser.uid : null,
+            userEmail: appState.isAuthenticated ? appState.currentUser.email : null,
+            userDisplayName: appState.isAuthenticated ? appState.currentUser.displayName : null,
+            userRole: appState.userRole
         };
 
         // Convertir les photos en Base64
@@ -1172,92 +1218,152 @@ function resetDmiForm() {
     validateDMIMode();
 }
 
-// ===== GESTION DE LA SAUVEGARDE DES DONNÉES D'AUTHENTIFICATION =====
-const AuthManager = {
-    STORAGE_KEY: 'dictamed_auth_credentials',
+// ===== FIREBASE AUTHENTICATION INTEGRATION =====
 
-    saveCredentials() {
-        const username = document.getElementById('username')?.value.trim();
-        const accessCode = document.getElementById('accessCode')?.value.trim();
-        const rememberAuth = document.getElementById('rememberAuth')?.checked;
-
-        if (rememberAuth && username && accessCode) {
-            const credentials = {
-                username: username,
-                accessCode: accessCode,
-                savedAt: new Date().toISOString()
-            };
-
-            try {
-                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(credentials));
-                Toast.success('Identifiants enregistrés.', 'Sauvegarde réussie');
-            } catch (e) {
-                console.error('Erreur sauvegarde:', e);
-                Toast.error('Impossible de sauvegarder.', 'Erreur');
-            }
-        } else if (!rememberAuth) {
-            this.clearCredentials();
-        }
-    },
-
-    restoreCredentials() {
-        try {
-            const saved = localStorage.getItem(this.STORAGE_KEY);
-            if (saved) {
-                const credentials = JSON.parse(saved);
-                const usernameInput = document.getElementById('username');
-                const accessCodeInput = document.getElementById('accessCode');
-                const rememberAuthCheckbox = document.getElementById('rememberAuth');
-
-                if (usernameInput && accessCodeInput && rememberAuthCheckbox) {
-                    usernameInput.value = credentials.username || '';
-                    accessCodeInput.value = credentials.accessCode || '';
-                    rememberAuthCheckbox.checked = true;
-                }
-            }
-        } catch (e) {
-            console.error('Erreur restauration:', e);
-        }
-    },
-
-    clearCredentials() {
-        try {
-            localStorage.removeItem(this.STORAGE_KEY);
-        } catch (e) {
-            console.error('Erreur effacement:', e);
-        }
-    },
-
-    init() {
-        this.restoreCredentials();
-
-        const rememberAuthCheckbox = document.getElementById('rememberAuth');
-        if (rememberAuthCheckbox) {
-            rememberAuthCheckbox.addEventListener('change', () => {
-                if (rememberAuthCheckbox.checked) {
-                    this.saveCredentials();
-                } else {
-                    this.clearCredentials();
-                    Toast.info('Identifiants ne seront plus enregistrés.', 'Information');
-                }
+/**
+ * Initialize Firebase authentication event handlers
+ */
+function initFirebaseAuth() {
+    // Set up authentication state change listeners
+    firebaseAuth.onAuthStateChange((state, user) => {
+        console.log('Firebase auth state changed:', state);
+        
+        if (state === 'signed_in') {
+            appState.isAuthenticated = true;
+            appState.currentUser = user;
+            appState.userRole = firebaseAuth.getCurrentUserRole();
+            appState.isFirebaseReady = true;
+            
+            console.log('User signed in:', {
+                uid: user.uid,
+                email: user.email,
+                role: appState.userRole
             });
+            
+            // Update UI to show authenticated state
+            updateAuthUI();
+            
+            // Save authentication state
+            saveAuthState();
+            
+        } else if (state === 'signed_out') {
+            appState.isAuthenticated = false;
+            appState.currentUser = null;
+            appState.userRole = null;
+            appState.isFirebaseReady = true;
+            
+            console.log('User signed out');
+            
+            // Update UI to show unauthenticated state
+            updateAuthUI();
+            
+            // Clear authentication state
+            clearAuthState();
         }
+    });
+}
 
-        const usernameInput = document.getElementById('username');
-        const accessCodeInput = document.getElementById('accessCode');
-
-        [usernameInput, accessCodeInput].forEach(input => {
-            if (input) {
-                input.addEventListener('blur', () => {
-                    const rememberAuth = document.getElementById('rememberAuth')?.checked;
-                    if (rememberAuth) {
-                        this.saveCredentials();
-                    }
-                });
-            }
-        });
+/**
+ * Update UI based on authentication state
+ */
+function updateAuthUI() {
+    if (appState.isAuthenticated) {
+        // User is authenticated - hide auth section, show user profile
+        const authSection = document.querySelector('.auth-card');
+        if (authSection) {
+            authSection.style.display = 'none';
+        }
+        
+        // Show user profile if it exists
+        const profileSection = document.getElementById('userProfileSection');
+        if (profileSection) {
+            profileSection.style.display = 'block';
+        }
+        
+    } else {
+        // User is not authenticated - show auth section, hide user profile
+        const authSection = document.querySelector('.auth-card');
+        if (authSection) {
+            authSection.style.display = 'block';
+        }
+        
+        // Hide user profile
+        const profileSection = document.getElementById('userProfileSection');
+        if (profileSection) {
+            profileSection.style.display = 'none';
+        }
     }
-};
+}
+
+/**
+ * Save authentication state to localStorage
+ */
+function saveAuthState() {
+    try {
+        const authData = {
+            isAuthenticated: appState.isAuthenticated,
+            userId: appState.currentUser?.uid,
+            userEmail: appState.currentUser?.email,
+            userDisplayName: appState.currentUser?.displayName,
+            userRole: appState.userRole,
+            timestamp: Date.now()
+        };
+        
+        localStorage.setItem('dictamed_firebase_auth', JSON.stringify(authData));
+    } catch (error) {
+        console.error('Error saving auth state:', error);
+    }
+}
+
+/**
+ * Clear authentication state from localStorage
+ */
+function clearAuthState() {
+    try {
+        localStorage.removeItem('dictamed_firebase_auth');
+    } catch (error) {
+        console.error('Error clearing auth state:', error);
+    }
+}
+
+/**
+ * Check if current mode requires authentication
+ */
+function checkAuthenticationRequirement() {
+    const mode = appState.currentMode;
+    
+    if (CONFIG.FIREBASE.PUBLIC_MODES.includes(mode)) {
+        return true; // Public mode, no auth required
+    }
+    
+    if (!appState.isAuthenticated) {
+        Toast.error('Cette section nécessite une authentification. Veuillez vous connecter.', 'Authentification requise');
+        // Show login modal
+        authComponents.showModal('loginModal');
+        return false;
+    }
+    
+    return true;
+}
+
+/**
+ * Handle form submission with authentication check
+ */
+function handleAuthenticatedFormSubmission(mode, formData) {
+    if (!checkAuthenticationRequirement()) {
+        return false;
+    }
+    
+    // Add user information to form data
+    if (appState.isAuthenticated && appState.currentUser) {
+        formData.userId = appState.currentUser.uid;
+        formData.userEmail = appState.currentUser.email;
+        formData.userDisplayName = appState.currentUser.displayName;
+        formData.userRole = appState.userRole;
+    }
+    
+    return true;
+}
 
 // ===== MASQUER LE MESSAGE DE SWIPE APRÈS INTERACTION =====
 function initSwipeHint() {
@@ -1318,6 +1424,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (submitNormalBtn) {
         submitNormalBtn.addEventListener('click', () => {
+            if (!checkAuthenticationRequirement()) {
+                return;
+            }
             Loading.show('Envoi en cours...');
             sendData('normal').finally(() => Loading.hide());
         });
@@ -1332,13 +1441,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (submitDmiBtn) {
         submitDmiBtn.addEventListener('click', () => {
+            if (!checkAuthenticationRequirement()) {
+                return;
+            }
             Loading.show('Envoi en cours...');
             sendDmiData().finally(() => Loading.hide());
         });
     }
 
-    // Initialiser AuthManager
-    AuthManager.init();
+    // Événements pour les boutons d'authentification Firebase
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    const showMigrationBtn = document.getElementById('showMigrationBtn');
 
-    console.log('✅ DictaMed initialisé avec succès!');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+            authComponents.showModal('loginModal');
+        });
+    }
+
+    if (registerBtn) {
+        registerBtn.addEventListener('click', () => {
+            authComponents.showModal('registerModal');
+        });
+    }
+
+    if (showMigrationBtn) {
+        showMigrationBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            authComponents.showModal('migrationModal');
+        });
+    }
+
+    // Initialize Firebase Authentication
+    initFirebaseAuth();
+
+    // Initialize authentication UI components
+    if (typeof authComponents !== 'undefined') {
+        authComponents.init();
+    }
+
+    console.log('✅ DictaMed initialisé avec Firebase Authentication!');
 });
