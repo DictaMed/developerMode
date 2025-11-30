@@ -132,31 +132,107 @@ header {
 }
 
 .logo {
-    font-size: 2rem;
-    font-weight: 800;
+    font-size: 2.8rem;
+    font-weight: 900;
     text-align: left;
-    letter-spacing: -1px;
+    letter-spacing: -2px;
     white-space: nowrap;
+    position: relative;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--blue-light) 30%, var(--green-secondary) 70%, var(--green-dark) 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: logoGradientShift 4s ease-in-out infinite;
+    text-shadow: none;
+    filter: drop-shadow(0 4px 8px rgba(37, 99, 235, 0.3));
+    transform: perspective(500px) rotateX(5deg);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logo::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        var(--blue-primary) 0%, 
+        var(--blue-light) 25%, 
+        var(--green-secondary) 75%, 
+        var(--green-dark) 100%);
+    background-size: 200% 200%;
+    animation: logoGradientShift 4s ease-in-out infinite;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    z-index: -1;
+    filter: blur(2px);
+    opacity: 0.6;
 }
 
 .logo-dicta {
-    color: var(--blue-primary);
-    text-shadow: 2px 2px 4px rgba(37, 99, 235, 0.2);
+    background: inherit;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
 }
 
 .logo-med {
-    color: var(--green-secondary);
-    text-shadow: 2px 2px 4px rgba(16, 185, 129, 0.2);
+    background: inherit;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+}
+
+.logo:hover {
+    transform: perspective(500px) rotateX(0deg) scale(1.05);
+    filter: drop-shadow(0 8px 16px rgba(37, 99, 235, 0.4));
+}
+
+@keyframes logoGradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
 }
 
 .slogan {
     text-align: left;
     color: var(--gray-medium);
     font-style: italic;
-    margin-top: 4px;
-    font-size: 0.85rem;
-    font-weight: 500;
+    margin-top: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
     white-space: nowrap;
+    background: linear-gradient(135deg, var(--gray-medium) 0%, var(--blue-primary) 50%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.slogan::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--blue-primary), var(--green-secondary));
+    transition: width 0.3s ease;
+}
+
+.logo:hover + .slogan::after {
+    width: 100%;
 }
 
 
@@ -246,14 +322,15 @@ header {
     }
 
     .logo {
-        font-size: 1.6rem;
+        font-size: 2.2rem;
         text-align: center;
+        letter-spacing: -1px;
     }
 
     .slogan {
         text-align: center;
-        font-size: 0.75rem;
-        margin-top: 4px;
+        font-size: 0.85rem;
+        margin-top: 6px;
     }
 
     .tabs-nav {
@@ -279,14 +356,25 @@ header {
     }
 
     .tab-btn {
-        font-size: 0.8rem;
-        padding: 10px 14px;
+        font-size: 0.9rem;
+        padding: 12px 18px;
         /* Enhanced touch targets for mobile */
-        min-height: 48px;
-        min-width: 44px;
+        min-height: 52px;
+        min-width: 48px;
         white-space: nowrap;
         flex-shrink: 0;
-        border-radius: 10px;
+        border-radius: 12px;
+        font-weight: 700;
+    }
+
+    .tab-icon {
+        font-size: 1.2em;
+    }
+
+    .tabs-container {
+        gap: 12px;
+        padding: 10px 16px;
+        margin: 0 -8px;
     }
 
     /* Auth modal mobile optimization */
@@ -315,14 +403,14 @@ header {
 
 .tabs-container {
     display: flex;
-    gap: 12px;
+    gap: 16px;
     justify-content: flex-end;
     align-items: center;
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: thin;
     -ms-overflow-style: auto;
-    padding: 8px 16px;
+    padding: 12px 20px;
     box-sizing: border-box;
     scroll-snap-type: x mandatory;
     flex-wrap: nowrap;
@@ -331,70 +419,132 @@ header {
     z-index: 1010;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
-    /* Better visual separation */
-    background: linear-gradient(90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.1) 20%,
-        rgba(255, 255, 255, 0.1) 80%,
-        transparent 100%);
-    backdrop-filter: blur(4px);
-    border-radius: 16px;
-    margin: 0 8px;
+    /* Enhanced visual separation with modern gradient */
+    background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.2) 0%,
+        rgba(255, 255, 255, 0.15) 25%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.15) 75%,
+        rgba(255, 255, 255, 0.2) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    margin: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    /* Subtle animated border glow */
+    position: relative;
+}
+
+.tabs-container::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+        var(--blue-primary), 
+        var(--green-secondary), 
+        var(--blue-primary), 
+        var(--green-secondary));
+    background-size: 400% 400%;
+    border-radius: 22px;
+    z-index: -1;
+    opacity: 0;
+    animation: tabContainerGlow 3s ease-in-out infinite;
+    transition: opacity 0.3s ease;
+}
+
+.tabs-container:hover::before {
+    opacity: 0.3;
+}
+
+@keyframes tabContainerGlow {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
 }
 
 .tab-icon {
-    font-size: 1.1em;
-    opacity: 0.8;
-    transition: all 0.3s ease;
+    font-size: 1.3em;
+    opacity: 0.9;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    transform: translateY(0);
 }
 
 .tab-btn:hover .tab-icon {
-    transform: scale(1.1);
+    transform: scale(1.2) translateY(-2px);
     opacity: 1;
+    filter: drop-shadow(0 2px 4px rgba(37, 99, 235, 0.3));
 }
 
 .tab-btn.active .tab-icon {
     opacity: 1;
-    filter: drop-shadow(0 0 3px currentColor);
+    filter: drop-shadow(0 0 6px currentColor) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    transform: scale(1.15);
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+    0%, 100% {
+        transform: scale(1.15);
+    }
+    50% {
+        transform: scale(1.2);
+    }
 }
 
 .tab-btn {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    padding: 12px 20px;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(255, 255, 255, 0.85) 50%, 
+        rgba(255, 255, 255, 0.75) 100%);
+    border: 2px solid rgba(37, 99, 235, 0.15);
+    padding: 14px 24px;
     color: var(--gray-dark);
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     position: relative;
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: visible;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     scroll-snap-align: start;
     min-width: max-content;
     width: max-content;
     max-width: none;
     box-shadow:
-        0 4px 12px rgba(0, 0, 0, 0.1),
-        0 2px 4px rgba(37, 99, 235, 0.08);
+        0 8px 20px rgba(0, 0, 0, 0.12),
+        0 4px 8px rgba(37, 99, 235, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
     flex-shrink: 0;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(12px);
     /* Enhanced clickability */
     z-index: 1010;
     pointer-events: auto;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
     /* Better touch targets */
-    min-height: 48px;
+    min-height: 52px;
     /* Accessibility */
     outline: none;
     /* Enhanced visibility */
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    /* Modern subtle pattern */
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(37, 99, 235, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
 }
 
 .tab-btn::before {
@@ -427,15 +577,23 @@ header {
 .tab-btn:hover {
     color: var(--blue-primary);
     background: linear-gradient(135deg,
-            rgba(37, 99, 235, 0.12) 0%,
-            rgba(16, 185, 129, 0.08) 100%);
-    transform: translateY(-3px) scale(1.03);
+            rgba(37, 99, 235, 0.15) 0%,
+            rgba(59, 130, 246, 0.1) 25%,
+            rgba(16, 185, 129, 0.12) 50%,
+            rgba(52, 211, 153, 0.08) 100%);
+    transform: translateY(-4px) scale(1.05);
     box-shadow:
-        0 8px 25px rgba(37, 99, 235, 0.2),
-        0 4px 12px rgba(16, 185, 129, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    border-color: rgba(37, 99, 235, 0.4);
-    text-shadow: 0 1px 3px rgba(37, 99, 235, 0.2);
+        0 12px 35px rgba(37, 99, 235, 0.25),
+        0 6px 18px rgba(16, 185, 129, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    border-color: rgba(37, 99, 235, 0.5);
+    text-shadow: 0 1px 4px rgba(37, 99, 235, 0.3);
+    backdrop-filter: blur(16px);
+}
+
+.tab-btn:active {
+    transform: translateY(-2px) scale(1.02);
+    transition: all 0.1s ease;
 }
 
 /* Enhanced accessibility and keyboard navigation */
@@ -516,24 +674,24 @@ header {
 }
 
 .tab-btn.active {
-    font-weight: 700;
+    font-weight: 800;
     background: linear-gradient(135deg,
-            rgba(37, 99, 235, 0.25) 0%,
-            rgba(29, 78, 216, 0.2) 30%,
-            rgba(16, 185, 129, 0.25) 70%,
-            rgba(5, 150, 105, 0.2) 100%);
+            rgba(37, 99, 235, 0.3) 0%,
+            rgba(59, 130, 246, 0.25) 25%,
+            rgba(16, 185, 129, 0.3) 75%,
+            rgba(5, 150, 105, 0.25) 100%);
     background-size: 300% 300%;
     animation: gradientShift 4s ease infinite, activePulse 2s ease-in-out infinite;
     box-shadow:
-        0 8px 30px rgba(37, 99, 235, 0.5),
-        0 4px 15px rgba(16, 185, 129, 0.3),
-        inset 0 2px 0 rgba(255, 255, 255, 0.4),
-        0 0 20px rgba(37, 99, 235, 0.2);
-    transform: translateY(-4px) scale(1.08);
-    border-color: rgba(37, 99, 235, 0.6);
+        0 12px 40px rgba(37, 99, 235, 0.6),
+        0 6px 20px rgba(16, 185, 129, 0.4),
+        inset 0 2px 0 rgba(255, 255, 255, 0.6),
+        0 0 30px rgba(37, 99, 235, 0.4);
+    transform: translateY(-6px) scale(1.12);
+    border-color: rgba(37, 99, 235, 0.8);
     position: relative;
     /* Enhanced glow effect */
-    filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.3));
+    filter: drop-shadow(0 0 12px rgba(37, 99, 235, 0.5));
 
     /* Texte en gradient bleu/vert avec enhanced contrast */
     background-image: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
@@ -542,6 +700,37 @@ header {
     -webkit-text-fill-color: transparent;
     color: transparent;
     text-shadow: none;
+    backdrop-filter: blur(20px);
+}
+
+/* Active tab pulse effect */
+.tab-btn.active::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    background: linear-gradient(45deg, 
+        var(--blue-primary), 
+        var(--green-secondary), 
+        var(--blue-primary));
+    background-size: 400% 400%;
+    border-radius: 20px;
+    z-index: -1;
+    animation: activeTabGlow 2s ease-in-out infinite;
+    opacity: 0.6;
+}
+
+@keyframes activeTabGlow {
+    0%, 100% {
+        background-position: 0% 50%;
+        opacity: 0.6;
+    }
+    50% {
+        background-position: 100% 50%;
+        opacity: 0.8;
+    }
 }
 
 /* Enhanced active indicator */
@@ -2224,12 +2413,22 @@ label span[style*="color: var(--red)"] {
 /* Très petits écrans (< 360px) */
 @media (max-width: 360px) {
     .logo {
-        font-size: 1.6rem;
+        font-size: 1.8rem;
+        letter-spacing: -0.5px;
+    }
+
+    .slogan {
+        font-size: 0.75rem;
     }
 
     .tab-btn {
-        padding: 10px 12px;
-        font-size: 0.8rem;
+        padding: 10px 14px;
+        font-size: 0.85rem;
+        min-height: 48px;
+    }
+
+    .tab-icon {
+        font-size: 1.1em;
     }
 
     .btn {
