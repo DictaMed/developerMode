@@ -73,18 +73,75 @@
     <nav class="tabs-nav" role="navigation" aria-label="Navigation principale">
         <div class="swipe-hint">👉 Faites glisser pour voir plus</div>
         <div class="tabs-container">
-            <button class="tab-btn active" data-tab="mode-normal" aria-selected="true"><span class="tab-icon">📝</span>Mode Normal</button>
+            <button class="tab-btn active" data-tab="welcome" aria-selected="true"><span class="tab-icon">🏠</span>Accueil</button>
+            <button class="tab-btn" data-tab="mode-normal" aria-selected="false"><span class="tab-icon">📝</span>Mode Normal</button>
+            <button class="tab-btn" data-tab="mode-test" aria-selected="false"><span class="tab-icon">🧪</span>Mode Test</button>
             <button class="tab-btn" data-tab="guide" aria-selected="false"><span class="tab-icon">📖</span>Guide</button>
             <button class="tab-btn" data-tab="contact" aria-selected="false"><span class="tab-icon">📧</span>Contact</button>
             <button class="tab-btn" data-tab="faq" aria-selected="false"><span class="tab-icon">❓</span>FAQ</button>
-            <button class="tab-btn" data-tab="mode-test" aria-selected="false"><span class="tab-icon">🧪</span>Mode Test</button>
             <button class="tab-btn" data-tab="mode-dmi" aria-selected="false"><span class="tab-icon">📝</span>Mode DMI</button>
         </div>
     </nav>
 
     <!-- Contenu des onglets -->
     <main class="container" id="main-content" role="main">
-        <!-- ONGLET 1: MODE NORMAL -->
+        <!-- ONGLET 1: PAGE D'ACCUEIL -->
+        <section id="welcome" class="tab-content active">
+            <div class="welcome-page">
+                <div class="welcome-logo">
+                    <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
+                </div>
+                
+                <h1 class="welcome-title">Bienvenue sur DictaMed</h1>
+                
+                <p class="welcome-subtitle">Où la voix rencontre les chiffres</p>
+                
+                <p class="welcome-description">
+                    Découvrez la solution révolutionnaire de dictée médicale intelligente qui transforme 
+                    vos enregistrements vocaux en données structurées pour faciliter la collecte 
+                    de données médicales et la création de fichiers SPSS.
+                </p>
+                
+                <div class="welcome-actions">
+                    <button class="welcome-btn welcome-btn-primary" onclick="switchTab('mode-test')">
+                        <span>🧪</span>
+                        <span>Essayer le Mode Test</span>
+                    </button>
+                    <button class="welcome-btn welcome-btn-secondary" onclick="switchTab('guide')">
+                        <span>📖</span>
+                        <span>Voir le Guide</span>
+                    </button>
+                </div>
+                
+                <div class="welcome-features">
+                    <div class="welcome-feature">
+                        <div class="welcome-feature-icon">⚡</div>
+                        <h4>Gain de temps</h4>
+                        <p>Divisez par 3 votre temps de saisie de données</p>
+                    </div>
+                    
+                    <div class="welcome-feature">
+                        <div class="welcome-feature-icon">🎯</div>
+                        <h4>Précision</h4>
+                        <p>Taux de reconnaissance >95% avec IA médicale</p>
+                    </div>
+                    
+                    <div class="welcome-feature">
+                        <div class="welcome-feature-icon">🔒</div>
+                        <h4>Sécurité</h4>
+                        <p>Conformité RGPD et chiffrement bout-en-bout</p>
+                    </div>
+                    
+                    <div class="welcome-feature">
+                        <div class="welcome-feature-icon">📱</div>
+                        <h4>Flexibilité</h4>
+                        <p>Compatible ordinateur, tablette et smartphone</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ONGLET 2: MODE NORMAL -->
         <section id="mode-normal" class="tab-content active">
             
             <!-- Authentification -->

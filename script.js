@@ -18,6 +18,8 @@ function initializeMode() {
             appState.currentMode = 'normal';
         } else if (tabId === 'mode-test') {
             appState.currentMode = 'test';
+        } else if (tabId === 'welcome') {
+            appState.currentMode = 'welcome';
         }
     }
     console.log('Mode initial:', appState.currentMode);
@@ -293,6 +295,8 @@ function switchTab(tabId) {
         appState.currentMode = 'normal';
     } else if (tabId === 'mode-test') {
         appState.currentMode = 'test';
+    } else if (tabId === 'welcome') {
+        appState.currentMode = 'welcome';
     }
 }
 
