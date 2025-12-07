@@ -97,11 +97,12 @@ header {
 
 
 
-/* Barre de navigation fixe en haut à droite */
+/* Barre de navigation fixe en bas horizontalement */
 .fixed-modes-nav {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 1000;
     background: linear-gradient(135deg, 
         rgba(255,255,255,0.95) 0%, 
@@ -140,32 +141,36 @@ header {
 
 .modes-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 8px;
-    min-width: 160px;
+    min-width: 600px;
 }
 
-/* Boutons de mode avec design amélioré */
+/* Boutons de mode horizontaux avec design amélioré */
 .mode-btn {
     background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%);
     border: 2px solid rgba(255, 255, 255, 0.4);
-    padding: 14px 18px;
+    padding: 12px 16px;
     color: var(--gray-dark);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.25s ease;
     position: relative;
-    border-radius: 14px;
+    border-radius: 12px;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    min-height: 52px;
+    justify-content: center;
+    gap: 4px;
+    min-height: 60px;
+    min-width: 90px;
     box-shadow: 
         0 4px 12px rgba(0,0,0,0.1),
         0 2px 4px rgba(0,0,0,0.05);
     backdrop-filter: blur(10px);
     letter-spacing: 0.3px;
+    flex-shrink: 0;
 }
 
 .mode-btn::before {
@@ -176,7 +181,7 @@ header {
     right: 0;
     bottom: 0;
     background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 100%);
-    border-radius: 12px;
+    border-radius: 10px;
     opacity: 0;
     transition: opacity 0.2s ease;
 }
@@ -186,7 +191,7 @@ header {
 }
 
 .mode-icon {
-    font-size: 1.4em;
+    font-size: 1.2em;
     opacity: 0.9;
     transition: opacity 0.2s ease;
     line-height: 1;
@@ -195,8 +200,10 @@ header {
 
 .mode-text {
     font-weight: 600;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.3px;
     transition: opacity 0.2s ease;
+    font-size: 0.8rem;
+    text-align: center;
 }
 
 /* Styles individuels pour chaque mode */
@@ -334,9 +341,9 @@ header {
     z-index: 1;
 }
 
-/* Ajouter de l'espace en haut pour compenser la barre fixe */
+/* Ajouter de l'espace en bas pour compenser la barre horizontale */
 main.container {
-    margin-top: 40px;
+    margin-bottom: 100px;
 }
 
 /* Contenu des onglets */
@@ -820,7 +827,7 @@ input:focus {
 /* Mode Test - Badge DEMO */
 .demo-badge {
     position: fixed;
-    top: 180px;
+    top: 120px;
     right: 25px;
     background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
     color: white;
@@ -991,22 +998,34 @@ footer {
         padding: 22px;
     }
     
-    /* Adapter la barre fixe pour mobile */
+    /* Adapter la barre fixe horizontale pour mobile */
     .fixed-modes-nav {
-        top: 15px;
-        right: 15px;
-        padding: 10px;
-        min-width: 140px;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 8px;
+        min-width: 90%;
+        max-width: 100%;
+    }
+    
+    .modes-container {
+        min-width: auto;
+        gap: 6px;
     }
     
     .mode-btn {
-        padding: 10px 12px;
-        font-size: 0.85rem;
-        min-height: 44px;
+        padding: 8px 10px;
+        font-size: 0.8rem;
+        min-height: 50px;
+        min-width: 70px;
     }
     
     .mode-icon {
-        font-size: 1.1em;
+        font-size: 1em;
+    }
+    
+    .mode-text {
+        font-size: 0.7rem;
     }
 }
 
@@ -1740,7 +1759,7 @@ label span[style*="color: var(--red)"] {
         width: 100%;
     }
 
-    /* Demo badge repositionné */
+    /* Demo badge repositionné pour barre horizontale en bas */
     .demo-badge {
         top: 85px;
         right: 10px;
@@ -1814,38 +1833,58 @@ label span[style*="color: var(--red)"] {
         font-size: 0.9rem;
     }
     
-    /* Adapter la barre fixe pour très petits écrans */
+    /* Adapter la barre fixe horizontale pour très petits écrans */
     .fixed-modes-nav {
-        top: 10px;
-        right: 10px;
-        padding: 8px;
-        min-width: 120px;
-        max-width: 140px;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 6px;
+        width: 95%;
+    }
+    
+    .modes-container {
+        gap: 4px;
     }
     
     .mode-btn {
-        padding: 8px 10px;
-        font-size: 0.8rem;
-        min-height: 40px;
+        padding: 6px 8px;
+        font-size: 0.75rem;
+        min-height: 45px;
+        min-width: 60px;
     }
     
     .mode-icon {
-        font-size: 1em;
+        font-size: 0.9em;
     }
     
     .mode-text {
-        font-size: 0.75rem;
+        font-size: 0.65rem;
     }
 }
 
-/* Écrans très petits - Masquer la barre fixe pour dégager de l'espace */
+/* Écrans très petits - Barre horizontale ultra-compacte */
 @media (max-width: 360px) {
     .fixed-modes-nav {
-        display: none;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 4px;
+        width: 98%;
+        border-radius: 12px;
     }
     
-    main.container {
-        margin-top: 20px;
+    .mode-btn {
+        padding: 4px 6px;
+        min-height: 40px;
+        min-width: 50px;
+    }
+    
+    .mode-icon {
+        font-size: 0.8em;
+    }
+    
+    .mode-text {
+        font-size: 0.6rem;
     }
 }
 
@@ -2230,7 +2269,7 @@ textarea:focus-visible {
 /* Indicateur de sauvegarde automatique */
 .autosave-indicator {
     position: fixed;
-    bottom: 20px;
+    bottom: 100px;
     left: 20px;
     padding: 8px 16px;
     background: white;
@@ -2281,7 +2320,7 @@ textarea:focus-visible {
 /* Améliorations responsive */
 @media (max-width: 480px) {
     .autosave-indicator {
-        bottom: 10px;
+        bottom: 80px;
         left: 10px;
         font-size: 12px;
         padding: 6px 12px;
