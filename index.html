@@ -227,29 +227,7 @@
         <div id="mode-normal" class="tab-content">
             <h1>🏥 Mode Normal - Production</h1>
             
-            <div class="card instructions-card">
-                <h3>🔐 Authentification requise</h3>
-                <p>Veuillez vous authentifier pour accéder au mode de production.</p>
-                
-                <div class="form-group">
-                    <label for="username">Identifiant <span style="color: var(--red)">*</span></label>
-                    <input type="text" id="username" placeholder="Votre identifiant" maxlength="50">
-                    <div class="char-counter" id="usernameCounter">0/50</div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="accessCode">Code d'accès <span style="color: var(--red)">*</span></label>
-                    <input type="password" id="accessCode" placeholder="Votre code d'accès" maxlength="20">
-                    <div class="char-counter" id="accessCodeCounter">0/20</div>
-                </div>
-                
-                <div class="form-group">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                        <input type="checkbox" id="rememberAuth" style="width: auto;">
-                        <span>Se souvenir de mes identifiants</span>
-                    </label>
-                </div>
-            </div>
+
 
             <div class="card">
                 <h3>📋 Informations patient</h3>
@@ -541,12 +519,6 @@
             
             <div class="workflow">
                 <div class="workflow-step">
-                    <div class="workflow-icon">🔐</div>
-                    <h4>Authentification</h4>
-                    <p>Connectez-vous avec vos identifiants</p>
-                </div>
-                <div class="workflow-arrow">→</div>
-                <div class="workflow-step">
                     <div class="workflow-icon">📋</div>
                     <h4>Informations</h4>
                     <p>Saisissez les données patient</p>
@@ -569,7 +541,7 @@
                 <div class="step-card">
                     <div class="step-number">1</div>
                     <h3>Mode Normal</h3>
-                    <p>Mode de production nécessitant une authentification. Vos données sont traitées de manière sécurisée et confidentielle.</p>
+                    <p>Mode de production simplifié sans authentification. Vos données sont traitées de manière sécurisée et confidentielle.</p>
                 </div>
                 
                 <div class="step-card">
@@ -604,12 +576,12 @@
             <div class="faq-list">
                 <div class="faq-item">
                     <h3>Comment utiliser DictaMed ?</h3>
-                    <p>DictaMed fonctionne en 4 étapes simples : authentification, saisie des informations patient, enregistrement vocal par sections, et envoi des données. Chaque section audio est limitée à 2 minutes.</p>
+                    <p>DictaMed fonctionne en 3 étapes simples : saisie des informations patient, enregistrement vocal par sections, et envoi des données. Chaque section audio est limitée à 2 minutes.</p>
                 </div>
                 
                 <div class="faq-item">
                     <h3>Quelle est la différence entre les modes ?</h3>
-                    <p><strong>Mode Normal</strong> : Production avec authentification. <strong>Mode Test</strong> : Démonstration publique. <strong>Saisie Texte</strong> : Saisie directe avec photos.</p>
+                    <p><strong>Mode Normal</strong> : Production simplifiée sans authentification. <strong>Mode Test</strong> : Démonstration publique. <strong>Saisie Texte</strong> : Saisie directe avec photos.</p>
                 </div>
                 
                 <div class="faq-item">
