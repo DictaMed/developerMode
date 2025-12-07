@@ -1,0 +1,124 @@
+<h1>🏥 Mode Normal - Production</h1>
+
+<div class="card">
+    <h3>📋 Informations patient</h3>
+    
+    <div class="form-group">
+        <label for="numeroDossier">Numéro de dossier <span style="color: var(--red)">*</span></label>
+        <input type="text" id="numeroDossier" placeholder="Numéro du dossier patient" maxlength="50">
+        <div class="char-counter" id="numeroDossierCounter">0/50</div>
+    </div>
+    
+    <div class="form-group">
+        <label for="nomPatient">Nom du patient <span style="color: var(--red)">*</span></label>
+        <input type="text" id="nomPatient" placeholder="Nom du patient" maxlength="50">
+        <div class="char-counter" id="nomPatientCounter">0/50</div>
+    </div>
+</div>
+
+<!-- Partie 1 -->
+<div class="recording-section" data-section="partie1">
+    <h3>🎤 Partie 1 - Anamnèse</h3>
+    <p class="section-description">Décrivez les symptômes, la durée d'évolution, les facteurs déclenchants...</p>
+    
+    <div class="recording-controls">
+        <div class="status-info">
+            <span class="status-badge" data-status="ready">⚪ Prêt</span>
+            <span class="timer">00:00</span>
+            <span class="recorded-badge hidden">✅ Enregistré</span>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="btn btn-record">🔴 Enregistrer</button>
+            <button class="btn btn-pause hidden">⏸️ Pause</button>
+            <button class="btn btn-stop hidden">⏹️ Arrêter</button>
+            <button class="btn btn-replay hidden">🔊 Réécouter</button>
+            <button class="btn btn-delete hidden">🗑️ Supprimer</button>
+        </div>
+        
+        <audio class="audio-player hidden" controls></audio>
+    </div>
+</div>
+
+<!-- Partie 2 -->
+<div class="recording-section" data-section="partie2">
+    <h3>🎤 Partie 2 - Examen clinique</h3>
+    <p class="section-description">Décrivez l'examen physique, les observations cliniques...</p>
+    
+    <div class="recording-controls">
+        <div class="status-info">
+            <span class="status-badge" data-status="ready">⚪ Prêt</span>
+            <span class="timer">00:00</span>
+            <span class="recorded-badge hidden">✅ Enregistré</span>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="btn btn-record">🔴 Enregistrer</button>
+            <button class="btn btn-pause hidden">⏸️ Pause</button>
+            <button class="btn btn-stop hidden">⏹️ Arrêter</button>
+            <button class="btn btn-replay hidden">🔊 Réécouter</button>
+            <button class="btn btn-delete hidden">🗑️ Supprimer</button>
+        </div>
+        
+        <audio class="audio-player hidden" controls></audio>
+    </div>
+</div>
+
+<!-- Partie 3 -->
+<div class="recording-section" data-section="partie3">
+    <h3>🎤 Partie 3 - Examens complémentaires</h3>
+    <p class="section-description">Décrivez les analyses, imagerie, résultats d'examens...</p>
+    
+    <div class="recording-controls">
+        <div class="status-info">
+            <span class="status-badge" data-status="ready">⚪ Prêt</span>
+            <span class="timer">00:00</span>
+            <span class="recorded-badge hidden">✅ Enregistré</span>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="btn btn-record">🔴 Enregistrer</button>
+            <button class="btn btn-pause hidden">⏸️ Pause</button>
+            <button class="btn btn-stop hidden">⏹️ Arrêter</button>
+            <button class="btn btn-replay hidden">🔊 Réécouter</button>
+            <button class="btn btn-delete hidden">🗑️ Supprimer</button>
+        </div>
+        
+        <audio class="audio-player hidden" controls></audio>
+    </div>
+</div>
+
+<!-- Partie 4 Optionnelle -->
+<div class="optional-section">
+    <div class="optional-toggle">
+        <button id="togglePartie4" class="btn btn-secondary">Afficher Partie 4 (optionnelle)</button>
+    </div>
+    
+    <div data-section="partie4" class="hidden">
+        <h3>🎤 Partie 4 - Synthèse et plan thérapeutique</h3>
+        <p class="section-description">Synthèse du cas, diagnostic, traitement et suivi...</p>
+        
+        <div class="recording-controls">
+            <div class="status-info">
+                <span class="status-badge" data-status="ready">⚪ Prêt</span>
+                <span class="timer">00:00</span>
+                <span class="recorded-badge hidden">✅ Enregistré</span>
+            </div>
+            
+            <div class="control-buttons">
+                <button class="btn btn-record">🔴 Enregistrer</button>
+                <button class="btn btn-pause hidden">⏸️ Pause</button>
+                <button class="btn btn-stop hidden">⏹️ Arrêter</button>
+                <button class="btn btn-replay hidden">🔊 Réécouter</button>
+                <button class="btn btn-delete hidden">🗑️ Supprimer</button>
+            </div>
+            
+            <audio class="audio-player hidden" controls></audio>
+        </div>
+    </div>
+</div>
+
+<div class="submit-section">
+    <div class="sections-count">0 section(s) enregistrée(s)</div>
+    <button id="submitNormal" class="btn btn-submit" disabled>📤 Envoyer les données</button>
+</div>

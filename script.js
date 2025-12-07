@@ -1162,7 +1162,7 @@ class TabNavigationSystem {
         });
     }
 
-    switchTab(tabId) {
+    async switchTab(tabId) {
         // Check access before switching
         if (!this.checkTabAccess(tabId)) {
             return;
@@ -1172,17 +1172,123 @@ class TabNavigationSystem {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-        // Activate selected tab and content
-        document.querySelector(`[data-tab="${tabId}"]`)?.classList.add('active');
-        document.getElementById(tabId)?.classList.add('active');
-
         // Sync fixed navigation buttons
         this.updateFixedNavButtons(tabId);
+
+        // Load tab content if not already loaded
+        await this.loadTabContent(tabId);
 
         // Update current mode
         this.updateAppMode(tabId);
         
         this.activeTab = tabId;
+    }
+
+    async loadTabContent(tabId) {
+        const tabContent = document.getElementById('tab-content');
+        
+        if (!tabContent) {
+            console.error('Container tab-content non trouvé');
+            return;
+        }
+
+        try {
+            // Show loading state
+            tabContent.innerHTML = '<div class="loading-content"><p>Chargement...</p></div>';
+            
+            // Map tab IDs to file names
+            const tabFiles = {
+                'home': 'tab-home.html',
+                'mode-normal': 'tab-mode-normal.html',
+                'mode-test': 'tab-mode-test.html',
+                'mode-dmi': 'tab-mode-dmi.html',
+                'guide': 'tab-guide.html',
+                'faq': 'tab-faq.html'
+            };
+            
+            const fileName = tabFiles[tabId];
+            if (!fileName) {
+                throw new Error(`Fichier de tab non trouvé pour: ${tabId}`);
+            }
+            
+            // Load content from file
+            const response = await fetch(fileName);
+            if (!response.ok) {
+                throw new Error(`Erreur lors du chargement: ${response.status}`);
+            }
+            
+            const content = await response.text();
+            tabContent.innerHTML = content;
+            
+            // Initialize event listeners for the newly loaded content
+            this.initTabContentEventListeners(tabId);
+            
+        } catch (error) {
+            console.error('Erreur lors du chargement du tab:', error);
+            tabContent.innerHTML = `
+                <div class="error-content">
+                    <h2>Erreur de chargement</h2>
+                    <p>Impossible de charger le contenu de cet onglet.</p>
+                    <button class="btn btn-primary" onclick="switchTab('home')">Retour à l'accueil</button>
+                </div>
+            `;
+        }
+    }
+
+    initTabContentEventListeners(tabId) {
+        // Initialize specific event listeners based on tab type
+        if (tabId === 'mode-normal' || tabId === 'mode-test') {
+            // Reinitialize audio recorders for recording sections
+            const recordingSections = document.querySelectorAll('.recording-section');
+            recordingSections.forEach(section => {
+                const sectionId = section.getAttribute('data-section');
+                const existingRecorder = audioRecorderManager.getRecorder(sectionId);
+                
+                // Create new recorder if doesn't exist or if tab changed
+                if (!existingRecorder) {
+                    const recorder = new AudioRecorder(section);
+                    audioRecorderManager.recorders.set(sectionId, recorder);
+                    appState.setRecording(sectionId, recorder);
+                }
+            });
+            
+            // Update section count
+            updateSectionCount();
+        }
+        
+        if (tabId === 'mode-dmi') {
+            // Initialize DMI specific listeners
+            const texteLibre = document.getElementById('texteLibre');
+            const texteLibreCounter = document.getElementById('texteLibreCounter');
+            
+            if (texteLibre && texteLibreCounter) {
+                texteLibre.addEventListener('input', () => {
+                    texteLibreCounter.textContent = texteLibre.value.length;
+                });
+            }
+            
+            // Initialize photo upload
+            photoManagementSystem.init();
+            
+            // DMI validation
+            formValidationSystem.validateDMIMode();
+        }
+        
+        if (tabId === 'mode-normal') {
+            // Initialize optional section toggle
+            const toggleBtn = document.getElementById('togglePartie4');
+            const partie4 = document.querySelector('[data-section="partie4"]');
+            
+            if (toggleBtn && partie4) {
+                toggleBtn.addEventListener('click', () => {
+                    const isHidden = partie4.classList.contains('hidden');
+                    partie4.classList.toggle('hidden');
+                    toggleBtn.textContent = isHidden 
+                        ? 'Masquer Partie 4' 
+                        : 'Afficher Partie 4 (optionnelle)';
+                });
+            }
+        }
     }
 
     checkTabAccess(tabId) {
@@ -2097,7 +2203,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===== EXPORT FOR GLOBAL ACCESS =====
-window.switchTab = (tabId) => tabNavigationSystem.switchTab(tabId);
+window.switchTab = async (tabId) => {
+    await tabNavigationSystem.switchTab(tabId);
+};
 window.toggleAuthModal = () => authModalSystem.toggle();
 window.closeAuthModal = () => authModalSystem.close();
 window.togglePasswordVisibility = () => authModalSystem.togglePasswordVisibility();

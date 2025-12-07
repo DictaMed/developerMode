@@ -1,0 +1,109 @@
+<h1>🧪 Mode Test - Démonstration</h1>
+
+<div class="demo-badge">MODE DÉMONSTRATION</div>
+
+<div class="card instructions-card">
+    <h3>ℹ️ Mode Test - Aperçu</h3>
+    <p>Ce mode vous permet de tester DictaMed sans authentification. Vos données seront envoyées vers un Google Sheet public pour démonstration.</p>
+    
+    <div class="info-box enhanced-realtime-box" style="position: relative;">
+        <h4>🔄 Transcription en temps réel</h4>
+        <p>Vos enregistrements seront transcrits et apparaîtront automatiquement dans le Google Sheet public.</p>
+        <a href="https://docs.google.com/spreadsheets/d/1example" target="_blank" class="google-sheet-link">
+            📊 Voir le Google Sheet public
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <h3>📋 Informations patient</h3>
+    
+    <div class="form-group">
+        <label for="numeroDossierTest">Numéro de dossier</label>
+        <input type="text" id="numeroDossierTest" placeholder="Numéro du dossier patient" maxlength="50">
+        <div class="char-counter" id="numeroDossierTestCounter">0/50</div>
+    </div>
+    
+    <div class="form-group">
+        <label for="nomPatientTest">Nom du patient</label>
+        <input type="text" id="nomPatientTest" placeholder="Nom du patient" maxlength="50">
+        <div class="char-counter" id="nomPatientTestCounter">0/50</div>
+    </div>
+</div>
+
+<!-- Section Clinique -->
+<div class="recording-section" data-section="clinique">
+    <h3>🎤 Examen Clinique</h3>
+    <p class="section-description">Décrivez l'examen clinique et les symptômes observés...</p>
+    
+    <div class="recording-controls">
+        <div class="status-info">
+            <span class="status-badge" data-status="ready">⚪ Prêt</span>
+            <span class="timer">00:00</span>
+            <span class="recorded-badge hidden">✅ Enregistré</span>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="btn btn-record">🔴 Enregistrer</button>
+            <button class="btn btn-pause hidden">⏸️ Pause</button>
+            <button class="btn btn-stop hidden">⏹️ Arrêter</button>
+            <button class="btn btn-replay hidden">🔊 Réécouter</button>
+            <button class="btn btn-delete hidden">🗑️ Supprimer</button>
+        </div>
+        
+        <audio class="audio-player hidden" controls></audio>
+    </div>
+</div>
+
+<!-- Section Antécédents -->
+<div class="recording-section" data-section="antecedents">
+    <h3>🎤 Antécédents</h3>
+    <p class="section-description">Décrivez les antécédents médicaux et familiaux...</p>
+    
+    <div class="recording-controls">
+        <div class="status-info">
+            <span class="status-badge" data-status="ready">⚪ Prêt</span>
+            <span class="timer">00:00</span>
+            <span class="recorded-badge hidden">✅ Enregistré</span>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="btn btn-record">🔴 Enregistrer</button>
+            <button class="btn btn-pause hidden">⏸️ Pause</button>
+            <button class="btn btn-stop hidden">⏹️ Arrêter</button>
+            <button class="btn btn-replay hidden">🔊 Réécouter</button>
+            <button class="btn btn-delete hidden">🗑️ Supprimer</button>
+        </div>
+        
+        <audio class="audio-player hidden" controls></audio>
+    </div>
+</div>
+
+<!-- Section Biologie -->
+<div class="recording-section" data-section="biologie">
+    <h3>🎤 Biologie</h3>
+    <p class="section-description">Décrivez les résultats d'analyses biologiques...</p>
+    
+    <div class="recording-controls">
+        <div class="status-info">
+            <span class="status-badge" data-status="ready">⚪ Prêt</span>
+            <span class="timer">00:00</span>
+            <span class="recorded-badge hidden">✅ Enregistré</span>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="btn btn-record">🔴 Enregistrer</button>
+            <button class="btn btn-pause hidden">⏸️ Pause</button>
+            <button class="btn btn-stop hidden">⏹️ Arrêter</button>
+            <button class="btn btn-replay hidden">🔊 Réécouter</button>
+            <button class="btn btn-delete hidden">🗑️ Supprimer</button>
+        </div>
+        
+        <audio class="audio-player hidden" controls></audio>
+    </div>
+</div>
+
+<div class="submit-section">
+    <div class="sections-count">0 section(s) enregistrée(s)</div>
+    <button id="submitTest" class="btn btn-submit" disabled>📤 Envoyer les données Test</button>
+</div>

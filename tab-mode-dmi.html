@@ -1,0 +1,43 @@
+<h1>📝 Saisie Texte - DMI</h1>
+
+<div class="card">
+    <h3>📋 Informations patient</h3>
+    
+    <div class="form-group">
+        <label for="numeroDossierDMI">Numéro de dossier <span style="color: var(--red)">*</span></label>
+        <input type="text" id="numeroDossierDMI" placeholder="Numéro du dossier patient" maxlength="50">
+        <div class="char-counter" id="numeroDossierDMICounter">0/50</div>
+    </div>
+    
+    <div class="form-group">
+        <label for="nomPatientDMI">Nom du patient</label>
+        <input type="text" id="nomPatientDMI" placeholder="Nom du patient" maxlength="50">
+        <div class="char-counter" id="nomPatientDMICounter">0/50</div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>📝 Saisie libre</h3>
+    <p>Vous pouvez saisir directement votre texte médical ci-dessous :</p>
+    
+    <div class="form-group">
+        <label for="texteLibre">Texte médical</label>
+        <textarea id="texteLibre" placeholder="Saisissez votre texte médical ici..."></textarea>
+        <div class="char-counter" id="texteLibreCounter">0</div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>📷 Photos (optionnel)</h3>
+    <p>Ajoutez des photos pour illustrer votre dossier (maximum 5 photos, 10MB chacune) :</p>
+    
+    <div class="form-group">
+        <input type="file" id="photosUpload" multiple accept="image/*">
+    </div>
+    
+    <div id="photosPreview" class="photos-preview"></div>
+</div>
+
+<div class="submit-section">
+    <button id="submitDMI" class="btn btn-submit" disabled>📤 Envoyer les données DMI</button>
+</div>
