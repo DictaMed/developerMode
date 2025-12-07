@@ -288,12 +288,26 @@ function switchTab(tabId) {
     document.querySelector(`[data-tab="${tabId}"]`)?.classList.add('active');
     document.getElementById(tabId)?.classList.add('active');
 
+    // Synchroniser les boutons de navigation fixes
+    updateFixedNavButtons(tabId);
+
     // Mettre à jour le mode actuel
     if (tabId === 'mode-normal') {
         appState.currentMode = 'normal';
     } else if (tabId === 'mode-test') {
         appState.currentMode = 'test';
     }
+}
+
+// Fonction pour synchroniser les boutons de navigation fixes
+function updateFixedNavButtons(activeTabId) {
+    const fixedNavBtns = document.querySelectorAll('.fixed-nav-btn');
+    fixedNavBtns.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-tab') === activeTabId) {
+            btn.classList.add('active');
+        }
+    });
 }
 
 // Rendre la fonction switchTab globale pour les boutons CTA
