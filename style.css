@@ -524,19 +524,25 @@ body {
     background: transparent;
     border: none;
     color: var(--gray-dark);
-    padding: 14px 20px;
-    border-radius: 12px;
-    font-size: 0.95rem;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     position: relative;
     overflow: hidden;
     white-space: nowrap;
     text-decoration: none;
+}
+
+/* Bouton de connexion - même taille que les autres onglets */
+.fixed-nav-btn.auth-btn {
+    padding: 10px 16px;
+    font-size: 0.9rem;
 }
 
 .fixed-nav-btn::before {
