@@ -63,7 +63,8 @@ header {
     justify-content: flex-end;
     align-items: flex-start;
     gap: 20px;
-    min-height: 80px;
+    min-height: 120px;
+    position: relative;
 }
 
 .logo-section {
@@ -102,8 +103,8 @@ header {
 
 /* Barre de navigation fixe en haut à droite */
 .fixed-modes-nav {
-    position: fixed;
-    top: 20px;
+    position: absolute;
+    top: 50px;
     right: 20px;
     z-index: 1000;
     background: linear-gradient(135deg, 
@@ -340,7 +341,7 @@ header {
 
 /* Ajouter de l'espace en haut pour compenser la barre fixe */
 main.container {
-    margin-top: 40px;
+    margin-top: 20px;
 }
 
 /* Contenu des onglets */
@@ -997,12 +998,15 @@ footer {
     
     /* Adapter la barre fixe horizontale pour mobile */
     .fixed-modes-nav {
+        position: fixed;
         bottom: 15px;
         left: 50%;
         transform: translateX(-50%);
         padding: 8px;
         min-width: 90%;
         max-width: 100%;
+        top: auto;
+        right: auto;
     }
     
     .modes-container {
@@ -1871,12 +1875,15 @@ label span[style*="color: var(--red)"] {
 /* Écrans très petits - Barre horizontale ultra-compacte */
 @media (max-width: 360px) {
     .fixed-modes-nav {
+        position: fixed;
         bottom: 8px;
         left: 50%;
         transform: translateX(-50%);
         padding: 4px;
         width: 98%;
         border-radius: 12px;
+        top: auto;
+        right: auto;
     }
     
     .mode-btn {
