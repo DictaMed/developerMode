@@ -14,103 +14,29 @@ function initializeMode() {
     const activeTab = document.querySelector('.tab-btn.active');
     if (activeTab) {
         const tabId = activeTab.getAttribute('data-tab');
-        if (tabId === 'mode-normal') {
+        if (tabId === 'home') {
+            appState.currentMode = 'home';
+        } else if (tabId === 'mode-normal') {
             appState.currentMode = 'normal';
         } else if (tabId === 'mode-test') {
             appState.currentMode = 'test';
         }
+    } else {
+        // Par défaut, utiliser le mode home
+        appState.currentMode = 'home';
     }
     console.log('Mode initial:', appState.currentMode);
 }
 
-// ===== SYSTÈME DE TOAST NOTIFICATIONS =====
+// ===== SYSTÈME DE TOAST NOTIFICATIONS (Désactivé) =====
 const Toast = {
-    container: null,
-    
-    init() {
-        if (!this.container) {
-            this.container = document.createElement('div');
-            this.container.className = 'toast-container';
-            document.body.appendChild(this.container);
-        }
-    },
-    
-    show(message, type = 'info', title = '', duration = 5000) {
-        this.init();
-        
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        
-        // Icônes selon le type
-        const icons = {
-            success: '✓',
-            error: '✕',
-            warning: '⚠',
-            info: 'ℹ'
-        };
-        
-        // Titres par défaut
-        const defaultTitles = {
-            success: 'Succès',
-            error: 'Erreur',
-            warning: 'Attention',
-            info: 'Information'
-        };
-        
-        const toastTitle = title || defaultTitles[type];
-        
-        toast.innerHTML = `
-            <div class="toast-icon">${icons[type]}</div>
-            <div class="toast-content">
-                <div class="toast-title">${toastTitle}</div>
-                <div class="toast-message">${message}</div>
-            </div>
-            <button class="toast-close" aria-label="Fermer">×</button>
-        `;
-        
-        this.container.appendChild(toast);
-        
-        // Fermeture au clic
-        const closeBtn = toast.querySelector('.toast-close');
-        closeBtn.addEventListener('click', () => this.remove(toast));
-        toast.addEventListener('click', (e) => {
-            if (e.target !== closeBtn) {
-                this.remove(toast);
-            }
-        });
-        
-        // Auto-suppression
-        if (duration > 0) {
-            setTimeout(() => this.remove(toast), duration);
-        }
-        
-        return toast;
-    },
-    
-    remove(toast) {
-        toast.style.animation = 'fadeOut 0.3s ease forwards';
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-            }
-        }, 300);
-    },
-    
-    success(message, title = '') {
-        return this.show(message, 'success', title);
-    },
-    
-    error(message, title = '') {
-        return this.show(message, 'error', title);
-    },
-    
-    warning(message, title = '') {
-        return this.show(message, 'warning', title);
-    },
-    
-    info(message, title = '') {
-        return this.show(message, 'info', title);
-    }
+    init() {},
+    show() {},
+    remove() {},
+    success() {},
+    error() {},
+    warning() {},
+    info() {}
 };
 
 // ===== LOADING OVERLAY =====
@@ -292,7 +218,9 @@ function switchTab(tabId) {
     updateFixedNavButtons(tabId);
 
     // Mettre à jour le mode actuel
-    if (tabId === 'mode-normal') {
+    if (tabId === 'home') {
+        appState.currentMode = 'home';
+    } else if (tabId === 'mode-normal') {
         appState.currentMode = 'normal';
     } else if (tabId === 'mode-test') {
         appState.currentMode = 'test';
@@ -754,6 +682,12 @@ function initAudioRecorders() {
 // ===== COMPTEUR DE SECTIONS =====
 function updateSectionCount() {
     const mode = appState.currentMode;
+    
+    // Ne pas mettre à jour le compteur si on est sur la page d'accueil
+    if (mode === 'home') {
+        return;
+    }
+    
     const sections = sectionsConfig[mode];
     let count = 0;
 
@@ -969,6 +903,13 @@ async function preparePayload(mode) {
     };
 
     try {
+        // Ajouter l'email de l'utilisateur Firebase s'il est connecté
+        const currentUser = FirebaseAuthManager.getCurrentUser();
+        if (currentUser && currentUser.email) {
+            payload.userEmail = currentUser.email;
+            console.log('Email utilisateur Firebase ajouté au payload:', currentUser.email);
+        }
+
         if (mode === 'normal') {
             // Mode Normal - Validation complète
             const username = document.getElementById('username')?.value.trim();
@@ -1298,6 +1239,13 @@ async function sendDmiData() {
             photos: []
         };
 
+        // Ajouter l'email de l'utilisateur Firebase s'il est connecté
+        const currentUser = FirebaseAuthManager.getCurrentUser();
+        if (currentUser && currentUser.email) {
+            payload.userEmail = currentUser.email;
+            console.log('Email utilisateur Firebase ajouté au payload DMI:', currentUser.email);
+        }
+
         // Convertir les photos en Base64
         for (const file of uploadedPhotos) {
             const base64 = await fileToBase64(file);
@@ -1553,4 +1501,406 @@ if (tabsContainer && swipeHint) {
             }, 500);
         }
     }, 10000);
+
+// ===== FIREBASE AUTHENTIFICATION MANAGER =====
+
+// Gestionnaire d'authentification Firebase
+const FirebaseAuthManager = {
+    currentUser: null,
+    isInitializing: true,
+    
+    // Initialisation du gestionnaire
+    init() {
+        console.log('Initialisation Firebase Auth...');
+        
+        // Attendre que Firebase soit chargé
+        if (typeof firebase === 'undefined') {
+            console.error('Firebase n\'est pas chargé');
+            return;
+        }
+        
+        // Configuration Google Auth
+        this.setupGoogleAuth();
+        
+        // Écouter les changements d'état d'authentification
+        firebase.auth().onAuthStateChanged((user) => {
+            this.handleAuthStateChanged(user);
+        });
+        
+        // Initialiser les événements UI
+        this.initUIEvents();
+        
+        // Vérifier l'état initial
+        this.currentUser = firebase.auth().currentUser;
+        this.isInitializing = false;
+        this.updateUI();
+        
+        console.log('✅ Firebase Auth initialisé');
+    },
+    
+    // Configuration Google Auth
+    setupGoogleAuth() {
+        // Google provider configuration
+        this.googleProvider = new firebase.auth.GoogleAuthProvider();
+        this.googleProvider.addScope('email');
+        this.googleProvider.addScope('profile');
+    },
+    
+    // Gestion des changements d'état d'authentification
+    handleAuthStateChanged(user) {
+        this.currentUser = user;
+        this.updateUI();
+        
+        if (user) {
+            console.log('Utilisateur connecté:', user.email);
+            Toast.success(`Bienvenue ${user.displayName || user.email} !`, 'Connexion réussie');
+            
+            // Redirection automatique vers le mode normal après connexion
+            setTimeout(() => {
+                console.log('Redirection automatique vers le mode normal...');
+                switchTab('mode-normal');
+            }, 1500); // Délai pour laisser le temps à l'utilisateur de voir le message de bienvenue
+        } else {
+            console.log('Utilisateur déconnecté');
+            // Retour à la page d'accueil si déconnexion
+            switchTab('home');
+        }
+    },
+    
+    // Initialisation des événements UI
+    initUIEvents() {
+        // Toggle entre Connexion/Inscription
+        const signInTab = document.getElementById('signInTab');
+        const signUpTab = document.getElementById('signUpTab');
+        
+        if (signInTab && signUpTab) {
+            signInTab.addEventListener('click', () => this.switchAuthMode('signin'));
+            signUpTab.addEventListener('click', () => this.switchAuthMode('signup'));
+        }
+        
+        // Formulaire email/mot de passe
+        const emailAuthForm = document.getElementById('emailAuthForm');
+        if (emailAuthForm) {
+            emailAuthForm.addEventListener('submit', (e) => this.handleEmailAuth(e));
+        }
+        
+        // Bouton Google Sign-In
+        const googleSignInBtn = document.getElementById('googleSignInBtn');
+        if (googleSignInBtn) {
+            googleSignInBtn.addEventListener('click', () => this.signInWithGoogle());
+        }
+        
+        // Bouton de déconnexion
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', () => this.signOut());
+        }
+    },
+    
+    // Bascule entre les modes Connexion/Inscription
+    switchAuthMode(mode) {
+        const signInTab = document.getElementById('signInTab');
+        const signUpTab = document.getElementById('signUpTab');
+        const emailSubmitBtn = document.getElementById('emailSubmitBtn');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        
+        if (mode === 'signin') {
+            signInTab.classList.add('active');
+            signUpTab.classList.remove('active');
+            emailSubmitBtn.querySelector('.btn-text').textContent = 'Se connecter';
+            emailInput.placeholder = 'votre@email.com';
+            passwordInput.placeholder = 'Mot de passe';
+        } else {
+            signInTab.classList.remove('active');
+            signUpTab.classList.add('active');
+            emailSubmitBtn.querySelector('.btn-text').textContent = 'Créer un compte';
+            emailInput.placeholder = 'votre@email.com';
+            passwordInput.placeholder = 'Mot de passe (min. 6 caractères)';
+        }
+        
+        // Nettoyer les erreurs
+        this.hideAuthError();
+    },
+    
+    // Gestion de l'authentification par email
+    async handleEmailAuth(event) {
+        event.preventDefault();
+        
+        const email = document.getElementById('emailInput').value.trim();
+        const password = document.getElementById('passwordInput').value;
+        const isSignUp = document.getElementById('signUpTab').classList.contains('active');
+        
+        if (!email || !password) {
+            this.showAuthError('Veuillez remplir tous les champs');
+            return;
+        }
+        
+        if (password.length < 6) {
+            this.showAuthError('Le mot de passe doit contenir au moins 6 caractères');
+            return;
+        }
+        
+        const emailSubmitBtn = document.getElementById('emailSubmitBtn');
+        const btnText = emailSubmitBtn.querySelector('.btn-text');
+        const loadingSpinner = emailSubmitBtn.querySelector('.loading-spinner-small');
+        
+        try {
+            // Afficher le chargement
+            emailSubmitBtn.disabled = true;
+            btnText.textContent = 'Traitement...';
+            loadingSpinner.classList.remove('hidden');
+            this.hideAuthError();
+            
+            let result;
+            if (isSignUp) {
+                // Inscription
+                result = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                console.log('Compte créé:', result.user.email);
+            } else {
+                // Connexion
+                result = await firebase.auth().signInWithEmailAndPassword(email, password);
+                console.log('Connexion réussie:', result.user.email);
+            }
+            
+            // Réinitialiser le formulaire
+            document.getElementById('emailAuthForm').reset();
+            
+        } catch (error) {
+            console.error('Erreur authentification email:', error);
+            this.handleAuthError(error);
+        } finally {
+            // Réinitialiser le bouton
+            emailSubmitBtn.disabled = false;
+            btnText.textContent = isSignUp ? 'Créer un compte' : 'Se connecter';
+            loadingSpinner.classList.add('hidden');
+        }
+    },
+    
+    // Connexion avec Google
+    async signInWithGoogle() {
+        const googleSignInBtn = document.getElementById('googleSignInBtn');
+        const originalText = googleSignInBtn.textContent;
+        
+        try {
+            // Afficher le chargement
+            googleSignInBtn.disabled = true;
+            googleSignInBtn.textContent = 'Connexion...';
+            this.hideAuthError();
+            
+            const result = await firebase.auth().signInWithPopup(this.googleProvider);
+            console.log('Connexion Google réussie:', result.user.email);
+            
+        } catch (error) {
+            console.error('Erreur connexion Google:', error);
+            this.handleAuthError(error);
+        } finally {
+            // Réinitialiser le bouton
+            googleSignInBtn.disabled = false;
+            googleSignInBtn.textContent = originalText;
+        }
+    },
+    
+    // Déconnexion
+    async signOut() {
+        try {
+            await firebase.auth().signOut();
+            console.log('Déconnexion réussie');
+        } catch (error) {
+            console.error('Erreur lors de la déconnexion:', error);
+            Toast.error('Erreur lors de la déconnexion', 'Erreur');
+        }
+    },
+    
+    // Gestion des erreurs d'authentification
+    handleAuthError(error) {
+        let message = 'Une erreur est survenue';
+        
+        switch (error.code) {
+            case 'auth/user-not-found':
+                message = 'Aucun compte trouvé avec cet email';
+                break;
+            case 'auth/wrong-password':
+                message = 'Mot de passe incorrect';
+                break;
+            case 'auth/email-already-in-use':
+                message = 'Cet email est déjà utilisé';
+                break;
+            case 'auth/weak-password':
+                message = 'Le mot de passe est trop faible';
+                break;
+            case 'auth/invalid-email':
+                message = 'Adresse email invalide';
+                break;
+            case 'auth/operation-not-allowed':
+                message = 'Opération non autorisée';
+                break;
+            case 'auth/too-many-requests':
+                message = 'Trop de tentatives. Réessayez plus tard';
+                break;
+            case 'auth/popup-closed-by-user':
+                message = 'Connexion annulée';
+                break;
+            case 'auth/popup-blocked':
+                message = 'Pop-up bloquée. Veuillez autoriser les pop-ups';
+                break;
+            case 'auth/network-request-failed':
+                message = 'Erreur de connexion. Vérifiez votre internet';
+                break;
+            default:
+                message = error.message || 'Erreur d\'authentification';
+        }
+        
+        this.showAuthError(message);
+    },
+    
+    // Affichage des erreurs
+    showAuthError(message) {
+        const authError = document.getElementById('authError');
+        if (authError) {
+            authError.textContent = message;
+            authError.classList.remove('hidden');
+            
+            // Masquer automatiquement après 5 secondes
+            setTimeout(() => {
+                this.hideAuthError();
+            }, 5000);
+        }
+    },
+    
+    // Masquage des erreurs
+    hideAuthError() {
+        const authError = document.getElementById('authError');
+        if (authError) {
+            authError.classList.add('hidden');
+        }
+    },
+    
+    // Mise à jour de l'interface utilisateur
+    updateUI() {
+        const authForm = document.getElementById('authForm');
+        const userProfile = document.getElementById('userProfile');
+        
+        if (this.currentUser) {
+            // Utilisateur connecté - afficher le profil
+            if (authForm) authForm.classList.add('hidden');
+            if (userProfile) userProfile.classList.remove('hidden');
+            
+            // Mettre à jour les informations utilisateur
+            this.updateUserProfile();
+        } else {
+            // Utilisateur non connecté - afficher le formulaire
+            if (authForm) authForm.classList.remove('hidden');
+            if (userProfile) userProfile.classList.add('hidden');
+        }
+    },
+    
+    // Mise à jour des informations du profil utilisateur
+    updateUserProfile() {
+        const user = this.currentUser;
+        if (!user) return;
+        
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
+        const userAvatar = document.getElementById('userAvatar');
+        const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+        
+        if (userName) {
+            userName.textContent = user.displayName || 'Utilisateur';
+        }
+        
+        if (userEmail) {
+            userEmail.textContent = user.email;
+        }
+        
+        // Gestion de l'avatar
+        if (user.photoURL && userAvatar) {
+            // Supprimer l'ancien avatar s'il existe
+            const oldImg = userAvatar.querySelector('img');
+            if (oldImg) oldImg.remove();
+            
+            // Ajouter la nouvelle photo
+            const img = document.createElement('img');
+            img.src = user.photoURL;
+            img.alt = 'Avatar utilisateur';
+            img.onerror = () => {
+                // Si l'image ne se charge pas, utiliser le placeholder
+                img.remove();
+                avatarPlaceholder.classList.remove('hidden');
+            };
+            userAvatar.appendChild(img);
+            avatarPlaceholder.classList.add('hidden');
+        } else if (avatarPlaceholder) {
+            avatarPlaceholder.classList.remove('hidden');
+            
+            // Supprimer les images existantes
+            const oldImg = userAvatar.querySelector('img');
+            if (oldImg) oldImg.remove();
+        }
+    },
+    
+    // Vérification si l'utilisateur est connecté
+    isAuthenticated() {
+        return this.currentUser !== null;
+    },
+    
+    // Obtention de l'utilisateur actuel
+    getCurrentUser() {
+        return this.currentUser;
+    },
+    
+    // Vérification si l'initialisation est terminée
+    isInitialized() {
+        return !this.isInitializing;
+    }
+};
+
+// Vérification de l'accès aux onglets selon l'authentification
+function checkTabAccess(tabId) {
+    // Mode Test toujours accessible
+    if (tabId === 'mode-test' || tabId === 'guide' || tabId === 'faq' || tabId === 'home') {
+        return true;
+    }
+    
+    // Mode Normal et DMI nécessitent une authentification
+    if ((tabId === 'mode-normal' || tabId === 'mode-dmi') && !FirebaseAuthManager.isAuthenticated()) {
+        Toast.warning('Veuillez vous connecter pour accéder à ce mode', 'Authentification requise');
+        return false;
+    }
+    
+    return true;
+}
+
+// Modification de la fonction switchTab pour inclure la vérification d'authentification
+const originalSwitchTab = switchTab;
+switchTab = function(tabId) {
+    // Vérifier l'accès avant de changer d'onglet
+    if (!checkTabAccess(tabId)) {
+        // Rediriger vers la page d'accueil si accès refusé
+        if (tabId === 'mode-normal' || tabId === 'mode-dmi') {
+            // Rester sur l'onglet actuel ou aller à l'accueil
+            const currentActiveTab = document.querySelector('.tab-btn.active, .fixed-nav-btn.active');
+            if (currentActiveTab) {
+                const currentTabId = currentActiveTab.getAttribute('data-tab');
+                if (currentTabId !== 'home') {
+                    originalSwitchTab('home');
+                }
+            } else {
+                originalSwitchTab('home');
+            }
+        }
+        return;
+    }
+    
+    // Exécuter le switchTab original
+    originalSwitchTab(tabId);
+};
+
+// Initialisation de Firebase Auth au chargement de la page
+document.addEventListener('DOMContentLoaded', () => {
+    // Attendre un peu que Firebase soit chargé
+    setTimeout(() => {
+        FirebaseAuthManager.init();
+    }, 100);
+});
 }
