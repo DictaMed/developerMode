@@ -41,7 +41,8 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    width: 100%;
+    max-width: 100%;
     margin: 0 auto;
     padding: 0 20px;
 }
@@ -111,11 +112,12 @@ header {
         inset 0 1px 0 rgba(255,255,255,0.9);
     border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 20px;
-    padding: 8px;
+    padding: 8px 0;
     margin-bottom: 32px;
     position: relative;
     overflow: hidden;
     -webkit-overflow-scrolling: touch;
+    width: 100%;
 }
 
 .tabs-nav::before {
@@ -171,7 +173,7 @@ header {
     -ms-overflow-style: auto;
     min-width: 100%;
     max-width: 100%;
-    padding: 8px 15px;
+    padding: 8px 20px;
     box-sizing: border-box;
     scroll-snap-type: x proximity;
     /* Permettre le défilement avec largeurs complètes */
@@ -1561,7 +1563,7 @@ label span[style*="color: var(--red)"] {
     /* Navigation full width */
     .tabs-nav {
         border-radius: 8px;
-        margin: 0 -8px 15px -8px;
+        margin: 0 0 15px 0;
     }
 
     .tabs-container {
