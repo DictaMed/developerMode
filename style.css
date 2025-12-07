@@ -75,8 +75,7 @@ header::after {
     right: 0;
     height: 2px;
     background: linear-gradient(90deg, var(--blue-primary), var(--green-secondary), var(--blue-primary));
-    background-size: 200% 100%;
-    animation: gradient-flow 4s ease-in-out infinite;
+    /* Static design - no animation */
 }
 
 .header-content {
@@ -204,10 +203,7 @@ header::after {
     pointer-events: none;
 }
 
-@keyframes subtle-glow {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 0.7; }
-}
+/* Animations removed for static design */
 
 /* Message de swipe sophistiqué pour mobile */
 .swipe-hint {
@@ -237,20 +233,7 @@ header::after {
     animation: swipeRight 2s ease-in-out infinite;
 }
 
-@keyframes fadeInOut {
-    0%, 100% { opacity: 0.6; transform: translateY(0); }
-    50% { opacity: 1; transform: translateY(-2px); }
-}
-
-@keyframes swipeLeft {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(-3px); }
-}
-
-@keyframes swipeRight {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(3px); }
-}
+/* Animations removed for static design */
 
 /* Afficher seulement sur mobile/tablette */
 @media (max-width: 768px) {
@@ -303,7 +286,7 @@ header::after {
 .tab-icon {
     font-size: 1.2em;
     opacity: 0.8;
-    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    /* Static design - no transitions */
     line-height: 1;
     filter: drop-shadow(0 1px 3px rgba(0,0,0,0.12))
            drop-shadow(0 2px 6px rgba(255,255,255,0.1));
@@ -316,13 +299,11 @@ header::after {
     justify-content: center;
 }
 
-/* Enhanced icon animations with better performance */
+/* Static icon states */
 .tab-btn:hover .tab-icon {
-    transform: scale(1.15) rotate(5deg);
     opacity: 1;
     filter: drop-shadow(0 2px 8px rgba(0,0,0,0.15))
            drop-shadow(0 4px 12px rgba(255,255,255,0.2));
-    animation: iconFloat 2s ease-in-out infinite;
 }
 
 .tab-btn.active .tab-icon {
@@ -330,8 +311,6 @@ header::after {
     filter: drop-shadow(0 0 8px rgba(255,255,255,0.8)) 
            drop-shadow(0 0 16px rgba(255,255,255,0.4))
            drop-shadow(0 2px 8px rgba(0,0,0,0.1));
-    transform: scale(1.2) rotate(8deg);
-    animation: iconPulse 1.5s ease-in-out infinite;
 }
 
 /* Icon types for better categorization */
@@ -350,15 +329,7 @@ header::after {
     opacity: 0.7;
 }
 
-@keyframes iconFloat {
-    0%, 100% { transform: scale(1.2) rotate(8deg) translateY(0px); }
-    50% { transform: scale(1.2) rotate(8deg) translateY(-2px); }
-}
-
-@keyframes iconPulse {
-    0%, 100% { transform: scale(1.15) rotate(12deg); }
-    50% { transform: scale(1.18) rotate(12deg); }
-}
+/* Static animations removed */
 
 .tab-btn {
     background: linear-gradient(145deg, 
@@ -373,7 +344,7 @@ header::after {
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    /* Static design - no transitions */
     white-space: nowrap;
     position: relative;
     border-radius: 20px;
@@ -440,7 +411,7 @@ header::after {
         var(--green-secondary) 75%,
         var(--blue-primary) 100%);
     transform: translateX(-50%);
-    transition: width 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    /* Static design - no transition */
     border-radius: 5px 5px 0 0;
     box-shadow: 
         0 3px 12px rgba(37, 99, 235, 0.4),
@@ -461,7 +432,7 @@ header::after {
         rgba(16, 185, 129, 0.06) 50%,
         transparent 70%);
     transform: translate(-50%, -50%);
-    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* Static design - no transition */
     border-radius: 50%;
     pointer-events: none;
 }
@@ -528,7 +499,7 @@ header::after {
         rgba(248,250,252,0.96) 80%,
         rgba(255,255,255,0.99) 100%);
     background-size: 200% 200%;
-    animation: gradientShift 5s ease infinite;
+    /* Static design - no animation */
     box-shadow: 
         0 18px 45px rgba(0,0,0,0.2),
         0 10px 25px rgba(0,0,0,0.12),
@@ -592,7 +563,7 @@ header::after {
         rgba(16, 185, 129, 0.06) 50%,
         transparent 70%);
     transform: translate(-50%, -50%);
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* Static design - no transition */
     border-radius: 50%;
     pointer-events: none;
     z-index: 1;
@@ -604,22 +575,11 @@ header::after {
     animation: slideInUp 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.95);
-        filter: blur(2px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
-    }
-}
+/* Animations removed for static design */
 
 /* Enhanced tab transitions */
 .tab-btn {
-    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    /* Static design - no transitions */
     will-change: transform, box-shadow, background;
 }
 
@@ -708,22 +668,7 @@ header::after {
     animation: activeGlow 2s ease-in-out infinite;
 }
 
-@keyframes activeGlow {
-    0%, 100% { 
-        box-shadow: 
-            0 3px 12px rgba(37, 99, 235, 0.5),
-            0 1px 6px rgba(16, 185, 129, 0.3),
-            inset 0 1px 0 rgba(255,255,255,0.9),
-            inset 0 -1px 0 rgba(255,255,255,0.7);
-    }
-    50% { 
-        box-shadow: 
-            0 4px 16px rgba(37, 99, 235, 0.7),
-            0 2px 8px rgba(16, 185, 129, 0.4),
-            inset 0 1px 0 rgba(255,255,255,1),
-            inset 0 -1px 0 rgba(255,255,255,0.8);
-    }
-}
+/* Animations removed for static design */
 
 .tab-btn.active::after {
     width: 130%;
@@ -758,7 +703,7 @@ header::after {
         rgba(255, 255, 255, 0.1) 60%,
         transparent 80%);
     transform: translate(-50%, -50%);
-    transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    /* Static design - no transition */
     border-radius: 50%;
     pointer-events: none;
 }
@@ -781,7 +726,7 @@ header::after {
         rgba(16, 185, 129, 0.1) 30%,
         transparent 70%);
     transform: translate(-50%, -50%);
-    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* Static design - no transition */
     border-radius: 50%;
     pointer-events: none;
     z-index: 1;
@@ -822,11 +767,7 @@ header::after {
         0 8px 25px rgba(37, 99, 235, 0.15);
 }
 
-@keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
+/* Animations removed for static design */
 
 /* Contenu des onglets */
 .tab-content {
@@ -838,16 +779,7 @@ header::after {
     display: block;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+/* Animations removed for static design */
 
 /* Titres */
 h1 {
@@ -1015,14 +947,7 @@ input[type="password"]:focus {
     animation: gradient-flow 3s ease-in-out infinite;
 }
 
-@keyframes gradient-flow {
-    0%, 100% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-}
+/* Animations removed for static design */
 
 .recording-section:hover {
     box-shadow: var(--shadow-lg);
@@ -1329,8 +1254,7 @@ input[type="password"]:focus {
     right: 0;
     height: 3px;
     background: linear-gradient(90deg, var(--blue-primary), var(--green-secondary), var(--blue-primary));
-    background-size: 200% 100%;
-    animation: gradient-flow 4s ease-in-out infinite;
+    /* Static design - no animation */
 }
 
 .workflow-step {
@@ -3008,14 +2932,7 @@ textarea:focus-visible {
     animation: gradient-flow 3s ease-in-out infinite;
 }
 
-@keyframes gradient-flow {
-    0%, 100% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-}
+/* Animations removed for static design */
 
 /* ===== STYLES AMÉLIORÉS POUR LA NAVIGATION DES ONGLETS ===== */
 .tabs-container {
