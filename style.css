@@ -1565,22 +1565,7 @@ label span[style*="color: var(--red)"] {
     }
     
 
-    /* Navigation améliorée */
-    .tabs-nav {
-        border-radius: 12px;
-        margin-bottom: 20px;
-    }
 
-    .tabs-container {
-        gap: 4px;
-        padding: 8px;
-    }
-
-    .tab-btn {
-        padding: 14px 20px;
-        font-size: 0.9rem;
-        margin: 0 2px;
-    }
 
     /* Cards et sections plus compactes */
     .card {
@@ -1868,7 +1853,7 @@ label span[style*="color: var(--red)"] {
     }
     
     .mode-text {
-        font-size: 0.65rem;
+        font-size: 0.75rem;
     }
 }
 
@@ -1897,7 +1882,7 @@ label span[style*="color: var(--red)"] {
     }
     
     .mode-text {
-        font-size: 0.6rem;
+        font-size: 0.7rem;
     }
 }
 
@@ -1942,13 +1927,7 @@ label span[style*="color: var(--red)"] {
         display: none; /* Masquer le slogan en landscape pour gagner de l'espace */
     }
 
-    .tabs-nav {
-        margin-bottom: 12px;
-    }
 
-    .tab-btn {
-        padding: 10px 16px;
-    }
 
     .card,
     .recording-section {
@@ -1960,10 +1939,6 @@ label span[style*="color: var(--red)"] {
 /* Optimisations pour iOS Safari */
 @supports (-webkit-touch-callout: none) {
     /* Smooth scrolling sur iOS */
-    .tabs-nav {
-        -webkit-overflow-scrolling: touch;
-        scroll-behavior: smooth;
-    }
 
     /* Fix pour le zoom sur les inputs iOS */
     input[type="text"],
@@ -1988,8 +1963,7 @@ label span[style*="color: var(--red)"] {
 /* Amélioration de l'accessibilité touch */
 @media (hover: none) and (pointer: coarse) {
     /* Appareils tactiles uniquement */
-    .btn,
-    .tab-btn {
+    .btn {
         min-height: 44px; /* Taille minimale recommandée par Apple */
     }
 
@@ -2005,10 +1979,6 @@ label span[style*="color: var(--red)"] {
     .btn:active {
         transform: scale(0.96);
         opacity: 0.9;
-    }
-
-    .tab-btn:active {
-        transform: scale(0.98);
     }
 }
 
@@ -2372,6 +2342,10 @@ textarea:focus-visible {
 .tabs-container {
     scroll-behavior: smooth;
     scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--blue-primary) rgba(0,0,0,0.1);
 }
 
 .tabs-container::before {
@@ -2387,17 +2361,6 @@ textarea:focus-visible {
     pointer-events: none;
 }
 
-/* Amélioration du scroll pour les onglets */
-.tabs-container {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-}
-
-.tabs-container {
-    scrollbar-width: thin;
-    scrollbar-color: var(--blue-primary) rgba(0,0,0,0.1);
-}
-
 .tabs-container::-webkit-scrollbar {
     height: 6px;
 }
@@ -2408,7 +2371,7 @@ textarea:focus-visible {
 }
 
 .tabs-container::-webkit-scrollbar-thumb {
-    background: linear-gradient(90deg, var(--blue-primary), var(--green-primary));
+    background: linear-gradient(90deg, var(--blue-primary), var(--green-secondary));
     border-radius: 3px;
 }
 
