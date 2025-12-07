@@ -22,14 +22,33 @@ class TestModeTab {
         const submitBtn = document.getElementById('submitTest');
         if (submitBtn) {
             submitBtn.addEventListener('click', () => {
-                if (window.loadingOverlay) {
-                    window.loadingOverlay.show('Envoi en cours...');
-                }
-                this.dataSender.send(window.APP_CONFIG.MODES.TEST).finally(() => {
+                try {
+                    if (window.loadingOverlay) {
+                        window.loadingOverlay.show('Envoi en cours...');
+                    }
+                    
+                    if (!this.dataSender) {
+                        console.error('DataSender non disponible');
+                        if (window.notificationSystem) {
+                            window.notificationSystem.error('Système d\'envoi non disponible', 'Erreur');
+                        }
+                        return;
+                    }
+                    
+                    this.dataSender.send(window.APP_CONFIG.MODES.TEST).finally(() => {
+                        if (window.loadingOverlay) {
+                            window.loadingOverlay.hide();
+                        }
+                    });
+                } catch (error) {
+                    console.error('Erreur lors de l\'envoi:', error);
+                    if (window.notificationSystem) {
+                        window.notificationSystem.error('Erreur lors de l\'envoi des données', 'Erreur');
+                    }
                     if (window.loadingOverlay) {
                         window.loadingOverlay.hide();
                     }
-                });
+                }
             });
         }
 
@@ -115,144 +134,267 @@ class TestModeTab {
         const sectionId = section.getAttribute('data-section');
         const guideText = guides[sectionId];
         
-        if (guideText && window.notificationSystem) {
-            window.notificationSystem.info(guideText, 'Guide d\'enregistrement', 3000);
+        if (guideText) {
+            if (window.notificationSystem && window.notificationSystem.info) {
+                try {
+                    window.notificationSystem.info(guideText, 'Guide d\'enregistrement', 3000);
+                } catch (error) {
+                    console.warn('Erreur lors de l\'affichage du guide:', error);
+                    // Fallback: afficher un toast simple
+                    alert(guideText);
+                }
+            } else {
+                console.log('Guide d\'enregistrement:', guideText);
+                // Fallback si notificationSystem non disponible
+                alert(guideText);
+            }
         }
     }
 
     // Validation spécifique au mode test
     validateForm() {
-        const numeroDossier = document.getElementById('numeroDossierTest').value.trim();
-        const nomPatient = document.getElementById('nomPatientTest').value.trim();
+        try {
+            const numeroDossier = document.getElementById('numeroDossierTest')?.value?.trim() || '';
+            const nomPatient = document.getElementById('nomPatientTest')?.value?.trim() || '';
 
-        if (!numeroDossier || !nomPatient) {
-            if (window.notificationSystem) {
-                window.notificationSystem.warning('Veuillez remplir le numéro de dossier et le nom du patient pour le test', 'Champs requis');
+            if (!numeroDossier || !nomPatient) {
+                if (window.notificationSystem && window.notificationSystem.warning) {
+                    try {
+                        window.notificationSystem.warning('Veuillez remplir le numéro de dossier et le nom du patient pour le test', 'Champs requis');
+                    } catch (error) {
+                        console.warn('Erreur notification:', error);
+                        alert('Veuillez remplir le numéro de dossier et le nom du patient pour le test');
+                    }
+                }
+                return false;
             }
+
+            let sectionCount = 0;
+            if (this.audioRecorderManager && typeof this.audioRecorderManager.getSectionCount === 'function') {
+                sectionCount = this.audioRecorderManager.getSectionCount();
+            }
+
+            if (sectionCount === 0) {
+                if (window.notificationSystem && window.notificationSystem.warning) {
+                    try {
+                        window.notificationSystem.warning('Veuillez enregistrer au moins une section pour tester la fonctionnalité', 'Aucun enregistrement');
+                    } catch (error) {
+                        console.warn('Erreur notification:', error);
+                        alert('Veuillez enregistrer au moins une section pour tester la fonctionnalité');
+                    }
+                }
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Erreur lors de la validation:', error);
             return false;
         }
-
-        const sectionCount = this.audioRecorderManager.getSectionCount();
-        if (sectionCount === 0) {
-            if (window.notificationSystem) {
-                window.notificationSystem.warning('Veuillez enregistrer au moins une section pour tester la fonctionnalité', 'Aucun enregistrement');
-            }
-            return false;
-        }
-
-        return true;
     }
 
     // Réinitialisation du formulaire
     resetForm() {
-        document.getElementById('numeroDossierTest').value = '';
-        document.getElementById('nomPatientTest').value = '';
-        
-        // Reset character counters
-        const counters = [
-            { counter: 'numeroDossierTestCounter' },
-            { counter: 'nomPatientTestCounter' }
-        ];
-        counters.forEach(({ counter }) => {
-            const counterEl = document.getElementById(counter);
-            if (counterEl) counterEl.textContent = '0/50';
-        });
-        
-        // Reset recordings
-        this.audioRecorderManager.resetMode(window.APP_CONFIG.MODES.TEST);
-        
-        // Update section count
-        this.audioRecorderManager.updateSectionCount();
+        try {
+            const numeroDossier = document.getElementById('numeroDossierTest');
+            const nomPatient = document.getElementById('nomPatientTest');
+            
+            if (numeroDossier) numeroDossier.value = '';
+            if (nomPatient) nomPatient.value = '';
+            
+            // Reset character counters
+            const counters = [
+                { counter: 'numeroDossierTestCounter' },
+                { counter: 'nomPatientTestCounter' }
+            ];
+            counters.forEach(({ counter }) => {
+                const counterEl = document.getElementById(counter);
+                if (counterEl) counterEl.textContent = '0/50';
+            });
+            
+            // Reset recordings
+            if (this.audioRecorderManager && typeof this.audioRecorderManager.resetMode === 'function') {
+                this.audioRecorderManager.resetMode(window.APP_CONFIG.MODES.TEST);
+            }
+            
+            // Update section count
+            if (this.audioRecorderManager && typeof this.audioRecorderManager.updateSectionCount === 'function') {
+                this.audioRecorderManager.updateSectionCount();
+            }
+        } catch (error) {
+            console.error('Erreur lors de la réinitialisation:', error);
+        }
     }
 
     // Gestion de l'affichage du Google Sheet
     showGoogleSheetResult() {
-        const googleSheetCard = document.getElementById('googleSheetCard');
-        if (googleSheetCard) {
-            googleSheetCard.style.display = 'block';
-            googleSheetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        try {
+            const googleSheetCard = document.getElementById('googleSheetCard');
+            if (googleSheetCard) {
+                googleSheetCard.style.display = 'block';
+                if (typeof googleSheetCard.scrollIntoView === 'function') {
+                    googleSheetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                console.warn('Element googleSheetCard non trouvé');
+            }
+        } catch (error) {
+            console.error('Erreur lors de l\'affichage du résultat Google Sheet:', error);
         }
     }
 
     hideGoogleSheetResult() {
-        const googleSheetCard = document.getElementById('googleSheetCard');
-        if (googleSheetCard) {
-            googleSheetCard.style.display = 'none';
+        try {
+            const googleSheetCard = document.getElementById('googleSheetCard');
+            if (googleSheetCard) {
+                googleSheetCard.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Erreur lors du masquage du résultat Google Sheet:', error);
         }
     }
 
     // Lifecycle methods
     onTabLoad() {
-        console.log('Mode Test chargé');
-        this.updateSectionCount();
-        this.hideGoogleSheetResult(); // Cacher le résultat précédent
-        
-        if (window.notificationSystem) {
-            window.notificationSystem.info('Mode démonstration actif - Vos données seront visibles dans le Google Sheet public', 'Mode Test', 5000);
+        try {
+            console.log('Mode Test chargé');
+            this.updateSectionCount();
+            this.hideGoogleSheetResult(); // Cacher le résultat précédent
+            
+            if (window.notificationSystem && window.notificationSystem.info) {
+                try {
+                    window.notificationSystem.info('Mode démonstration actif - Vos données seront visibles dans le Google Sheet public', 'Mode Test', 5000);
+                } catch (error) {
+                    console.warn('Erreur lors de l\'affichage de la notification:', error);
+                    console.log('Mode démonstration actif');
+                }
+            } else {
+                console.log('Mode démonstration actif - Vos données seront visibles dans le Google Sheet public');
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement du tab test:', error);
         }
     }
 
     onTabUnload() {
-        console.log('Mode Test déchargé');
-        // Cacher le Google Sheet quand on quitte le tab
-        this.hideGoogleSheetResult();
+        try {
+            console.log('Mode Test déchargé');
+            // Cacher le Google Sheet quand on quitte le tab
+            this.hideGoogleSheetResult();
+        } catch (error) {
+            console.error('Erreur lors du déchargement du tab test:', error);
+        }
     }
 
     updateSectionCount() {
-        if (this.audioRecorderManager) {
-            this.audioRecorderManager.updateSectionCount();
+        try {
+            if (this.audioRecorderManager && typeof this.audioRecorderManager.updateSectionCount === 'function') {
+                this.audioRecorderManager.updateSectionCount();
+            }
+        } catch (error) {
+            console.error('Erreur lors de la mise à jour du compteur de sections:', error);
         }
     }
 
     // Méthodes utilitaires spécifiques au mode test
     getPatientInfo() {
-        return {
-            numeroDossier: document.getElementById('numeroDossierTest').value.trim(),
-            nomPatient: document.getElementById('nomPatientTest').value.trim()
-        };
+        try {
+            return {
+                numeroDossier: document.getElementById('numeroDossierTest')?.value?.trim() || '',
+                nomPatient: document.getElementById('nomPatientTest')?.value?.trim() || ''
+            };
+        } catch (error) {
+            console.error('Erreur lors de la récupération des infos patient:', error);
+            return {
+                numeroDossier: '',
+                nomPatient: ''
+            };
+        }
     }
 
     hasValidData() {
-        const patientInfo = this.getPatientInfo();
-        return patientInfo.numeroDossier && patientInfo.nomPatient && this.audioRecorderManager.getSectionCount() > 0;
+        try {
+            const patientInfo = this.getPatientInfo();
+            const hasRecordings = this.audioRecorderManager && 
+                                 typeof this.audioRecorderManager.getSectionCount === 'function' && 
+                                 this.audioRecorderManager.getSectionCount() > 0;
+            
+            return patientInfo.numeroDossier && patientInfo.nomPatient && hasRecordings;
+        } catch (error) {
+            console.error('Erreur lors de la vérification des données:', error);
+            return false;
+        }
     }
 
     // Méthodes spécifiques au mode démo
     getDemoStats() {
-        return {
-            totalRecordings: this.audioRecorderManager.getSectionCount(),
-            totalDuration: this.calculateTotalRecordingDuration(),
-            formCompletion: this.getFormCompletionPercentage()
-        };
+        try {
+            const totalRecordings = this.audioRecorderManager && 
+                                   typeof this.audioRecorderManager.getSectionCount === 'function' ? 
+                                   this.audioRecorderManager.getSectionCount() : 0;
+            
+            return {
+                totalRecordings,
+                totalDuration: this.calculateTotalRecordingDuration(),
+                formCompletion: this.getFormCompletionPercentage()
+            };
+        } catch (error) {
+            console.error('Erreur lors de la récupération des stats:', error);
+            return {
+                totalRecordings: 0,
+                totalDuration: 0,
+                formCompletion: 0
+            };
+        }
     }
 
     calculateTotalRecordingDuration() {
-        let totalDuration = 0;
-        const sections = window.APP_CONFIG.SECTIONS.test;
-        
-        sections.forEach(sectionId => {
-            const recorder = this.audioRecorderManager.getRecorder(sectionId);
-            if (recorder && recorder.hasRecording()) {
-                // Estimation basée sur la taille du fichier audio
-                if (recorder.audioBlob) {
-                    totalDuration += Math.round(recorder.audioBlob.size / 32000); // Estimation approximative
-                }
+        try {
+            let totalDuration = 0;
+            const sections = window.APP_CONFIG?.SECTIONS?.test || [];
+            
+            if (!this.audioRecorderManager || typeof this.audioRecorderManager.getRecorder !== 'function') {
+                return 0;
             }
-        });
-        
-        return totalDuration;
+            
+            sections.forEach(sectionId => {
+                try {
+                    const recorder = this.audioRecorderManager.getRecorder(sectionId);
+                    if (recorder && typeof recorder.hasRecording === 'function' && recorder.hasRecording()) {
+                        // Estimation basée sur la taille du fichier audio
+                        if (recorder.audioBlob && recorder.audioBlob.size) {
+                            totalDuration += Math.round(recorder.audioBlob.size / 32000); // Estimation approximative
+                        }
+                    }
+                } catch (sectionError) {
+                    console.warn(`Erreur lors du calcul de la durée pour la section ${sectionId}:`, sectionError);
+                }
+            });
+            
+            return totalDuration;
+        } catch (error) {
+            console.error('Erreur lors du calcul de la durée totale:', error);
+            return 0;
+        }
     }
 
     getFormCompletionPercentage() {
-        const patientInfo = this.getPatientInfo();
-        const hasRecordings = this.audioRecorderManager.getSectionCount() > 0;
-        
-        let completion = 0;
-        if (patientInfo.numeroDossier) completion += 33;
-        if (patientInfo.nomPatient) completion += 33;
-        if (hasRecordings) completion += 34;
-        
-        return completion;
+        try {
+            const patientInfo = this.getPatientInfo();
+            const hasRecordings = this.audioRecorderManager && 
+                                 typeof this.audioRecorderManager.getSectionCount === 'function' && 
+                                 this.audioRecorderManager.getSectionCount() > 0;
+            
+            let completion = 0;
+            if (patientInfo.numeroDossier) completion += 33;
+            if (patientInfo.nomPatient) completion += 33;
+            if (hasRecordings) completion += 34;
+            
+            return completion;
+        } catch (error) {
+            console.error('Erreur lors du calcul du pourcentage de completion:', error);
+            return 0;
+        }
     }
 }
 
