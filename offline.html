@@ -89,7 +89,6 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 16px;
         }
         
         .features li::before {
@@ -104,7 +103,6 @@
             justify-content: center;
             font-weight: bold;
             flex-shrink: 0;
-            font-size: 14px;
         }
         
         .btn {
@@ -127,39 +125,10 @@
             box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
         }
         
-        .btn:active {
-            transform: translateY(0);
-        }
-        
         .retry-info {
             margin-top: 24px;
             font-size: 14px;
             color: #64748b;
-        }
-        
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 16px;
-            padding: 8px 16px;
-            background: #fef3c7;
-            border-radius: 20px;
-            font-size: 14px;
-            color: #92400e;
-        }
-        
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            background: #f59e0b;
-            border-radius: 50%;
-            animation: blink 1.5s ease-in-out infinite;
-        }
-        
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
         }
         
         @media (max-width: 480px) {
@@ -179,10 +148,6 @@
             
             p {
                 font-size: 16px;
-            }
-            
-            .features li {
-                font-size: 14px;
             }
         }
     </style>
@@ -204,11 +169,6 @@
         </div>
         
         <button class="btn" onclick="window.location.reload()">🔄 Réessayer</button>
-        
-        <div class="status-indicator">
-            <span class="status-dot"></span>
-            <span>En attente de connexion...</span>
-        </div>
         
         <div class="retry-info">
             La connexion sera vérifiée automatiquement dès que vous serez de nouveau en ligne.
