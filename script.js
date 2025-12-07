@@ -1,11 +1,12 @@
 /**
  * DictaMed - Application de dictée médicale intelligente
- * Version améliorée avec correction du bug DMI
- * 
- * CORRECTION IMPORTANTE: 
- * - Variable 'texteLibre' renommée en 'dmiTexteLibre' pour éviter les conflits
- * - Variable 'photosUpload' renommée en 'dmiPhotosUpload'
- * - Stockage des photos DMI séparé dans 'dmiUploadedPhotos'
+ * Version avec authentification Firebase
+ *
+ * IMPORTANT CHANGES:
+ * - Firebase authentication integrated for Normal Mode access
+ * - Original username/password system replaced with Firebase auth
+ * - Firebase Auth UI component added
+ * - Normal Mode now requires Firebase authentication
  */
 
 'use strict';
@@ -1244,91 +1245,138 @@ function resetDmiForm() {
     updateDMIPhotosPreview();
     validateDMIMode();
 }
-
-// ===== GESTION DE LA SAUVEGARDE DES DONNÉES D'AUTHENTIFICATION =====
+// ===== GESTION DE LA SAUVEGARDE DES DONNÉES D'AUTHENTIFICATION (Legacy - à supprimer) =====
 const AuthManager = {
     STORAGE_KEY: 'dictamed_auth_credentials',
-    
+
     saveCredentials() {
-        const username = document.getElementById('username')?.value.trim();
-        const accessCode = document.getElementById('accessCode')?.value.trim();
-        const rememberAuth = document.getElementById('rememberAuth')?.checked;
-        
-        if (rememberAuth && username && accessCode) {
-            const credentials = {
-                username: username,
-                accessCode: accessCode,
-                savedAt: new Date().toISOString()
-            };
-            
-            try {
-                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(credentials));
-                Toast.success('Identifiants enregistrés.', 'Sauvegarde réussie');
-            } catch (e) {
-                console.error('Erreur sauvegarde:', e);
-                Toast.error('Impossible de sauvegarder.', 'Erreur');
-            }
-        } else if (!rememberAuth) {
-            this.clearCredentials();
-        }
+        // This legacy function is kept for backward compatibility but should not be used
+        console.warn('⚠️ Legacy AuthManager.saveCredentials() called - using Firebase instead');
+        return;
     },
-    
+
     restoreCredentials() {
-        try {
-            const saved = localStorage.getItem(this.STORAGE_KEY);
-            if (saved) {
-                const credentials = JSON.parse(saved);
-                const usernameInput = document.getElementById('username');
-                const accessCodeInput = document.getElementById('accessCode');
-                const rememberAuthCheckbox = document.getElementById('rememberAuth');
-                
-                if (usernameInput && accessCodeInput && rememberAuthCheckbox) {
-                    usernameInput.value = credentials.username || '';
-                    accessCodeInput.value = credentials.accessCode || '';
-                    rememberAuthCheckbox.checked = true;
-                }
-            }
-        } catch (e) {
-            console.error('Erreur restauration:', e);
-        }
+        // This legacy function is kept for backward compatibility but should not be used
+        console.warn('⚠️ Legacy AuthManager.restoreCredentials() called - using Firebase instead');
+        return;
     },
-    
+
     clearCredentials() {
+        // This legacy function is kept for backward compatibility but should not be used
+        console.warn('⚠️ Legacy AuthManager.clearCredentials() called - using Firebase instead');
+        return;
+    },
+
+    init() {
+        // Legacy init - kept for backward compatibility
+        console.warn('⚠️ Legacy AuthManager.init() called - Firebase Auth is now used instead');
+
+        // Remove any legacy auth elements from the UI
+        const legacyAuthCard = document.querySelector('.auth-card');
+        if (legacyAuthCard) {
+            legacyAuthCard.style.display = 'none';
+        }
+    }
+};
+
+// ===== FIREBASE AUTHENTICATION MANAGER =====
+const FirebaseAuthManager = {
+    // Initialize Firebase Auth
+    async init() {
         try {
-            localStorage.removeItem(this.STORAGE_KEY);
-        } catch (e) {
-            console.error('Erreur effacement:', e);
+            // Import and initialize Firebase Auth UI
+            const firebaseAuthUI = await import('./firebase-auth-ui.js');
+            await firebaseAuthUI.default.init();
+
+            console.log('🔐 Firebase Auth Manager initialized');
+
+            // Set up event listeners for Firebase auth
+            this.setupFirebaseEventListeners(firebaseAuthUI.default);
+
+            return firebaseAuthUI.default;
+
+        } catch (error) {
+            console.error('🔥 Error initializing Firebase Auth Manager:', error);
+            Toast.error('Erreur d\'initialisation de Firebase Auth', 'Erreur');
+            return null;
         }
     },
-    
-    init() {
-        this.restoreCredentials();
-        
-        const rememberAuthCheckbox = document.getElementById('rememberAuth');
-        if (rememberAuthCheckbox) {
-            rememberAuthCheckbox.addEventListener('change', () => {
-                if (rememberAuthCheckbox.checked) {
-                    this.saveCredentials();
-                } else {
-                    this.clearCredentials();
-                    Toast.info('Identifiants ne seront plus enregistrés.', 'Information');
+
+    // Set up Firebase event listeners
+    setupFirebaseEventListeners(firebaseAuthUI) {
+        // Add event listener to normal mode tab
+        const normalModeTab = document.querySelector('[data-tab="mode-normal"]');
+        if (normalModeTab) {
+            normalModeTab.addEventListener('click', async (e) => {
+                if (!firebaseAuthUI.isUserAuthenticated()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    Toast.warning('Authentification requise pour le Mode Normal', 'Accès restreint');
+                    firebaseAuthUI.openAuthModal();
+                    return false;
                 }
+                return true;
             });
         }
-        
-        const usernameInput = document.getElementById('username');
-        const accessCodeInput = document.getElementById('accessCode');
-        
-        [usernameInput, accessCodeInput].forEach(input => {
-            if (input) {
-                input.addEventListener('blur', () => {
-                    const rememberAuth = document.getElementById('rememberAuth')?.checked;
-                    if (rememberAuth) {
-                        this.saveCredentials();
-                    }
-                });
-            }
+
+        // Add event listener to any elements that require authentication
+        const authRequiredElements = document.querySelectorAll('[data-requires-auth]');
+        authRequiredElements.forEach(element => {
+            element.addEventListener('click', (e) => {
+                if (!firebaseAuthUI.isUserAuthenticated()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    Toast.warning('Authentification requise', 'Accès restreint');
+                    firebaseAuthUI.openAuthModal();
+                    return false;
+                }
+            });
         });
+    },
+
+    // Check if user is authenticated
+    async isAuthenticated() {
+        try {
+            const firebaseAuthUI = await import('./firebase-auth-ui.js');
+            return firebaseAuthUI.default.isUserAuthenticated();
+        } catch (error) {
+            console.error('Error checking authentication:', error);
+            return false;
+        }
+    },
+
+    // Get current user email
+    async getUserEmail() {
+        try {
+            const firebaseAuthUI = await import('./firebase-auth-ui.js');
+            return firebaseAuthUI.default.getCurrentUserEmail();
+        } catch (error) {
+            console.error('Error getting user email:', error);
+            return null;
+        }
+    },
+
+    // Open Firebase auth modal
+    async openAuthModal() {
+        try {
+            const firebaseAuthUI = await import('./firebase-auth-ui.js');
+            firebaseAuthUI.default.openAuthModal();
+        } catch (error) {
+            console.error('Error opening auth modal:', error);
+        }
+    },
+
+    // Sign out from Firebase
+    async signOut() {
+        try {
+            const firebaseAuthUI = await import('./firebase-auth-ui.js');
+            await firebaseAuthUI.default.handleLogout();
+        } catch (error) {
+            console.error('Error signing out:', error);
+            Toast.error('Erreur lors de la déconnexion', 'Erreur');
+        }
     }
 };
 
@@ -1364,15 +1412,18 @@ function initSwipeHint() {
 
 // ===== INITIALISATION PRINCIPALE =====
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Initialisation de DictaMed...');
-    
+    console.log('🚀 Initialisation de DictaMed avec Firebase Auth...');
+
     // Initialiser le mode selon l'onglet actif
     initializeMode();
-    
+
     // Initialiser les systèmes de base
     Toast.init();
     AutoSave.init();
-    
+
+    // Initialiser Firebase Authentication
+    initFirebaseAuthentication();
+
     // Initialiser les composants
     initTabs();
     initCharCounters();
@@ -1380,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initAudioRecorders();
     initDMIPhotosUpload(); // CORRECTION: Fonction renommée
     initSwipeHint();
-    
+
     updateSectionCount();
     validateDMIMode();
 
@@ -1410,8 +1461,57 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Initialiser AuthManager
-    AuthManager.init();
+    // Initialiser Firebase Auth Manager (remplace l'ancien AuthManager)
+    FirebaseAuthManager.init().catch(error => {
+        console.error('🔥 Error initializing Firebase Auth Manager:', error);
+    });
 
-    console.log('✅ DictaMed initialisé avec succès!');
+    console.log('✅ DictaMed avec Firebase Auth initialisé avec succès!');
 });
+
+// Initialize Firebase Authentication
+async function initFirebaseAuthentication() {
+    try {
+        // Dynamically import Firebase Auth UI
+        const firebaseAuthUI = await import('./firebase-auth-ui.js');
+        await firebaseAuthUI.default.init();
+
+        console.log('🔐 Firebase Authentication UI initialized');
+
+        // Set up normal mode protection
+        setupNormalModeProtection();
+
+    } catch (error) {
+        console.error('🔥 Error initializing Firebase Authentication:', error);
+        Toast.error('Erreur d\'initialisation de l\'authentification Firebase', 'Erreur');
+    }
+}
+
+// Set up protection for Normal Mode
+function setupNormalModeProtection() {
+    // Add click handler to normal mode tab to check authentication
+    const normalModeTab = document.querySelector('[data-tab="mode-normal"]');
+    if (normalModeTab) {
+        normalModeTab.addEventListener('click', async (e) => {
+            // Import Firebase Auth UI
+            const firebaseAuthUI = await import('./firebase-auth-ui.js');
+
+            // Check if user is authenticated
+            if (!firebaseAuthUI.default.isUserAuthenticated()) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Show authentication required message
+                Toast.warning('Authentification requise pour accéder au Mode Normal', 'Accès restreint');
+
+                // Open auth modal
+                firebaseAuthUI.default.openAuthModal();
+
+                // Don't switch to normal mode
+                return false;
+            }
+
+            return true;
+        });
+    }
+}

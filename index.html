@@ -32,7 +32,12 @@
     
     <!-- Stylesheet -->
     <link rel="stylesheet" href="style.css">
-    
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
+
     <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232563eb;stop-opacity:1'/><stop offset='100%25' style='stop-color:%231e40af;stop-opacity:1'/></linearGradient><linearGradient id='grad2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%2310b981;stop-opacity:1'/><stop offset='100%25' style='stop-color:%23059669;stop-opacity:1'/></linearGradient></defs><text x='10' y='75' font-size='70' font-weight='bold' font-family='Arial, sans-serif'><tspan fill='url(%23grad1)'>D</tspan><tspan fill='url(%23grad2)'>M</tspan></text></svg>">
     
@@ -80,26 +85,8 @@
     <!-- Contenu des onglets -->
     <main class="container" id="main-content" role="main">
         <!-- ONGLET 1: MODE NORMAL -->
-        <section id="mode-normal" class="tab-content active">
-            
-            <!-- Authentification -->
-            <div class="card auth-card">
-                <h2>🔐 Authentification</h2>
-                <div class="form-group">
-                    <label for="username">🔐 Identifiant</label>
-                    <input type="text" id="username" placeholder="Votre identifiant" autocomplete="username">
-                </div>
-                <div class="form-group">
-                    <label for="accessCode">🔑 Code d'accès</label>
-                    <input type="password" id="accessCode" placeholder="Votre code d'accès" autocomplete="current-password">
-                </div>
-                <div class="form-group" style="margin-top: 15px;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                        <input type="checkbox" id="rememberAuth" style="width: auto; cursor: pointer;">
-                        <span>💾 Enregistrer mes informations d'authentification</span>
-                    </label>
-                </div>
-            </div>
+        <section id="mode-normal" class="tab-content active" data-requires-auth="true">
+            <!-- Firebase Auth will handle authentication - legacy auth card removed -->
 
             <!-- Informations patient -->
             <div class="card">
@@ -692,6 +679,13 @@
         </div>
     </footer>
 
+    <!-- Firebase Configuration -->
+    <script type="module" src="firebase-config.js"></script>
+
+    <!-- Firebase Auth UI -->
+    <script type="module" src="firebase-auth-ui.js"></script>
+
+    <!-- Main Application Script -->
     <script src="script.js"></script>
 </body>
 </html>
