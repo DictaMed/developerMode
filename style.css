@@ -2431,7 +2431,7 @@ textarea:focus-visible {
 }
 
 .tabs-container::-webkit-scrollbar-thumb {
-    background: linear-gradient(90deg, var(--blue-primary), var(--green-primary));
+    background: linear-gradient(90deg, var(--blue-primary), var(--green-secondary));
     border-radius: 3px;
 }
 

@@ -433,7 +433,7 @@ class AudioRecorder {
             this.mediaRecorder.addEventListener('dataavailable', event => {
                 if (event.data.size > 0) {
                     this.audioChunks.push(event.data);
-                    console.log(`📦 Partie 1 - Chunk audio capturé: ${event.data.size} bytes, Total chunks: ${this.audioChunks.length}`);
+                    console.log(`📦 ${this.sectionId} - Chunk audio capturé: ${event.data.size} bytes, Total chunks: ${this.audioChunks.length}`);
                 }
             });
 
@@ -446,7 +446,7 @@ class AudioRecorder {
                 
                 // Afficher la taille du fichier
                 const sizeMB = (this.audioBlob.size / (1024 * 1024)).toFixed(2);
-                console.log(`✅ Partie 1 - Enregistrement terminé: ${sizeMB} MB, Chunks collectés: ${this.audioChunks.length}`);
+                console.log(`✅ ${this.sectionId} - Enregistrement terminé: ${sizeMB} MB, Chunks collectés: ${this.audioChunks.length}`);
                 
                 // Mettre à jour le compteur de sections maintenant que audioBlob est défini
                 updateSectionCount();
@@ -461,7 +461,7 @@ class AudioRecorder {
 
             // Commencer l'enregistrement avec timeslice pour capturer les données toutes les secondes
             this.mediaRecorder.start(1000);
-            console.log(`🎙️ Partie 1 - Enregistrement démarré avec timeslice=1000ms`);
+            console.log(`🎙️ ${this.sectionId} - Enregistrement démarré avec timeslice=1000ms`);
             
             this.startTime = Date.now() - this.pausedTime;
             this.startTimer();
