@@ -1,282 +1,449 @@
-// État global de l'application
-const appState = {
-    currentMode: 'normal', // 'normal' ou 'test'
-    recordings: {
-        normal: {},
-        test: {}
+/**
+ * DictaMed - Medical Dictation Application
+ * Main JavaScript file with improved structure and organization
+ * Version: 2.0.0 - Refactored for better maintainability
+ */
+
+// ===== APPLICATION CONSTANTS =====
+const APP_CONFIG = {
+    MAX_RECORDING_DURATION: 120, // 2 minutes in seconds
+    MAX_FILE_SIZE: 50 * 1024 * 1024, // 50MB
+    MAX_PHOTOS: 5,
+    MAX_PHOTO_SIZE: 10 * 1024 * 1024, // 10MB
+    AUTOSAVE_INTERVAL: 30000, // 30 seconds
+    AUTOSAVE_RETENTION: 24 * 60 * 60 * 1000, // 24 hours
+    TIMEOUT_DURATION: 30000, // 30 seconds
+    MODES: {
+        NORMAL: 'normal',
+        TEST: 'test',
+        DMI: 'dmi',
+        HOME: 'home'
     },
-    autoSaveInterval: null,
-    lastSaveTime: null
+    SECTIONS: {
+        normal: ['partie1', 'partie2', 'partie3', 'partie4'],
+        test: ['clinique', 'antecedents', 'biologie']
+    },
+    ENDPOINTS: {
+        normal: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMedNormalMode',
+        test: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed',
+        dmi: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed'
+    },
+    AUDIO_FORMATS: {
+        PRIORITY: [
+            'audio/mpeg',              // MP3
+            'audio/mp4',               // M4A/AAC
+            'audio/webm;codecs=opus',  // WebM Opus
+            'audio/webm',              // WebM
+            'audio/ogg;codecs=opus',   // Ogg Opus
+            'audio/wav'                // WAV
+        ]
+    }
 };
 
-// Initialiser le mode actuel au démarrage selon l'onglet actif
-function initializeMode() {
-    const activeTab = document.querySelector('.tab-btn.active');
-    if (activeTab) {
-        const tabId = activeTab.getAttribute('data-tab');
-        if (tabId === 'home') {
-            appState.currentMode = 'home';
-        } else if (tabId === 'mode-normal') {
-            appState.currentMode = 'normal';
-        } else if (tabId === 'mode-test') {
-            appState.currentMode = 'test';
-        }
-    } else {
-        // Par défaut, utiliser le mode home
-        appState.currentMode = 'home';
+// ===== APPLICATION STATE =====
+class AppState {
+    constructor() {
+        this.currentMode = APP_CONFIG.MODES.HOME;
+        this.recordings = {
+            normal: {},
+            test: {}
+        };
+        this.autoSaveInterval = null;
+        this.lastSaveTime = null;
+        this.isInitialized = false;
     }
-    console.log('Mode initial:', appState.currentMode);
+
+    setMode(mode) {
+        if (Object.values(APP_CONFIG.MODES).includes(mode)) {
+            this.currentMode = mode;
+        }
+    }
+
+    getMode() {
+        return this.currentMode;
+    }
+
+    getRecordingsForMode(mode) {
+        return this.recordings[mode] || {};
+    }
+
+    hasRecording(sectionId) {
+        const mode = this.currentMode;
+        return this.recordings[mode] && this.recordings[mode][sectionId] && this.recordings[mode][sectionId].hasRecording();
+    }
+
+    getRecording(sectionId) {
+        const mode = this.currentMode;
+        return this.recordings[mode] && this.recordings[mode][sectionId] ? this.recordings[mode][sectionId] : null;
+    }
+
+    setRecording(sectionId, recorder) {
+        if (!this.recordings[this.currentMode]) {
+            this.recordings[this.currentMode] = {};
+        }
+        this.recordings[this.currentMode][sectionId] = recorder;
+    }
+
+    clear() {
+        this.recordings = {
+            normal: {},
+            test: {}
+        };
+        this.lastSaveTime = null;
+    }
 }
 
-// ===== SYSTÈME DE TOAST NOTIFICATIONS (Désactivé) =====
-const Toast = {
-    init() {},
-    show() {},
-    remove() {},
-    success() {},
-    error() {},
-    warning() {},
-    info() {}
+// ===== UTILITY FUNCTIONS =====
+const Utils = {
+    // Format duration in MM:SS format
+    formatDuration(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+    },
+
+    // Convert file to Base64
+    async fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64 = reader.result.split(',')[1];
+                resolve(base64);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    },
+
+    // Format file size
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    },
+
+    // Generate unique ID
+    generateId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    },
+
+    // Validate email format
+    isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    },
+
+    // Debounce function
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    },
+
+    // Throttle function
+    throttle(func, limit) {
+        let inThrottle;
+        return function() {
+            const args = arguments;
+            const context = this;
+            if (!inThrottle) {
+                func.apply(context, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
+    }
 };
 
-// ===== LOADING OVERLAY =====
-const Loading = {
-    overlay: null,
-    
-    show(text = 'Chargement...') {
-        if (!this.overlay) {
-            this.overlay = document.createElement('div');
-            this.overlay.className = 'loading-overlay';
-            this.overlay.innerHTML = `
-                <div class="loading-spinner">
-                    <div class="spinner"></div>
-                    <div class="loading-text">${text}</div>
-                </div>
-            `;
-            document.body.appendChild(this.overlay);
+// ===== NOTIFICATION SYSTEM =====
+class NotificationSystem {
+    constructor() {
+        this.container = null;
+        this.notifications = new Map();
+        this.init();
+    }
+
+    init() {
+        this.container = document.createElement('div');
+        this.container.className = 'notification-container';
+        this.container.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+            pointer-events: none;
+        `;
+        document.body.appendChild(this.container);
+    }
+
+    show(message, type = 'info', duration = 5000) {
+        const id = Utils.generateId();
+        const notification = this.createNotification(id, message, type);
+        this.notifications.set(id, notification);
+        
+        this.container.appendChild(notification);
+        
+        // Trigger animation
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        // Auto remove
+        if (duration > 0) {
+            setTimeout(() => {
+                this.remove(id);
+            }, duration);
         }
-    },
-    
+        
+        return id;
+    }
+
+    createNotification(id, message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.style.cssText = `
+            background: ${this.getBackgroundColor(type)};
+            color: ${this.getTextColor(type)};
+            padding: 16px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            pointer-events: auto;
+            position: relative;
+        `;
+        
+        notification.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 1.2em;">${this.getIcon(type)}</span>
+                <span style="flex: 1;">${message}</span>
+                <button onclick="notificationSystem.remove('${id}')" 
+                        style="background: none; border: none; font-size: 1.2em; cursor: pointer; opacity: 0.7;">
+                    ×
+                </button>
+            </div>
+        `;
+        
+        return notification;
+    }
+
+    remove(id) {
+        const notification = this.notifications.get(id);
+        if (notification) {
+            notification.classList.remove('show');
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+                this.notifications.delete(id);
+            }, 300);
+        }
+    }
+
+    getBackgroundColor(type) {
+        const colors = {
+            success: '#10B981',
+            error: '#EF4444',
+            warning: '#F59E0B',
+            info: '#3B82F6'
+        };
+        return colors[type] || colors.info;
+    }
+
+    getTextColor(type) {
+        return 'white';
+    }
+
+    getIcon(type) {
+        const icons = {
+            success: '✅',
+            error: '❌',
+            warning: '⚠️',
+            info: 'ℹ️'
+        };
+        return icons[type] || icons.info;
+    }
+
+    success(message, duration) {
+        return this.show(message, 'success', duration);
+    }
+
+    error(message, duration) {
+        return this.show(message, 'error', duration);
+    }
+
+    warning(message, duration) {
+        return this.show(message, 'warning', duration);
+    }
+
+    info(message, duration) {
+        return this.show(message, 'info', duration);
+    }
+}
+
+// ===== LOADING OVERLAY =====
+class LoadingOverlay {
+    constructor() {
+        this.overlay = null;
+        this.isVisible = false;
+    }
+
+    show(text = 'Chargement...') {
+        if (this.isVisible) return;
+        
+        this.overlay = document.createElement('div');
+        this.overlay.className = 'loading-overlay';
+        this.overlay.innerHTML = `
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <div class="loading-text">${text}</div>
+            </div>
+        `;
+        
+        this.overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+        `;
+        
+        document.body.appendChild(this.overlay);
+        this.isVisible = true;
+    }
+
     hide() {
-        if (this.overlay) {
+        if (this.overlay && this.isVisible) {
             this.overlay.style.animation = 'fadeOut 0.2s ease forwards';
             setTimeout(() => {
                 if (this.overlay && this.overlay.parentNode) {
                     this.overlay.parentNode.removeChild(this.overlay);
                     this.overlay = null;
+                    this.isVisible = false;
                 }
             }, 200);
         }
     }
-};
+}
 
-// ===== AUTO-SAVE AVEC LOCALSTORAGE =====
-const AutoSave = {
-    indicator: null,
-    debounceTimer: null,
-    
+// ===== AUTO-SAVE SYSTEM =====
+class AutoSaveSystem {
+    constructor(appState) {
+        this.appState = appState;
+        this.indicator = null;
+        this.debounceTimer = null;
+    }
+
     init() {
-        // Créer l'indicateur
-        if (!this.indicator) {
-            this.indicator = document.createElement('div');
-            this.indicator.className = 'autosave-indicator';
-            this.indicator.innerHTML = '<div class="icon"></div><span class="text">Sauvegarde automatique</span>';
-            document.body.appendChild(this.indicator);
-        }
-        
-        // Restaurer les données sauvegardées
-        this.restore();
-        
-        // Démarrer l'auto-save
+        this.createIndicator();
         this.startAutoSave();
-    },
-    
+    }
+
+    createIndicator() {
+        this.indicator = document.createElement('div');
+        this.indicator.className = 'autosave-indicator';
+        this.indicator.innerHTML = '<div class="icon"></div><span class="text">Sauvegarde automatique</span>';
+        this.indicator.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        `;
+        document.body.appendChild(this.indicator);
+    }
+
     save() {
         try {
-            const mode = appState.currentMode;
             const data = {
-                mode,
+                mode: this.appState.getMode(),
                 timestamp: Date.now(),
-                forms: {}
+                forms: this.collectFormData()
             };
             
-            // Mode normal - no authentication fields to save anymore
-            // Ne rien sauvegarder en mode test
-            
             localStorage.setItem('dictamed_autosave', JSON.stringify(data));
-            appState.lastSaveTime = Date.now();
-            
+            this.appState.lastSaveTime = Date.now();
             this.showIndicator('saved');
         } catch (error) {
             console.error('Erreur lors de la sauvegarde:', error);
+            this.showIndicator('error');
         }
-    },
-    
-    restore() {
-        try {
-            const saved = localStorage.getItem('dictamed_autosave');
-            if (!saved) return;
-            
-            const data = JSON.parse(saved);
-            
-            // Vérifier si les données ne sont pas trop anciennes (24h)
-            const dayInMs = 24 * 60 * 60 * 1000;
-            if (Date.now() - data.timestamp > dayInMs) {
-                localStorage.removeItem('dictamed_autosave');
-                return;
-            }
-            
-            // Authentication fields removed - no restoration needed
-        } catch (error) {
-            console.error('Erreur lors de la restauration:', error);
+    }
+
+    collectFormData() {
+        const data = {};
+        const mode = this.appState.getMode();
+        
+        // Collect form data based on current mode
+        if (mode === APP_CONFIG.MODES.NORMAL) {
+            data.numeroDossier = document.getElementById('numeroDossier')?.value || '';
+            data.nomPatient = document.getElementById('nomPatient')?.value || '';
+        } else if (mode === APP_CONFIG.MODES.TEST) {
+            data.numeroDossier = document.getElementById('numeroDossierTest')?.value || '';
+            data.nomPatient = document.getElementById('nomPatientTest')?.value || '';
+        } else if (mode === APP_CONFIG.MODES.DMI) {
+            data.numeroDossier = document.getElementById('numeroDossierDMI')?.value || '';
+            data.nomPatient = document.getElementById('nomPatientDMI')?.value || '';
+            data.texteLibre = document.getElementById('texteLibre')?.value || '';
         }
-    },
-    
+        
+        return data;
+    }
+
     startAutoSave() {
-        // Sauvegarder toutes les 30 secondes
         appState.autoSaveInterval = setInterval(() => {
             this.save();
-        }, 30000);
+        }, APP_CONFIG.AUTOSAVE_INTERVAL);
         
-        // Authentication fields removed - no auto-save listeners needed
-    },
-    
+        // Debounced save on form changes
+        const debouncedSave = Utils.debounce(() => {
+            this.save();
+        }, 1000);
+        
+        document.addEventListener('input', debouncedSave);
+    }
+
     showIndicator(state) {
         if (!this.indicator) return;
         
-        this.indicator.className = 'autosave-indicator show ' + state;
+        this.indicator.style.opacity = '1';
+        this.indicator.style.transform = 'translateY(0)';
         
         setTimeout(() => {
-            this.indicator.classList.remove('show');
+            this.indicator.style.opacity = '0';
+            this.indicator.style.transform = 'translateY(20px)';
         }, 2000);
-    },
-    
+    }
+
     clear() {
         localStorage.removeItem('dictamed_autosave');
     }
-};
-
-// Configuration des sections par mode
-const sectionsConfig = {
-    normal: ['partie1', 'partie2', 'partie3', 'partie4'],
-    test: ['clinique', 'antecedents', 'biologie']
-};
-
-// Gestion des photos pour le mode mode DMI
-let uploadedPhotos = [];
-
-// ===== NAVIGATION PAR ONGLETS =====
-function initTabs() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetTab = btn.getAttribute('data-tab');
-            switchTab(targetTab);
-        });
-    });
 }
 
-function switchTab(tabId) {
-    // Désactiver tous les onglets et contenus
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-    // Activer l'onglet et le contenu sélectionnés
-    document.querySelector(`[data-tab="${tabId}"]`)?.classList.add('active');
-    document.getElementById(tabId)?.classList.add('active');
-
-    // Synchroniser les boutons de navigation fixes
-    updateFixedNavButtons(tabId);
-
-    // Mettre à jour le mode actuel
-    if (tabId === 'home') {
-        appState.currentMode = 'home';
-    } else if (tabId === 'mode-normal') {
-        appState.currentMode = 'normal';
-    } else if (tabId === 'mode-test') {
-        appState.currentMode = 'test';
-    }
-}
-
-// Fonction pour synchroniser les boutons de navigation fixes
-function updateFixedNavButtons(activeTabId) {
-    const fixedNavBtns = document.querySelectorAll('.fixed-nav-btn');
-    fixedNavBtns.forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.getAttribute('data-tab') === activeTabId) {
-            btn.classList.add('active');
-        }
-    });
-}
-
-// Rendre la fonction switchTab globale pour les boutons CTA
-window.switchTab = switchTab;
-
-// ===== COMPTEUR DE CARACTÈRES =====
-function initCharCounters() {
-    const inputs = [
-        { id: 'numeroDossier', counterId: 'numeroDossierCounter' },
-        { id: 'nomPatient', counterId: 'nomPatientCounter' },
-        { id: 'numeroDossierTest', counterId: 'numeroDossierTestCounter' },
-        { id: 'nomPatientTest', counterId: 'nomPatientTestCounter' },
-        { id: 'numeroDossierDMI', counterId: 'numeroDossierDMICounter' },
-        { id: 'nomPatientDMI', counterId: 'nomPatientDMICounter' }
-    ];
-
-    inputs.forEach(({ id, counterId }) => {
-        const input = document.getElementById(id);
-        const counter = document.getElementById(counterId);
-        
-        if (input && counter) {
-            input.addEventListener('input', () => {
-                const length = input.value.length;
-                const maxLength = input.maxLength;
-                counter.textContent = `${length}/${maxLength}`;
-
-                // Changer la couleur selon le niveau
-                counter.classList.remove('warning', 'danger');
-                if (length >= maxLength) {
-                    counter.classList.add('danger');
-                } else if (length >= maxLength * 0.8) {
-                    counter.classList.add('warning');
-                }
-
-                // Validation pour le mode DMI
-                if (id === 'numeroDossierDMI') {
-                    validateDMIMode();
-                }
-            });
-        }
-    });
-
-    // Compteur pour le textarea
-    const texteLibre = document.getElementById('texteLibre');
-    const texteLibreCounter = document.getElementById('texteLibreCounter');
-    if (texteLibre && texteLibreCounter) {
-        texteLibre.addEventListener('input', () => {
-            texteLibreCounter.textContent = texteLibre.value.length;
-        });
-    }
-}
-
-// ===== PARTIE 4 OPTIONNELLE =====
-function initOptionalSection() {
-    const toggleBtn = document.getElementById('togglePartie4');
-    const partie4 = document.querySelector('[data-section="partie4"]');
-    
-    if (toggleBtn && partie4) {
-        toggleBtn.addEventListener('click', () => {
-            partie4.classList.toggle('hidden');
-            toggleBtn.textContent = partie4.classList.contains('hidden') 
-                ? 'Afficher Partie 4 (optionnelle)' 
-                : 'Masquer Partie 4';
-        });
-    }
-}
-
-// ===== ENREGISTREMENT AUDIO =====
+// ===== AUDIO RECORDER CLASS =====
 class AudioRecorder {
     constructor(sectionElement) {
         this.section = sectionElement;
@@ -288,6 +455,7 @@ class AudioRecorder {
         this.pausedTime = 0;
         this.timerInterval = null;
         this.audioBlob = null;
+        this.supportedMimeType = '';
         
         this.initElements();
         this.initEventListeners();
@@ -315,101 +483,101 @@ class AudioRecorder {
 
     async startRecording() {
         try {
-            // Vérifier la compatibilité du navigateur
+            // Check browser compatibility
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 throw new Error('Votre navigateur ne supporte pas l\'enregistrement audio. Veuillez utiliser un navigateur moderne (Chrome, Firefox, Edge, Safari).');
             }
 
-            // Afficher un indicateur de chargement
+            // Show loading indicator
             this.updateStatus('loading', '⏳ Accès au microphone...');
             this.btnRecord.disabled = true;
 
-            // Demander l'accès au microphone avec paramètres optimisés
+            // Request microphone access with optimized settings
             this.stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     echoCancellation: true,
                     noiseSuppression: true,
                     autoGainControl: true,
                     sampleRate: 44100,
-                    channelCount: 1  // Mono pour réduire la taille
+                    channelCount: 1
                 }
             });
 
-            // Déterminer le format audio supporté
-            const mimeType = this.getSupportedMimeType();
-            console.log('Format audio utilisé:', mimeType);
+            // Determine supported audio format
+            this.supportedMimeType = this.getSupportedMimeType();
+            console.log('Format audio utilisé:', this.supportedMimeType);
             
-            // Créer le MediaRecorder avec options optimisées
-            const options = mimeType ? { mimeType, audioBitsPerSecond: 128000 } : {};
+            // Create MediaRecorder with optimized options
+            const options = this.supportedMimeType ? { 
+                mimeType: this.supportedMimeType, 
+                audioBitsPerSecond: 128000 
+            } : {};
             this.mediaRecorder = new MediaRecorder(this.stream, options);
             this.audioChunks = [];
 
-            // Événement pour collecter les données audio
+            // Event to collect audio data
             this.mediaRecorder.addEventListener('dataavailable', event => {
                 if (event.data.size > 0) {
                     this.audioChunks.push(event.data);
-                    console.log(`📦 Partie 1 - Chunk audio capturé: ${event.data.size} bytes, Total chunks: ${this.audioChunks.length}`);
                 }
             });
 
-            // Événement de fin d'enregistrement
+            // Recording end event
             this.mediaRecorder.addEventListener('stop', () => {
-                this.audioBlob = new Blob(this.audioChunks, { type: mimeType || 'audio/webm' });
+                this.audioBlob = new Blob(this.audioChunks, { 
+                    type: this.supportedMimeType || 'audio/webm' 
+                });
                 const audioUrl = URL.createObjectURL(this.audioBlob);
                 this.audioPlayer.src = audioUrl;
                 this.audioPlayer.classList.remove('hidden');
                 
-                // Afficher la taille du fichier
-                const sizeMB = (this.audioBlob.size / (1024 * 1024)).toFixed(2);
-                console.log(`✅ Partie 1 - Enregistrement terminé: ${sizeMB} MB, Chunks collectés: ${this.audioChunks.length}`);
-                
-                // Mettre à jour le compteur de sections maintenant que audioBlob est défini
                 updateSectionCount();
             });
 
-            // Gestion des erreurs pendant l'enregistrement
+            // Error handling during recording
             this.mediaRecorder.addEventListener('error', (event) => {
                 console.error('Erreur MediaRecorder:', event.error);
-                Toast.error('Une erreur est survenue lors de l\'enregistrement. Veuillez réessayer.', 'Erreur d\'enregistrement');
+                notificationSystem.error('Une erreur est survenue lors de l\'enregistrement. Veuillez réessayer.', 'Erreur d\'enregistrement');
                 this.resetRecording();
             });
 
-            // Commencer l'enregistrement avec timeslice pour capturer les données toutes les secondes
+            // Start recording with timeslice for data collection
             this.mediaRecorder.start(1000);
-            console.log(`🎙️ Partie 1 - Enregistrement démarré avec timeslice=1000ms`);
             
             this.startTime = Date.now() - this.pausedTime;
             this.startTimer();
             
-            // Mettre à jour l'UI
+            // Update UI
             this.updateStatus('recording', '🔴 En cours');
             this.btnRecord.classList.add('hidden');
             this.btnRecord.disabled = false;
             this.btnPause.classList.remove('hidden');
             this.btnStop.classList.remove('hidden');
             
-            // Ajouter un indicateur visuel d'enregistrement
+            // Add visual recording indicator
             this.section.classList.add('is-recording');
 
         } catch (error) {
             console.error('Erreur d\'accès au microphone:', error);
-            
-            // Messages d'erreur personnalisés
-            let errorMessage = 'Erreur : Impossible d\'accéder au microphone.';
-            
-            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-                errorMessage = '🎤 Accès refusé au microphone.\n\nVeuillez autoriser l\'accès au microphone dans les paramètres de votre navigateur et réessayer.';
-            } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-                errorMessage = '🎤 Aucun microphone détecté.\n\nVeuillez connecter un microphone et réessayer.';
-            } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-                errorMessage = '🎤 Microphone déjà utilisé.\n\nFermez les autres applications utilisant le microphone et réessayer.';
-            } else if (error.message) {
-                errorMessage = error.message;
-            }
-            
-            Toast.error(errorMessage, 'Accès au microphone');
+            this.handleMicrophoneError(error);
             this.resetRecording();
         }
+    }
+
+    handleMicrophoneError(error) {
+        let errorMessage = 'Erreur : Impossible d\'accéder au microphone.';
+        
+        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+            errorMessage = '🎤 Accès refusé au microphone.\n\nVeuillez autoriser l\'accès au microphone dans les paramètres de votre navigateur et réessayer.';
+        } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+            errorMessage = '🎤 Aucun microphone détecté.\n\nVeuillez connecter un microphone et réessayer.';
+        } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+            errorMessage = '🎤 Microphone déjà utilisé.\n\nFermez les autres applications utilisant le microphone et réessayer.';
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        
+        notificationSystem.error(errorMessage, 'Accès au microphone');
     }
 
     pauseRecording() {
@@ -419,7 +587,6 @@ class AudioRecorder {
             this.stopTimer();
             this.updateStatus('paused', '⏸️ En pause');
             this.btnPause.textContent = '▶️ Reprendre';
-            this.btnPause.classList.add('btn-resume');
             this.section.classList.remove('is-recording');
             this.section.classList.add('is-paused');
         } else if (this.mediaRecorder && this.mediaRecorder.state === 'paused') {
@@ -428,7 +595,6 @@ class AudioRecorder {
             this.startTimer();
             this.updateStatus('recording', '🔴 En cours');
             this.btnPause.textContent = '⏸️ Pause';
-            this.btnPause.classList.remove('btn-resume');
             this.section.classList.remove('is-paused');
             this.section.classList.add('is-recording');
         }
@@ -439,31 +605,27 @@ class AudioRecorder {
             this.mediaRecorder.stop();
             this.stopTimer();
             
-            // Arrêter tous les tracks du stream
+            // Stop all stream tracks
             if (this.stream) {
                 this.stream.getTracks().forEach(track => track.stop());
                 this.stream = null;
             }
 
-            // Mettre à jour l'UI (correction: ne plus afficher "Enregistré" dans le status badge)
+            // Update UI
             this.updateStatus('ready', 'Prêt');
             this.btnRecord.classList.add('hidden');
             this.btnPause.classList.add('hidden');
-            this.btnPause.textContent = '⏸️ Pause'; // Reset le texte
-            this.btnPause.classList.remove('btn-resume');
+            this.btnPause.textContent = '⏸️ Pause';
             this.btnStop.classList.add('hidden');
             this.btnReplay.classList.remove('hidden');
             this.btnDelete.classList.remove('hidden');
-            this.recordedBadge.classList.remove('hidden'); // Badge vert unique
+            this.recordedBadge.classList.remove('hidden');
             
-            // Marquer la section comme enregistrée
+            // Mark section as recorded
             this.section.classList.remove('is-recording', 'is-paused');
             this.section.classList.add('recorded');
             
-            // NOTE: updateSectionCount() est appelé dans l'événement 'stop' du MediaRecorder
-            // pour s'assurer que audioBlob est défini avant de compter
-            
-            // Feedback sonore optionnel (vibration sur mobile)
+            // Feedback for mobile users
             if ('vibrate' in navigator) {
                 navigator.vibrate(200);
             }
@@ -483,18 +645,18 @@ class AudioRecorder {
     }
 
     resetRecording() {
-        // Arrêter le stream si actif
+        // Stop active stream
         if (this.stream) {
             this.stream.getTracks().forEach(track => track.stop());
             this.stream = null;
         }
 
-        // Arrêter le MediaRecorder si actif
+        // Stop active MediaRecorder
         if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
             this.mediaRecorder.stop();
         }
 
-        // Réinitialiser l'état
+        // Reset state
         this.audioBlob = null;
         this.audioChunks = [];
         this.pausedTime = 0;
@@ -503,39 +665,33 @@ class AudioRecorder {
         this.audioPlayer.classList.add('hidden');
         this.stopTimer();
         
-        // Réinitialiser l'UI
+        // Reset UI
         this.updateStatus('ready', '⚪ Prêt');
         this.btnRecord.classList.remove('hidden');
         this.btnRecord.disabled = false;
         this.btnPause.classList.add('hidden');
         this.btnPause.textContent = '⏸️ Pause';
-        this.btnPause.classList.remove('btn-resume');
         this.btnStop.classList.add('hidden');
         this.btnReplay.classList.add('hidden');
         this.btnDelete.classList.add('hidden');
         this.recordedBadge.classList.add('hidden');
         
-        // Retirer tous les marquages
+        // Remove all markings
         this.section.classList.remove('recorded', 'is-recording', 'is-paused');
         
-        // Mettre à jour le compteur de sections
         updateSectionCount();
     }
 
     startTimer() {
-        const MAX_DURATION = 120; // 2 minutes = 120 secondes
-        
         this.timerInterval = setInterval(() => {
             const elapsed = Date.now() - this.startTime;
             const seconds = Math.floor(elapsed / 1000);
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            this.timer.textContent = 
-                `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
             
-            // Arrêt automatique après 2 minutes
-            if (seconds >= MAX_DURATION) {
-                Toast.info('Durée maximale de 2 minutes atteinte. Enregistrement arrêté automatiquement.', 'Limite atteinte', 5000);
+            this.timer.textContent = Utils.formatDuration(seconds);
+            
+            // Auto stop after maximum duration
+            if (seconds >= APP_CONFIG.MAX_RECORDING_DURATION) {
+                notificationSystem.info('Durée maximale de 2 minutes atteinte. Enregistrement arrêté automatiquement.', 'Limite atteinte', 5000);
                 this.stopRecording();
             }
         }, 1000);
@@ -554,38 +710,17 @@ class AudioRecorder {
     }
 
     getSupportedMimeType() {
-        // Liste des formats par ordre de préférence (MP3 en priorité)
-        const types = [
-            'audio/mpeg',              // MP3 - Priorité maximale
-            'audio/mp4',               // M4A/AAC
-            'audio/webm;codecs=opus',  // WebM Opus
-            'audio/webm',              // WebM
-            'audio/ogg;codecs=opus',   // Ogg Opus
-            'audio/wav'                // WAV (fallback)
-        ];
-
-        for (const type of types) {
+        for (const type of APP_CONFIG.AUDIO_FORMATS.PRIORITY) {
             if (MediaRecorder.isTypeSupported(type)) {
                 return type;
             }
         }
-
-        // Fallback : laisser le navigateur choisir
-        return '';
+        return ''; // Let browser choose
     }
 
     async getBase64Audio() {
         if (!this.audioBlob) return null;
-
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64 = reader.result.split(',')[1];
-                resolve(base64);
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(this.audioBlob);
-        });
+        return Utils.fileToBase64(this.audioBlob);
     }
 
     getAudioFormat() {
@@ -597,7 +732,7 @@ class AudioRecorder {
         if (type.includes('mp4')) return 'mp4';
         if (type.includes('mpeg')) return 'mp3';
         if (type.includes('wav')) return 'wav';
-        return 'webm'; // Format par défaut moderne
+        return 'webm';
     }
 
     getMimeType() {
@@ -605,596 +740,778 @@ class AudioRecorder {
     }
 
     hasRecording() {
-        return this.audioBlob !== null;
+        return this.audioBlob !== null && this.audioBlob.size > 0;
     }
 
-    // Nouvelle méthode pour valider l'enregistrement avant envoi
     validateRecording() {
         if (!this.audioBlob) {
             return { valid: false, error: 'Aucun enregistrement disponible' };
         }
 
-        // Vérifier la taille (max 50MB pour éviter les timeouts)
-        const maxSize = 50 * 1024 * 1024; // 50MB
-        if (this.audioBlob.size > maxSize) {
-            const sizeMB = (this.audioBlob.size / (1024 * 1024)).toFixed(1);
+        if (this.audioBlob.size > APP_CONFIG.MAX_FILE_SIZE) {
             return { 
                 valid: false, 
-                error: `Enregistrement trop volumineux (${sizeMB}MB). Limite: 50MB.` 
+                error: `Enregistrement trop volumineux. Limite: ${Utils.formatFileSize(APP_CONFIG.MAX_FILE_SIZE)}` 
             };
         }
 
-        // Vérifier que le blob n'est pas vide
         if (this.audioBlob.size === 0) {
             return { valid: false, error: 'Enregistrement vide' };
-        }
-
-        // Vérifier le format audio
-        const validTypes = ['audio/webm', 'audio/ogg', 'audio/mp4', 'audio/mpeg', 'audio/wav'];
-        if (!validTypes.includes(this.audioBlob.type)) {
-            console.warn(`Format audio non standard: ${this.audioBlob.type}, mais continuation...`);
         }
 
         return { valid: true, error: null };
     }
 }
 
-// Initialiser les enregistreurs audio
-const audioRecorders = new Map();
-
-function initAudioRecorders() {
-    const recordingSections = document.querySelectorAll('.recording-section');
-    
-    recordingSections.forEach(section => {
-        const sectionId = section.getAttribute('data-section');
-        const recorder = new AudioRecorder(section);
-        audioRecorders.set(sectionId, recorder);
-    });
-}
-
-// ===== COMPTEUR DE SECTIONS =====
-function updateSectionCount() {
-    const mode = appState.currentMode;
-    
-    // Ne pas mettre à jour le compteur si on est sur la page d'accueil
-    if (mode === 'home') {
-        return;
+// ===== AUDIO RECORDER MANAGER =====
+class AudioRecorderManager {
+    constructor(appState) {
+        this.appState = appState;
+        this.recorders = new Map();
     }
-    
-    const sections = sectionsConfig[mode];
-    let count = 0;
 
-    sections.forEach(sectionId => {
-        const recorder = audioRecorders.get(sectionId);
-        if (recorder && recorder.hasRecording()) {
-            count++;
-        }
-    });
-
-    // Mettre à jour l'affichage
-    const countElements = document.querySelectorAll('.sections-count');
-    countElements.forEach(el => {
-        if (el.closest(`#mode-${mode}`)) {
-            el.textContent = `${count} section(s) enregistrée(s)`;
-        }
-    });
-
-    // Activer/désactiver le bouton d'envoi
-    const submitBtn = mode === 'normal' 
-        ? document.getElementById('submitNormal')
-        : document.getElementById('submitTest');
-    
-    if (submitBtn) {
-        submitBtn.disabled = count === 0;
+    init() {
+        const recordingSections = document.querySelectorAll('.recording-section');
+        
+        recordingSections.forEach(section => {
+            const sectionId = section.getAttribute('data-section');
+            const recorder = new AudioRecorder(section);
+            this.recorders.set(sectionId, recorder);
+            this.appState.setRecording(sectionId, recorder);
+        });
     }
-}
 
-// ===== RÉCAPITULATIF AVANT ENVOI =====
-function showSendSummary(mode) {
-    const isTest = mode === 'test';
-    const numeroDossier = document.getElementById(isTest ? 'numeroDossierTest' : 'numeroDossier').value;
-    const nomPatient = document.getElementById(isTest ? 'nomPatientTest' : 'nomPatient').value;
-    const sections = isTest ? ['clinique', 'antecedents', 'biologie'] : ['partie1', 'partie2', 'partie3', 'partie4'];
-    
-    let summary = `📋 Récapitulatif avant envoi (${mode.toUpperCase()}):\n\n`;
-    summary += `👤 Patient: ${numeroDossier} - ${nomPatient}\n`;
-    summary += `📊 Sections enregistrées:\n`;
-    
-    let sectionCount = 0;
-    sections.forEach(sectionId => {
-        const recorder = audioRecorders.get(sectionId);
-        if (recorder && recorder.hasRecording()) {
-            const validation = recorder.validateRecording();
-            sectionCount++;
-            const size = recorder.audioBlob ? (recorder.audioBlob.size / 1024).toFixed(1) : '0';
-            summary += `   ✅ ${sectionId}: ${size}KB ${validation.valid ? '' : `(⚠️ ${validation.error})`}\n`;
-        }
-    });
-    
-    if (sectionCount === 0) {
-        summary += '   ❌ Aucune section enregistrée\n';
+    getRecorder(sectionId) {
+        return this.recorders.get(sectionId);
     }
-    
-    summary += `\n🎯 ${sectionCount} section(s) prête(s) pour l'envoi`;
-    
-    return summary;
-}
 
-// ===== ENVOI DES DONNÉES AMÉLIORÉ =====
-async function sendData(mode) {
-    try {
-        const submitBtn = mode === 'normal' 
-            ? document.getElementById('submitNormal')
-            : document.getElementById('submitTest');
+    getAllRecorders() {
+        return this.recorders;
+    }
+
+    getSectionCount() {
+        let count = 0;
+        const mode = this.appState.getMode();
+        const sections = APP_CONFIG.SECTIONS[mode];
         
-        if (!submitBtn) {
-            console.error('Bouton d\'envoi non trouvé pour le mode:', mode);
-            return;
-        }
+        if (!sections) return 0;
         
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Envoi en cours...';
-
-        // Afficher le récapitulatif avant envoi
-        const summary = showSendSummary(mode);
-        console.log('📋', summary);
-        Toast.info('Vérification des données avant envoi...', 'Préparation', 2000);
-
-        // Préparer le payload avec gestion d'erreur améliorée
-        const payload = await preparePayload(mode);
-        
-        if (!payload) {
-            const errorMsg = 'Veuillez remplir le numéro de dossier et le nom du patient, et enregistrer au moins une section.';
-            
-            Toast.warning(errorMsg, 'Champs manquants');
-            submitBtn.disabled = false;
-            submitBtn.textContent = mode === 'normal' ? 'Envoyer les données' : 'Envoyer les données Test';
-            return;
-        }
-
-        // Vérifier qu'il y a des sections enregistrées
-        const hasRecordings = Object.keys(payload.sections || {}).length > 0;
-        if (!hasRecordings) {
-            Toast.warning('Veuillez enregistrer au moins une section avant d\'envoyer.', 'Aucun enregistrement');
-            submitBtn.disabled = false;
-            submitBtn.textContent = mode === 'normal' ? 'Envoyer les données' : 'Envoyer les données Test';
-            return;
-        }
-
-        // Déterminer l'endpoint
-        const endpoint = mode === 'normal'
-            ? 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMedNormalMode'
-            : 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed';
-
-        console.log('🔄 Envoi des données vers:', endpoint);
-        console.log('📊 Payload:', {
-            mode: payload.mode,
-            patient: payload.NumeroDeDossier ? `${payload.NumeroDeDossier} - ${payload.NomDuPatient || 'N/A'}` : 'N/A',
-            sectionsCount: Object.keys(payload.sections || {}).length
+        sections.forEach(sectionId => {
+            const recorder = this.recorders.get(sectionId);
+            if (recorder && recorder.hasRecording()) {
+                count++;
+            }
         });
 
-        // Mettre à jour le statut
-        submitBtn.textContent = 'Transmission en cours...';
+        return count;
+    }
 
-        // Envoyer les données avec timeout et retry
-        const response = await Promise.race([
-            fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            }),
-            new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Timeout après 30 secondes')), 30000)
-            )
-        ]);
-
-        console.log('📡 Réponse reçue:', {
-            status: response.status,
-            statusText: response.statusText,
-            ok: response.ok
+    updateSectionCount() {
+        const mode = this.appState.getMode();
+        
+        if (mode === APP_CONFIG.MODES.HOME) {
+            return;
+        }
+        
+        const count = this.getSectionCount();
+        
+        // Update display
+        const countElements = document.querySelectorAll('.sections-count');
+        countElements.forEach(el => {
+            if (el.closest(`#mode-${mode}`)) {
+                el.textContent = `${count} section(s) enregistrée(s)`;
+            }
         });
 
-        if (response.ok) {
-            Toast.success('Votre dossier a été envoyé et traité avec succès !', 'Envoi réussi');
-            
-            if (mode === 'test') {
-                // Mode Test : Afficher le Google Sheet et notification
-                const googleSheetCard = document.getElementById('googleSheetCard');
-                if (googleSheetCard) {
-                    googleSheetCard.style.display = 'block';
-                    // Faire défiler vers la carte Google Sheet
-                    googleSheetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-                
-                // Notification pour consulter le Google Sheet
-                setTimeout(() => {
-                    Toast.info('Consultez le Google Sheet pour voir vos données transcrites en temps réel.', 'Résultats disponibles', 8000);
-                }, 1000);
-                
-                // NE PAS réinitialiser en mode test pour permettre de voir les résultats
-            } else {
-                // Mode Normal : Réinitialiser automatiquement
-                resetForm(mode);
-                AutoSave.clear();
-                Toast.success('Formulaire réinitialisé pour un nouveau patient.', 'Prêt', 3000);
-            }
-        } else {
-            // Gérer les erreurs HTTP
-            let errorMessage = `Le serveur a renvoyé une erreur (${response.status})`;
-            
-            try {
-                const errorText = await response.text();
-                console.error('Détails de l\'erreur:', errorText);
-                
-                if (response.status === 413) {
-                    errorMessage = 'Les fichiers audio sont trop volumineux. Veuillez enregistrer des sections plus courtes.';
-                } else if (response.status === 400) {
-                    errorMessage = 'Les données envoyées ne sont pas valides. Vérifiez vos enregistrements.';
-                } else if (response.status >= 500) {
-                    errorMessage = 'Erreur serveur. Veuillez réessayer dans quelques instants.';
-                }
-            } catch (e) {
-                console.error('Erreur lors de la lecture de la réponse:', e);
-            }
-            
-            Toast.error(errorMessage, 'Erreur d\'envoi');
-        }
-
-    } catch (error) {
-        console.error('Erreur lors de l\'envoi:', error);
-        
-        // Messages d'erreur plus spécifiques
-        if (error.name === 'TypeError' && error.message.includes('fetch')) {
-            Toast.error('Impossible de contacter le serveur. Vérifiez votre connexion Internet et réessayez.', 'Erreur réseau');
-        } else if (error.message.includes('Timeout')) {
-            Toast.error('La connexion a pris trop de temps. Vérifiez votre connexion et réessayez.', 'Timeout');
-        } else {
-            Toast.error(`Une erreur inattendue s'est produite: ${error.message}`, 'Erreur technique');
-        }
-    } finally {
-        const submitBtn = mode === 'normal' 
+        // Enable/disable submit button
+        const submitBtn = mode === APP_CONFIG.MODES.NORMAL 
             ? document.getElementById('submitNormal')
             : document.getElementById('submitTest');
         
         if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = mode === 'normal' ? 'Envoyer les données' : 'Envoyer les données Test';
+            submitBtn.disabled = count === 0;
         }
+    }
+
+    resetMode(mode) {
+        const sections = APP_CONFIG.SECTIONS[mode];
+        if (!sections) return;
+        
+        sections.forEach(sectionId => {
+            const recorder = this.recorders.get(sectionId);
+            if (recorder && recorder.hasRecording()) {
+                recorder.resetRecording();
+            }
+        });
     }
 }
 
-async function preparePayload(mode) {
-    const payload = {
-        mode: mode,
-        recordedAt: new Date().toISOString(),
-        sections: {}
-    };
+// ===== DATA SENDER =====
+class DataSender {
+    constructor(appState, audioRecorderManager) {
+        this.appState = appState;
+        this.audioRecorderManager = audioRecorderManager;
+    }
 
-    try {
-        // Ajouter l'email de l'utilisateur Firebase s'il est connecté
-        const currentUser = FirebaseAuthManager.getCurrentUser();
-        if (currentUser && currentUser.email) {
-            payload.userEmail = currentUser.email;
-            console.log('Email utilisateur Firebase ajouté au payload:', currentUser.email);
-        }
-
-        if (mode === 'normal') {
-            // Mode Normal - Validation simplifiée (no authentication required)
-            const numeroDossier = document.getElementById('numeroDossier')?.value.trim();
-            const nomPatient = document.getElementById('nomPatient')?.value.trim();
-
-            // Validation des champs obligatoires
-            const missingFields = [];
-            if (!numeroDossier) missingFields.push('numéro de dossier');
-            if (!nomPatient) missingFields.push('nom du patient');
-
-            if (missingFields.length > 0) {
-                console.warn('Champs manquants:', missingFields);
-                return null;
-            }
-
-            payload.NumeroDeDossier = numeroDossier;
-            payload.NomDuPatient = nomPatient;
-
-            // Collecter les enregistrements avec gestion d'erreur
-            const sections = ['partie1', 'partie2', 'partie3', 'partie4'];
-            let index = 0;
-            let hasValidRecording = false;
+    async send(mode) {
+        try {
+            const submitBtn = mode === APP_CONFIG.MODES.NORMAL 
+                ? document.getElementById('submitNormal')
+                : document.getElementById('submitTest');
             
-            for (const sectionId of sections) {
-                const recorder = audioRecorders.get(sectionId);
-                if (recorder && recorder.hasRecording()) {
-                    try {
-                        // Validation de l'enregistrement
-                        const validation = recorder.validateRecording();
-                        if (!validation.valid) {
-                            console.warn(`Section ${sectionId} invalide:`, validation.error);
-                            continue;
-                        }
-                        
-                        index++;
-                        const base64 = await recorder.getBase64Audio();
-                        const format = recorder.getAudioFormat();
-                        const mimeType = recorder.getMimeType();
-                        
-                        // Vérifications de sécurité supplémentaires
-                        if (!base64 || base64.length === 0) {
-                            console.warn(`Enregistrement vide pour la section: ${sectionId}`);
-                            continue;
-                        }
-                        
-                        payload.sections[sectionId] = {
-                            audioBase64: base64,
-                            fileName: `msgVocal${index}.${format}`,
-                            mimeType: mimeType,
-                            format: format,
-                            sectionName: sectionId,
-                            fileSize: recorder.audioBlob.size
-                        };
-                        
-                        hasValidRecording = true;
-                        console.log(`✅ Section ${sectionId} préparée (${format}, ${(base64.length/1024).toFixed(1)}KB, ${(recorder.audioBlob.size/1024).toFixed(1)}KB)`);
-                    } catch (sectionError) {
-                        console.error(`Erreur lors de la préparation de la section ${sectionId}:`, sectionError);
-                        // Continuer avec les autres sections
-                    }
-                }
+            if (!submitBtn) {
+                console.error('Bouton d\'envoi non trouvé pour le mode:', mode);
+                return;
             }
-
-            if (!hasValidRecording) {
-                console.warn('Aucune section enregistrée trouvée');
-                return null;
-            }
-
-        } else {
-            // Mode Test - Validation simplifiée
-            const numeroDossier = document.getElementById('numeroDossierTest')?.value.trim();
-            const nomPatient = document.getElementById('nomPatientTest')?.value.trim();
-
-            const missingFields = [];
-            if (!numeroDossier) missingFields.push('numéro de dossier');
-            if (!nomPatient) missingFields.push('nom du patient');
-
-            if (missingFields.length > 0) {
-                console.warn('Champs manquants en mode test:', missingFields);
-                return null;
-            }
-
-            payload.NumeroDeDossier = numeroDossier;
-            payload.NomDuPatient = nomPatient;
-
-            // Collecter les enregistrements avec gestion d'erreur
-            const sections = ['clinique', 'antecedents', 'biologie'];
-            let index = 0;
-            let hasValidRecording = false;
             
-            for (const sectionId of sections) {
-                const recorder = audioRecorders.get(sectionId);
-                if (recorder && recorder.hasRecording()) {
-                    try {
-                        // Validation de l'enregistrement
-                        const validation = recorder.validateRecording();
-                        if (!validation.valid) {
-                            console.warn(`Section ${sectionId} invalide:`, validation.error);
-                            continue;
-                        }
-                        
-                        index++;
-                        const base64 = await recorder.getBase64Audio();
-                        const format = recorder.getAudioFormat();
-                        const mimeType = recorder.getMimeType();
-                        
-                        // Vérifications de sécurité supplémentaires
-                        if (!base64 || base64.length === 0) {
-                            console.warn(`Enregistrement vide pour la section: ${sectionId}`);
-                            continue;
-                        }
-                        
-                        payload.sections[sectionId] = {
-                            audioBase64: base64,
-                            fileName: `msgVocal${index}.${format}`,
-                            mimeType: mimeType,
-                            format: format,
-                            sectionName: sectionId,
-                            fileSize: recorder.audioBlob.size
-                        };
-                        
-                        hasValidRecording = true;
-                        console.log(`✅ Section ${sectionId} préparée (${format}, ${(base64.length/1024).toFixed(1)}KB, ${(recorder.audioBlob.size/1024).toFixed(1)}KB)`);
-                    } catch (sectionError) {
-                        console.error(`Erreur lors de la préparation de la section ${sectionId}:`, sectionError);
-                        // Continuer avec les autres sections
-                    }
-                }
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Envoi en cours...';
+
+            // Show summary before sending
+            const summary = this.showSendSummary(mode);
+            console.log('📋', summary);
+            notificationSystem.info('Vérification des données avant envoi...', 'Préparation', 2000);
+
+            // Prepare payload with improved error handling
+            const payload = await this.preparePayload(mode);
+            
+            if (!payload) {
+                const errorMsg = 'Veuillez remplir le numéro de dossier et le nom du patient, et enregistrer au moins une section.';
+                notificationSystem.warning(errorMsg, 'Champs manquants');
+                submitBtn.disabled = false;
+                submitBtn.textContent = mode === APP_CONFIG.MODES.NORMAL ? 'Envoyer les données' : 'Envoyer les données Test';
+                return;
             }
 
-            if (!hasValidRecording) {
-                console.warn('Aucune section enregistrée trouvée en mode test');
-                return null;
+            // Check if there are recorded sections
+            const hasRecordings = Object.keys(payload.sections || {}).length > 0;
+            if (!hasRecordings) {
+                notificationSystem.warning('Veuillez enregistrer au moins une section avant d\'envoyer.', 'Aucun enregistrement');
+                submitBtn.disabled = false;
+                submitBtn.textContent = mode === APP_CONFIG.MODES.NORMAL ? 'Envoyer les données' : 'Envoyer les données Test';
+                return;
+            }
+
+            // Determine endpoint
+            const endpoint = APP_CONFIG.ENDPOINTS[mode];
+            if (!endpoint) {
+                throw new Error(`Endpoint non configuré pour le mode: ${mode}`);
+            }
+
+            console.log('🔄 Envoi des données vers:', endpoint);
+
+            // Send data with timeout and retry
+            const response = await Promise.race([
+                fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                }),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Timeout après 30 secondes')), APP_CONFIG.TIMEOUT_DURATION)
+                )
+            ]);
+
+            if (response.ok) {
+                await this.handleSuccessResponse(mode);
+            } else {
+                await this.handleErrorResponse(response);
+            }
+
+        } catch (error) {
+            this.handleNetworkError(error);
+        } finally {
+            const submitBtn = mode === APP_CONFIG.MODES.NORMAL 
+                ? document.getElementById('submitNormal')
+                : document.getElementById('submitTest');
+            
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = mode === APP_CONFIG.MODES.NORMAL ? 'Envoyer les données' : 'Envoyer les données Test';
             }
         }
+    }
 
-        // Validation finale du payload
-        if (Object.keys(payload.sections).length === 0) {
-            console.warn('Payload créé mais sans sections valides');
+    async preparePayload(mode) {
+        const payload = {
+            mode: mode,
+            recordedAt: new Date().toISOString(),
+            sections: {}
+        };
+
+        try {
+            // Add Firebase user email if connected
+            const currentUser = FirebaseAuthManager.getCurrentUser();
+            if (currentUser && currentUser.email) {
+                payload.userEmail = currentUser.email;
+            }
+
+            if (mode === APP_CONFIG.MODES.NORMAL) {
+                return await this.prepareNormalModePayload(payload);
+            } else if (mode === APP_CONFIG.MODES.TEST) {
+                return await this.prepareTestModePayload(payload);
+            }
+
+            return null;
+        } catch (error) {
+            console.error('Erreur lors de la préparation du payload:', error);
+            return null;
+        }
+    }
+
+    async prepareNormalModePayload(payload) {
+        const numeroDossier = document.getElementById('numeroDossier')?.value.trim();
+        const nomPatient = document.getElementById('nomPatient')?.value.trim();
+
+        // Validate required fields
+        if (!numeroDossier || !nomPatient) {
             return null;
         }
 
-        console.log(`🎯 Payload préparé pour le mode ${mode}:`, {
-            patient: `${payload.NumeroDeDossier} - ${payload.NomDuPatient}`,
-            sections: Object.keys(payload.sections).length,
-            timestamp: payload.recordedAt
-        });
+        payload.NumeroDeDossier = numeroDossier;
+        payload.NomDuPatient = nomPatient;
+
+        return await this.prepareSectionsPayload(payload, APP_CONFIG.SECTIONS.normal);
+    }
+
+    async prepareTestModePayload(payload) {
+        const numeroDossier = document.getElementById('numeroDossierTest')?.value.trim();
+        const nomPatient = document.getElementById('nomPatientTest')?.value.trim();
+
+        // Validate required fields
+        if (!numeroDossier || !nomPatient) {
+            return null;
+        }
+
+        payload.NumeroDeDossier = numeroDossier;
+        payload.NomDuPatient = nomPatient;
+
+        return await this.prepareSectionsPayload(payload, APP_CONFIG.SECTIONS.test);
+    }
+
+    async prepareSectionsPayload(payload, sections) {
+        let index = 0;
+        let hasValidRecording = false;
+        
+        for (const sectionId of sections) {
+            const recorder = this.audioRecorderManager.getRecorder(sectionId);
+            if (recorder && recorder.hasRecording()) {
+                try {
+                    // Validate recording
+                    const validation = recorder.validateRecording();
+                    if (!validation.valid) {
+                        console.warn(`Section ${sectionId} invalide:`, validation.error);
+                        continue;
+                    }
+                    
+                    index++;
+                    const base64 = await recorder.getBase64Audio();
+                    const format = recorder.getAudioFormat();
+                    const mimeType = recorder.getMimeType();
+                    
+                    // Additional security checks
+                    if (!base64 || base64.length === 0) {
+                        console.warn(`Enregistrement vide pour la section: ${sectionId}`);
+                        continue;
+                    }
+                    
+                    payload.sections[sectionId] = {
+                        audioBase64: base64,
+                        fileName: `msgVocal${index}.${format}`,
+                        mimeType: mimeType,
+                        format: format,
+                        sectionName: sectionId,
+                        fileSize: recorder.audioBlob.size
+                    };
+                    
+                    hasValidRecording = true;
+                    console.log(`✅ Section ${sectionId} préparée (${format}, ${Utils.formatFileSize(recorder.audioBlob.size)})`);
+                } catch (sectionError) {
+                    console.error(`Erreur lors de la préparation de la section ${sectionId}:`, sectionError);
+                }
+            }
+        }
+
+        if (!hasValidRecording) {
+            return null;
+        }
 
         return payload;
-        
-    } catch (error) {
-        console.error('Erreur lors de la préparation du payload:', error);
-        return null;
     }
-}
 
-function resetForm(mode) {
-    if (mode === 'normal') {
-        document.getElementById('numeroDossier').value = '';
-        document.getElementById('nomPatient').value = '';
+    showSendSummary(mode) {
+        const isTest = mode === APP_CONFIG.MODES.TEST;
+        const numeroDossier = document.getElementById(isTest ? 'numeroDossierTest' : 'numeroDossier').value;
+        const nomPatient = document.getElementById(isTest ? 'nomPatientTest' : 'nomPatient').value;
+        const sections = isTest ? APP_CONFIG.SECTIONS.test : APP_CONFIG.SECTIONS.normal;
         
-        // Réinitialiser les compteurs de caractères
-        const counters = [
-            { input: 'numeroDossier', counter: 'numeroDossierCounter' },
-            { input: 'nomPatient', counter: 'nomPatientCounter' }
-        ];
-        counters.forEach(({ counter }) => {
-            const counterEl = document.getElementById(counter);
-            if (counterEl) counterEl.textContent = '0/50';
-        });
+        let summary = `📋 Récapitulatif avant envoi (${mode.toUpperCase()}):\n\n`;
+        summary += `👤 Patient: ${numeroDossier} - ${nomPatient}\n`;
+        summary += `📊 Sections enregistrées:\n`;
         
-        const sections = ['partie1', 'partie2', 'partie3', 'partie4'];
+        let sectionCount = 0;
         sections.forEach(sectionId => {
-            const recorder = audioRecorders.get(sectionId);
+            const recorder = this.audioRecorderManager.getRecorder(sectionId);
             if (recorder && recorder.hasRecording()) {
-                recorder.resetRecording();
+                const validation = recorder.validateRecording();
+                sectionCount++;
+                const size = recorder.audioBlob ? Utils.formatFileSize(recorder.audioBlob.size) : '0';
+                summary += `   ✅ ${sectionId}: ${size} ${validation.valid ? '' : `(⚠️ ${validation.error})`}\n`;
             }
         });
-    } else {
-        document.getElementById('numeroDossierTest').value = '';
-        document.getElementById('nomPatientTest').value = '';
         
-        // Réinitialiser les compteurs de caractères
-        const counters = [
-            { input: 'numeroDossierTest', counter: 'numeroDossierTestCounter' },
-            { input: 'nomPatientTest', counter: 'nomPatientTestCounter' }
-        ];
-        counters.forEach(({ counter }) => {
-            const counterEl = document.getElementById(counter);
-            if (counterEl) counterEl.textContent = '0/50';
-        });
+        if (sectionCount === 0) {
+            summary += '   ❌ Aucune section enregistrée\n';
+        }
         
-        const sections = ['clinique', 'antecedents', 'biologie'];
-        sections.forEach(sectionId => {
-            const recorder = audioRecorders.get(sectionId);
-            if (recorder && recorder.hasRecording()) {
-                recorder.resetRecording();
+        summary += `\n🎯 ${sectionCount} section(s) prête(s) pour l'envoi`;
+        
+        return summary;
+    }
+
+    async handleSuccessResponse(mode) {
+        notificationSystem.success('Votre dossier a été envoyé et traité avec succès !', 'Envoi réussi');
+        
+        if (mode === APP_CONFIG.MODES.TEST) {
+            // Test mode: Show Google Sheet and notification
+            const googleSheetCard = document.getElementById('googleSheetCard');
+            if (googleSheetCard) {
+                googleSheetCard.style.display = 'block';
+                googleSheetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
+            
+            // Notification to consult Google Sheet
+            setTimeout(() => {
+                notificationSystem.info('Consultez le Google Sheet pour voir vos données transcrites en temps réel.', 'Résultats disponibles', 8000);
+            }, 1000);
+            
+        } else {
+            // Normal mode: Auto reset
+            resetForm(mode);
+            autoSaveSystem.clear();
+            notificationSystem.success('Formulaire réinitialisé pour un nouveau patient.', 'Prêt', 3000);
+        }
+    }
+
+    async handleErrorResponse(response) {
+        let errorMessage = `Le serveur a renvoyé une erreur (${response.status})`;
+        
+        try {
+            const errorText = await response.text();
+            console.error('Détails de l\'erreur:', errorText);
+            
+            if (response.status === 413) {
+                errorMessage = 'Les fichiers audio sont trop volumineux. Veuillez enregistrer des sections plus courtes.';
+            } else if (response.status === 400) {
+                errorMessage = 'Les données envoyées ne sont pas valides. Vérifiez vos enregistrements.';
+            } else if (response.status >= 500) {
+                errorMessage = 'Erreur serveur. Veuillez réessayer dans quelques instants.';
+            }
+        } catch (e) {
+            console.error('Erreur lors de la lecture de la réponse:', e);
+        }
+        
+        notificationSystem.error(errorMessage, 'Erreur d\'envoi');
+    }
+
+    handleNetworkError(error) {
+        console.error('Erreur lors de l\'envoi:', error);
+        
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            notificationSystem.error('Impossible de contacter le serveur. Vérifiez votre connexion Internet et réessayez.', 'Erreur réseau');
+        } else if (error.message.includes('Timeout')) {
+            notificationSystem.error('La connexion a pris trop de temps. Vérifiez votre connexion et réessayez.', 'Timeout');
+        } else {
+            notificationSystem.error(`Une erreur inattendue s'est produite: ${error.message}`, 'Erreur technique');
+        }
+    }
+}
+
+// ===== TAB NAVIGATION SYSTEM =====
+class TabNavigationSystem {
+    constructor(appState) {
+        this.appState = appState;
+        this.activeTab = 'home';
+    }
+
+    init() {
+        this.initTabButtons();
+        this.initFixedNavButtons();
+    }
+
+    initTabButtons() {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.getAttribute('data-tab');
+                this.switchTab(targetTab);
+            });
         });
     }
-    
-    updateSectionCount();
-}
 
-// ===== MODE SAISIE TEXTE =====
-
-// Validation du mode DMI
-function validateDMIMode() {
-    const numeroDossier = document.getElementById('numeroDossierDMI').value.trim();
-    const submitBtn = document.getElementById('submitDMI');
-    
-    if (submitBtn) {
-        submitBtn.disabled = !numeroDossier;
+    initFixedNavButtons() {
+        const fixedNavBtns = document.querySelectorAll('.fixed-nav-btn');
+        fixedNavBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.getAttribute('data-tab');
+                this.switchTab(targetTab);
+            });
+        });
     }
-}
 
-// Gestion de l'upload de photos
-function initPhotosUpload() {
-    const photosInput = document.getElementById('photosUpload');
-    const photosPreview = document.getElementById('photosPreview');
-    
-    if (!photosInput || !photosPreview) return;
-    
-    photosInput.addEventListener('change', (e) => {
-        const files = Array.from(e.target.files);
-        
-        // Limiter à 5 photos
-        if (uploadedPhotos.length + files.length > 5) {
-            Toast.warning(`Vous avez atteint la limite de 5 photos. Supprimez des photos existantes pour en ajouter de nouvelles.`, 'Limite atteinte');
+    switchTab(tabId) {
+        // Check access before switching
+        if (!this.checkTabAccess(tabId)) {
             return;
         }
         
-        // Vérifier la taille et le format de chaque fichier
+        // Deactivate all tabs and content
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+        // Activate selected tab and content
+        document.querySelector(`[data-tab="${tabId}"]`)?.classList.add('active');
+        document.getElementById(tabId)?.classList.add('active');
+
+        // Sync fixed navigation buttons
+        this.updateFixedNavButtons(tabId);
+
+        // Update current mode
+        this.updateAppMode(tabId);
+        
+        this.activeTab = tabId;
+    }
+
+    checkTabAccess(tabId) {
+        // Test mode always accessible
+        if (tabId === APP_CONFIG.MODES.TEST || tabId === 'guide' || tabId === 'faq' || tabId === APP_CONFIG.MODES.HOME) {
+            return true;
+        }
+        
+        // DMI mode requires authentication, Normal mode no longer requires it
+        if (tabId === APP_CONFIG.MODES.DMI && !FirebaseAuthManager.isAuthenticated()) {
+            notificationSystem.warning('Veuillez vous connecter pour accéder à ce mode', 'Authentification requise');
+            return false;
+        }
+        
+        return true;
+    }
+
+    updateFixedNavButtons(activeTabId) {
+        const fixedNavBtns = document.querySelectorAll('.fixed-nav-btn');
+        fixedNavBtns.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-tab') === activeTabId) {
+                btn.classList.add('active');
+            }
+        });
+    }
+
+    updateAppMode(tabId) {
+        let mode = APP_CONFIG.MODES.HOME;
+        
+        if (tabId === APP_CONFIG.MODES.NORMAL) {
+            mode = APP_CONFIG.MODES.NORMAL;
+        } else if (tabId === APP_CONFIG.MODES.TEST) {
+            mode = APP_CONFIG.MODES.TEST;
+        } else if (tabId === APP_CONFIG.MODES.DMI) {
+            mode = APP_CONFIG.MODES.DMI;
+        }
+        
+        this.appState.setMode(mode);
+    }
+
+    getActiveTab() {
+        return this.activeTab;
+    }
+}
+
+// ===== FORM VALIDATION SYSTEM =====
+class FormValidationSystem {
+    constructor() {
+        this.validators = new Map();
+        this.init();
+    }
+
+    init() {
+        this.initCharCounters();
+        this.initOptionalSection();
+        this.initDMIValidation();
+    }
+
+    initCharCounters() {
+        const inputs = [
+            { id: 'numeroDossier', counterId: 'numeroDossierCounter', maxLength: 50 },
+            { id: 'nomPatient', counterId: 'nomPatientCounter', maxLength: 50 },
+            { id: 'numeroDossierTest', counterId: 'numeroDossierTestCounter', maxLength: 50 },
+            { id: 'nomPatientTest', counterId: 'nomPatientTestCounter', maxLength: 50 },
+            { id: 'numeroDossierDMI', counterId: 'numeroDossierDMICounter', maxLength: 50 },
+            { id: 'nomPatientDMI', counterId: 'nomPatientDMICounter', maxLength: 50 }
+        ];
+
+        inputs.forEach(({ id, counterId, maxLength }) => {
+            const input = document.getElementById(id);
+            const counter = document.getElementById(counterId);
+            
+            if (input && counter) {
+                input.addEventListener('input', () => {
+                    this.updateCharCounter(input, counter, maxLength);
+                });
+            }
+        });
+
+        // Textarea counter
+        const texteLibre = document.getElementById('texteLibre');
+        const texteLibreCounter = document.getElementById('texteLibreCounter');
+        if (texteLibre && texteLibreCounter) {
+            texteLibre.addEventListener('input', () => {
+                texteLibreCounter.textContent = texteLibre.value.length;
+            });
+        }
+    }
+
+    updateCharCounter(input, counter, maxLength) {
+        const length = input.value.length;
+        counter.textContent = `${length}/${maxLength}`;
+
+        // Change color based on usage level
+        counter.classList.remove('warning', 'danger');
+        if (length >= maxLength) {
+            counter.classList.add('danger');
+        } else if (length >= maxLength * 0.8) {
+            counter.classList.add('warning');
+        }
+
+        // DMI mode validation
+        if (input.id === 'numeroDossierDMI') {
+            this.validateDMIMode();
+        }
+    }
+
+    initOptionalSection() {
+        const toggleBtn = document.getElementById('togglePartie4');
+        const partie4 = document.querySelector('[data-section="partie4"]');
+        
+        if (toggleBtn && partie4) {
+            toggleBtn.addEventListener('click', () => {
+                const isHidden = partie4.classList.contains('hidden');
+                partie4.classList.toggle('hidden');
+                toggleBtn.textContent = isHidden 
+                    ? 'Masquer Partie 4' 
+                    : 'Afficher Partie 4 (optionnelle)';
+            });
+        }
+    }
+
+    validateDMIMode() {
+        const numeroDossier = document.getElementById('numeroDossierDMI').value.trim();
+        const submitBtn = document.getElementById('submitDMI');
+        
+        if (submitBtn) {
+            submitBtn.disabled = !numeroDossier;
+        }
+    }
+
+    initDMIValidation() {
+        this.validateDMIMode();
+    }
+}
+
+// ===== PHOTO MANAGEMENT SYSTEM =====
+class PhotoManagementSystem {
+    constructor() {
+        this.uploadedPhotos = [];
+        this.init();
+    }
+
+    init() {
+        this.initPhotosUpload();
+    }
+
+    initPhotosUpload() {
+        const photosInput = document.getElementById('photosUpload');
+        const photosPreview = document.getElementById('photosPreview');
+        
+        if (!photosInput || !photosPreview) return;
+        
+        photosInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            this.handleFileSelection(files);
+        });
+    }
+
+    handleFileSelection(files) {
+        // Limit to 5 photos
+        if (this.uploadedPhotos.length + files.length > APP_CONFIG.MAX_PHOTOS) {
+            notificationSystem.warning(`Vous avez atteint la limite de ${APP_CONFIG.MAX_PHOTOS} photos. Supprimez des photos existantes pour en ajouter de nouvelles.`, 'Limite atteinte');
+            return;
+        }
+        
+        // Validate each file
         files.forEach(file => {
-            // Vérifier le format
-            if (!file.type.startsWith('image/')) {
-                Toast.error(`Le fichier "${file.name}" n'est pas une image valide.`, 'Format non supporté');
+            if (!this.validateFile(file)) {
                 return;
             }
             
-            // Vérifier la taille (max 10MB)
-            if (file.size > 10 * 1024 * 1024) {
-                const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-                Toast.error(`Le fichier "${file.name}" est trop volumineux (${sizeMB} MB). Limite : 10 MB.`, 'Fichier trop lourd');
-                return;
-            }
-            
-            // Ajouter la photo
-            uploadedPhotos.push(file);
+            this.addPhoto(file);
         });
         
-        // Réinitialiser l'input
-        photosInput.value = '';
-        
-        // Mettre à jour la prévisualisation
-        updatePhotosPreview();
-    });
-}
+        this.updatePreview();
+    }
 
-// Mettre à jour la prévisualisation des photos
-function updatePhotosPreview() {
-    const photosPreview = document.getElementById('photosPreview');
-    if (!photosPreview) return;
-    
-    photosPreview.innerHTML = '';
-    
-    uploadedPhotos.forEach((file, index) => {
-        const reader = new FileReader();
+    validateFile(file) {
+        // Check format
+        if (!file.type.startsWith('image/')) {
+            notificationSystem.error(`Le fichier "${file.name}" n'est pas une image valide.`, 'Format non supporté');
+            return false;
+        }
         
-        reader.onload = (e) => {
-            const photoItem = document.createElement('div');
-            photoItem.className = 'photo-item';
+        // Check size
+        if (file.size > APP_CONFIG.MAX_PHOTO_SIZE) {
+            const sizeMB = Utils.formatFileSize(file.size);
+            notificationSystem.error(`Le fichier "${file.name}" est trop volumineux (${sizeMB}). Limite : ${Utils.formatFileSize(APP_CONFIG.MAX_PHOTO_SIZE)}.`, 'Fichier trop lourd');
+            return false;
+        }
+        
+        return true;
+    }
+
+    addPhoto(file) {
+        this.uploadedPhotos.push(file);
+    }
+
+    removePhoto(index) {
+        this.uploadedPhotos.splice(index, 1);
+        this.updatePreview();
+    }
+
+    updatePreview() {
+        const photosPreview = document.getElementById('photosPreview');
+        if (!photosPreview) return;
+        
+        photosPreview.innerHTML = '';
+        
+        this.uploadedPhotos.forEach((file, index) => {
+            const reader = new FileReader();
             
-            photoItem.innerHTML = `
-                <img src="${e.target.result}" alt="Photo ${index + 1}">
-                <button class="photo-item-remove" data-index="${index}" title="Supprimer">×</button>
-                <div class="photo-item-info">${file.name}</div>
-            `;
+            reader.onload = (e) => {
+                const photoItem = this.createPhotoItem(e.target.result, file, index);
+                photosPreview.appendChild(photoItem);
+            };
             
-            photosPreview.appendChild(photoItem);
-            
-            // Ajouter l'événement de suppression
-            const removeBtn = photoItem.querySelector('.photo-item-remove');
-            removeBtn.addEventListener('click', () => {
-                uploadedPhotos.splice(index, 1);
-                updatePhotosPreview();
+            reader.readAsDataURL(file);
+        });
+    }
+
+    createPhotoItem(src, file, index) {
+        const photoItem = document.createElement('div');
+        photoItem.className = 'photo-item';
+        
+        photoItem.innerHTML = `
+            <img src="${src}" alt="Photo ${index + 1}">
+            <button class="photo-item-remove" data-index="${index}" title="Supprimer">×</button>
+            <div class="photo-item-info">${file.name}</div>
+        `;
+        
+        // Add remove event
+        const removeBtn = photoItem.querySelector('.photo-item-remove');
+        removeBtn.addEventListener('click', () => {
+            this.removePhoto(index);
+        });
+        
+        return photoItem;
+    }
+
+    getPhotos() {
+        return this.uploadedPhotos;
+    }
+
+    clear() {
+        this.uploadedPhotos = [];
+        this.updatePreview();
+    }
+
+    async getPhotosAsBase64() {
+        const photos = [];
+        for (const file of this.uploadedPhotos) {
+            const base64 = await Utils.fileToBase64(file);
+            photos.push({
+                fileName: file.name,
+                mimeType: file.type,
+                size: file.size,
+                base64: base64
             });
-        };
-        
-        reader.readAsDataURL(file);
-    });
+        }
+        return photos;
+    }
 }
 
-// Envoi des données du mode DMI
-async function sendDmiData() {
-    try {
-        const submitBtn = document.getElementById('submitDMI');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Envoi en cours...';
+// ===== DMI DATA SENDER =====
+class DMIDataSender {
+    constructor(photoManagementSystem) {
+        this.photoManagementSystem = photoManagementSystem;
+    }
 
-        // Préparer le payload
+    async send() {
+        try {
+            const submitBtn = document.getElementById('submitDMI');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Envoi en cours...';
+
+            // Prepare payload
+            const payload = await this.preparePayload();
+            if (!payload) {
+                notificationSystem.warning('Le numéro de dossier est obligatoire pour envoyer les données.', 'Champ requis');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Envoyer les données DMI';
+                return;
+            }
+
+            // Send to webhook
+            const response = await fetch(APP_CONFIG.ENDPOINTS.dmi, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                notificationSystem.success('Vos données DMI ont été envoyées avec succès !', 'Envoi réussi');
+                
+                if (confirm('Voulez-vous réinitialiser le formulaire DMI ?')) {
+                    this.resetForm();
+                }
+            } else {
+                const errorText = await response.text();
+                notificationSystem.error(`Le serveur a renvoyé une erreur (${response.status}). Veuillez réessayer ou contactez le support.`, 'Erreur d\'envoi');
+                console.error('Détails:', errorText);
+            }
+
+        } catch (error) {
+            console.error('Erreur lors de l\'envoi:', error);
+            notificationSystem.error('Impossible de contacter le serveur. Vérifiez votre connexion Internet.', 'Erreur réseau');
+        } finally {
+            const submitBtn = document.getElementById('submitDMI');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Envoyer les données DMI';
+        }
+    }
+
+    async preparePayload() {
         const numeroDossier = document.getElementById('numeroDossierDMI').value.trim();
         const nomPatient = document.getElementById('nomPatientDMI').value.trim();
         const texteLibre = document.getElementById('texteLibre').value.trim();
 
         if (!numeroDossier) {
-            Toast.warning('Le numéro de dossier est obligatoire pour envoyer les données.', 'Champ requis');
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Envoyer les données DMI';
-            return;
+            return null;
         }
 
         const payload = {
-            mode: 'dmi',
+            mode: APP_CONFIG.MODES.DMI,
             recordedAt: new Date().toISOString(),
             NumeroDeDossier: numeroDossier,
             NomDuPatient: nomPatient,
@@ -1202,315 +1519,133 @@ async function sendDmiData() {
             photos: []
         };
 
-        // Ajouter l'email de l'utilisateur Firebase s'il est connecté
+        // Add Firebase user email if connected
         const currentUser = FirebaseAuthManager.getCurrentUser();
         if (currentUser && currentUser.email) {
             payload.userEmail = currentUser.email;
-            console.log('Email utilisateur Firebase ajouté au payload DMI:', currentUser.email);
         }
 
-        // Convertir les photos en Base64
-        for (const file of uploadedPhotos) {
-            const base64 = await fileToBase64(file);
-            payload.photos.push({
-                fileName: file.name,
-                mimeType: file.type,
-                size: file.size,
-                base64: base64
-            });
+        // Convert photos to Base64
+        payload.photos = await this.photoManagementSystem.getPhotosAsBase64();
+
+        return payload;
+    }
+
+    resetForm() {
+        document.getElementById('numeroDossierDMI').value = '';
+        document.getElementById('nomPatientDMI').value = '';
+        document.getElementById('texteLibre').value = '';
+        document.getElementById('texteLibreCounter').textContent = '0';
+        this.photoManagementSystem.clear();
+        document.getElementById('submitDMI').disabled = true;
+    }
+}
+
+// ===== AUTHENTICATION MODAL SYSTEM =====
+class AuthModalSystem {
+    constructor() {
+        this.isOpen = false;
+    }
+
+    init() {
+        this.initEventListeners();
+    }
+
+    initEventListeners() {
+        // Modal toggle
+        const authButton = document.getElementById('authButton');
+        if (authButton) {
+            authButton.addEventListener('click', () => this.toggle());
         }
 
-        // Envoyer au webhook du mode test (same as mode test)
-        const endpoint = 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed';
-
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-            Toast.success('Vos données DMI ont été envoyées avec succès !', 'Envoi réussi');
-            
-            // Réinitialiser le formulaire si souhaité
-            if (confirm('Voulez-vous réinitialiser le formulaire DMI ?')) {
-                resetDmiForm();
-            }
-        } else {
-            const errorText = await response.text();
-            Toast.error(`Le serveur a renvoyé une erreur (${response.status}). Veuillez réessayer ou contactez le support.`, 'Erreur d\'envoi');
-            console.error('Détails:', errorText);
-        }
-
-    } catch (error) {
-        console.error('Erreur lors de l\'envoi:', error);
-        Toast.error('Impossible de contacter le serveur. Vérifiez votre connexion Internet.', 'Erreur réseau');
-    } finally {
-        const submitBtn = document.getElementById('submitDMI');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Envoyer les données DMI';
-    }
-}
-
-// Convertir un fichier en Base64
-function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const base64 = reader.result.split(',')[1];
-            resolve(base64);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
-// Réinitialiser le formulaire mode DMI
-function resetDmiForm() {
-    document.getElementById('numeroDossierDMI').value = '';
-    document.getElementById('nomPatientDMI').value = '';
-    document.getElementById('texteLibre').value = '';
-    document.getElementById('texteLibreCounter').textContent = '0';
-    uploadedPhotos = [];
-    updatePhotosPreview();
-    validateDMIMode();
-}
-
-// ===== INITIALISATION =====
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Initialisation de DictaMed...');
-    
-    // Initialiser le mode selon l'onglet actif
-    initializeMode();
-    
-    // Initialiser les systèmes de base
-    Toast.init();
-    AutoSave.init();
-    
-    // Initialiser les composants
-    initTabs();
-    initCharCounters();
-    initOptionalSection();
-    initAudioRecorders();
-    initPhotosUpload();
-    updateSectionCount();
-    validateDMIMode();
-
-    // Événements pour les boutons d'envoi
-    const submitNormalBtn = document.getElementById('submitNormal');
-    const submitTestBtn = document.getElementById('submitTest');
-    const submitDmiBtn = document.getElementById('submitDMI');
-
-    if (submitNormalBtn) {
-        submitNormalBtn.addEventListener('click', () => {
-            Loading.show('Envoi en cours...');
-            sendData('normal').finally(() => Loading.hide());
-        });
-    }
-
-    if (submitTestBtn) {
-        submitTestBtn.addEventListener('click', () => {
-            Loading.show('Envoi en cours...');
-            sendData('test').finally(() => Loading.hide());
-        });
-    }
-
-    if (submitDmiBtn) {
-        submitDmiBtn.addEventListener('click', () => {
-            Loading.show('Envoi en cours...');
-            sendDmiData().finally(() => Loading.hide());
-        });
-    }
-
-    // Message de bienvenue supprimé à la demande de l'utilisateur
-
-    console.log('✅ DictaMed initialisé avec succès!');
-});
-
-
-// ===== AUTHENTICATION MANAGER REMOVED =====
-/* Authentication fields and AuthManager removed as requested */
-
-
-
-
-// ===== MASQUER LE MESSAGE DE SWIPE APRÈS INTERACTION =====
-const tabsContainer = document.querySelector('.tabs-container');
-const swipeHint = document.querySelector('.swipe-hint');
-
-if (tabsContainer && swipeHint) {
-    let hasScrolled = false;
-    
-    tabsContainer.addEventListener('scroll', () => {
-        if (!hasScrolled) {
-            hasScrolled = true;
-            swipeHint.style.animation = 'fadeOut 0.5s ease forwards';
-            setTimeout(() => {
-                swipeHint.style.display = 'none';
-            }, 500);
-        }
-    });
-    
-    // Masquer également après 10 secondes si pas de scroll
-    setTimeout(() => {
-        if (!hasScrolled && swipeHint) {
-            swipeHint.style.animation = 'fadeOut 0.5s ease forwards';
-            setTimeout(() => {
-                swipeHint.style.display = 'none';
-            }, 500);
-        }
-    }, 10000);
-
-// ===== GESTION DU MODAL D'AUTHENTIFICATION =====
-
-// Fonctions globales pour le modal
-function toggleAuthModal() {
-    const authModal = document.getElementById('authModal');
-    if (!authModal) return;
-    
-    if (authModal.classList.contains('hidden')) {
-        openAuthModal();
-    } else {
-        closeAuthModal();
-    }
-}
-
-function openAuthModal() {
-    const authModal = document.getElementById('authModal');
-    if (authModal) {
-        authModal.classList.remove('hidden');
-        // Focus sur le premier input
-        const firstInput = authModal.querySelector('input[type="email"]');
-        if (firstInput) {
-            setTimeout(() => firstInput.focus(), 100);
-        }
-    }
-}
-
-function closeAuthModal() {
-    const authModal = document.getElementById('authModal');
-    if (authModal) {
-        authModal.classList.add('hidden');
-    }
-}
-
-// Toggle password visibility
-function togglePasswordVisibility() {
-    const passwordInput = document.getElementById('modalPasswordInput');
-    const eyeIcon = document.querySelector('.password-toggle .eye-icon');
-    
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        eyeIcon.textContent = '🙈';
-    } else {
-        passwordInput.type = 'password';
-        eyeIcon.textContent = '👁️';
-    }
-}
-
-// Show forgot password message
-function showForgotPassword() {
-    // This would typically send a password reset email
-    const email = document.getElementById('modalEmailInput').value.trim();
-    
-    if (!email) {
-        alert('Veuillez d\'abord entrer votre adresse email pour réinitialiser votre mot de passe.');
-        document.getElementById('modalEmailInput').focus();
-        return;
-    }
-    
-    // Firebase password reset
-    if (typeof firebase !== 'undefined' && firebase.auth) {
-        firebase.auth().sendPasswordResetEmail(email)
-            .then(() => {
-                Toast.success('Un email de réinitialisation a été envoyé à ' + email, 'Email envoyé');
-            })
-            .catch((error) => {
-                console.error('Erreur:', error);
-                if (error.code === 'auth/user-not-found') {
-                    Toast.error('Aucun compte trouvé avec cet email', 'Erreur');
-                } else {
-                    Toast.error('Impossible d\'envoyer l\'email de réinitialisation', 'Erreur');
+        // Close on outside click
+        const authModal = document.getElementById('authModal');
+        if (authModal) {
+            authModal.addEventListener('click', (e) => {
+                if (e.target === authModal) {
+                    this.close();
                 }
             });
-    } else {
-        alert('Un email de réinitialisation sera envoyé à: ' + email);
+        }
+
+        // Close button
+        const closeBtn = document.querySelector('.auth-modal-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.close());
+        }
+
+        // Password visibility toggle
+        const passwordToggle = document.querySelector('.password-toggle');
+        if (passwordToggle) {
+            passwordToggle.addEventListener('click', () => this.togglePasswordVisibility());
+        }
+    }
+
+    toggle() {
+        if (this.isOpen) {
+            this.close();
+        } else {
+            this.open();
+        }
+    }
+
+    open() {
+        const authModal = document.getElementById('authModal');
+        if (authModal) {
+            authModal.classList.remove('hidden');
+            this.isOpen = true;
+            
+            // Focus on first input
+            const firstInput = authModal.querySelector('input[type="email"]');
+            if (firstInput) {
+                setTimeout(() => firstInput.focus(), 100);
+            }
+        }
+    }
+
+    close() {
+        const authModal = document.getElementById('authModal');
+        if (authModal) {
+            authModal.classList.add('hidden');
+            this.isOpen = false;
+        }
+    }
+
+    togglePasswordVisibility() {
+        const passwordInput = document.getElementById('modalPasswordInput');
+        const eyeIcon = document.querySelector('.password-toggle .eye-icon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.textContent = '🙈';
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.textContent = '👁️';
+        }
     }
 }
 
-// Password strength indicator
-function updatePasswordStrength(password) {
-    const strengthBar = document.querySelector('.strength-bar');
-    const strengthText = document.querySelector('.strength-text');
-    const strengthContainer = document.getElementById('passwordStrength');
-    
-    if (!strengthBar || !strengthContainer) return;
-    
-    // Show strength indicator only in signup mode
-    const isSignUp = document.getElementById('modalSignUpTab')?.classList.contains('active');
-    if (!isSignUp) {
-        strengthContainer.classList.add('hidden');
-        return;
-    }
-    
-    if (password.length === 0) {
-        strengthContainer.classList.add('hidden');
-        return;
-    }
-    
-    strengthContainer.classList.remove('hidden');
-    
-    let strength = 0;
-    if (password.length >= 6) strength += 25;
-    if (password.length >= 8) strength += 25;
-    if (/[A-Z]/.test(password)) strength += 25;
-    if (/[0-9]/.test(password) || /[^a-zA-Z0-9]/.test(password)) strength += 25;
-    
-    strengthBar.style.setProperty('--strength', strength + '%');
-    strengthBar.style.background = strength < 50 ? '#ef4444' : strength < 75 ? '#f59e0b' : '#10b981';
-    
-    const labels = ['Faible', 'Moyen', 'Bon', 'Fort'];
-    const idx = Math.min(Math.floor(strength / 25), 3);
-    strengthText.textContent = labels[idx];
-}
-
-// Rendre les fonctions globales
-window.toggleAuthModal = toggleAuthModal;
-window.closeAuthModal = closeAuthModal;
-window.togglePasswordVisibility = togglePasswordVisibility;
-window.showForgotPassword = showForgotPassword;
-
-// ===== FIREBASE AUTHENTIFICATION MANAGER =====
-
-// Gestionnaire d'authentification Firebase
+// ===== FIREBASE AUTHENTICATION MANAGER (IMPROVED) =====
 const FirebaseAuthManager = {
     currentUser: null,
     isInitializing: true,
     
-    // Initialisation du gestionnaire
     init() {
         console.log('Initialisation Firebase Auth...');
         
-        // Attendre que Firebase soit chargé
         if (typeof firebase === 'undefined') {
             console.error('Firebase n\'est pas chargé');
             return;
         }
         
-        // Configuration Google Auth
         this.setupGoogleAuth();
         
-        // Écouter les changements d'état d'authentification
         firebase.auth().onAuthStateChanged((user) => {
             this.handleAuthStateChanged(user);
         });
         
-        // Initialiser les événements UI
         this.initUIEvents();
         
-        // Vérifier l'état initial
         this.currentUser = firebase.auth().currentUser;
         this.isInitializing = false;
         this.updateUI();
@@ -1518,40 +1653,33 @@ const FirebaseAuthManager = {
         console.log('✅ Firebase Auth initialisé');
     },
     
-    // Configuration Google Auth
     setupGoogleAuth() {
-        // Google provider configuration
         this.googleProvider = new firebase.auth.GoogleAuthProvider();
         this.googleProvider.addScope('email');
         this.googleProvider.addScope('profile');
     },
     
-    // Gestion des changements d'état d'authentification
     handleAuthStateChanged(user) {
         this.currentUser = user;
         this.updateUI();
         
         if (user) {
             console.log('Utilisateur connecté:', user.email);
-            Toast.success(`Bienvenue ${user.displayName || user.email} !`, 'Connexion réussie');
+            notificationSystem.success(`Bienvenue ${user.displayName || user.email} !`, 'Connexion réussie');
+            authModalSystem.close();
             
-            // Fermer le modal après connexion
-            closeAuthModal();
-            
-            // Redirection automatique vers le mode normal après connexion
+            // Auto redirect to normal mode after connection
             setTimeout(() => {
                 console.log('Redirection automatique vers le mode normal...');
-                switchTab('mode-normal');
-            }, 1500); // Délai pour laisser le temps à l'utilisateur de voir le message de bienvenue
+                tabNavigationSystem.switchTab(APP_CONFIG.MODES.NORMAL);
+            }, 1500);
         } else {
             console.log('Utilisateur déconnecté');
-            // Ne plus rediriger automatiquement vers l'accueil
         }
     },
     
-    // Initialisation des événements UI
     initUIEvents() {
-        // Toggle entre Connexion/Inscription dans le modal
+        // Auth mode toggle
         const modalSignInTab = document.getElementById('modalSignInTab');
         const modalSignUpTab = document.getElementById('modalSignUpTab');
         
@@ -1560,44 +1688,31 @@ const FirebaseAuthManager = {
             modalSignUpTab.addEventListener('click', () => this.switchAuthMode('signup'));
         }
         
-        // Formulaire email/mot de passe du modal
+        // Email auth form
         const modalEmailAuthForm = document.getElementById('modalEmailAuthForm');
         if (modalEmailAuthForm) {
             modalEmailAuthForm.addEventListener('submit', (e) => this.handleEmailAuth(e));
         }
         
-        // Bouton Google Sign-In du modal
+        // Google Sign-In
         const modalGoogleSignInBtn = document.getElementById('modalGoogleSignInBtn');
         if (modalGoogleSignInBtn) {
             modalGoogleSignInBtn.addEventListener('click', () => this.signInWithGoogle());
         }
         
-        // Bouton de déconnexion du modal
+        // Sign out
         const modalSignOutBtn = document.getElementById('modalSignOutBtn');
         if (modalSignOutBtn) {
             modalSignOutBtn.addEventListener('click', () => this.signOut());
         }
-        
-        // Fermer le modal en cliquant en dehors
-        const authModal = document.getElementById('authModal');
-        if (authModal) {
-            authModal.addEventListener('click', (e) => {
-                if (e.target === authModal) {
-                    closeAuthModal();
-                }
-            });
-        }
     },
     
-    // Bascule entre les modes Connexion/Inscription
     switchAuthMode(mode) {
         const modalSignInTab = document.getElementById('modalSignInTab');
         const modalSignUpTab = document.getElementById('modalSignUpTab');
         const modalEmailSubmitBtn = document.getElementById('modalEmailSubmitBtn');
         const modalEmailInput = document.getElementById('modalEmailInput');
         const modalPasswordInput = document.getElementById('modalPasswordInput');
-        const authModeToggle = document.querySelector('.auth-mode-toggle');
-        const passwordStrength = document.getElementById('passwordStrength');
         
         if (mode === 'signin') {
             modalSignInTab.classList.add('active');
@@ -1605,34 +1720,17 @@ const FirebaseAuthManager = {
             modalEmailSubmitBtn.querySelector('.btn-text').textContent = 'Se connecter';
             modalEmailInput.placeholder = 'votre@email.com';
             modalPasswordInput.placeholder = 'Mot de passe';
-            
-            // Animation du fond glissant
-            if (authModeToggle) {
-                authModeToggle.classList.remove('signup-active');
-            }
-            
-            // Masquer l'indicateur de force
-            if (passwordStrength) {
-                passwordStrength.classList.add('hidden');
-            }
         } else {
             modalSignInTab.classList.remove('active');
             modalSignUpTab.classList.add('active');
             modalEmailSubmitBtn.querySelector('.btn-text').textContent = 'Créer un compte';
             modalEmailInput.placeholder = 'votre@email.com';
             modalPasswordInput.placeholder = 'Mot de passe (min. 6 caractères)';
-            
-            // Animation du fond glissant
-            if (authModeToggle) {
-                authModeToggle.classList.add('signup-active');
-            }
         }
         
-        // Nettoyer les erreurs
         this.hideAuthError();
     },
     
-    // Gestion de l'authentification par email
     async handleEmailAuth(event) {
         event.preventDefault();
         
@@ -1642,6 +1740,11 @@ const FirebaseAuthManager = {
         
         if (!email || !password) {
             this.showAuthError('Veuillez remplir tous les champs');
+            return;
+        }
+        
+        if (!Utils.isValidEmail(email)) {
+            this.showAuthError('Veuillez entrer une adresse email valide');
             return;
         }
         
@@ -1655,7 +1758,6 @@ const FirebaseAuthManager = {
         const loadingSpinner = modalEmailSubmitBtn.querySelector('.loading-spinner-small');
         
         try {
-            // Afficher le chargement
             modalEmailSubmitBtn.disabled = true;
             btnText.textContent = 'Traitement...';
             loadingSpinner.classList.remove('hidden');
@@ -1663,36 +1765,28 @@ const FirebaseAuthManager = {
             
             let result;
             if (isSignUp) {
-                // Inscription
                 result = await firebase.auth().createUserWithEmailAndPassword(email, password);
-                console.log('Compte créé:', result.user.email);
             } else {
-                // Connexion
                 result = await firebase.auth().signInWithEmailAndPassword(email, password);
-                console.log('Connexion réussie:', result.user.email);
             }
             
-            // Réinitialiser le formulaire
             document.getElementById('modalEmailAuthForm').reset();
             
         } catch (error) {
             console.error('Erreur authentification email:', error);
             this.handleAuthError(error);
         } finally {
-            // Réinitialiser le bouton
             modalEmailSubmitBtn.disabled = false;
             btnText.textContent = isSignUp ? 'Créer un compte' : 'Se connecter';
             loadingSpinner.classList.add('hidden');
         }
     },
     
-    // Connexion avec Google
     async signInWithGoogle() {
         const modalGoogleSignInBtn = document.getElementById('modalGoogleSignInBtn');
         const originalText = modalGoogleSignInBtn.textContent;
         
         try {
-            // Afficher le chargement
             modalGoogleSignInBtn.disabled = true;
             modalGoogleSignInBtn.textContent = 'Connexion...';
             this.hideAuthError();
@@ -1704,25 +1798,22 @@ const FirebaseAuthManager = {
             console.error('Erreur connexion Google:', error);
             this.handleAuthError(error);
         } finally {
-            // Réinitialiser le bouton
             modalGoogleSignInBtn.disabled = false;
             modalGoogleSignInBtn.textContent = originalText;
         }
     },
     
-    // Déconnexion
     async signOut() {
         try {
             await firebase.auth().signOut();
             console.log('Déconnexion réussie');
-            closeAuthModal(); // Fermer le modal après déconnexion
+            authModalSystem.close();
         } catch (error) {
             console.error('Erreur lors de la déconnexion:', error);
-            Toast.error('Erreur lors de la déconnexion', 'Erreur');
+            notificationSystem.error('Erreur lors de la déconnexion', 'Erreur');
         }
     },
     
-    // Gestion des erreurs d'authentification
     handleAuthError(error) {
         let message = 'Une erreur est survenue';
         
@@ -1764,21 +1855,18 @@ const FirebaseAuthManager = {
         this.showAuthError(message);
     },
     
-    // Affichage des erreurs
     showAuthError(message) {
         const modalAuthError = document.getElementById('modalAuthError');
         if (modalAuthError) {
             modalAuthError.textContent = message;
             modalAuthError.classList.remove('hidden');
             
-            // Masquer automatiquement après 5 secondes
             setTimeout(() => {
                 this.hideAuthError();
             }, 5000);
         }
     },
     
-    // Masquage des erreurs
     hideAuthError() {
         const modalAuthError = document.getElementById('modalAuthError');
         if (modalAuthError) {
@@ -1786,37 +1874,30 @@ const FirebaseAuthManager = {
         }
     },
     
-    // Mise à jour de l'interface utilisateur
     updateUI() {
         const modalAuthForm = document.getElementById('modalEmailAuthForm');
         const modalUserProfile = document.getElementById('modalUserProfile');
         const authButtonText = document.getElementById('authButtonText');
         
         if (this.currentUser) {
-            // Utilisateur connecté - afficher le profil dans le modal
             if (modalAuthForm) modalAuthForm.classList.add('hidden');
             if (modalUserProfile) modalUserProfile.classList.remove('hidden');
             
-            // Mettre à jour le bouton d'authentification
             if (authButtonText) {
                 authButtonText.textContent = 'Déconnexion';
             }
             
-            // Mettre à jour les informations utilisateur
             this.updateUserProfile();
         } else {
-            // Utilisateur non connecté - afficher le formulaire dans le modal
             if (modalAuthForm) modalAuthForm.classList.remove('hidden');
             if (modalUserProfile) modalUserProfile.classList.add('hidden');
             
-            // Mettre à jour le bouton d'authentification
             if (authButtonText) {
                 authButtonText.textContent = 'Connexion';
             }
         }
     },
     
-    // Mise à jour des informations du profil utilisateur
     updateUserProfile() {
         const user = this.currentUser;
         if (!user) return;
@@ -1834,18 +1915,14 @@ const FirebaseAuthManager = {
             modalUserEmail.textContent = user.email;
         }
         
-        // Gestion de l'avatar
         if (user.photoURL && modalUserAvatar) {
-            // Supprimer l'ancien avatar s'il existe
             const oldImg = modalUserAvatar.querySelector('img');
             if (oldImg) oldImg.remove();
             
-            // Ajouter la nouvelle photo
             const img = document.createElement('img');
             img.src = user.photoURL;
             img.alt = 'Avatar utilisateur';
             img.onerror = () => {
-                // Si l'image ne se charge pas, utiliser le placeholder
                 img.remove();
                 modalAvatarPlaceholder.classList.remove('hidden');
             };
@@ -1854,74 +1931,198 @@ const FirebaseAuthManager = {
         } else if (modalAvatarPlaceholder) {
             modalAvatarPlaceholder.classList.remove('hidden');
             
-            // Supprimer les images existantes
             const oldImg = modalUserAvatar.querySelector('img');
             if (oldImg) oldImg.remove();
         }
     },
     
-    // Vérification si l'utilisateur est connecté
     isAuthenticated() {
         return this.currentUser !== null;
     },
     
-    // Obtention de l'utilisateur actuel
     getCurrentUser() {
         return this.currentUser;
     },
     
-    // Vérification si l'initialisation est terminée
     isInitialized() {
         return !this.isInitializing;
     }
 };
 
-// Vérification de l'accès aux onglets selon l'authentification
-function checkTabAccess(tabId) {
-    // Mode Test toujours accessible
-    if (tabId === 'mode-test' || tabId === 'guide' || tabId === 'faq' || tabId === 'home') {
-        return true;
-    }
-    
-    // Mode DMI nécessite une authentification, Mode Normal ne le nécessite plus
-    if (tabId === 'mode-dmi' && !FirebaseAuthManager.isAuthenticated()) {
-        Toast.warning('Veuillez vous connecter pour accéder à ce mode', 'Authentification requise');
-        return false;
-    }
-    
-    return true;
+// ===== GLOBAL APPLICATION INSTANCES =====
+const appState = new AppState();
+const notificationSystem = new NotificationSystem();
+const loadingOverlay = new LoadingOverlay();
+const autoSaveSystem = new AutoSaveSystem(appState);
+const audioRecorderManager = new AudioRecorderManager(appState);
+const dataSender = new DataSender(appState, audioRecorderManager);
+const tabNavigationSystem = new TabNavigationSystem(appState);
+const formValidationSystem = new FormValidationSystem();
+const photoManagementSystem = new PhotoManagementSystem();
+const dmiDataSender = new DMIDataSender(photoManagementSystem);
+const authModalSystem = new AuthModalSystem();
+
+// ===== GLOBAL HELPER FUNCTIONS =====
+function updateSectionCount() {
+    audioRecorderManager.updateSectionCount();
 }
 
-// Modification de la fonction switchTab pour inclure la vérification d'authentification
-const originalSwitchTab = switchTab;
-switchTab = function(tabId) {
-    // Vérifier l'accès avant de changer d'onglet
-    if (!checkTabAccess(tabId)) {
-        // Rediriger vers la page d'accueil si accès refusé
-        if (tabId === 'mode-normal' || tabId === 'mode-dmi') {
-            // Rester sur l'onglet actuel ou aller à l'accueil
-            const currentActiveTab = document.querySelector('.tab-btn.active, .fixed-nav-btn.active');
-            if (currentActiveTab) {
-                const currentTabId = currentActiveTab.getAttribute('data-tab');
-                if (currentTabId !== 'home') {
-                    originalSwitchTab('home');
-                }
-            } else {
-                originalSwitchTab('home');
+function resetForm(mode) {
+    if (mode === APP_CONFIG.MODES.NORMAL) {
+        document.getElementById('numeroDossier').value = '';
+        document.getElementById('nomPatient').value = '';
+        
+        // Reset character counters
+        const counters = [
+            { input: 'numeroDossier', counter: 'numeroDossierCounter' },
+            { input: 'nomPatient', counter: 'nomPatientCounter' }
+        ];
+        counters.forEach(({ counter }) => {
+            const counterEl = document.getElementById(counter);
+            if (counterEl) counterEl.textContent = '0/50';
+        });
+        
+        audioRecorderManager.resetMode(mode);
+    } else {
+        document.getElementById('numeroDossierTest').value = '';
+        document.getElementById('nomPatientTest').value = '';
+        
+        // Reset character counters
+        const counters = [
+            { input: 'numeroDossierTest', counter: 'numeroDossierTestCounter' },
+            { input: 'nomPatientTest', counter: 'nomPatientTestCounter' }
+        ];
+        counters.forEach(({ counter }) => {
+            const counterEl = document.getElementById(counter);
+            if (counterEl) counterEl.textContent = '0/50';
+        });
+        
+        audioRecorderManager.resetMode(mode);
+    }
+    
+    updateSectionCount();
+}
+
+// ===== GLOBAL EVENT LISTENERS =====
+function initEventListeners() {
+    // Submit buttons
+    const submitNormalBtn = document.getElementById('submitNormal');
+    const submitTestBtn = document.getElementById('submitTest');
+    const submitDmiBtn = document.getElementById('submitDMI');
+
+    if (submitNormalBtn) {
+        submitNormalBtn.addEventListener('click', () => {
+            loadingOverlay.show('Envoi en cours...');
+            dataSender.send(APP_CONFIG.MODES.NORMAL).finally(() => loadingOverlay.hide());
+        });
+    }
+
+    if (submitTestBtn) {
+        submitTestBtn.addEventListener('click', () => {
+            loadingOverlay.show('Envoi en cours...');
+            dataSender.send(APP_CONFIG.MODES.TEST).finally(() => loadingOverlay.hide());
+        });
+    }
+
+    if (submitDmiBtn) {
+        submitDmiBtn.addEventListener('click', () => {
+            loadingOverlay.show('Envoi en cours...');
+            dmiDataSender.send().finally(() => loadingOverlay.hide());
+        });
+    }
+
+    // Swipe hint hiding
+    const tabsContainer = document.querySelector('.tabs-container');
+    const swipeHint = document.querySelector('.swipe-hint');
+
+    if (tabsContainer && swipeHint) {
+        let hasScrolled = false;
+        
+        tabsContainer.addEventListener('scroll', Utils.throttle(() => {
+            if (!hasScrolled) {
+                hasScrolled = true;
+                swipeHint.style.animation = 'fadeOut 0.5s ease forwards';
+                setTimeout(() => {
+                    swipeHint.style.display = 'none';
+                }, 500);
             }
-        }
+        }, 100));
+        
+        // Auto hide after 10 seconds
+        setTimeout(() => {
+            if (!hasScrolled && swipeHint) {
+                swipeHint.style.animation = 'fadeOut 0.5s ease forwards';
+                setTimeout(() => {
+                    swipeHint.style.display = 'none';
+                }, 500);
+            }
+        }, 10000);
+    }
+}
+
+// ===== APPLICATION INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Initialisation de DictaMed v2.0...');
+    
+    try {
+        // Initialize core systems
+        tabNavigationSystem.init();
+        formValidationSystem.init();
+        photoManagementSystem.init();
+        authModalSystem.init();
+        autoSaveSystem.init();
+        
+        // Initialize audio recorders
+        audioRecorderManager.init();
+        
+        // Initialize Firebase Auth with delay
+        setTimeout(() => {
+            FirebaseAuthManager.init();
+        }, 100);
+        
+        // Initialize event listeners
+        initEventListeners();
+        
+        // Update initial state
+        updateSectionCount();
+        
+        appState.isInitialized = true;
+        
+        console.log('✅ DictaMed v2.0 initialisé avec succès!');
+        
+    } catch (error) {
+        console.error('Erreur lors de l\'initialisation:', error);
+        notificationSystem.error('Erreur lors de l\'initialisation de l\'application', 'Erreur d\'initialisation');
+    }
+});
+
+// ===== EXPORT FOR GLOBAL ACCESS =====
+window.switchTab = (tabId) => tabNavigationSystem.switchTab(tabId);
+window.toggleAuthModal = () => authModalSystem.toggle();
+window.closeAuthModal = () => authModalSystem.close();
+window.togglePasswordVisibility = () => authModalSystem.togglePasswordVisibility();
+window.showForgotPassword = () => {
+    const email = document.getElementById('modalEmailInput').value.trim();
+    if (!email) {
+        alert('Veuillez d\'abord entrer votre adresse email pour réinitialiser votre mot de passe.');
+        document.getElementById('modalEmailInput').focus();
         return;
     }
     
-    // Exécuter le switchTab original
-    originalSwitchTab(tabId);
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().sendPasswordResetEmail(email)
+            .then(() => {
+                notificationSystem.success('Un email de réinitialisation a été envoyé à ' + email, 'Email envoyé');
+            })
+            .catch((error) => {
+                console.error('Erreur:', error);
+                if (error.code === 'auth/user-not-found') {
+                    notificationSystem.error('Aucun compte trouvé avec cet email', 'Erreur');
+                } else {
+                    notificationSystem.error('Impossible d\'envoyer l\'email de réinitialisation', 'Erreur');
+                }
+            });
+    } else {
+        alert('Un email de réinitialisation sera envoyé à: ' + email);
+    }
 };
-
-// Initialisation de Firebase Auth au chargement de la page
-document.addEventListener('DOMContentLoaded', () => {
-    // Attendre un peu que Firebase soit chargé
-    setTimeout(() => {
-        FirebaseAuthManager.init();
-    }, 100);
-});
-}
