@@ -672,22 +672,151 @@ main.container {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -1155,22 +1284,151 @@ main.container {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -1710,22 +1968,151 @@ main.container {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -2320,22 +2707,151 @@ main.container {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -2957,22 +3473,151 @@ input:focus {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -3361,22 +4006,151 @@ input:focus {
     
     .user-avatar img,
     .avatar-placeholder {
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -3900,22 +4674,151 @@ input:focus {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -4621,22 +5524,151 @@ input:focus {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -5230,22 +6262,151 @@ footer {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -5705,22 +6866,151 @@ footer {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -6180,22 +7470,151 @@ footer {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -6677,22 +8096,151 @@ footer {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -7156,22 +8704,151 @@ footer {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -7636,22 +9313,151 @@ footer {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -8218,22 +10024,151 @@ footer a:hover {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -8714,22 +10649,151 @@ footer a:hover {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -9345,22 +11409,151 @@ input[type="file"]:hover {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -9824,22 +12017,151 @@ label span[style*="color: var(--red)"] {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -10284,22 +12606,151 @@ label span[style*="color: var(--red)"] {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -10823,22 +13274,151 @@ label span[style*="color: var(--red)"] {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -11507,22 +14087,151 @@ label span[style*="color: var(--red)"] {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -11987,22 +14696,151 @@ label span[style*="color: var(--red)"] {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -12471,22 +15309,151 @@ label span[style*="color: var(--red)"] {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -12947,22 +15914,151 @@ label span[style*="color: var(--red)"] {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -13434,22 +16530,151 @@ label span[style*="color: var(--red)"] {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -14026,22 +17251,151 @@ label span[style*="color: var(--red)"] {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -14491,22 +17845,151 @@ label span[style*="color: var(--red)"] {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -14974,22 +18457,151 @@ label span[style*="color: var(--red)"] {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -15578,22 +19190,151 @@ textarea:focus-visible {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -16060,22 +19801,151 @@ textarea:focus-visible {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -16873,22 +20743,151 @@ textarea:focus-visible {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -17364,22 +21363,151 @@ textarea:focus-visible {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -17890,22 +22018,151 @@ textarea:focus-visible {
     }
 }
 
-/* ========== AUTHENTIFICATION FIREBASE ========== */
+/* ========== MODAL D'AUTHENTIFICATION MODERNE ========== */
 
-/* Carte d'authentification */
-.firebase-auth-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.08) 0%, 
-        rgba(16, 185, 129, 0.08) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    margin-bottom: 32px;
+/* Overlay du modal avec animation */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.firebase-auth-card h3 {
-    color: var(--blue-primary);
+.auth-modal.hidden {
+    display: none;
+}
+
+.auth-modal-content {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    width: 90%;
+    max-width: 450px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
     margin-bottom: 20px;
-    font-size: 1.4rem;
+}
+
+.auth-modal-header h2 {
+    color: var(--gray-dark);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--gray-medium);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    transform: rotate(90deg);
+}
+
+.auth-modal-body {
+    padding: 0 24px 24px 24px;
+}
+
+/* Toggle onglets moderne */
+.auth-mode-toggle {
+    display: flex;
+    background: var(--gray-light);
+    border-radius: 16px;
+    padding: 6px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.06),
+        0 1px 3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn.active {
+    color: white;
     font-weight: 700;
+    transform: translateY(-1px);
+    box-shadow: 
+        0 4px 12px rgba(37, 99, 235, 0.3),
+        0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.auth-tab-btn.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auth-tab-btn:not(.active):hover {
+    color: var(--gray-dark);
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
 }
 
 /* Formulaire d'authentification */
@@ -18343,3 +22600,660 @@ textarea:focus-visible {
 .firebase-auth-card {
     animation: slideDown 0.3s ease;
 }
+
+
+/* ========== OPTIMIZED AUTH MODAL STYLES ========== */
+
+/* Auth Modal Logo */
+.auth-modal-logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.auth-modal-logo .logo-dicta {
+    color: var(--blue-primary);
+}
+
+.auth-modal-logo .logo-med {
+    color: var(--green-secondary);
+}
+
+/* Auth Modal Header Enhanced */
+.auth-modal-header {
+    text-align: center;
+    position: relative;
+    padding: 28px 24px 16px 24px !important;
+}
+
+.auth-modal-header h2 {
+    font-size: 1.5rem !important;
+    margin-top: 8px;
+}
+
+.auth-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+}
+
+/* Tab Button with Icons */
+.auth-tab-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.auth-tab-icon {
+    font-size: 1.1rem;
+}
+
+/* Modern Form Groups */
+.form-group-modern {
+    margin-bottom: 20px;
+}
+
+.form-group-modern label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--gray-dark);
+    font-size: 0.95rem;
+}
+
+.input-icon {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.form-group-modern input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--gray-light);
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+}
+
+.form-group-modern input:focus {
+    outline: none;
+    border-color: var(--blue-primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    transform: translateY(-2px);
+}
+
+.form-group-modern input::placeholder {
+    color: #a0aec0;
+}
+
+/* Password Input Wrapper */
+.password-input-wrapper {
+    position: relative;
+}
+
+.password-input-wrapper input {
+    padding-right: 50px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.password-toggle:hover {
+    opacity: 1;
+}
+
+.eye-icon {
+    font-size: 1.2rem;
+}
+
+/* Password Strength Indicator */
+.password-strength {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: var(--gray-lighter);
+    border-radius: 8px;
+}
+
+.strength-bar {
+    height: 4px;
+    background: var(--gray-light);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.strength-bar::before {
+    content: '';
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--red) 0%, var(--orange) 50%, var(--green-secondary) 100%);
+    transition: width 0.3s ease;
+}
+
+.strength-text {
+    font-size: 0.8rem;
+    color: var(--gray-medium);
+}
+
+/* Auth Options Row */
+.auth-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--gray-medium);
+}
+
+.remember-me input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--blue-primary);
+}
+
+.forgot-password {
+    color: var(--blue-primary);
+    font-size: 0.9rem;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.forgot-password:hover {
+    color: var(--blue-dark);
+    text-decoration: underline;
+}
+
+/* Glow Button Effect */
+.btn-glow {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-glow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-glow:hover::before {
+    left: 100%;
+}
+
+.btn-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-glow:hover .btn-icon {
+    transform: translateX(4px);
+}
+
+/* Enhanced Google Button */
+.btn-google {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-google::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(66, 133, 244, 0.05) 0%, rgba(52, 168, 83, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.btn-google:hover::before {
+    opacity: 1;
+}
+
+.btn-google:hover {
+    border-color: #dadce0;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Auth Footer */
+.auth-footer {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.terms-text {
+    font-size: 0.8rem;
+    color: var(--gray-medium);
+    line-height: 1.6;
+}
+
+.terms-text a {
+    color: var(--blue-primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.terms-text a:hover {
+    text-decoration: underline;
+}
+
+/* Modern User Info in Modal */
+.user-info-modern {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: linear-gradient(135deg, 
+        rgba(37, 99, 235, 0.08) 0%, 
+        rgba(16, 185, 129, 0.08) 100%);
+    padding: 24px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(37, 99, 235, 0.1);
+}
+
+.user-avatar-modern {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatar-placeholder-modern {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+}
+
+.avatar-status-indicator {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+    background: var(--green-secondary);
+    border-radius: 50%;
+    border: 3px solid white;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.user-details-modern {
+    flex: 1;
+}
+
+.user-details-modern h4 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gray-dark);
+    margin-bottom: 4px;
+}
+
+.user-details-modern p {
+    color: var(--gray-medium);
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+}
+
+.connection-status-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--green-dark);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--green-secondary);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+/* User Actions Modern */
+.user-actions-modern {
+    display: flex;
+    gap: 12px;
+}
+
+.user-actions-modern .btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--blue-primary);
+    color: var(--blue-primary);
+}
+
+.btn-outline:hover {
+    background: var(--blue-primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+    color: white;
+    border: none;
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+}
+
+/* Modal Animations Enhanced */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Auth Button in Header - Taille uniforme avec autres boutons */
+.fixed-nav-btn.auth-btn {
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    color: white;
+    padding: 8px 14px; /* Même padding que les autres boutons */
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem; /* Taille de texte standard */
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+    min-width: auto;
+    max-width: none;
+    height: auto;
+}
+
+.fixed-nav-btn.auth-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.fixed-nav-btn.auth-btn .nav-icon {
+    opacity: 1;
+    font-size: 0.9rem;
+}
+
+/* Responsive Auth Modal */
+@media (max-width: 480px) {
+    .auth-modal-content {
+        max-width: 95%;
+        margin: 10px;
+        border-radius: 16px;
+    }
+    
+    .auth-modal-header {
+        padding: 20px 16px 12px 16px !important;
+    }
+    
+    .auth-modal-body {
+        padding: 0 16px 20px 16px;
+    }
+    
+    .auth-options {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .user-info-modern {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .user-details-modern {
+        text-align: center;
+    }
+    
+    .user-actions-modern {
+        flex-direction: column;
+    }
+}
+
+
+
+/* ========== ONGLETS CONNEXION/INSCRIPTION - DESIGN PREMIUM ========== */
+
+/* Container des onglets modernisé */
+.auth-mode-toggle {
+    display: flex;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 20px;
+    padding: 8px;
+    margin-bottom: 32px;
+    box-shadow: 
+        inset 0 2px 8px rgba(0,0,0,0.08),
+        0 1px 3px rgba(0,0,0,0.05);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.8);
+}
+
+/* Fond animé glissant */
+.auth-mode-toggle::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 8px;
+    width: calc(50% - 8px);
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    border-radius: 14px;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 4px 15px rgba(37, 99, 235, 0.35),
+        0 2px 6px rgba(16, 185, 129, 0.25);
+}
+
+.auth-mode-toggle.signup-active::before {
+    transform: translateX(100%);
+}
+
+/* Boutons d'onglets premium - TAILLE UNIFORME */
+.auth-tab-btn {
+    flex: 1 1 50%; /* Chaque bouton prend exactement 50% */
+    min-width: 0; /* Empêche le débordement */
+    max-width: 50%; /* Force la moitié */
+    padding: 16px 24px;
+    border: none;
+    background: transparent;
+    color: var(--gray-medium);
+    font-weight: 700;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 1rem;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    letter-spacing: 0.3px;
+    box-sizing: border-box;
+    height: 52px; /* Hauteur fixe pour uniformité */
+}
+
+/* Icône des onglets */
+.auth-tab-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.auth-tab-btn:hover .auth-tab-icon {
+    transform: scale(1.15);
+}
+
+/* État actif de l'onglet */
+.auth-tab-btn.active {
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Effet hover pour l'onglet inactif */
+.auth-tab-btn:not(.active):hover {
+    color: var(--blue-primary);
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Animation de pression */
+.auth-tab-btn:active {
+    transform: scale(0.97);
+}
+
+/* Badge de nouveauté optionnel */
+.auth-tab-btn .tab-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: #f59e0b;
+    color: white;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-weight: 700;
+    animation: pulse 2s infinite;
+}
+
+/* Variante compacte pour mobile */
+@media (max-width: 480px) {
+    .auth-mode-toggle {
+        padding: 6px;
+        border-radius: 16px;
+        margin-bottom: 24px;
+    }
+    
+    .auth-mode-toggle::before {
+        top: 6px;
+        bottom: 6px;
+        left: 6px;
+        width: calc(50% - 6px);
+        border-radius: 12px;
+    }
+    
+    .auth-tab-btn {
+        flex: 1 1 50%;
+        min-width: 0;
+        max-width: 50%;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        border-radius: 12px;
+        gap: 8px;
+        height: 44px; /* Hauteur fixe mobile */
+    }
+    
+    .auth-tab-icon {
+        font-size: 1.1rem;
+    }
+}
+
+/* Animation d'entrée */
+@keyframes tabSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-mode-toggle {
+    animation: tabSlideIn 0.5s ease-out;
+}
+
+/* Effet de brillance au survol */
+.auth-tab-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255,255,255,0.2) 50%,
+        transparent 100%
+    );
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+
+.auth-tab-btn.active:hover::after {
+    left: 100%;
+}
+

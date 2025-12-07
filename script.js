@@ -1396,9 +1396,91 @@ function closeAuthModal() {
     }
 }
 
+// Toggle password visibility
+function togglePasswordVisibility() {
+    const passwordInput = document.getElementById('modalPasswordInput');
+    const eyeIcon = document.querySelector('.password-toggle .eye-icon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.textContent = '🙈';
+    } else {
+        passwordInput.type = 'password';
+        eyeIcon.textContent = '👁️';
+    }
+}
+
+// Show forgot password message
+function showForgotPassword() {
+    // This would typically send a password reset email
+    const email = document.getElementById('modalEmailInput').value.trim();
+    
+    if (!email) {
+        alert('Veuillez d\'abord entrer votre adresse email pour réinitialiser votre mot de passe.');
+        document.getElementById('modalEmailInput').focus();
+        return;
+    }
+    
+    // Firebase password reset
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().sendPasswordResetEmail(email)
+            .then(() => {
+                Toast.success('Un email de réinitialisation a été envoyé à ' + email, 'Email envoyé');
+            })
+            .catch((error) => {
+                console.error('Erreur:', error);
+                if (error.code === 'auth/user-not-found') {
+                    Toast.error('Aucun compte trouvé avec cet email', 'Erreur');
+                } else {
+                    Toast.error('Impossible d\'envoyer l\'email de réinitialisation', 'Erreur');
+                }
+            });
+    } else {
+        alert('Un email de réinitialisation sera envoyé à: ' + email);
+    }
+}
+
+// Password strength indicator
+function updatePasswordStrength(password) {
+    const strengthBar = document.querySelector('.strength-bar');
+    const strengthText = document.querySelector('.strength-text');
+    const strengthContainer = document.getElementById('passwordStrength');
+    
+    if (!strengthBar || !strengthContainer) return;
+    
+    // Show strength indicator only in signup mode
+    const isSignUp = document.getElementById('modalSignUpTab')?.classList.contains('active');
+    if (!isSignUp) {
+        strengthContainer.classList.add('hidden');
+        return;
+    }
+    
+    if (password.length === 0) {
+        strengthContainer.classList.add('hidden');
+        return;
+    }
+    
+    strengthContainer.classList.remove('hidden');
+    
+    let strength = 0;
+    if (password.length >= 6) strength += 25;
+    if (password.length >= 8) strength += 25;
+    if (/[A-Z]/.test(password)) strength += 25;
+    if (/[0-9]/.test(password) || /[^a-zA-Z0-9]/.test(password)) strength += 25;
+    
+    strengthBar.style.setProperty('--strength', strength + '%');
+    strengthBar.style.background = strength < 50 ? '#ef4444' : strength < 75 ? '#f59e0b' : '#10b981';
+    
+    const labels = ['Faible', 'Moyen', 'Bon', 'Fort'];
+    const idx = Math.min(Math.floor(strength / 25), 3);
+    strengthText.textContent = labels[idx];
+}
+
 // Rendre les fonctions globales
 window.toggleAuthModal = toggleAuthModal;
 window.closeAuthModal = closeAuthModal;
+window.togglePasswordVisibility = togglePasswordVisibility;
+window.showForgotPassword = showForgotPassword;
 
 // ===== FIREBASE AUTHENTIFICATION MANAGER =====
 
@@ -1514,6 +1596,8 @@ const FirebaseAuthManager = {
         const modalEmailSubmitBtn = document.getElementById('modalEmailSubmitBtn');
         const modalEmailInput = document.getElementById('modalEmailInput');
         const modalPasswordInput = document.getElementById('modalPasswordInput');
+        const authModeToggle = document.querySelector('.auth-mode-toggle');
+        const passwordStrength = document.getElementById('passwordStrength');
         
         if (mode === 'signin') {
             modalSignInTab.classList.add('active');
@@ -1521,12 +1605,27 @@ const FirebaseAuthManager = {
             modalEmailSubmitBtn.querySelector('.btn-text').textContent = 'Se connecter';
             modalEmailInput.placeholder = 'votre@email.com';
             modalPasswordInput.placeholder = 'Mot de passe';
+            
+            // Animation du fond glissant
+            if (authModeToggle) {
+                authModeToggle.classList.remove('signup-active');
+            }
+            
+            // Masquer l'indicateur de force
+            if (passwordStrength) {
+                passwordStrength.classList.add('hidden');
+            }
         } else {
             modalSignInTab.classList.remove('active');
             modalSignUpTab.classList.add('active');
             modalEmailSubmitBtn.querySelector('.btn-text').textContent = 'Créer un compte';
             modalEmailInput.placeholder = 'votre@email.com';
             modalPasswordInput.placeholder = 'Mot de passe (min. 6 caractères)';
+            
+            // Animation du fond glissant
+            if (authModeToggle) {
+                authModeToggle.classList.add('signup-active');
+            }
         }
         
         // Nettoyer les erreurs
