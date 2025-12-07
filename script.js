@@ -1363,6 +1363,43 @@ if (tabsContainer && swipeHint) {
         }
     }, 10000);
 
+// ===== GESTION DU MODAL D'AUTHENTIFICATION =====
+
+// Fonctions globales pour le modal
+function toggleAuthModal() {
+    const authModal = document.getElementById('authModal');
+    if (!authModal) return;
+    
+    if (authModal.classList.contains('hidden')) {
+        openAuthModal();
+    } else {
+        closeAuthModal();
+    }
+}
+
+function openAuthModal() {
+    const authModal = document.getElementById('authModal');
+    if (authModal) {
+        authModal.classList.remove('hidden');
+        // Focus sur le premier input
+        const firstInput = authModal.querySelector('input[type="email"]');
+        if (firstInput) {
+            setTimeout(() => firstInput.focus(), 100);
+        }
+    }
+}
+
+function closeAuthModal() {
+    const authModal = document.getElementById('authModal');
+    if (authModal) {
+        authModal.classList.add('hidden');
+    }
+}
+
+// Rendre les fonctions globales
+window.toggleAuthModal = toggleAuthModal;
+window.closeAuthModal = closeAuthModal;
+
 // ===== FIREBASE AUTHENTIFICATION MANAGER =====
 
 // Gestionnaire d'authentification Firebase
@@ -1416,6 +1453,9 @@ const FirebaseAuthManager = {
             console.log('Utilisateur connecté:', user.email);
             Toast.success(`Bienvenue ${user.displayName || user.email} !`, 'Connexion réussie');
             
+            // Fermer le modal après connexion
+            closeAuthModal();
+            
             // Redirection automatique vers le mode normal après connexion
             setTimeout(() => {
                 console.log('Redirection automatique vers le mode normal...');
@@ -1423,61 +1463,70 @@ const FirebaseAuthManager = {
             }, 1500); // Délai pour laisser le temps à l'utilisateur de voir le message de bienvenue
         } else {
             console.log('Utilisateur déconnecté');
-            // Retour à la page d'accueil si déconnexion
-            switchTab('home');
+            // Ne plus rediriger automatiquement vers l'accueil
         }
     },
     
     // Initialisation des événements UI
     initUIEvents() {
-        // Toggle entre Connexion/Inscription
-        const signInTab = document.getElementById('signInTab');
-        const signUpTab = document.getElementById('signUpTab');
+        // Toggle entre Connexion/Inscription dans le modal
+        const modalSignInTab = document.getElementById('modalSignInTab');
+        const modalSignUpTab = document.getElementById('modalSignUpTab');
         
-        if (signInTab && signUpTab) {
-            signInTab.addEventListener('click', () => this.switchAuthMode('signin'));
-            signUpTab.addEventListener('click', () => this.switchAuthMode('signup'));
+        if (modalSignInTab && modalSignUpTab) {
+            modalSignInTab.addEventListener('click', () => this.switchAuthMode('signin'));
+            modalSignUpTab.addEventListener('click', () => this.switchAuthMode('signup'));
         }
         
-        // Formulaire email/mot de passe
-        const emailAuthForm = document.getElementById('emailAuthForm');
-        if (emailAuthForm) {
-            emailAuthForm.addEventListener('submit', (e) => this.handleEmailAuth(e));
+        // Formulaire email/mot de passe du modal
+        const modalEmailAuthForm = document.getElementById('modalEmailAuthForm');
+        if (modalEmailAuthForm) {
+            modalEmailAuthForm.addEventListener('submit', (e) => this.handleEmailAuth(e));
         }
         
-        // Bouton Google Sign-In
-        const googleSignInBtn = document.getElementById('googleSignInBtn');
-        if (googleSignInBtn) {
-            googleSignInBtn.addEventListener('click', () => this.signInWithGoogle());
+        // Bouton Google Sign-In du modal
+        const modalGoogleSignInBtn = document.getElementById('modalGoogleSignInBtn');
+        if (modalGoogleSignInBtn) {
+            modalGoogleSignInBtn.addEventListener('click', () => this.signInWithGoogle());
         }
         
-        // Bouton de déconnexion
-        const signOutBtn = document.getElementById('signOutBtn');
-        if (signOutBtn) {
-            signOutBtn.addEventListener('click', () => this.signOut());
+        // Bouton de déconnexion du modal
+        const modalSignOutBtn = document.getElementById('modalSignOutBtn');
+        if (modalSignOutBtn) {
+            modalSignOutBtn.addEventListener('click', () => this.signOut());
+        }
+        
+        // Fermer le modal en cliquant en dehors
+        const authModal = document.getElementById('authModal');
+        if (authModal) {
+            authModal.addEventListener('click', (e) => {
+                if (e.target === authModal) {
+                    closeAuthModal();
+                }
+            });
         }
     },
     
     // Bascule entre les modes Connexion/Inscription
     switchAuthMode(mode) {
-        const signInTab = document.getElementById('signInTab');
-        const signUpTab = document.getElementById('signUpTab');
-        const emailSubmitBtn = document.getElementById('emailSubmitBtn');
-        const emailInput = document.getElementById('emailInput');
-        const passwordInput = document.getElementById('passwordInput');
+        const modalSignInTab = document.getElementById('modalSignInTab');
+        const modalSignUpTab = document.getElementById('modalSignUpTab');
+        const modalEmailSubmitBtn = document.getElementById('modalEmailSubmitBtn');
+        const modalEmailInput = document.getElementById('modalEmailInput');
+        const modalPasswordInput = document.getElementById('modalPasswordInput');
         
         if (mode === 'signin') {
-            signInTab.classList.add('active');
-            signUpTab.classList.remove('active');
-            emailSubmitBtn.querySelector('.btn-text').textContent = 'Se connecter';
-            emailInput.placeholder = 'votre@email.com';
-            passwordInput.placeholder = 'Mot de passe';
+            modalSignInTab.classList.add('active');
+            modalSignUpTab.classList.remove('active');
+            modalEmailSubmitBtn.querySelector('.btn-text').textContent = 'Se connecter';
+            modalEmailInput.placeholder = 'votre@email.com';
+            modalPasswordInput.placeholder = 'Mot de passe';
         } else {
-            signInTab.classList.remove('active');
-            signUpTab.classList.add('active');
-            emailSubmitBtn.querySelector('.btn-text').textContent = 'Créer un compte';
-            emailInput.placeholder = 'votre@email.com';
-            passwordInput.placeholder = 'Mot de passe (min. 6 caractères)';
+            modalSignInTab.classList.remove('active');
+            modalSignUpTab.classList.add('active');
+            modalEmailSubmitBtn.querySelector('.btn-text').textContent = 'Créer un compte';
+            modalEmailInput.placeholder = 'votre@email.com';
+            modalPasswordInput.placeholder = 'Mot de passe (min. 6 caractères)';
         }
         
         // Nettoyer les erreurs
@@ -1488,9 +1537,9 @@ const FirebaseAuthManager = {
     async handleEmailAuth(event) {
         event.preventDefault();
         
-        const email = document.getElementById('emailInput').value.trim();
-        const password = document.getElementById('passwordInput').value;
-        const isSignUp = document.getElementById('signUpTab').classList.contains('active');
+        const email = document.getElementById('modalEmailInput').value.trim();
+        const password = document.getElementById('modalPasswordInput').value;
+        const isSignUp = document.getElementById('modalSignUpTab').classList.contains('active');
         
         if (!email || !password) {
             this.showAuthError('Veuillez remplir tous les champs');
@@ -1502,13 +1551,13 @@ const FirebaseAuthManager = {
             return;
         }
         
-        const emailSubmitBtn = document.getElementById('emailSubmitBtn');
-        const btnText = emailSubmitBtn.querySelector('.btn-text');
-        const loadingSpinner = emailSubmitBtn.querySelector('.loading-spinner-small');
+        const modalEmailSubmitBtn = document.getElementById('modalEmailSubmitBtn');
+        const btnText = modalEmailSubmitBtn.querySelector('.btn-text');
+        const loadingSpinner = modalEmailSubmitBtn.querySelector('.loading-spinner-small');
         
         try {
             // Afficher le chargement
-            emailSubmitBtn.disabled = true;
+            modalEmailSubmitBtn.disabled = true;
             btnText.textContent = 'Traitement...';
             loadingSpinner.classList.remove('hidden');
             this.hideAuthError();
@@ -1525,14 +1574,14 @@ const FirebaseAuthManager = {
             }
             
             // Réinitialiser le formulaire
-            document.getElementById('emailAuthForm').reset();
+            document.getElementById('modalEmailAuthForm').reset();
             
         } catch (error) {
             console.error('Erreur authentification email:', error);
             this.handleAuthError(error);
         } finally {
             // Réinitialiser le bouton
-            emailSubmitBtn.disabled = false;
+            modalEmailSubmitBtn.disabled = false;
             btnText.textContent = isSignUp ? 'Créer un compte' : 'Se connecter';
             loadingSpinner.classList.add('hidden');
         }
@@ -1540,13 +1589,13 @@ const FirebaseAuthManager = {
     
     // Connexion avec Google
     async signInWithGoogle() {
-        const googleSignInBtn = document.getElementById('googleSignInBtn');
-        const originalText = googleSignInBtn.textContent;
+        const modalGoogleSignInBtn = document.getElementById('modalGoogleSignInBtn');
+        const originalText = modalGoogleSignInBtn.textContent;
         
         try {
             // Afficher le chargement
-            googleSignInBtn.disabled = true;
-            googleSignInBtn.textContent = 'Connexion...';
+            modalGoogleSignInBtn.disabled = true;
+            modalGoogleSignInBtn.textContent = 'Connexion...';
             this.hideAuthError();
             
             const result = await firebase.auth().signInWithPopup(this.googleProvider);
@@ -1557,8 +1606,8 @@ const FirebaseAuthManager = {
             this.handleAuthError(error);
         } finally {
             // Réinitialiser le bouton
-            googleSignInBtn.disabled = false;
-            googleSignInBtn.textContent = originalText;
+            modalGoogleSignInBtn.disabled = false;
+            modalGoogleSignInBtn.textContent = originalText;
         }
     },
     
@@ -1567,6 +1616,7 @@ const FirebaseAuthManager = {
         try {
             await firebase.auth().signOut();
             console.log('Déconnexion réussie');
+            closeAuthModal(); // Fermer le modal après déconnexion
         } catch (error) {
             console.error('Erreur lors de la déconnexion:', error);
             Toast.error('Erreur lors de la déconnexion', 'Erreur');
@@ -1617,10 +1667,10 @@ const FirebaseAuthManager = {
     
     // Affichage des erreurs
     showAuthError(message) {
-        const authError = document.getElementById('authError');
-        if (authError) {
-            authError.textContent = message;
-            authError.classList.remove('hidden');
+        const modalAuthError = document.getElementById('modalAuthError');
+        if (modalAuthError) {
+            modalAuthError.textContent = message;
+            modalAuthError.classList.remove('hidden');
             
             // Masquer automatiquement après 5 secondes
             setTimeout(() => {
@@ -1631,28 +1681,39 @@ const FirebaseAuthManager = {
     
     // Masquage des erreurs
     hideAuthError() {
-        const authError = document.getElementById('authError');
-        if (authError) {
-            authError.classList.add('hidden');
+        const modalAuthError = document.getElementById('modalAuthError');
+        if (modalAuthError) {
+            modalAuthError.classList.add('hidden');
         }
     },
     
     // Mise à jour de l'interface utilisateur
     updateUI() {
-        const authForm = document.getElementById('authForm');
-        const userProfile = document.getElementById('userProfile');
+        const modalAuthForm = document.getElementById('modalEmailAuthForm');
+        const modalUserProfile = document.getElementById('modalUserProfile');
+        const authButtonText = document.getElementById('authButtonText');
         
         if (this.currentUser) {
-            // Utilisateur connecté - afficher le profil
-            if (authForm) authForm.classList.add('hidden');
-            if (userProfile) userProfile.classList.remove('hidden');
+            // Utilisateur connecté - afficher le profil dans le modal
+            if (modalAuthForm) modalAuthForm.classList.add('hidden');
+            if (modalUserProfile) modalUserProfile.classList.remove('hidden');
+            
+            // Mettre à jour le bouton d'authentification
+            if (authButtonText) {
+                authButtonText.textContent = 'Déconnexion';
+            }
             
             // Mettre à jour les informations utilisateur
             this.updateUserProfile();
         } else {
-            // Utilisateur non connecté - afficher le formulaire
-            if (authForm) authForm.classList.remove('hidden');
-            if (userProfile) userProfile.classList.add('hidden');
+            // Utilisateur non connecté - afficher le formulaire dans le modal
+            if (modalAuthForm) modalAuthForm.classList.remove('hidden');
+            if (modalUserProfile) modalUserProfile.classList.add('hidden');
+            
+            // Mettre à jour le bouton d'authentification
+            if (authButtonText) {
+                authButtonText.textContent = 'Connexion';
+            }
         }
     },
     
@@ -1661,23 +1722,23 @@ const FirebaseAuthManager = {
         const user = this.currentUser;
         if (!user) return;
         
-        const userName = document.getElementById('userName');
-        const userEmail = document.getElementById('userEmail');
-        const userAvatar = document.getElementById('userAvatar');
-        const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+        const modalUserName = document.getElementById('modalUserName');
+        const modalUserEmail = document.getElementById('modalUserEmail');
+        const modalUserAvatar = document.getElementById('modalUserAvatar');
+        const modalAvatarPlaceholder = document.getElementById('modalAvatarPlaceholder');
         
-        if (userName) {
-            userName.textContent = user.displayName || 'Utilisateur';
+        if (modalUserName) {
+            modalUserName.textContent = user.displayName || 'Utilisateur';
         }
         
-        if (userEmail) {
-            userEmail.textContent = user.email;
+        if (modalUserEmail) {
+            modalUserEmail.textContent = user.email;
         }
         
         // Gestion de l'avatar
-        if (user.photoURL && userAvatar) {
+        if (user.photoURL && modalUserAvatar) {
             // Supprimer l'ancien avatar s'il existe
-            const oldImg = userAvatar.querySelector('img');
+            const oldImg = modalUserAvatar.querySelector('img');
             if (oldImg) oldImg.remove();
             
             // Ajouter la nouvelle photo
@@ -1687,15 +1748,15 @@ const FirebaseAuthManager = {
             img.onerror = () => {
                 // Si l'image ne se charge pas, utiliser le placeholder
                 img.remove();
-                avatarPlaceholder.classList.remove('hidden');
+                modalAvatarPlaceholder.classList.remove('hidden');
             };
-            userAvatar.appendChild(img);
-            avatarPlaceholder.classList.add('hidden');
-        } else if (avatarPlaceholder) {
-            avatarPlaceholder.classList.remove('hidden');
+            modalUserAvatar.appendChild(img);
+            modalAvatarPlaceholder.classList.add('hidden');
+        } else if (modalAvatarPlaceholder) {
+            modalAvatarPlaceholder.classList.remove('hidden');
             
             // Supprimer les images existantes
-            const oldImg = userAvatar.querySelector('img');
+            const oldImg = modalUserAvatar.querySelector('img');
             if (oldImg) oldImg.remove();
         }
     },
