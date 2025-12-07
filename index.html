@@ -4,95 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DictaMed - Dictée Médicale Intelligente</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style-optimized.css">
     <link rel="icon" type="image/png" sizes="32x32" href="icon-72x72.png">
     <link rel="icon" type="image/png" sizes="16x16" href="icon-72x72.png">
     
-    <!-- CSS de Fallback - S'active si style.css ne se charge pas -->
+    <!-- CSS de Fallback - S'active si style-optimized.css ne se charge pas -->
     <link rel="stylesheet" href="style-fallback.css">
-    
-    <!-- Diagnostic CSS - À supprimer en production -->
-    <script>
-        // Vérification et correction automatique du chargement des styles
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                // Vérification des variables CSS principales
-                const rootStyles = getComputedStyle(document.documentElement);
-                const primaryColor = rootStyles.getPropertyValue('--blue-primary');
-                
-                console.log('🔍 Diagnostic CSS - Variables principales:', {
-                    primary: primaryColor,
-                    secondary: rootStyles.getPropertyValue('--green-secondary'),
-                    grayDark: rootStyles.getPropertyValue('--gray-dark')
-                });
-                
-                // Vérification du bouton d'authentification
-                const authButton = document.querySelector('.fixed-nav-btn.auth-btn');
-                if (authButton) {
-                    const computedStyle = getComputedStyle(authButton);
-                    console.log('🔍 Diagnostic CSS - Bouton Auth:', {
-                        background: computedStyle.background,
-                        color: computedStyle.color,
-                        display: computedStyle.display,
-                        opacity: computedStyle.opacity,
-                        position: computedStyle.position
-                    });
-                    
-                    // Force l'application des styles si nécessaire
-                    if (computedStyle.background === 'rgba(0, 0, 0, 0)' || computedStyle.background === 'transparent') {
-                        console.warn('⚠️ Les styles du bouton Auth ne sont pas appliqués. Application des styles de fallback...');
-                        authButton.style.cssText = `
-                            background: linear-gradient(135deg, #2563eb 0%, #10b981 100%) !important;
-                            color: white !important;
-                            padding: 10px 16px !important;
-                            border: none !important;
-                            border-radius: 10px !important;
-                            font-weight: 600 !important;
-                            cursor: pointer !important;
-                            display: flex !important;
-                            align-items: center !important;
-                            justify-content: center !important;
-                            gap: 6px !important;
-                            min-height: 40px !important;
-                            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2) !important;
-                        `;
-                    }
-                } else {
-                    console.error('❌ Bouton d\'authentification non trouvé!');
-                }
-                
-                // Vérification du modal
-                const authModal = document.getElementById('authModal');
-                if (authModal) {
-                    const modalStyle = getComputedStyle(authModal);
-                    console.log('🔍 Diagnostic CSS - Modal:', {
-                        display: modalStyle.display,
-                        zIndex: modalStyle.zIndex,
-                        position: modalStyle.position
-                    });
-                }
-                
-                // Affichage d'un message de diagnostic si problème détecté
-                if (!primaryColor || primaryColor.trim() === '') {
-                    showDiagnosticWarning();
-                }
-                
-            }, 1000);
-        });
-        
-        function showDiagnosticWarning() {
-            const warning = document.createElement('div');
-            warning.className = 'diagnostic-warning';
-            warning.innerHTML = `
-                ⚠️ <strong>Problème CSS détecté!</strong><br>
-                Les styles principaux ne se chargent pas correctement.<br>
-                • Vérifiez que le serveur sert bien les fichiers CSS<br>
-                • Ouvrez la console pour plus de détails<br>
-                • Utilisez le fichier diagnostic-css.html pour plus d'informations
-            `;
-            document.body.insertBefore(warning, document.body.firstChild);
-        }
-    </script>
 </head>
 <body>
     <!-- Navigation fixe horizontale en header -->
@@ -398,6 +315,7 @@
     <script src="js/core/config.js"></script>
     <script src="js/core/utils.js"></script>
     <script src="js/core/app-state.js"></script>
+    <script src="js/core/error-handler.js"></script>
     
     <!-- Modules Components -->
     <script src="js/components/notification.js"></script>
