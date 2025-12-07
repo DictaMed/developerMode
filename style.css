@@ -158,12 +158,31 @@ header {
     .swipe-hint {
         display: block;
     }
+    
+    /* Ajuster le padding pour mobile tout en gardant l'alignement à droite */
+    .tabs-container {
+        padding: 8px 10px 8px 20px;
+    }
+}
+
+/* Styles responsive pour tablette */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .tabs-container {
+        padding: 8px 20px 8px 30px;
+    }
+}
+
+/* Styles pour grand écran */
+@media (min-width: 1025px) {
+    .tabs-container {
+        padding: 8px 30px 8px 50px;
+    }
 }
 
 .tabs-container {
     display: flex;
     gap: 8px;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
     overflow-x: auto;
     overflow-y: hidden;
