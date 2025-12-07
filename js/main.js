@@ -149,11 +149,30 @@ async function initializeComponents() {
         // Initialize other components with proper error handling
         const componentPromises = [];
         
+        // Helper function for safe async operations
+        const safeAsyncOperation = async (operation, context, fallbackMessage) => {
+            try {
+                if (window.errorHandler && typeof window.errorHandler.handleAsync === 'function') {
+                    return await window.errorHandler.handleAsync(operation, context, fallbackMessage);
+                } else {
+                    // Fallback if errorHandler not available
+                    return await operation();
+                }
+            } catch (error) {
+                logger.warning(`Erreur lors de l'initialisation de ${context}`, {
+                    error: error.message,
+                    stack: error.stack
+                });
+                // Don't throw, just log and continue
+                return null;
+            }
+        };
+        
         // Form validation system
         if (typeof FormValidationSystem !== 'undefined') {
             formValidationSystem = new FormValidationSystem();
             componentPromises.push(
-                errorHandler.handleAsync(
+                safeAsyncOperation(
                     () => formValidationSystem.init(),
                     'FormValidationSystem',
                     'Erreur lors de l\'initialisation du système de validation'
@@ -165,7 +184,7 @@ async function initializeComponents() {
         if (typeof PhotoManagementSystem !== 'undefined') {
             photoManagementSystem = new PhotoManagementSystem();
             componentPromises.push(
-                errorHandler.handleAsync(
+                safeAsyncOperation(
                     () => photoManagementSystem.init(),
                     'PhotoManagementSystem',
                     'Erreur lors de l\'initialisation du système de gestion des photos'
@@ -182,7 +201,7 @@ async function initializeComponents() {
         if (typeof AuthModalSystem !== 'undefined') {
             authModalSystem = new AuthModalSystem();
             componentPromises.push(
-                errorHandler.handleAsync(
+                safeAsyncOperation(
                     () => authModalSystem.init(),
                     'AuthModalSystem',
                     'Erreur lors de l\'initialisation du modal d\'authentification'
@@ -194,7 +213,7 @@ async function initializeComponents() {
         if (typeof AutoSaveSystem !== 'undefined') {
             autoSaveSystem = new AutoSaveSystem(appState);
             componentPromises.push(
-                errorHandler.handleAsync(
+                safeAsyncOperation(
                     () => autoSaveSystem.init(),
                     'AutoSaveSystem',
                     'Erreur lors de l\'initialisation du système de sauvegarde automatique'
@@ -210,7 +229,7 @@ async function initializeComponents() {
         // Wait for all component initializations to complete
         const results = await Promise.allSettled(componentPromises);
         
-        // Log any failed component initializations
+        // Log any failed component initializations but don't fail the entire process
         results.forEach((result, index) => {
             if (result.status === 'rejected') {
                 logger.warning(`Composant ${index} a échoué lors de l'initialisation`, {
@@ -242,7 +261,8 @@ async function initializeComponents() {
             error: error.message,
             stack: error.stack
         });
-        throw error;
+        // Don't throw the error, just log it and continue
+        // The application should still function even if some components fail to initialize
     }
 }
 
@@ -254,10 +274,29 @@ async function initializeTabs() {
         // Initialize tab-specific modules
         const tabPromises = [];
         
+        // Helper function for safe async operations
+        const safeAsyncOperation = async (operation, context, fallbackMessage) => {
+            try {
+                if (window.errorHandler && typeof window.errorHandler.handleAsync === 'function') {
+                    return await window.errorHandler.handleAsync(operation, context, fallbackMessage);
+                } else {
+                    // Fallback if errorHandler not available
+                    return await operation();
+                }
+            } catch (error) {
+                logger.warning(`Erreur lors de l'initialisation de ${context}`, {
+                    error: error.message,
+                    stack: error.stack
+                });
+                // Don't throw, just log and continue
+                return null;
+            }
+        };
+        
         if (typeof HomeTab !== 'undefined') {
             homeTab = new HomeTab(appState, tabNavigationSystem);
             tabPromises.push(
-                errorHandler.handleAsync(
+                safeAsyncOperation(
                     () => homeTab.init(),
                     'HomeTab',
                     'Erreur lors de l\'initialisation de l\'onglet d\'accueil'
@@ -268,7 +307,7 @@ async function initializeTabs() {
         if (typeof NormalModeTab !== 'undefined') {
             normalModeTab = new NormalModeTab(appState, tabNavigationSystem, audioRecorderManager, dataSender);
             tabPromises.push(
-                errorHandler.handleAsync(
+                safeAsyncOperation(
                     () => normalModeTab.init(),
                     'NormalModeTab',
                     'Erreur lors de l\'initialisation du mode normal'
@@ -279,7 +318,7 @@ async function initializeTabs() {
         if (typeof TestModeTab !== 'undefined') {
             testModeTab = new TestModeTab(appState, tabNavigationSystem, audioRecorderManager, dataSender);
             tabPromises.push(
-                errorHandler.handleAsync(
+                safeAsyncOperation(
                     () => testModeTab.init(),
                     'TestModeTab',
                     'Erreur lors de l\'initialisation du mode test'
@@ -299,7 +338,8 @@ async function initializeTabs() {
             error: error.message,
             stack: error.stack
         });
-        throw error;
+        // Don't throw the error, just log it and continue
+        // The application should still function even if some tabs fail to initialize
     }
 }
 
