@@ -32,6 +32,7 @@ if (import.meta.env.PROD) {
 // Authentication state
 let currentUser = null;
 let authStateListeners = [];
+let isInitialized = false;
 
 // Initialize Firebase Auth and set up state listener
 export function initFirebaseAuth() {
@@ -39,6 +40,13 @@ export function initFirebaseAuth() {
 
   return new Promise((resolve, reject) => {
     try {
+      // Prevent multiple initializations
+      if (isInitialized) {
+        console.log('⚠️ Firebase Auth already initialized');
+        resolve(currentUser);
+        return;
+      }
+
       // Set up auth state listener
       onAuthStateChanged(auth, (user) => {
         currentUser = user;
@@ -55,12 +63,13 @@ export function initFirebaseAuth() {
 
         if (user) {
           console.log('👤 User signed in:', user.email);
-          resolve(user);
         } else {
           console.log('👤 No user signed in');
-          resolve(null);
         }
       });
+
+      isInitialized = true;
+      resolve(currentUser);
     } catch (error) {
       console.error('🔥 Firebase auth initialization error:', error);
       reject(error);

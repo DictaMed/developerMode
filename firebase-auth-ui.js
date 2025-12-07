@@ -23,26 +23,39 @@ class FirebaseAuthUI {
   // Initialize the Firebase Auth UI
   async init() {
     try {
+      console.log('🔐 Starting Firebase Auth UI initialization...');
+
       // Import Firebase auth functions
       const { initFirebaseAuth, onAuthStateChange, signInWithFirebase, signOutFromFirebase, getFirebaseErrorMessage } = await import('./firebase-config.js');
+      console.log('✅ Firebase config imported successfully');
 
       // Initialize Firebase Auth
+      console.log('🔥 Initializing Firebase Auth...');
       await initFirebaseAuth();
+      console.log('✅ Firebase Auth initialized');
 
       // Set up auth state listener
       onAuthStateChange(this.handleAuthStateChange.bind(this));
+      console.log('✅ Auth state listener registered');
 
       // Create UI elements
       this.createAuthUI();
+      console.log('✅ Auth UI elements created');
 
       // Set up event listeners
       this.setupEventListeners();
+      console.log('✅ Event listeners set up');
 
-      console.log('🔐 Firebase Auth UI initialized');
+      console.log('🔐 Firebase Auth UI initialized successfully');
 
     } catch (error) {
       console.error('🔥 Error initializing Firebase Auth UI:', error);
-      this.showError('Erreur d\'initialisation de l\'authentification');
+      
+      // Show user-friendly error
+      this.showError('Erreur d\'initialisation de l\'authentification. Veuillez recharger la page.');
+      
+      // Re-throw for higher-level handling
+      throw error;
     }
   }
 

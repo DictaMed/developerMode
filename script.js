@@ -1284,20 +1284,31 @@ const FirebaseAuthManager = {
     // Initialize Firebase Auth
     async init() {
         try {
+            console.log('🔥 Starting Firebase Auth Manager initialization...');
+
             // Import and initialize Firebase Auth UI
             const firebaseAuthUI = await import('./firebase-auth-ui.js');
-            await firebaseAuthUI.default.init();
+            console.log('✅ Firebase Auth UI module imported');
 
-            console.log('🔐 Firebase Auth Manager initialized');
+            await firebaseAuthUI.default.init();
+            console.log('✅ Firebase Auth UI initialized successfully');
 
             // Set up event listeners for Firebase auth
             this.setupFirebaseEventListeners(firebaseAuthUI.default);
+            console.log('✅ Event listeners configured');
+
+            console.log('🔐 Firebase Auth Manager initialized successfully');
 
             return firebaseAuthUI.default;
 
         } catch (error) {
             console.error('🔥 Error initializing Firebase Auth Manager:', error);
-            Toast.error('Erreur d\'initialisation de Firebase Auth', 'Erreur');
+            
+            // Show user-friendly error
+            if (typeof Toast !== 'undefined') {
+                Toast.error('Erreur d\'initialisation de Firebase Auth. Veuillez recharger la page.', 'Erreur critique');
+            }
+            
             return null;
         }
     },
@@ -1469,49 +1480,23 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ DictaMed avec Firebase Auth initialisé avec succès!');
 });
 
-// Initialize Firebase Authentication
+// Initialize Firebase Authentication (consolidated)
 async function initFirebaseAuthentication() {
     try {
-        // Dynamically import Firebase Auth UI
-        const firebaseAuthUI = await import('./firebase-auth-ui.js');
-        await firebaseAuthUI.default.init();
+        // Use FirebaseAuthManager for consolidated initialization
+        const authManager = await FirebaseAuthManager.init();
+        
+        if (!authManager) {
+            throw new Error('Failed to initialize Firebase Auth Manager');
+        }
 
-        console.log('🔐 Firebase Authentication UI initialized');
-
-        // Set up normal mode protection
-        setupNormalModeProtection();
+        console.log('🔐 Firebase Authentication UI initialized successfully');
+        
+        return authManager;
 
     } catch (error) {
         console.error('🔥 Error initializing Firebase Authentication:', error);
         Toast.error('Erreur d\'initialisation de l\'authentification Firebase', 'Erreur');
-    }
-}
-
-// Set up protection for Normal Mode
-function setupNormalModeProtection() {
-    // Add click handler to normal mode tab to check authentication
-    const normalModeTab = document.querySelector('[data-tab="mode-normal"]');
-    if (normalModeTab) {
-        normalModeTab.addEventListener('click', async (e) => {
-            // Import Firebase Auth UI
-            const firebaseAuthUI = await import('./firebase-auth-ui.js');
-
-            // Check if user is authenticated
-            if (!firebaseAuthUI.default.isUserAuthenticated()) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                // Show authentication required message
-                Toast.warning('Authentification requise pour accéder au Mode Normal', 'Accès restreint');
-
-                // Open auth modal
-                firebaseAuthUI.default.openAuthModal();
-
-                // Don't switch to normal mode
-                return false;
-            }
-
-            return true;
-        });
+        return null;
     }
 }
