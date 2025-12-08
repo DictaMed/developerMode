@@ -45,8 +45,8 @@ class HomeTab {
         const featureCards = document.querySelectorAll('.feature-card-modern');
         featureCards.forEach((card, index) => {
             setTimeout(() => {
-                card.style.animation = 'slideInUp 0.6s ease forwards';
-            }, index * 100);
+                card.style.animation = 'slideInUp 0.8s ease forwards';
+            }, index * 150);
         });
     }
 
@@ -55,15 +55,113 @@ class HomeTab {
         const modeCards = document.querySelectorAll('.mode-card-modern');
         modeCards.forEach((card, index) => {
             setTimeout(() => {
-                card.style.animation = 'slideInUp 0.6s ease forwards';
-            }, (index + 3) * 100); // Délai après les feature cards
+                card.style.animation = 'slideInUp 0.8s ease forwards';
+            }, (index + 3) * 150); // Délai après les feature cards
+        });
+    }
+
+    animateHeroStats() {
+        // Animation des statistiques du hero
+        const stats = document.querySelectorAll('.stat-item');
+        stats.forEach((stat, index) => {
+            setTimeout(() => {
+                stat.style.animation = 'statFloat 0.8s ease forwards';
+            }, index * 200);
+        });
+    }
+
+    animateTestimonials() {
+        // Animation des témoignages
+        const testimonials = document.querySelectorAll('.testimonial-card');
+        testimonials.forEach((testimonial, index) => {
+            setTimeout(() => {
+                testimonial.style.animation = 'testimonialSlideIn 0.8s ease forwards';
+            }, index * 200);
+        });
+    }
+
+    initScrollAnimations() {
+        // Animation au scroll pour les nouveaux éléments
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observer les nouvelles sections
+        document.querySelectorAll('.testimonials-section, .mode-features').forEach(el => {
+            observer.observe(el);
+        });
+    }
+
+    addInteractiveEffects() {
+        // Effets interactifs pour les nouvelles cartes
+        const featureCards = document.querySelectorAll('.feature-card-modern');
+        featureCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                const highlight = card.querySelector('.feature-highlight');
+                if (highlight) {
+                    highlight.style.transform = 'scale(1.05)';
+                    highlight.style.transition = 'transform 0.3s ease';
+                }
+            });
+
+            card.addEventListener('mouseleave', () => {
+                const highlight = card.querySelector('.feature-highlight');
+                if (highlight) {
+                    highlight.style.transform = 'scale(1)';
+                }
+            });
+        });
+
+        // Effets pour les cartes de modes
+        const modeCards = document.querySelectorAll('.mode-card-modern');
+        modeCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                const badge = card.querySelector('.mode-badge');
+                if (badge) {
+                    badge.style.transform = 'scale(1.1) rotate(2deg)';
+                    badge.style.transition = 'all 0.3s ease';
+                }
+            });
+
+            card.addEventListener('mouseleave', () => {
+                const badge = card.querySelector('.mode-badge');
+                if (badge) {
+                    badge.style.transform = 'scale(1) rotate(0deg)';
+                }
+            });
         });
     }
 
     // Lifecycle methods
     onTabLoad() {
+        // Animer les éléments existants
         this.updateFeatureCards();
         this.updateModeCards();
+        
+        // Animer les nouveaux éléments
+        setTimeout(() => {
+            this.animateHeroStats();
+            this.animateTestimonials();
+        }, 800); // Délai après les animations principales
+        
+        // Initialiser les effets interactifs
+        setTimeout(() => {
+            this.addInteractiveEffects();
+        }, 1200);
+        
+        // Initialiser les animations au scroll
+        this.initScrollAnimations();
+        
+        console.log('Page d\'accueil améliorée chargée avec animations');
     }
 
     onTabUnload() {
