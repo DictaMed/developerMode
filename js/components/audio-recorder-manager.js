@@ -12,7 +12,7 @@ class AudioRecorderManager {
 
     init() {
         try {
-            const recordingSections = document.querySelectorAll('.recording-section');
+            const recordingSections = document.querySelectorAll('.recording-section-enhanced');
             
             // Vérification de nullité pour les sections d'enregistrement
             if (!recordingSections || recordingSections.length === 0) {
