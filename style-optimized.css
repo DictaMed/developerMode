@@ -714,204 +714,10 @@ p {
     padding: 0 var(--space-xl) var(--space-xl) var(--space-xl);
 }
 
-/* ========== WORKFLOW STYLES ========== */
-.workflow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-xl);
-    margin: var(--space-2xl) 0;
-    flex-wrap: wrap;
-    animation: fadeInUp 0.8s ease-out;
-}
-
-.workflow-step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    background: var(--gradient-surface);
-    backdrop-filter: blur(20px);
-    border-radius: var(--border-radius-xl);
-    padding: var(--space-xl);
-    box-shadow: var(--shadow-lg);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    transition: var(--transition-slow);
-    min-width: 200px;
-    position: relative;
-    overflow: hidden;
-    animation: slideInUp 0.8s ease-out forwards;
-    opacity: 0;
-}
-
-.workflow-step:nth-child(1) {
-    animation-delay: 0.2s;
-}
-
-.workflow-step:nth-child(2) {
-    animation-delay: 0.4s;
-}
-
-.workflow-step:nth-child(3) {
-    animation-delay: 0.6s;
-}
-
-.workflow-step::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--gradient-primary);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--transition-slow);
-}
-
-.workflow-step:hover {
-    transform: translateY(-8px) scale(1.05);
-    box-shadow: var(--shadow-xl);
-}
-
-.workflow-step:hover::before {
-    transform: scaleX(1);
-}
-
-.workflow-icon {
-    font-size: 3rem;
-    margin-bottom: var(--space-md);
-    animation: float 3s ease-in-out infinite;
-}
-
-.workflow-step:nth-child(2) .workflow-icon {
-    animation-delay: 0.7s;
-}
-
-.workflow-step:nth-child(3) .workflow-icon {
-    animation-delay: 1.2s;
-}
-
-.workflow-arrow {
-    font-size: 2rem;
-    color: var(--primary);
-    font-weight: bold;
-    animation: pulse 2s ease-in-out infinite;
-    animation-delay: 0.8s;
-}
-
-/* ========== STEPS GRID STYLES ========== */
-.steps-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--space-xl);
-    margin: var(--space-2xl) 0;
-}
-
-.step-card {
-    background: var(--gradient-surface);
-    backdrop-filter: blur(20px);
-    border-radius: var(--border-radius-xl);
-    padding: var(--space-xl);
-    text-align: center;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    transition: var(--transition-slow);
-    position: relative;
-    overflow: hidden;
-    animation: slideInUp 0.8s ease-out forwards;
-    opacity: 0;
-}
-
-.step-card:nth-child(1) {
-    animation-delay: 0.3s;
-}
-
-.step-card:nth-child(2) {
-    animation-delay: 0.5s;
-}
-
-.step-card:nth-child(3) {
-    animation-delay: 0.7s;
-}
-
-.step-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--gradient-primary);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--transition-slow);
-}
-
-.step-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: var(--shadow-xl);
-}
-
-.step-card:hover::before {
-    transform: scaleX(1);
-}
-
-.step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 60px;
-    height: 60px;
-    background: var(--gradient-primary);
-    color: white;
-    border-radius: 50%;
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin-bottom: var(--space-lg);
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
-    animation: pulse 2s ease-in-out infinite;
-}
-
-.step-card:nth-child(1) .step-number {
-    animation-delay: 0.6s;
-}
-
-.step-card:nth-child(2) .step-number {
-    animation-delay: 0.8s;
-}
-
-.step-card:nth-child(3) .step-number {
-    animation-delay: 1s;
-}
-
-.step-card h3 {
-    color: var(--gray-900);
-    margin-bottom: var(--space-md);
-    font-size: 1.5rem;
-}
-
-.step-card p {
-    color: var(--gray-600);
-    line-height: 1.6;
-    margin: 0;
-}
-
 /* ========== FAQ STYLES ========== */
 .faq-section {
     margin-top: var(--space-2xl);
     margin-bottom: var(--space-2xl);
-}
-
-.faq-title {
-    text-align: center;
-    margin-bottom: var(--space-xl);
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 2.5rem;
-    animation: fadeInUp 1s ease-out;
 }
 
 .faq-container {
@@ -930,20 +736,7 @@ p {
     border: 1px solid rgba(255, 255, 255, 0.3);
     overflow: hidden;
     transition: var(--transition-base);
-    animation: slideInUp 0.6s ease-out forwards;
-    opacity: 0;
 }
-
-.faq-item:nth-child(1) { animation-delay: 0.1s; }
-.faq-item:nth-child(2) { animation-delay: 0.2s; }
-.faq-item:nth-child(3) { animation-delay: 0.3s; }
-.faq-item:nth-child(4) { animation-delay: 0.4s; }
-.faq-item:nth-child(5) { animation-delay: 0.5s; }
-.faq-item:nth-child(6) { animation-delay: 0.6s; }
-.faq-item:nth-child(7) { animation-delay: 0.7s; }
-.faq-item:nth-child(8) { animation-delay: 0.8s; }
-.faq-item:nth-child(9) { animation-delay: 0.9s; }
-.faq-item:nth-child(10) { animation-delay: 1.0s; }
 
 .faq-item:hover {
     box-shadow: var(--shadow-lg);
@@ -964,45 +757,23 @@ p {
     color: var(--gray-900);
     text-align: left;
     transition: var(--transition-base);
-    position: relative;
 }
 
 .faq-question:hover {
     background: linear-gradient(135deg, rgba(37, 99, 235, 0.03) 0%, rgba(16, 185, 129, 0.03) 100%);
 }
 
-.faq-icon {
-    font-size: 1.5rem;
-    flex-shrink: 0;
-}
-
-.faq-text {
-    flex: 1;
-}
-
-.faq-arrow {
-    font-size: 1.2rem;
-    transition: transform var(--transition-base);
-    color: var(--primary);
-}
-
-.faq-item.active .faq-arrow {
-    transform: rotate(180deg);
-}
-
 .faq-answer {
     max-height: 0;
     overflow: hidden;
-    transition: max-height var(--transition-slow), padding var(--transition-slow), opacity var(--transition-slow);
+    transition: max-height var(--transition-slow), padding var(--transition-slow);
     padding: 0 var(--space-xl);
     background: linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.6) 100%);
-    opacity: 0;
 }
 
 .faq-item.active .faq-answer {
-    max-height: 400px;
+    max-height: 300px;
     padding: var(--space-md) var(--space-xl) var(--space-lg) var(--space-xl);
-    opacity: 1;
 }
 
 .faq-answer p {
@@ -1010,83 +781,6 @@ p {
     font-size: 1rem;
     line-height: 1.7;
     margin: 0;
-}
-
-/* ========== FAQ LIST STYLES (pour tab-faq.html) ========== */
-.faq-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
-    max-width: 800px;
-    margin: 0 auto;
-    padding: var(--space-xl) 0;
-}
-
-.faq-list .faq-item {
-    background: var(--gradient-surface);
-    backdrop-filter: blur(20px);
-    border-radius: var(--border-radius-lg);
-    padding: var(--space-xl);
-    box-shadow: var(--shadow-md);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    transition: var(--transition-slow);
-    animation: slideInUp 0.6s ease-out;
-}
-
-.faq-list .faq-item:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-4px);
-}
-
-.faq-list .faq-item h3 {
-    color: var(--gray-900);
-    margin-bottom: var(--space-md);
-    font-size: 1.3rem;
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.faq-list .faq-item p {
-    color: var(--gray-600);
-    line-height: 1.7;
-    margin: 0;
-}
-
-/* ========== INSTRUCTIONS CARD ========== */
-.instructions-card {
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
-    border: 2px solid rgba(37, 99, 235, 0.2);
-    animation: fadeInUp 1s ease-out;
-}
-
-.instructions-card h3 {
-    color: var(--primary);
-    margin-bottom: var(--space-lg);
-    font-size: 1.5rem;
-}
-
-.instructions-card ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.instructions-card li {
-    position: relative;
-    padding: var(--space-sm) 0 var(--space-sm) var(--space-xl);
-    color: var(--gray-700);
-    line-height: 1.6;
-    font-size: 1rem;
-}
-
-.instructions-card li::before {
-    content: '✨';
-    position: absolute;
-    left: 0;
-    top: var(--space-sm);
-    font-size: 1.1rem;
 }
 
 /* ========== FOOTER ========== */
@@ -1159,64 +853,6 @@ footer a:hover {
         transform: translateY(0);
     }
 }
-
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes scaleIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-/* Enhanced animation classes with delays */
-.animate-slide-up {
-    animation: slideInUp 0.8s ease-out forwards;
-}
-
-.animate-slide-left {
-    animation: slideInLeft 0.6s ease-out forwards;
-}
-
-.animate-slide-right {
-    animation: slideInRight 0.6s ease-out forwards;
-}
-
-.animate-scale-in {
-    animation: scaleIn 0.5s ease-out forwards;
-}
-
-/* Animation delays for staggered effects */
-.animate-delay-1 { animation-delay: 0.1s; }
-.animate-delay-2 { animation-delay: 0.2s; }
-.animate-delay-3 { animation-delay: 0.3s; }
-.animate-delay-4 { animation-delay: 0.4s; }
-.animate-delay-5 { animation-delay: 0.5s; }
-.animate-delay-6 { animation-delay: 0.6s; }
 
 @keyframes slideIn {
     from {
@@ -1325,32 +961,6 @@ footer a:hover {
         border-radius: 16px;
     }
     
-    /* Workflow responsive */
-    .workflow {
-        flex-direction: column;
-        gap: var(--space-lg);
-    }
-    
-    .workflow-arrow {
-        transform: rotate(90deg);
-    }
-    
-    .workflow-step {
-        min-width: 250px;
-        max-width: 300px;
-    }
-    
-    /* Steps grid responsive */
-    .steps-grid {
-        grid-template-columns: 1fr;
-        gap: var(--space-lg);
-    }
-    
-    .step-card {
-        padding: var(--space-lg);
-    }
-    
-    /* FAQ responsive */
     .faq-question {
         padding: var(--space-md) var(--space-lg);
         font-size: 1rem;
@@ -1363,10 +973,6 @@ footer a:hover {
     
     .faq-item.active .faq-answer {
         padding: var(--space-sm) var(--space-lg) var(--space-md) var(--space-lg);
-    }
-    
-    .faq-list .faq-item {
-        padding: var(--space-lg);
     }
 }
 

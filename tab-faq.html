@@ -1,89 +1,28 @@
 <h1>❓ Foire Aux Questions</h1>
 
-<div class="faq-section">
-    <div class="faq-container">
-        <div class="faq-item">
-            <button class="faq-question" onclick="toggleFaq(this)">
-                <span class="faq-icon">📋</span>
-                <span class="faq-text">Comment utiliser DictaMed ?</span>
-                <span class="faq-arrow">▼</span>
-            </button>
-            <div class="faq-answer">
-                <p>DictaMed fonctionne en 3 étapes simples : saisie des informations patient, enregistrement vocal par sections, et envoi des données. Chaque section audio est limitée à 2 minutes.</p>
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <button class="faq-question" onclick="toggleFaq(this)">
-                <span class="faq-icon">⚙️</span>
-                <span class="faq-text">Quelle est la différence entre les modes ?</span>
-                <span class="faq-arrow">▼</span>
-            </button>
-            <div class="faq-answer">
-                <p><strong>Mode Normal</strong> : Production simplifiée sans authentification. <strong>Mode Test</strong> : Démonstration publique. <strong>Saisie Texte</strong> : Saisie directe avec photos.</p>
-            </div>
-        </div>
-        
-        <div class="faq-item">
-            <button class="faq-question" onclick="toggleFaq(this)">
-                <span class="faq-icon">🔒</span>
-                <span class="faq-text">Mes données sont-elles sécurisées ?</span>
-                <span class="faq-arrow">▼</span>
-            </button>
-            <div class="faq-answer">
-                <p>Oui, toutes les données sont chiffrées et transmises de manière sécurisée. En mode production, elles sont traitées selon les normes médicales en vigueur.</p>
-            </div>
-        </div>
-        
-        <div class="faq-item">
-            <button class="faq-question" onclick="toggleFaq(this)">
-                <span class="faq-icon">🎤</span>
-                <span class="faq-text">Que faire si l'enregistrement ne fonctionne pas ?</span>
-                <span class="faq-arrow">▼</span>
-            </button>
-            <div class="faq-answer">
-                <p>Vérifiez que vous avez autorisé l'accès au microphone dans votre navigateur. Utilisez un navigateur moderne (Chrome, Firefox, Edge, Safari).</p>
-            </div>
-        </div>
-        
-        <div class="faq-item">
-            <button class="faq-question" onclick="toggleFaq(this)">
-                <span class="faq-icon">📊</span>
-                <span class="faq-text">Comment voir mes transcriptions en mode test ?</span>
-                <span class="faq-arrow">▼</span>
-            </button>
-            <div class="faq-answer">
-                <p>Vos enregistrements apparaissent en temps réel dans le Google Sheet public affiché après chaque envoi en mode test.</p>
-            </div>
-        </div>
+<div class="faq-list">
+    <div class="faq-item">
+        <h3>Comment utiliser DictaMed ?</h3>
+        <p>DictaMed fonctionne en 3 étapes simples : saisie des informations patient, enregistrement vocal par sections, et envoi des données. Chaque section audio est limitée à 2 minutes.</p>
+    </div>
+    
+    <div class="faq-item">
+        <h3>Quelle est la différence entre les modes ?</h3>
+        <p><strong>Mode Normal</strong> : Production simplifiée sans authentification. <strong>Mode Test</strong> : Démonstration publique. <strong>Saisie Texte</strong> : Saisie directe avec photos.</p>
+    </div>
+    
+    <div class="faq-item">
+        <h3>Mes données sont-elles sécurisées ?</h3>
+        <p>Oui, toutes les données sont chiffrées et transmises de manière sécurisée. En mode production, elles sont traitées selon les normes médicales en vigueur.</p>
+    </div>
+    
+    <div class="faq-item">
+        <h3>Que faire si l'enregistrement ne fonctionne pas ?</h3>
+        <p>Vérifiez que vous avez autorisé l'accès au microphone dans votre navigateur. Utilisez un navigateur moderne (Chrome, Firefox, Edge, Safari).</p>
+    </div>
+    
+    <div class="faq-item">
+        <h3>Comment voir mes transcriptions en mode test ?</h3>
+        <p>Vos enregistrements apparaissent en temps réel dans le Google Sheet public affiché après chaque envoi en mode test.</p>
     </div>
 </div>
-
-<!-- Tips Section -->
-<div class="card instructions-card">
-    <h3>💡 Conseils d'utilisation</h3>
-    <ul>
-        <li>Parlez clairement et à un rythme normal</li>
-        <li>Évitez les bruits de fond pendant l'enregistrement</li>
-        <li>Une section ne peut pas dépasser 2 minutes</li>
-        <li>Sauvegardez régulièrement vos données</li>
-        <li>Utilisez le mode test pour vous familiariser</li>
-    </ul>
-</div>
-
-<script>
-function toggleFaq(button) {
-    const item = button.closest('.faq-item');
-    const isActive = item.classList.contains('active');
-    
-    // Close all other items
-    document.querySelectorAll('.faq-item').forEach(el => {
-        el.classList.remove('active');
-    });
-    
-    // Toggle current item
-    if (!isActive) {
-        item.classList.add('active');
-    }
-}
-</script>
