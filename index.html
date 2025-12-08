@@ -3,230 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DictaMed - Dictée Médicale</title>
+    <title>DictaMed</title>
     <link rel="stylesheet" href="style-optimized.css">
     <link rel="icon" type="image/png" sizes="32x32" href="icon-72x72.png">
-    <link rel="stylesheet" href="style-fallback.css">
 </head>
 <body>
-    <!-- Navigation fixe -->
-    <div class="fixed-nav-header" id="fixedNavHeader">
-        <div class="fixed-nav-container">
-            <div class="nav-logo-left">
-                <div class="header-logo">
-                    <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
-                </div>
-            </div>
-            <div class="nav-tabs-right">
-                <button class="fixed-nav-btn active" data-tab="home">🏠 Accueil</button>
-                <button class="fixed-nav-btn" data-tab="mode-normal">🏥 Mode Normal</button>
-                <button class="fixed-nav-btn" data-tab="mode-test">🧪 Mode Test</button>
-                <button class="fixed-nav-btn" data-tab="mode-dmi">📝 Saisie Texte</button>
-                <button class="fixed-nav-btn" data-tab="guide">📖 Guide</button>
-                <button class="fixed-nav-btn" data-tab="faq">❓ FAQ</button>
-                <button class="fixed-nav-btn auth-btn" id="authButton">
-                    🔐 <span id="authButtonText">Connexion</span>
-                </button>
+    <!-- Navigation simple -->
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="logo">DictaMed</div>
+            <div class="nav-links">
+                <button data-tab="mode-test">Mode Test</button>
+                <button data-tab="guide">Guide</button>
+                <button data-tab="faq">FAQ</button>
             </div>
         </div>
-    </div>
+    </nav>
 
-    <main class="container">
-        <!-- Page d'accueil -->
-        <div id="tab-content" class="tab-content active">
-            <!-- Section Hero Simplifiée -->
-            <div class="hero-section-modern">
-                <div class="hero-content-modern">
-                    <h1 class="hero-title">
-                        <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
-                    </h1>
-                    <p class="hero-subtitle">
-                        Dictée médicale intelligente
-                    </p>
-                    <p class="hero-description">
-                        Transformez vos paroles en documents médicaux structurés et sécurisés.
-                    </p>
-                    
-                    <div class="hero-cta">
-                        <button class="btn btn-primary btn-large" data-tab="mode-test">
-                            🚀 Commencer
-                        </button>
-                        <button class="btn btn-secondary btn-large" data-tab="guide">
-                            📋 Guide
-                        </button>
-                    </div>
+    <!-- Contenu principal -->
+    <main class="main">
+        <section class="hero">
+            <h1>DictaMed</h1>
+            <p>Dictée médicale intelligente</p>
+            <div class="hero-buttons">
+                <button data-tab="mode-test">Essayer</button>
+                <button data-tab="guide">Guide</button>
+            </div>
+        </section>
+
+        <section class="features">
+            <h2>Fonctionnalités</h2>
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon">🎤</div>
+                    <h3>Dictée Vocale</h3>
+                    <p>Transcription intelligente</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Sécurisé</h3>
+                    <p>Conformité RGPD</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Rapide</h3>
+                    <p>Résultats instantanés</p>
                 </div>
             </div>
+        </section>
 
-            <!-- Section Fonctionnalités Simplifiée -->
-            <div class="features-modes-section">
-                <div class="features-overview">
-                    <h2>✨ Fonctionnalités</h2>
-                    <div class="features-grid-modern">
-                        <div class="feature-card-modern">
-                            <div class="feature-icon-modern">🎤</div>
-                            <h4>Dictée Vocale</h4>
-                            <p>Transcription en temps réel avec IA médicale spécialisée.</p>
-                        </div>
-                        <div class="feature-card-modern">
-                            <div class="feature-icon-modern">🔒</div>
-                            <h4>Sécurisé</h4>
-                            <p>Conformité RGPD et chiffrement end-to-end.</p>
-                        </div>
-                        <div class="feature-card-modern">
-                            <div class="feature-icon-modern">⚡</div>
-                            <h4>Rapide</h4>
-                            <p>Résultats en moins de 3 secondes.</p>
-                        </div>
-                    </div>
+        <section class="modes">
+            <h2>Modes</h2>
+            <div class="modes-grid">
+                <div class="mode">
+                    <div class="mode-icon">🧪</div>
+                    <h3>Mode Test</h3>
+                    <p>Essai gratuit</p>
+                    <button data-tab="mode-test">Tester</button>
                 </div>
-
-                <div class="modes-overview">
-                    <h2>🎯 Modes d'utilisation</h2>
-                    <div class="modes-grid-modern">
-                        <div class="mode-card-modern demo-mode">
-                            <div class="mode-icon-modern">🧪</div>
-                            <h4>Mode Test</h4>
-                            <p>Découvrez DictaMed gratuitement sans inscription.</p>
-                            <button class="btn btn-primary btn-small" data-tab="mode-test">
-                                Tester
-                            </button>
-                        </div>
-
-                        <div class="mode-card-modern production-mode">
-                            <div class="mode-icon-modern">🏥</div>
-                            <h4>Mode Normal</h4>
-                            <p>Solution complète pour les professionnels.</p>
-                            <button class="btn btn-secondary btn-small" data-tab="mode-normal">
-                                Accéder
-                            </button>
-                        </div>
-
-                        <div class="mode-card-modern dmi-mode">
-                            <div class="mode-icon-modern">📝</div>
-                            <h4>Saisie Texte</h4>
-                            <p>Saisie manuelle avec gestion de photos.</p>
-                            <button class="btn btn-secondary btn-small" data-tab="mode-dmi">
-                                Saisir
-                            </button>
-                        </div>
-                    </div>
+                <div class="mode">
+                    <div class="mode-icon">🏥</div>
+                    <h3>Mode Normal</h3>
+                    <p>Professionnel</p>
+                    <button data-tab="mode-normal">Accéder</button>
+                </div>
+                <div class="mode">
+                    <div class="mode-icon">📝</div>
+                    <h3>Saisie Texte</h3>
+                    <p>Mode manuel</p>
+                    <button data-tab="mode-dmi">Saisir</button>
                 </div>
             </div>
-        </div>
-
-        <!-- Résultat Google Sheet (caché par défaut) -->
-        <div id="googleSheetCard" class="card google-sheet-result" style="display: none;">
-            <h2>✅ Données envoyées avec succès !</h2>
-            <p>Vos enregistrements ont été transcrits et sont disponibles dans le Google Sheet public :</p>
-            <a href="https://docs.google.com/spreadsheets/d/1example" target="_blank" class="btn btn-primary">
-                📊 Consulter le Google Sheet
-            </a>
-            <p class="note">Les données restent disponibles dans le sheet public pendant 24h.</p>
-        </div>
+        </section>
     </main>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2024 DictaMed - Dictée médicale intelligente</p>
-            <p>Contact: <a href="mailto:support@dictamed.fr">support@dictamed.fr</a></p>
-        </div>
+    <!-- Footer simple -->
+    <footer class="footer">
+        <p>&copy; 2024 DictaMed</p>
+        <p><a href="mailto:support@dictamed.fr">Contact</a></p>
     </footer>
 
-    <!-- Modal d'authentification simplifié -->
-    <div id="authModal" class="auth-modal hidden">
-        <div class="auth-modal-content">
-            <div class="auth-modal-header">
-                <div class="auth-modal-logo">
-                    <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
-                </div>
-                <h2 id="authModalTitle">Connexion</h2>
-                <button class="auth-modal-close" data-action="close-auth">&times;</button>
+    <!-- Modal d'authentification minimal -->
+    <div id="authModal" class="auth-modal" style="display: none;">
+        <div class="auth-content">
+            <div class="auth-header">
+                <h2>Connexion</h2>
+                <button onclick="closeAuth()">&times;</button>
             </div>
-            
-            <div class="auth-modal-body">
-                <div class="auth-mode-toggle">
-                    <button type="button" id="modalSignInTab" class="auth-tab-btn active">🔐 Connexion</button>
-                    <button type="button" id="modalSignUpTab" class="auth-tab-btn">✨ Inscription</button>
-                </div>
-                
-                <form id="modalEmailAuthForm" class="auth-email-form">
-                    <div class="form-group-modern">
-                        <label for="modalEmailInput">📧 Email</label>
-                        <input type="email" id="modalEmailInput" placeholder="votre@email.com" required>
-                    </div>
-                    
-                    <div class="form-group-modern">
-                        <label for="modalPasswordInput">🔒 Mot de passe</label>
-                        <div class="password-input-wrapper">
-                            <input type="password" id="modalPasswordInput" placeholder="••••••••" required>
-                            <button type="button" class="password-toggle" data-action="toggle-password">
-                                <span class="eye-icon">👁️</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <button type="submit" id="modalEmailSubmitBtn" class="btn btn-primary btn-full">
-                        <span class="btn-text">Se connecter</span>
-                        <span class="btn-icon">→</span>
-                    </button>
-                    
-                    <button type="button" id="modalGoogleSignInBtn" class="btn btn-google btn-full">
-                        Continuer avec Google
-                    </button>
-                    
-                    <div id="modalAuthError" class="auth-error hidden"></div>
+            <div class="auth-body">
+                <form>
+                    <input type="email" placeholder="Email" required>
+                    <input type="password" placeholder="Mot de passe" required>
+                    <button type="submit">Se connecter</button>
                 </form>
-                
-                <!-- Profil utilisateur -->
-                <div id="modalUserProfile" class="user-profile-compact hidden">
-                    <div class="user-info-modern">
-                        <div class="user-avatar-modern" id="modalUserAvatar">
-                            <div class="avatar-placeholder-modern" id="modalAvatarPlaceholder">👤</div>
-                        </div>
-                        <div class="user-details-modern">
-                            <h4 id="modalUserName">Utilisateur</h4>
-                            <p id="modalUserEmail">email@example.com</p>
-                        </div>
-                    </div>
-                    <div class="user-actions-modern">
-                        <button class="btn btn-outline" data-tab="mode-normal" data-action="close-after-nav">
-                            🏥 Mode Normal
-                        </button>
-                        <button id="modalSignOutBtn" class="btn btn-danger">
-                            🚪 Déconnexion
-                        </button>
-                    </div>
-                </div>
+                <button>Google</button>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Scripts essentiels -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="firebase-config.js"></script>
-    
-    <!-- Scripts Core -->
     <script src="js/core/config.js"></script>
-    <script src="js/core/utils.js"></script>
-    <script src="js/core/error-handler.js"></script>
-    <script src="js/core/app-state.js"></script>
-    
-    <!-- Composants -->
-    <script src="js/components/notification.js"></script>
-    <script src="js/components/firebase-auth-manager.js"></script>
-    <script src="js/components/auth-modal.js"></script>
-    <script src="js/components/audio-recorder.js"></script>
     <script src="js/components/navigation.js"></script>
-    <script src="js/components/data-sender.js"></script>
-    
-    <!-- Onglets -->
-    <script src="js/tabs/home.js"></script>
-    <script src="js/tabs/normal-mode.js"></script>
-    <script src="js/tabs/test-mode.js"></script>
-    
-    <!-- Point d'entrée principal -->
     <script src="js/main.js"></script>
 </body>
 </html>
