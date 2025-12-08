@@ -81,10 +81,12 @@ class FormValidationSystem {
     }
 
     validateDMIMode() {
-        const numeroDossier = document.getElementById('numeroDossierDMI').value.trim();
+        const numeroDossierElement = document.getElementById('numeroDossierDMI');
         const submitBtn = document.getElementById('submitDMI');
         
-        if (submitBtn) {
+        // Only validate if DMI elements are available
+        if (numeroDossierElement && submitBtn) {
+            const numeroDossier = numeroDossierElement.value.trim();
             submitBtn.disabled = !numeroDossier;
         }
     }
