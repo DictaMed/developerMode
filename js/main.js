@@ -321,9 +321,18 @@ async function initializeComponents() {
         window.tabNavigationSystem = tabNavigationSystem;
         
         // Make switchTab function available immediately for onclick handlers
+        // This will be properly set up once navigation system is initialized
         window.switchTab = async (tabId) => {
-            if (tabNavigationSystem) {
+            if (tabNavigationSystem && tabNavigationSystem.switchTab) {
                 await tabNavigationSystem.switchTab(tabId);
+            } else {
+                console.warn('⚠️ switchTab called before navigation system ready');
+                // Retry after a short delay
+                setTimeout(async () => {
+                    if (tabNavigationSystem && tabNavigationSystem.switchTab) {
+                        await tabNavigationSystem.switchTab(tabId);
+                    }
+                }, 100);
             }
         };
         
@@ -567,6 +576,12 @@ function setupGlobalEventListeners() {
 }
 
 function setupTabChangeListeners() {
+    // Only set up tab change listeners if navigation system is available
+    if (!tabNavigationSystem || !tabNavigationSystem.switchTab) {
+        console.warn('⚠️ setupTabChangeListeners: tabNavigationSystem not ready, skipping');
+        return;
+    }
+    
     // Listen for tab changes to trigger lifecycle methods
     const originalSwitchTab = tabNavigationSystem.switchTab.bind(tabNavigationSystem);
     
@@ -647,77 +662,8 @@ function makeInstancesGlobal() {
     window.DictaMed = window.DictaMed || {};
     
     // Only expose essential global functions for backward compatibility
-    window.switchTab = async (tabId) => {
-        if (tabNavigationSystem) {
-            await tabNavigationSystem.switchTab(tabId);
-        }
-    };
-
-    window.toggleAuthModal = () => {
-        if (authModalSystem) {
-            authModalSystem.toggle();
-        }
-    };
-
-    window.closeAuthModal = () => {
-        if (authModalSystem) {
-            authModalSystem.close();
-        }
-    };
-
-    window.togglePasswordVisibility = () => {
-        if (authModalSystem) {
-            authModalSystem.togglePasswordVisibility();
-        }
-    };
-
-    window.showForgotPassword = () => {
-        const emailInput = document.getElementById('modalEmailInput');
-        if (!emailInput) {
-            console.warn('Modal email input not found');
-            return;
-        }
-        
-        const email = emailInput.value.trim();
-        if (!email) {
-            if (notificationSystem) {
-                notificationSystem.warning('Veuillez d\'abord entrer votre adresse email pour réinitialiser votre mot de passe.', 'Email requis');
-            } else {
-                alert('Veuillez d\'abord entrer votre adresse email pour réinitialiser votre mot de passe.');
-            }
-            emailInput.focus();
-            return;
-        }
-        
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-            firebase.auth().sendPasswordResetEmail(email)
-                .then(() => {
-                    if (notificationSystem) {
-                        notificationSystem.success('Un email de réinitialisation a été envoyé à ' + email, 'Email envoyé');
-                    } else {
-                        alert('Un email de réinitialisation a été envoyé à ' + email);
-                    }
-                })
-                .catch((error) => {
-                    console.error('Erreur:', error);
-                    if (error.code === 'auth/user-not-found') {
-                        if (notificationSystem) {
-                            notificationSystem.error('Aucun compte trouvé avec cet email', 'Erreur');
-                        } else {
-                            alert('Aucun compte trouvé avec cet email');
-                        }
-                    } else {
-                        if (notificationSystem) {
-                            notificationSystem.error('Impossible d\'envoyer l\'email de réinitialisation', 'Erreur');
-                        } else {
-                            alert('Impossible d\'envoyer l\'email de réinitialisation');
-                        }
-                    }
-                });
-        } else {
-            alert('Un email de réinitialisation sera envoyé à: ' + email);
-        }
-    };
+    // These are already set up early in the file with safety checks
+    // No need to reassign them here to avoid timing issues
 }
 
 function initializeGlobalHelpers() {
