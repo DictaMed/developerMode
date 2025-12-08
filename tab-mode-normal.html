@@ -1,124 +1,366 @@
-<h1>🏥 Mode Normal - Production</h1>
-
-<div class="card">
-    <h3>📋 Informations patient</h3>
-    
-    <div class="form-group">
-        <label for="numeroDossier">Numéro de dossier <span style="color: var(--red)">*</span></label>
-        <input type="text" id="numeroDossier" placeholder="Numéro du dossier patient" maxlength="50">
-        <div class="char-counter" id="numeroDossierCounter">0/50</div>
-    </div>
-    
-    <div class="form-group">
-        <label for="nomPatient">Nom du patient <span style="color: var(--red)">*</span></label>
-        <input type="text" id="nomPatient" placeholder="Nom du patient" maxlength="50">
-        <div class="char-counter" id="nomPatientCounter">0/50</div>
-    </div>
-</div>
-
-<!-- Partie 1 -->
-<div class="recording-section" data-section="partie1">
-    <h3>🎤 Partie 1 - Anamnèse</h3>
-    <p class="section-description">Décrivez les symptômes, la durée d'évolution, les facteurs déclenchants...</p>
-    
-    <div class="recording-controls">
-        <div class="status-info">
-            <span class="status-badge" data-status="ready">⚪ Prêt</span>
-            <span class="timer">00:00</span>
-            <span class="recorded-badge hidden">✅ Enregistré</span>
+<div class="mode-header">
+    <div class="mode-header-content">
+        <div class="mode-title-section">
+            <h1 class="mode-main-title">
+                <span class="mode-icon">🏥</span>
+                Mode Normal - Production
+            </h1>
+            <p class="mode-subtitle">Interface avancée d'enregistrement médical</p>
         </div>
-        
-        <div class="control-buttons">
-            <button class="btn btn-record">🔴 Enregistrer</button>
-            <button class="btn btn-pause hidden">⏸️ Pause</button>
-            <button class="btn btn-stop hidden">⏹️ Arrêter</button>
-            <button class="btn btn-replay hidden">🔊 Réécouter</button>
-            <button class="btn btn-delete hidden">🗑️ Supprimer</button>
+        <div class="mode-stats">
+            <div class="stat-card">
+                <div class="stat-number">4</div>
+                <div class="stat-label">Sections</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">0</div>
+                <div class="stat-label">Enregistrées</div>
+            </div>
         </div>
-        
-        <audio class="audio-player hidden" controls></audio>
     </div>
 </div>
 
-<!-- Partie 2 -->
-<div class="recording-section" data-section="partie2">
-    <h3>🎤 Partie 2 - Examen clinique</h3>
-    <p class="section-description">Décrivez l'examen physique, les observations cliniques...</p>
+<div class="patient-info-section">
+    <div class="section-header">
+        <div class="section-icon">📋</div>
+        <h3>Informations patient</h3>
+        <div class="section-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="patientProgress"></div>
+            </div>
+        </div>
+    </div>
     
-    <div class="recording-controls">
-        <div class="status-info">
-            <span class="status-badge" data-status="ready">⚪ Prêt</span>
-            <span class="timer">00:00</span>
-            <span class="recorded-badge hidden">✅ Enregistré</span>
+    <div class="form-grid">
+        <div class="form-group-enhanced">
+            <label for="numeroDossier">
+                <span class="label-icon">🆔</span>
+                Numéro de dossier 
+                <span class="required-indicator">*</span>
+            </label>
+            <div class="input-wrapper">
+                <input type="text" id="numeroDossier" placeholder="Numéro du dossier patient" maxlength="50">
+                <div class="input-decoration"></div>
+            </div>
+            <div class="char-counter" id="numeroDossierCounter">0/50</div>
         </div>
         
-        <div class="control-buttons">
-            <button class="btn btn-record">🔴 Enregistrer</button>
-            <button class="btn btn-pause hidden">⏸️ Pause</button>
-            <button class="btn btn-stop hidden">⏹️ Arrêter</button>
-            <button class="btn btn-replay hidden">🔊 Réécouter</button>
-            <button class="btn btn-delete hidden">🗑️ Supprimer</button>
+        <div class="form-group-enhanced">
+            <label for="nomPatient">
+                <span class="label-icon">👤</span>
+                Nom du patient 
+                <span class="required-indicator">*</span>
+            </label>
+            <div class="input-wrapper">
+                <input type="text" id="nomPatient" placeholder="Nom du patient" maxlength="50">
+                <div class="input-decoration"></div>
+            </div>
+            <div class="char-counter" id="nomPatientCounter">0/50</div>
         </div>
-        
-        <audio class="audio-player hidden" controls></audio>
     </div>
 </div>
 
-<!-- Partie 3 -->
-<div class="recording-section" data-section="partie3">
-    <h3>🎤 Partie 3 - Examens complémentaires</h3>
-    <p class="section-description">Décrivez les analyses, imagerie, résultats d'examens...</p>
+<!-- Partie 1 - Enhanced -->
+<div class="recording-section-enhanced" data-section="partie1">
+    <div class="section-header">
+        <div class="section-number">01</div>
+        <div class="section-info">
+            <h3 class="section-title">
+                <span class="section-icon">🎤</span>
+                Anamnèse
+            </h3>
+            <p class="section-description">Décrivez les symptômes, la durée d'évolution, les facteurs déclenchants...</p>
+        </div>
+        <div class="section-status">
+            <span class="status-indicator" data-status="ready">
+                <span class="status-dot"></span>
+                Prêt
+            </span>
+        </div>
+    </div>
     
-    <div class="recording-controls">
-        <div class="status-info">
-            <span class="status-badge" data-status="ready">⚪ Prêt</span>
-            <span class="timer">00:00</span>
-            <span class="recorded-badge hidden">✅ Enregistré</span>
+    <div class="recording-controls-enhanced">
+        <div class="recording-timer-section">
+            <div class="timer-display">
+                <span class="timer-icon">⏱️</span>
+                <span class="timer" id="timer-partie1">00:00</span>
+            </div>
+            <div class="recording-progress">
+                <div class="progress-bar-recording">
+                    <div class="progress-fill-recording" id="progress-partie1"></div>
+                </div>
+            </div>
         </div>
         
-        <div class="control-buttons">
-            <button class="btn btn-record">🔴 Enregistrer</button>
-            <button class="btn btn-pause hidden">⏸️ Pause</button>
-            <button class="btn btn-stop hidden">⏹️ Arrêter</button>
-            <button class="btn btn-replay hidden">🔊 Réécouter</button>
-            <button class="btn btn-delete hidden">🗑️ Supprimer</button>
+        <div class="control-buttons-enhanced">
+            <button class="btn-record-enhanced" data-action="record">
+                <span class="btn-icon">🔴</span>
+                <span class="btn-text">Enregistrer</span>
+                <div class="btn-ripple"></div>
+            </button>
+            <button class="btn-control-enhanced hidden" data-action="pause">
+                <span class="btn-icon">⏸️</span>
+                <span class="btn-text">Pause</span>
+            </button>
+            <button class="btn-control-enhanced hidden" data-action="stop">
+                <span class="btn-icon">⏹️</span>
+                <span class="btn-text">Arrêter</span>
+            </button>
+            <button class="btn-control-enhanced hidden" data-action="replay">
+                <span class="btn-icon">🔊</span>
+                <span class="btn-text">Réécouter</span>
+            </button>
+            <button class="btn-control-enhanced danger hidden" data-action="delete">
+                <span class="btn-icon">🗑️</span>
+                <span class="btn-text">Supprimer</span>
+            </button>
         </div>
         
-        <audio class="audio-player hidden" controls></audio>
+        <div class="recorded-badge-enhanced hidden">
+            <div class="recorded-content">
+                <span class="recorded-icon">✅</span>
+                <span class="recorded-text">Enregistrement terminé</span>
+                <div class="recorded-duration">Durée: <span id="duration-partie1">00:00</span></div>
+            </div>
+        </div>
+        
+        <audio class="audio-player-enhanced hidden" controls></audio>
     </div>
 </div>
 
-<!-- Partie 4 Optionnelle -->
-<div class="optional-section">
-    <div class="optional-toggle">
-        <button id="togglePartie4" class="btn btn-secondary">Afficher Partie 4 (optionnelle)</button>
+<!-- Partie 2 - Enhanced -->
+<div class="recording-section-enhanced" data-section="partie2">
+    <div class="section-header">
+        <div class="section-number">02</div>
+        <div class="section-info">
+            <h3 class="section-title">
+                <span class="section-icon">🩺</span>
+                Examen clinique
+            </h3>
+            <p class="section-description">Décrivez l'examen physique, les observations cliniques...</p>
+        </div>
+        <div class="section-status">
+            <span class="status-indicator" data-status="ready">
+                <span class="status-dot"></span>
+                Prêt
+            </span>
+        </div>
     </div>
     
-    <div data-section="partie4" class="hidden">
-        <h3>🎤 Partie 4 - Synthèse et plan thérapeutique</h3>
-        <p class="section-description">Synthèse du cas, diagnostic, traitement et suivi...</p>
+    <div class="recording-controls-enhanced">
+        <div class="recording-timer-section">
+            <div class="timer-display">
+                <span class="timer-icon">⏱️</span>
+                <span class="timer" id="timer-partie2">00:00</span>
+            </div>
+            <div class="recording-progress">
+                <div class="progress-bar-recording">
+                    <div class="progress-fill-recording" id="progress-partie2"></div>
+                </div>
+            </div>
+        </div>
         
-        <div class="recording-controls">
-            <div class="status-info">
-                <span class="status-badge" data-status="ready">⚪ Prêt</span>
-                <span class="timer">00:00</span>
-                <span class="recorded-badge hidden">✅ Enregistré</span>
+        <div class="control-buttons-enhanced">
+            <button class="btn-record-enhanced" data-action="record">
+                <span class="btn-icon">🔴</span>
+                <span class="btn-text">Enregistrer</span>
+                <div class="btn-ripple"></div>
+            </button>
+            <button class="btn-control-enhanced hidden" data-action="pause">
+                <span class="btn-icon">⏸️</span>
+                <span class="btn-text">Pause</span>
+            </button>
+            <button class="btn-control-enhanced hidden" data-action="stop">
+                <span class="btn-icon">⏹️</span>
+                <span class="btn-text">Arrêter</span>
+            </button>
+            <button class="btn-control-enhanced hidden" data-action="replay">
+                <span class="btn-icon">🔊</span>
+                <span class="btn-text">Réécouter</span>
+            </button>
+            <button class="btn-control-enhanced danger hidden" data-action="delete">
+                <span class="btn-icon">🗑️</span>
+                <span class="btn-text">Supprimer</span>
+            </button>
+        </div>
+        
+        <div class="recorded-badge-enhanced hidden">
+            <div class="recorded-content">
+                <span class="recorded-icon">✅</span>
+                <span class="recorded-text">Enregistrement terminé</span>
+                <div class="recorded-duration">Durée: <span id="duration-partie2">00:00</span></div>
+            </div>
+        </div>
+        
+        <audio class="audio-player-enhanced hidden" controls></audio>
+    </div>
+</div>
+
+<!-- Partie 3 - Enhanced -->
+<div class="recording-section-enhanced" data-section="partie3">
+    <div class="section-header">
+        <div class="section-number">03</div>
+        <div class="section-info">
+            <h3 class="section-title">
+                <span class="section-icon">🔬</span>
+                Examens complémentaires
+            </h3>
+            <p class="section-description">Décrivez les analyses, imagerie, résultats d'examens...</p>
+        </div>
+        <div class="section-status">
+            <span class="status-indicator" data-status="ready">
+                <span class="status-dot"></span>
+                Prêt
+            </span>
+        </div>
+    </div>
+    
+    <div class="recording-controls-enhanced">
+        <div class="recording-timer-section">
+            <div class="timer-display">
+                <span class="timer-icon">⏱️</span>
+                <span class="timer" id="timer-partie3">00:00</span>
+            </div>
+            <div class="recording-progress">
+                <div class="progress-bar-recording">
+                    <div class="progress-fill-recording" id="progress-partie3"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-buttons-enhanced">
+            <button class="btn-record-enhanced" data-action="record">
+                <span class="btn-icon">🔴</span>
+                <span class="btn-text">Enregistrer</span>
+                <div class="btn-ripple"></div>
+            </button>
+            <button class="btn-control-enhanced hidden" data-action="pause">
+                <span class="btn-icon">⏸️</span>
+                <span class="btn-text">Pause</span>
+            </button>
+            <button class="btn-control-enhanced hidden" data-action="stop">
+                <span class="btn-icon">⏹️</span>
+                <span class="btn-text">Arrêter</span>
+            </button>
+            <button class="btn-control-enhanced hidden" data-action="replay">
+                <span class="btn-icon">🔊</span>
+                <span class="btn-text">Réécouter</span>
+            </button>
+            <button class="btn-control-enhanced danger hidden" data-action="delete">
+                <span class="btn-icon">🗑️</span>
+                <span class="btn-text">Supprimer</span>
+            </button>
+        </div>
+        
+        <div class="recorded-badge-enhanced hidden">
+            <div class="recorded-content">
+                <span class="recorded-icon">✅</span>
+                <span class="recorded-text">Enregistrement terminé</span>
+                <div class="recorded-duration">Durée: <span id="duration-partie3">00:00</span></div>
+            </div>
+        </div>
+        
+        <audio class="audio-player-enhanced hidden" controls></audio>
+    </div>
+</div>
+
+<!-- Partie 4 Optionnelle - Enhanced -->
+<div class="optional-section-enhanced">
+    <div class="optional-toggle-enhanced">
+        <button id="togglePartie4" class="btn-toggle-enhanced">
+            <span class="toggle-icon">➕</span>
+            <span class="toggle-text">Afficher Partie 4 (optionnelle)</span>
+            <span class="toggle-arrow">▼</span>
+        </button>
+    </div>
+    
+    <div data-section="partie4" class="recording-section-enhanced hidden">
+        <div class="section-header">
+            <div class="section-number">04</div>
+            <div class="section-info">
+                <h3 class="section-title">
+                    <span class="section-icon">💊</span>
+                    Synthèse et plan thérapeutique
+                </h3>
+                <p class="section-description">Synthèse du cas, diagnostic, traitement et suivi...</p>
+            </div>
+            <div class="section-status">
+                <span class="status-indicator optional" data-status="ready">
+                    <span class="status-dot"></span>
+                    Optionnel
+                </span>
+            </div>
+        </div>
+        
+        <div class="recording-controls-enhanced">
+            <div class="recording-timer-section">
+                <div class="timer-display">
+                    <span class="timer-icon">⏱️</span>
+                    <span class="timer" id="timer-partie4">00:00</span>
+                </div>
+                <div class="recording-progress">
+                    <div class="progress-bar-recording">
+                        <div class="progress-fill-recording" id="progress-partie4"></div>
+                    </div>
+                </div>
             </div>
             
-            <div class="control-buttons">
-                <button class="btn btn-record">🔴 Enregistrer</button>
-                <button class="btn btn-pause hidden">⏸️ Pause</button>
-                <button class="btn btn-stop hidden">⏹️ Arrêter</button>
-                <button class="btn btn-replay hidden">🔊 Réécouter</button>
-                <button class="btn btn-delete hidden">🗑️ Supprimer</button>
+            <div class="control-buttons-enhanced">
+                <button class="btn-record-enhanced" data-action="record">
+                    <span class="btn-icon">🔴</span>
+                    <span class="btn-text">Enregistrer</span>
+                    <div class="btn-ripple"></div>
+                </button>
+                <button class="btn-control-enhanced hidden" data-action="pause">
+                    <span class="btn-icon">⏸️</span>
+                    <span class="btn-text">Pause</span>
+                </button>
+                <button class="btn-control-enhanced hidden" data-action="stop">
+                    <span class="btn-icon">⏹️</span>
+                    <span class="btn-text">Arrêter</span>
+                </button>
+                <button class="btn-control-enhanced hidden" data-action="replay">
+                    <span class="btn-icon">🔊</span>
+                    <span class="btn-text">Réécouter</span>
+                </button>
+                <button class="btn-control-enhanced danger hidden" data-action="delete">
+                    <span class="btn-icon">🗑️</span>
+                    <span class="btn-text">Supprimer</span>
+                </button>
             </div>
             
-            <audio class="audio-player hidden" controls></audio>
+            <div class="recorded-badge-enhanced hidden">
+                <div class="recorded-content">
+                    <span class="recorded-icon">✅</span>
+                    <span class="recorded-text">Enregistrement terminé</span>
+                    <div class="recorded-duration">Durée: <span id="duration-partie4">00:00</span></div>
+                </div>
+            </div>
+            
+            <audio class="audio-player-enhanced hidden" controls></audio>
         </div>
     </div>
 </div>
 
-<div class="submit-section">
-    <div class="sections-count">0 section(s) enregistrée(s)</div>
-    <button id="submitNormal" class="btn btn-submit" disabled>📤 Envoyer les données</button>
+<!-- Submit Section Enhanced -->
+<div class="submit-section-enhanced">
+    <div class="submit-progress">
+        <div class="progress-info">
+            <div class="progress-text">
+                <span class="progress-count" id="sectionsCount">0</span>
+                <span class="progress-label">section(s) enregistrée(s)</span>
+            </div>
+            <div class="progress-bar-submit">
+                <div class="progress-fill-submit" id="submitProgress"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="submit-actions">
+        <button id="submitNormal" class="btn-submit-enhanced" disabled>
+            <span class="submit-icon">📤</span>
+            <span class="submit-text">Envoyer les données</span>
+            <div class="submit-ripple"></div>
+        </button>
+    </div>
 </div>
