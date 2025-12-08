@@ -117,8 +117,16 @@ class FormValidationSystem {
 
     // Validation des formulaires par mode
     validateNormalMode() {
-        const numeroDossier = document.getElementById('numeroDossier').value.trim();
-        const nomPatient = document.getElementById('nomPatient').value.trim();
+        const numeroDossierElement = document.getElementById('numeroDossier');
+        const nomPatientElement = document.getElementById('nomPatient');
+        
+        // Only validate if elements exist
+        if (!numeroDossierElement || !nomPatientElement) {
+            return { isValid: false, errors: ['Éléments du formulaire non trouvés'] };
+        }
+        
+        const numeroDossier = numeroDossierElement.value.trim();
+        const nomPatient = nomPatientElement.value.trim();
 
         const errors = [];
 
@@ -145,8 +153,16 @@ class FormValidationSystem {
     }
 
     validateTestMode() {
-        const numeroDossier = document.getElementById('numeroDossierTest').value.trim();
-        const nomPatient = document.getElementById('nomPatientTest').value.trim();
+        const numeroDossierElement = document.getElementById('numeroDossierTest');
+        const nomPatientElement = document.getElementById('nomPatientTest');
+        
+        // Only validate if elements exist
+        if (!numeroDossierElement || !nomPatientElement) {
+            return { isValid: false, errors: ['Éléments du formulaire de test non trouvés'] };
+        }
+        
+        const numeroDossier = numeroDossierElement.value.trim();
+        const nomPatient = nomPatientElement.value.trim();
 
         const errors = [];
 
@@ -173,9 +189,18 @@ class FormValidationSystem {
     }
 
     validateDMIModeForm() {
-        const numeroDossier = document.getElementById('numeroDossierDMI').value.trim();
-        const nomPatient = document.getElementById('nomPatientDMI').value.trim();
-        const texteLibre = document.getElementById('texteLibre').value.trim();
+        const numeroDossierElement = document.getElementById('numeroDossierDMI');
+        const nomPatientElement = document.getElementById('nomPatientDMI');
+        const texteLibreElement = document.getElementById('texteLibre');
+        
+        // Only validate if elements exist
+        if (!numeroDossierElement) {
+            return { isValid: false, errors: ['Éléments du formulaire DMI non trouvés'] };
+        }
+        
+        const numeroDossier = numeroDossierElement.value.trim();
+        const nomPatient = nomPatientElement ? nomPatientElement.value.trim() : '';
+        const texteLibre = texteLibreElement ? texteLibreElement.value.trim() : '';
 
         const errors = [];
 

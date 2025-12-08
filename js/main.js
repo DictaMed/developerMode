@@ -547,14 +547,20 @@ function makeInstancesGlobal() {
     };
 
     window.showForgotPassword = () => {
-        const email = document.getElementById('modalEmailInput').value.trim();
+        const emailInput = document.getElementById('modalEmailInput');
+        if (!emailInput) {
+            console.warn('Modal email input not found');
+            return;
+        }
+        
+        const email = emailInput.value.trim();
         if (!email) {
             if (notificationSystem) {
                 notificationSystem.warning('Veuillez d\'abord entrer votre adresse email pour réinitialiser votre mot de passe.', 'Email requis');
             } else {
                 alert('Veuillez d\'abord entrer votre adresse email pour réinitialiser votre mot de passe.');
             }
-            document.getElementById('modalEmailInput').focus();
+            emailInput.focus();
             return;
         }
         

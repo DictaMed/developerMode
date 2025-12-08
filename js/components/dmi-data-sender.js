@@ -64,9 +64,13 @@ class DMIDataSender {
     }
 
     async preparePayload() {
-        const numeroDossier = document.getElementById('numeroDossierDMI').value.trim();
-        const nomPatient = document.getElementById('nomPatientDMI').value.trim();
-        const texteLibre = document.getElementById('texteLibre').value.trim();
+        const numeroDossierElement = document.getElementById('numeroDossierDMI');
+        const nomPatientElement = document.getElementById('nomPatientDMI');
+        const texteLibreElement = document.getElementById('texteLibre');
+        
+        const numeroDossier = numeroDossierElement ? numeroDossierElement.value.trim() : '';
+        const nomPatient = nomPatientElement ? nomPatientElement.value.trim() : '';
+        const texteLibre = texteLibreElement ? texteLibreElement.value.trim() : '';
 
         if (!numeroDossier) {
             return null;

@@ -85,8 +85,17 @@ class NormalModeTab {
 
     // Validation spécifique au mode normal
     validateForm() {
-        const numeroDossier = document.getElementById('numeroDossier').value.trim();
-        const nomPatient = document.getElementById('nomPatient').value.trim();
+        const numeroDossierEl = document.getElementById('numeroDossier');
+        const nomPatientEl = document.getElementById('nomPatient');
+        
+        // Only validate if elements exist
+        if (!numeroDossierEl || !nomPatientEl) {
+            console.warn('Form elements not found for validation');
+            return false;
+        }
+        
+        const numeroDossier = numeroDossierEl.value.trim();
+        const nomPatient = nomPatientEl.value.trim();
 
         if (!numeroDossier || !nomPatient) {
             if (window.notificationSystem) {
@@ -108,8 +117,11 @@ class NormalModeTab {
 
     // Réinitialisation du formulaire
     resetForm() {
-        document.getElementById('numeroDossier').value = '';
-        document.getElementById('nomPatient').value = '';
+        const numeroDossierEl = document.getElementById('numeroDossier');
+        const nomPatientEl = document.getElementById('nomPatient');
+        
+        if (numeroDossierEl) numeroDossierEl.value = '';
+        if (nomPatientEl) nomPatientEl.value = '';
         
         // Reset character counters
         const counters = [
@@ -150,9 +162,12 @@ class NormalModeTab {
 
     // Méthodes utilitaires spécifiques au mode normal
     getPatientInfo() {
+        const numeroDossierEl = document.getElementById('numeroDossier');
+        const nomPatientEl = document.getElementById('nomPatient');
+        
         return {
-            numeroDossier: document.getElementById('numeroDossier').value.trim(),
-            nomPatient: document.getElementById('nomPatient').value.trim()
+            numeroDossier: numeroDossierEl ? numeroDossierEl.value.trim() : '',
+            nomPatient: nomPatientEl ? nomPatientEl.value.trim() : ''
         };
     }
 

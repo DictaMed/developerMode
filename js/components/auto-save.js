@@ -60,15 +60,22 @@ class AutoSaveSystem {
         
         // Collect form data based on current mode
         if (mode === window.APP_CONFIG.MODES.NORMAL) {
-            data.numeroDossier = document.getElementById('numeroDossier')?.value || '';
-            data.nomPatient = document.getElementById('nomPatient')?.value || '';
+            const numeroDossierEl = document.getElementById('numeroDossier');
+            const nomPatientEl = document.getElementById('nomPatient');
+            data.numeroDossier = numeroDossierEl ? numeroDossierEl.value : '';
+            data.nomPatient = nomPatientEl ? nomPatientEl.value : '';
         } else if (mode === window.APP_CONFIG.MODES.TEST) {
-            data.numeroDossier = document.getElementById('numeroDossierTest')?.value || '';
-            data.nomPatient = document.getElementById('nomPatientTest')?.value || '';
+            const numeroDossierTestEl = document.getElementById('numeroDossierTest');
+            const nomPatientTestEl = document.getElementById('nomPatientTest');
+            data.numeroDossier = numeroDossierTestEl ? numeroDossierTestEl.value : '';
+            data.nomPatient = nomPatientTestEl ? nomPatientTestEl.value : '';
         } else if (mode === window.APP_CONFIG.MODES.DMI) {
-            data.numeroDossier = document.getElementById('numeroDossierDMI')?.value || '';
-            data.nomPatient = document.getElementById('nomPatientDMI')?.value || '';
-            data.texteLibre = document.getElementById('texteLibre')?.value || '';
+            const numeroDossierDMIEl = document.getElementById('numeroDossierDMI');
+            const nomPatientDMIEl = document.getElementById('nomPatientDMI');
+            const texteLibreEl = document.getElementById('texteLibre');
+            data.numeroDossier = numeroDossierDMIEl ? numeroDossierDMIEl.value : '';
+            data.nomPatient = nomPatientDMIEl ? nomPatientDMIEl.value : '';
+            data.texteLibre = texteLibreEl ? texteLibreEl.value : '';
         }
         
         return data;

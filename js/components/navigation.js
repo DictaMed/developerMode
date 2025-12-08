@@ -42,6 +42,12 @@ class TabNavigationSystem {
     }
 
     async switchTab(tabId) {
+        // Validate tabId before proceeding
+        if (!tabId || typeof tabId !== 'string') {
+            console.warn('⚠️ Navigation: Invalid tabId provided:', tabId);
+            return;
+        }
+        
         // Check access before switching
         if (!this.checkTabAccess(tabId)) {
             return;
