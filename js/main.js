@@ -11,6 +11,99 @@ let formValidationSystem, photoManagementSystem, dmiDataSender, authModalSystem;
 // ===== TAB INSTANCES =====
 let homeTab, normalModeTab, testModeTab;
 
+// ===== IMMEDIATE GLOBAL FUNCTION DEFINITIONS =====
+// These functions are made available immediately to prevent onclick handler errors
+window.switchTab = async function(tabId) {
+    // Store the request and execute when system is ready
+    console.log(`🔄 switchTab called with: ${tabId}`);
+    if (tabNavigationSystem && tabNavigationSystem.switchTab) {
+        await tabNavigationSystem.switchTab(tabId);
+    } else {
+        console.warn('⚠️ switchTab called but navigation system not ready');
+        // Retry after a short delay
+        setTimeout(async () => {
+            if (tabNavigationSystem && tabNavigationSystem.switchTab) {
+                await tabNavigationSystem.switchTab(tabId);
+            }
+        }, 100);
+    }
+};
+
+window.toggleAuthModal = function() {
+    console.log('🔄 toggleAuthModal called');
+    if (authModalSystem && authModalSystem.toggle) {
+        authModalSystem.toggle();
+    } else {
+        console.warn('⚠️ toggleAuthModal called but auth modal system not ready');
+        setTimeout(() => {
+            if (authModalSystem && authModalSystem.toggle) {
+                authModalSystem.toggle();
+            }
+        }, 100);
+    }
+};
+
+window.closeAuthModal = function() {
+    console.log('🔄 closeAuthModal called');
+    if (authModalSystem && authModalSystem.close) {
+        authModalSystem.close();
+    } else {
+        console.warn('⚠️ closeAuthModal called but auth modal system not ready');
+        setTimeout(() => {
+            if (authModalSystem && authModalSystem.close) {
+                authModalSystem.close();
+            }
+        }, 100);
+    }
+};
+
+window.togglePasswordVisibility = function() {
+    console.log('🔄 togglePasswordVisibility called');
+    if (authModalSystem && authModalSystem.togglePasswordVisibility) {
+        authModalSystem.togglePasswordVisibility();
+    } else {
+        console.warn('⚠️ togglePasswordVisibility called but auth modal system not ready');
+        setTimeout(() => {
+            if (authModalSystem && authModalSystem.togglePasswordVisibility) {
+                authModalSystem.togglePasswordVisibility();
+            }
+        }, 100);
+    }
+};
+
+window.showForgotPassword = function() {
+    console.log('🔄 showForgotPassword called');
+    const emailInput = document.getElementById('modalEmailInput');
+    if (!emailInput) {
+        console.warn('Modal email input not found');
+        return;
+    }
+    
+    const email = emailInput.value.trim();
+    if (!email) {
+        alert('Veuillez d\'abord entrer votre adresse email pour réinitialiser votre mot de passe.');
+        emailInput.focus();
+        return;
+    }
+    
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().sendPasswordResetEmail(email)
+            .then(() => {
+                alert('Un email de réinitialisation a été envoyé à ' + email);
+            })
+            .catch((error) => {
+                console.error('Erreur:', error);
+                if (error.code === 'auth/user-not-found') {
+                    alert('Aucun compte trouvé avec cet email');
+                } else {
+                    alert('Impossible d\'envoyer l\'email de réinitialisation');
+                }
+            });
+    } else {
+        alert('Un email de réinitialisation sera envoyé à: ' + email);
+    }
+};
+
 // ===== APPLICATION INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', async () => {
     const logger = window.logger?.createLogger('App Initialization') || console;
