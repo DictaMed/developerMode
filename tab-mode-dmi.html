@@ -1,43 +1,122 @@
-<h1>📝 Saisie Texte - DMI</h1>
-
-<div class="card">
-    <h3>📋 Informations patient</h3>
-    
-    <div class="form-group">
-        <label for="numeroDossierDMI">Numéro de dossier <span style="color: var(--red)">*</span></label>
-        <input type="text" id="numeroDossierDMI" placeholder="Numéro du dossier patient" maxlength="50">
-        <div class="char-counter" id="numeroDossierDMICounter">0/50</div>
+<!-- DMI Mode Header -->
+<div class="dmi-container">
+    <div class="dmi-header-section">
+        <div class="dmi-header-content">
+            <div class="dmi-title-section">
+                <h1 class="dmi-main-title">
+                    <span class="dmi-icon">📝</span>
+                    Saisie Texte - DMI
+                </h1>
+                <p class="dmi-subtitle">
+                    Mode de saisie manuelle enrichie avec gestion de photos médicales
+                </p>
+            </div>
+            <div class="dmi-features">
+                <div class="dmi-feature-item">
+                    <span>✏️</span>
+                    <span>Texte structuré</span>
+                </div>
+                <div class="dmi-feature-item">
+                    <span>📷</span>
+                    <span>Photos médicales</span>
+                </div>
+                <div class="dmi-feature-item">
+                    <span>✅</span>
+                    <span>Validation croisée</span>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <div class="form-group">
-        <label for="nomPatientDMI">Nom du patient</label>
-        <input type="text" id="nomPatientDMI" placeholder="Nom du patient" maxlength="50">
-        <div class="char-counter" id="nomPatientDMICounter">0/50</div>
-    </div>
-</div>
 
-<div class="card">
-    <h3>📝 Saisie libre</h3>
-    <p>Vous pouvez saisir directement votre texte médical ci-dessous :</p>
-    
-    <div class="form-group">
-        <label for="texteLibre">Texte médical</label>
-        <textarea id="texteLibre" placeholder="Saisissez votre texte médical ici..."></textarea>
-        <div class="char-counter" id="texteLibreCounter">0</div>
+    <!-- Patient Information Section -->
+    <div class="dmi-card-enhanced">
+        <h3 class="dmi-card-title">
+            <span class="dmi-card-icon">👤</span>
+            Informations patient
+        </h3>
+        
+        <div class="form-grid">
+            <div class="dmi-form-group">
+                <label for="numeroDossierDMI">
+                    <span class="dmi-input-icon">📁</span>
+                    Numéro de dossier <span style="color: var(--red)">*</span>
+                </label>
+                <input type="text" id="numeroDossierDMI" placeholder="Numéro du dossier patient" maxlength="50">
+                <div class="char-counter" id="numeroDossierDMICounter">0/50</div>
+            </div>
+            
+            <div class="dmi-form-group">
+                <label for="nomPatientDMI">
+                    <span class="dmi-input-icon">👨‍⚕️</span>
+                    Nom du patient
+                </label>
+                <input type="text" id="nomPatientDMI" placeholder="Nom du patient" maxlength="50">
+                <div class="char-counter" id="nomPatientDMICounter">0/50</div>
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="card">
-    <h3>📷 Photos (optionnel)</h3>
-    <p>Ajoutez des photos pour illustrer votre dossier (maximum 5 photos, 10MB chacune) :</p>
-    
-    <div class="form-group">
-        <input type="file" id="photosUpload" multiple accept="image/*">
+    <!-- Free Text Section -->
+    <div class="dmi-card-enhanced">
+        <h3 class="dmi-card-title">
+            <span class="dmi-card-icon">✍️</span>
+            Saisie libre
+        </h3>
+        <p style="color: var(--gray-medium); margin-bottom: var(--space-lg); font-size: 1.1rem;">
+            Vous pouvez saisir directement votre texte médical ci-dessous :
+        </p>
+        
+        <div class="dmi-form-group">
+            <label for="texteLibre">
+                <span class="dmi-input-icon">📝</span>
+                Texte médical
+            </label>
+            <div class="dmi-textarea-wrapper">
+                <textarea id="texteLibre" class="dmi-textarea" placeholder="Saisissez votre texte médical ici...&#10;&#10;Conseils :&#10;• Structurez votre texte avec des paragraphes clairs&#10;• Utilisez des termes médicaux précis&#10;• Mentionnez les symptômes, diagnostic et traitement"></textarea>
+                <div class="char-counter" id="texteLibreCounter">0 caractères</div>
+            </div>
+        </div>
     </div>
-    
-    <div id="photosPreview" class="photos-preview"></div>
-</div>
 
-<div class="submit-section">
-    <button id="submitDMI" class="btn btn-submit" disabled>📤 Envoyer les données DMI</button>
+    <!-- Photos Upload Section -->
+    <div class="dmi-card-enhanced">
+        <h3 class="dmi-card-title">
+            <span class="dmi-card-icon">📸</span>
+            Photos médicales (optionnel)
+        </h3>
+        <p style="color: var(--gray-medium); margin-bottom: var(--space-lg); font-size: 1.1rem;">
+            Ajoutez des photos pour illustrer votre dossier (maximum 5 photos, 10MB chacune) :
+        </p>
+        
+        <div class="dmi-upload-section">
+            <div class="dmi-upload-icon">📷</div>
+            <p class="dmi-upload-text">
+                Glissez-déposez vos photos ici ou cliquez pour sélectionner
+            </p>
+            <label for="photosUpload" class="dmi-upload-btn">
+                <span>📁</span>
+                Sélectionner des photos
+            </label>
+            <input type="file" id="photosUpload" class="dmi-file-input" multiple accept="image/*">
+        </div>
+        
+        <div id="photosPreview" class="dmi-photos-preview"></div>
+    </div>
+
+    <!-- Submit Section -->
+    <div class="dmi-submit-section-enhanced">
+        <div style="margin-bottom: var(--space-lg);">
+            <h4 style="color: var(--gray-dark); margin: 0 0 var(--space-sm) 0;">Prêt à envoyer ?</h4>
+            <p style="color: var(--gray-medium); margin: 0;">Vérifiez vos informations avant de soumettre</p>
+        </div>
+        
+        <button id="submitDMI" class="dmi-submit-btn" disabled>
+            <span class="dmi-submit-icon">📤</span>
+            <span>Envoyer les données DMI</span>
+        </button>
+        
+        <div style="margin-top: var(--space-md); font-size: 0.9rem; color: var(--gray-medium);">
+            <p>✅ Données sécurisées • 🔒 Chiffrement end-to-end • 📊 Sauvegarde automatique</p>
+        </div>
+    </div>
 </div>
