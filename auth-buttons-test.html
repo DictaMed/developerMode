@@ -193,6 +193,62 @@
                                 
                                 // Réouvrir pour continuer les tests
                                 authButton.click();
+                                
+                                // Test spécifique du bouton inscription
+                                setTimeout(() => {
+                                    logResult('🧪 Test du bouton inscription...', 'info');
+                                    const signUpTab = document.getElementById('modalSignUpTab');
+                                    const authTitle = document.getElementById('authModalTitle');
+                                    const emailSubmitBtn = document.getElementById('modalEmailSubmitBtn');
+                                    const btnText = emailSubmitBtn ? emailSubmitBtn.querySelector('.btn-text') : null;
+                                    
+                                    if (signUpTab && authTitle && btnText) {
+                                        // Cliquer sur le bouton inscription
+                                        signUpTab.click();
+                                        
+                                        // Vérifier les changements
+                                        setTimeout(() => {
+                                            const isTitleChanged = authTitle.textContent === 'Inscription';
+                                            const isButtonChanged = btnText.textContent === 'S\'inscrire';
+                                            const isSignUpTabActive = signUpTab.classList.contains('active');
+                                            const isSignInTabNotActive = !document.getElementById('modalSignInTab').classList.contains('active');
+                                            
+                                            if (isTitleChanged && isButtonChanged && isSignUpTabActive && isSignInTabNotActive) {
+                                                logResult('✅ Bouton inscription fonctionne correctement', 'success');
+                                                logResult(`   - Titre: "${authTitle.textContent}"`, 'success');
+                                                logResult(`   - Bouton: "${btnText.textContent}"`, 'success');
+                                                logResult(`   - Onglet inscription actif: ${isSignUpTabActive ? 'Oui' : 'Non'}`, 'success');
+                                            } else {
+                                                logResult('❌ Bouton inscription ne fonctionne pas complètement', 'error');
+                                                logResult(`   - Titre actuel: "${authTitle.textContent}" (attendu: "Inscription")`, 'error');
+                                                logResult(`   - Bouton actuel: "${btnText.textContent}" (attendu: "S'inscrire")`, 'error');
+                                                logResult(`   - Onglet inscription actif: ${isSignUpTabActive ? 'Oui' : 'Non'}`, 'error');
+                                            }
+                                            
+                                            // Test du retour au mode connexion
+                                            const signInTab = document.getElementById('modalSignInTab');
+                                            if (signInTab) {
+                                                signInTab.click();
+                                                setTimeout(() => {
+                                                    const backToSignIn = authTitle.textContent === 'Connexion' && 
+                                                                       btnText.textContent === 'Se connecter' &&
+                                                                       signInTab.classList.contains('active');
+                                                    
+                                                    if (backToSignIn) {
+                                                        logResult('✅ Bouton retour connexion fonctionne', 'success');
+                                                    } else {
+                                                        logResult('❌ Bouton retour connexion ne fonctionne pas', 'error');
+                                                    }
+                                                }, 300);
+                                            }
+                                        }, 300);
+                                    } else {
+                                        logResult('❌ Éléments nécessaires pour le test non trouvés', 'error');
+                                        logResult(`   - signUpTab: ${signUpTab ? 'Trouvé' : 'Non trouvé'}`, 'error');
+                                        logResult(`   - authTitle: ${authTitle ? 'Trouvé' : 'Non trouvé'}`, 'error');
+                                        logResult(`   - btnText: ${btnText ? 'Trouvé' : 'Non trouvé'}`, 'error');
+                                    }
+                                }, 1200);
                             }, 1000);
                         }
                     }, 100);

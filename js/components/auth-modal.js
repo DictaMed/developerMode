@@ -7,6 +7,7 @@
 class AuthModalSystem {
     constructor() {
         this.isOpen = false;
+        this.currentMode = 'signin'; // 'signin' or 'signup'
     }
 
     init() {
@@ -72,6 +73,48 @@ class AuthModalSystem {
                 this.showForgotPassword();
             });
         }
+
+        // Tab switching between sign in and sign up
+        const modalSignInTab = document.getElementById('modalSignInTab');
+        const modalSignUpTab = document.getElementById('modalSignUpTab');
+        
+        if (modalSignInTab) {
+            modalSignInTab.addEventListener('click', () => this.switchMode('signin'));
+        }
+        
+        if (modalSignUpTab) {
+            modalSignUpTab.addEventListener('click', () => this.switchMode('signup'));
+        }
+    }
+
+    switchMode(mode) {
+        this.currentMode = mode;
+        const modalSignInTab = document.getElementById('modalSignInTab');
+        const modalSignUpTab = document.getElementById('modalSignUpTab');
+        const authModalTitle = document.getElementById('authModalTitle');
+        const emailSubmitBtn = document.getElementById('modalEmailSubmitBtn');
+        
+        if (mode === 'signup') {
+            // Switch to sign up mode
+            if (modalSignInTab) modalSignInTab.classList.remove('active');
+            if (modalSignUpTab) modalSignUpTab.classList.add('active');
+            if (authModalTitle) authModalTitle.textContent = 'Inscription';
+            if (emailSubmitBtn) {
+                const btnText = emailSubmitBtn.querySelector('.btn-text');
+                if (btnText) btnText.textContent = 'S\'inscrire';
+            }
+        } else {
+            // Switch to sign in mode
+            if (modalSignInTab) modalSignInTab.classList.add('active');
+            if (modalSignUpTab) modalSignUpTab.classList.remove('active');
+            if (authModalTitle) authModalTitle.textContent = 'Connexion';
+            if (emailSubmitBtn) {
+                const btnText = emailSubmitBtn.querySelector('.btn-text');
+                if (btnText) btnText.textContent = 'Se connecter';
+            }
+        }
+        
+        console.log(`🔄 Mode switched to: ${mode}`);
     }
 
     toggle() {
@@ -87,6 +130,12 @@ class AuthModalSystem {
         if (authModal) {
             authModal.classList.remove('hidden');
             this.isOpen = true;
+            
+            // Ensure default mode is set to signin
+            if (this.currentMode !== 'signin' && this.currentMode !== 'signup') {
+                this.currentMode = 'signin';
+            }
+            this.switchMode(this.currentMode);
             
             // Focus on first input
             const firstInput = authModal.querySelector('input[type="email"]');
