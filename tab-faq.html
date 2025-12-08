@@ -1,28 +1,719 @@
-<h1>❓ Foire Aux Questions</h1>
+<div class="faq-page">
+    <!-- Header Section -->
+    <div class="faq-header">
+        <div class="faq-icon-large">❓</div>
+        <h1 class="faq-title">Foire Aux Questions</h1>
+        <p class="faq-subtitle">Trouvez rapidement les réponses à vos questions sur DictaMed</p>
+    </div>
 
-<div class="faq-list">
-    <div class="faq-item">
-        <h3>Comment utiliser DictaMed ?</h3>
-        <p>DictaMed fonctionne en 3 étapes simples : saisie des informations patient, enregistrement vocal par sections, et envoi des données. Chaque section audio est limitée à 2 minutes.</p>
+    <!-- Quick Actions -->
+    <div class="faq-quick-actions">
+        <button class="quick-action-btn" data-tab="mode-test">
+            <span class="quick-action-icon">🧪</span>
+            <span>Essayer le mode test</span>
+        </button>
+        <button class="quick-action-btn" data-tab="guide">
+            <span class="quick-action-icon">📖</span>
+            <span>Voir le guide complet</span>
+        </button>
     </div>
-    
-    <div class="faq-item">
-        <h3>Quelle est la différence entre les modes ?</h3>
-        <p><strong>Mode Normal</strong> : Production simplifiée sans authentification. <strong>Mode Test</strong> : Démonstration publique. <strong>Saisie Texte</strong> : Saisie directe avec photos.</p>
+
+    <!-- Search Bar -->
+    <div class="faq-search-container">
+        <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="faq-search-input" placeholder="Rechercher dans les questions fréquentes..." id="faqSearch">
+            <button class="clear-search-btn" id="clearSearch" style="display: none;">✕</button>
+        </div>
     </div>
-    
-    <div class="faq-item">
-        <h3>Mes données sont-elles sécurisées ?</h3>
-        <p>Oui, toutes les données sont chiffrées et transmises de manière sécurisée. En mode production, elles sont traitées selon les normes médicales en vigueur.</p>
+
+    <!-- Categories -->
+    <div class="faq-categories">
+        <button class="category-btn active" data-category="all">
+            <span class="category-icon">🌟</span>
+            <span>Toutes</span>
+        </button>
+        <button class="category-btn" data-category="usage">
+            <span class="category-icon">🎤</span>
+            <span>Utilisation</span>
+        </button>
+        <button class="category-btn" data-category="security">
+            <span class="category-icon">🔒</span>
+            <span>Sécurité</span>
+        </button>
+        <button class="category-btn" data-category="technical">
+            <span class="category-icon">⚙️</span>
+            <span>Technique</span>
+        </button>
+        <button class="category-btn" data-category="billing">
+            <span class="category-icon">💰</span>
+            <span>Tarifs</span>
+        </button>
     </div>
-    
-    <div class="faq-item">
-        <h3>Que faire si l'enregistrement ne fonctionne pas ?</h3>
-        <p>Vérifiez que vous avez autorisé l'accès au microphone dans votre navigateur. Utilisez un navigateur moderne (Chrome, Firefox, Edge, Safari).</p>
+
+    <!-- FAQ List -->
+    <div class="faq-list">
+        <div class="faq-item" data-category="usage">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="question-content">
+                    <span class="faq-icon">🎤</span>
+                    <h3>Comment utiliser DictaMed ?</h3>
+                </div>
+                <span class="faq-arrow">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="answer-content">
+                    <p>DictaMed fonctionne en 3 étapes simples :</p>
+                    <ol>
+                        <li><strong>Saisie des informations patient</strong> - Remplissez les champs obligatoires</li>
+                        <li><strong>Enregistrement vocal par sections</strong> - Dictez chaque section (max 2 minutes)</li>
+                        <li><strong>Envoi des données</strong> - Transmettez votre dossier sécurisé</li>
+                    </ol>
+                    <div class="tip-box">
+                        <span class="tip-icon">💡</span>
+                        <span>Commencez par le mode test pour vous familiariser avec l'interface</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="faq-item" data-category="usage">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="question-content">
+                    <span class="faq-icon">🎯</span>
+                    <h3>Quelle est la différence entre les modes ?</h3>
+                </div>
+                <span class="faq-arrow">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="answer-content">
+                    <div class="mode-comparison">
+                        <div class="mode-card demo">
+                            <h4>🧪 Mode Test</h4>
+                            <p>Démonstration gratuite sans inscription. Données vers Google Sheet public.</p>
+                            <span class="mode-badge">100% Gratuit</span>
+                        </div>
+                        <div class="mode-card production">
+                            <h4>🏥 Mode Normal</h4>
+                            <p>Production simplifiée sans authentification. Traitement sécurisé.</p>
+                            <span class="mode-badge">Professionnel</span>
+                        </div>
+                        <div class="mode-card dmi">
+                            <h4>📝 Saisie Texte</h4>
+                            <p>Saisie directe avec gestion de photos. Idéal pour comptes-rendus.</p>
+                            <span class="mode-badge">Flexible</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="faq-item" data-category="security">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="question-content">
+                    <span class="faq-icon">🔒</span>
+                    <h3>Mes données sont-elles sécurisées ?</h3>
+                </div>
+                <span class="faq-arrow">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="answer-content">
+                    <p>Absolument ! DictaMed garantit la sécurité maximale :</p>
+                    <div class="security-features">
+                        <div class="security-item">
+                            <span class="security-icon">🛡️</span>
+                            <span>Chiffrement end-to-end</span>
+                        </div>
+                        <div class="security-item">
+                            <span class="security-icon">🇫🇷</span>
+                            <span>Hébergement en France</span>
+                        </div>
+                        <div class="security-item">
+                            <span class="security-icon">📋</span>
+                            <span>Conformité RGPD</span>
+                        </div>
+                        <div class="security-item">
+                            <span class="security-icon">🏥</span>
+                            <span>Certifié HDS</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="faq-item" data-category="technical">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="question-content">
+                    <span class="faq-icon">🎧</span>
+                    <h3>Que faire si l'enregistrement ne fonctionne pas ?</h3>
+                </div>
+                <span class="faq-arrow">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="answer-content">
+                    <p>Vérifiez les points suivants :</p>
+                    <div class="troubleshooting-steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <span>Autorisez l'accès microphone dans votre navigateur</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span>Utilisez un navigateur moderne (Chrome, Firefox, Edge, Safari)</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span>Vérifiez que votre microphone fonctionne (test dans les paramètres)</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <span>Rechargez la page si nécessaire</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="faq-item" data-category="usage">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="question-content">
+                    <span class="faq-icon">📊</span>
+                    <h3>Comment voir mes transcriptions en mode test ?</h3>
+                </div>
+                <span class="faq-arrow">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="answer-content">
+                    <p>Vos enregistrements apparaissent en temps réel :</p>
+                    <div class="transcription-process">
+                        <div class="process-step">
+                            <span class="process-icon">🎤</span>
+                            <span>Enregistrez vos données</span>
+                        </div>
+                        <span class="process-arrow">→</span>
+                        <div class="process-step">
+                            <span class="process-icon">🤖</span>
+                            <span>Transcription automatique</span>
+                        </div>
+                        <span class="process-arrow">→</span>
+                        <div class="process-step">
+                            <span class="process-icon">📋</span>
+                            <span>Affichage dans le Google Sheet</span>
+                        </div>
+                    </div>
+                    <div class="note-box">
+                        <span class="note-icon">ℹ️</span>
+                        <span>Le lien vers le Google Sheet s'affiche après chaque envoi</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <div class="faq-item">
-        <h3>Comment voir mes transcriptions en mode test ?</h3>
-        <p>Vos enregistrements apparaissent en temps réel dans le Google Sheet public affiché après chaque envoi en mode test.</p>
+
+    <!-- Contact Section -->
+    <div class="faq-contact-section">
+        <div class="contact-card">
+            <div class="contact-icon">💬</div>
+            <h3>Vous ne trouvez pas votre réponse ?</h3>
+            <p>Notre équipe support est là pour vous aider</p>
+            <div class="contact-actions">
+                <a href="mailto:support@dictamed.fr" class="contact-btn primary">
+                    <span class="btn-icon">📧</span>
+                    Envoyer un email
+                </a>
+                <button class="contact-btn secondary" onclick="window.location.reload()">
+                    <span class="btn-icon">🔄</span>
+                    Actualiser la page
+                </button>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- CSS Styles -->
+<style>
+.faq-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+/* Header */
+.faq-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    color: white;
+}
+
+.faq-icon-large {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.faq-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+}
+
+.faq-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+/* Quick Actions */
+.faq-quick-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+}
+
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: white;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.quick-action-btn:hover {
+    background: #f8f9fa;
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+/* Search */
+.faq-search-container {
+    margin-bottom: 2rem;
+}
+
+.search-input-wrapper {
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.faq-search-input {
+    width: 100%;
+    padding: 1rem 3rem 1rem 3rem;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.faq-search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+}
+
+.clear-search-btn {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+/* Categories */
+.faq-categories {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+}
+
+.category-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: white;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.category-btn.active,
+.category-btn:hover {
+    background: #667eea;
+    border-color: #667eea;
+    color: white;
+}
+
+/* FAQ Items */
+.faq-item {
+    background: white;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.faq-item:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.faq-question {
+    padding: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+.faq-question:hover {
+    background: #f8f9fa;
+}
+
+.question-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.faq-question h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.faq-icon {
+    font-size: 1.5rem;
+}
+
+.faq-arrow {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.faq-item.active .faq-arrow {
+    transform: rotate(180deg);
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.faq-item.active .faq-answer {
+    max-height: 1000px;
+}
+
+.answer-content {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    border-top: 1px solid #e1e5e9;
+}
+
+/* Content Styling */
+.tip-box, .note-box {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f0f8ff;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.mode-comparison {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.mode-card {
+    padding: 1rem;
+    border-radius: 8px;
+    position: relative;
+}
+
+.mode-card.demo {
+    background: #e8f5e8;
+    border: 1px solid #4caf50;
+}
+
+.mode-card.production {
+    background: #e3f2fd;
+    border: 1px solid #2196f3;
+}
+
+.mode-card.dmi {
+    background: #fff3e0;
+    border: 1px solid #ff9800;
+}
+
+.mode-badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: white;
+}
+
+.demo .mode-badge {
+    background: #4caf50;
+}
+
+.production .mode-badge {
+    background: #2196f3;
+}
+
+.dmi .mode-badge {
+    background: #ff9800;
+}
+
+.security-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.security-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+}
+
+.troubleshooting-steps {
+    margin-top: 1rem;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0;
+}
+
+.step-number {
+    width: 24px;
+    height: 24px;
+    background: #667eea;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.transcription-process {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+}
+
+.process-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    min-width: 120px;
+}
+
+.process-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.process-arrow {
+    font-size: 1.2rem;
+    color: #667eea;
+}
+
+/* Contact Section */
+.faq-contact-section {
+    margin-top: 3rem;
+}
+
+.contact-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.contact-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.contact-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.contact-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.contact-btn.primary {
+    background: white;
+    color: #667eea;
+}
+
+.contact-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.contact-btn.secondary {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.contact-btn.secondary:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .faq-page {
+        padding: 1rem;
+    }
+    
+    .faq-quick-actions {
+        flex-direction: column;
+    }
+    
+    .faq-categories {
+        justify-content: flex-start;
+    }
+    
+    .contact-actions {
+        flex-direction: column;
+    }
+    
+    .transcription-process {
+        flex-direction: column;
+    }
+    
+    .process-arrow {
+        transform: rotate(90deg);
+    }
+}
+</style>
+
+<script>
+function toggleFaq(button) {
+    const item = button.closest('.faq-item');
+    const isActive = item.classList.contains('active');
+    
+    // Close all other items
+    document.querySelectorAll('.faq-item').forEach(el => {
+        el.classList.remove('active');
+    });
+    
+    // Toggle current item
+    if (!isActive) {
+        item.classList.add('active');
+    }
+}
+
+// Search functionality
+const searchInput = document.getElementById('faqSearch');
+const clearSearchBtn = document.getElementById('clearSearch');
+const faqItems = document.querySelectorAll('.faq-item');
+
+searchInput.addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    
+    if (searchTerm.length > 0) {
+        clearSearchBtn.style.display = 'block';
+    } else {
+        clearSearchBtn.style.display = 'none';
+    }
+    
+    faqItems.forEach(item => {
+        const question = item.querySelector('h3').textContent.toLowerCase();
+        const answer = item.querySelector('.answer-content').textContent.toLowerCase();
+        
+        if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+});
+
+clearSearchBtn.addEventListener('click', function() {
+    searchInput.value = '';
+    this.style.display = 'none';
+    faqItems.forEach(item => {
+        item.style.display = 'block';
+    });
+});
+
+// Category filtering
+const categoryBtns = document.querySelectorAll('.category-btn');
+
+categoryBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+        const category = this.dataset.category;
+        
+        // Update active button
+        categoryBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Filter items
+        faqItems.forEach(item => {
+            if (category === 'all' || item.dataset.category === category) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
