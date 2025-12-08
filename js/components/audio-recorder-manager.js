@@ -16,7 +16,12 @@ class AudioRecorderManager {
             
             // Vérification de nullité pour les sections d'enregistrement
             if (!recordingSections || recordingSections.length === 0) {
-                console.warn('⚠️ AudioRecorderManager: No recording sections found in DOM');
+                // Only warn in development environment - this is expected on home page
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    console.debug('ℹ️ AudioRecorderManager: No recording sections found in DOM (expected on home page)');
+                } else {
+                    console.debug('ℹ️ AudioRecorderManager: No recording sections found in current tab');
+                }
                 return;
             }
             

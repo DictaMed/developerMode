@@ -27,18 +27,23 @@ class FormValidationSystem {
                 { id: 'nomPatientDMI', counterId: 'nomPatientDMICounter', maxLength: 50 }
             ];
 
+            let initializedCount = 0;
             inputs.forEach(({ id, counterId, maxLength }) => {
                 try {
                     const input = document.getElementById(id);
                     const counter = document.getElementById(counterId);
                     
-                    if (!input) {
-                        console.warn(`FormValidationSystem: Input element not found: ${id}`);
-                        return;
-                    }
-                    
-                    if (!counter) {
-                        console.warn(`FormValidationSystem: Counter element not found: ${counterId}`);
+                    // Only process if both elements exist
+                    if (!input || !counter) {
+                        // Only log warning if we're in development and the elements are expected to exist
+                        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                            if (!input) {
+                                console.debug(`FormValidationSystem: Input element not found: ${id} (expected if not on this tab)`);
+                            }
+                            if (!counter) {
+                                console.debug(`FormValidationSystem: Counter element not found: ${counterId} (expected if not on this tab)`);
+                            }
+                        }
                         return;
                     }
                     
@@ -58,6 +63,7 @@ class FormValidationSystem {
                     
                     // Initialisation du compteur
                     this.updateCharCounter(input, counter, maxLength);
+                    initializedCount++;
                 } catch (inputError) {
                     console.error(`FormValidationSystem: Error setting up input ${id}:`, inputError);
                 }
@@ -68,11 +74,7 @@ class FormValidationSystem {
                 const texteLibre = document.getElementById('texteLibre');
                 const texteLibreCounter = document.getElementById('texteLibreCounter');
                 
-                if (!texteLibre) {
-                    console.warn('FormValidationSystem: texteLibre element not found');
-                } else if (!texteLibreCounter) {
-                    console.warn('FormValidationSystem: texteLibreCounter element not found');
-                } else {
+                if (texteLibre && texteLibreCounter) {
                     texteLibre.addEventListener('input', () => {
                         try {
                             texteLibreCounter.textContent = texteLibre.value.length;
@@ -83,12 +85,27 @@ class FormValidationSystem {
                     
                     // Initialisation
                     texteLibreCounter.textContent = texteLibre.value.length;
+                    initializedCount++;
+                } else {
+                    // Only log warnings in development if elements are expected
+                    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                        if (!texteLibre) {
+                            console.debug('FormValidationSystem: texteLibre element not found (expected if not on DMI tab)');
+                        }
+                        if (!texteLibreCounter) {
+                            console.debug('FormValidationSystem: texteLibreCounter element not found (expected if not on DMI tab)');
+                        }
+                    }
                 }
             } catch (textareaError) {
                 console.error('FormValidationSystem: Error setting up textarea counter:', textareaError);
             }
             
-            console.log('✅ FormValidationSystem char counters initialized');
+            if (initializedCount > 0) {
+                console.log(`✅ FormValidationSystem: ${initializedCount} char counters initialized`);
+            } else {
+                console.log('ℹ️ FormValidationSystem: No form elements found on current page');
+            }
         } catch (error) {
             console.error('FormValidationSystem: Error in initCharCounters:', error);
         }

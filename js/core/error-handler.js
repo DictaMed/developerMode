@@ -223,6 +223,9 @@ class Logger {
     // Create contextual loggers
     createLogger(componentName) {
         return {
+            critical: (message, details = {}) => {
+                this.errorHandler.critical(message, componentName, details);
+            },
             error: (message, details = {}) => {
                 this.errorHandler.error(message, componentName, details);
             },

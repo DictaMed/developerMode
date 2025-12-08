@@ -227,6 +227,13 @@ async function initializeComponents() {
         // Expose navigation system globally
         window.tabNavigationSystem = tabNavigationSystem;
         
+        // Make switchTab function available immediately for onclick handlers
+        window.switchTab = async (tabId) => {
+            if (tabNavigationSystem) {
+                await tabNavigationSystem.switchTab(tabId);
+            }
+        };
+        
         // Initialize other components with proper error handling
         const componentPromises = [];
         
