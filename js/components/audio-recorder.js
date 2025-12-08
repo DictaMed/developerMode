@@ -303,6 +303,17 @@ class AudioRecorder {
         return this.audioBlob !== null && this.audioBlob.size > 0;
     }
 
+    getDuration() {
+        // Estimate duration based on file size and bitrate
+        if (!this.audioBlob || this.audioBlob.size === 0) {
+            return 0;
+        }
+        
+        // Rough estimation: 128kbps = 16KB per second
+        const estimatedDuration = Math.round(this.audioBlob.size / 16000);
+        return Math.max(estimatedDuration, 1); // Minimum 1 second
+    }
+
     validateRecording() {
         if (!this.audioBlob) {
             return { valid: false, error: 'Aucun enregistrement disponible' };

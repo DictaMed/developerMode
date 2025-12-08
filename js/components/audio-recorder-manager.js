@@ -11,14 +11,27 @@ class AudioRecorderManager {
     }
 
     init() {
-        const recordingSections = document.querySelectorAll('.recording-section');
-        
-        recordingSections.forEach(section => {
-            const sectionId = section.getAttribute('data-section');
-            const recorder = new window.AudioRecorder(section);
-            this.recorders.set(sectionId, recorder);
-            this.appState.setRecording(sectionId, recorder);
-        });
+        try {
+            const recordingSections = document.querySelectorAll('.recording-section');
+            
+            recordingSections.forEach(section => {
+                try {
+                    const sectionId = section.getAttribute('data-section');
+                    if (sectionId) {
+                        const recorder = new window.AudioRecorder(section);
+                        this.recorders.set(sectionId, recorder);
+                        this.appState.setRecording(sectionId, recorder);
+                    }
+                } catch (sectionError) {
+                    console.warn(`Erreur lors de l'initialisation de la section ${section?.getAttribute('data-section')}:`, sectionError);
+                }
+            });
+            
+            console.log(`✅ AudioRecorderManager initialisé avec ${this.recorders.size} enregistreurs`);
+        } catch (error) {
+            console.error('❌ Erreur lors de l\'initialisation d\'AudioRecorderManager:', error);
+            throw error;
+        }
     }
 
     getRecorder(sectionId) {

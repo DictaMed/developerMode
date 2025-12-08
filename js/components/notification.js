@@ -26,25 +26,40 @@ class NotificationSystem {
     }
 
     show(message, type = 'info', duration = 5000) {
-        const id = window.Utils.generateId();
-        const notification = this.createNotification(id, message, type);
-        this.notifications.set(id, notification);
-        
-        this.container.appendChild(notification);
-        
-        // Trigger animation
-        setTimeout(() => {
-            notification.classList.add('show');
-        }, 10);
-        
-        // Auto remove
-        if (duration > 0) {
-            setTimeout(() => {
-                this.remove(id);
-            }, duration);
+        try {
+            // Fallback if Utils not available
+            const id = window.Utils?.generateId?.() || Date.now().toString();
+            const notification = this.createNotification(id, message, type);
+            this.notifications.set(id, notification);
+            
+            if (this.container) {
+                this.container.appendChild(notification);
+                
+                // Trigger animation
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+                
+                // Auto remove
+                if (duration > 0) {
+                    setTimeout(() => {
+                        this.remove(id);
+                    }, duration);
+                }
+            } else {
+                // Fallback to console if container not available
+                console.log(`[${type.toUpperCase()}] ${message}`);
+            }
+            
+            return id;
+        } catch (error) {
+            console.error('Erreur lors de l\'affichage de la notification:', error);
+            // Fallback to alert for critical errors
+            if (type === 'error') {
+                alert(`Erreur: ${message}`);
+            }
+            return null;
         }
-        
-        return id;
     }
 
     createNotification(id, message, type) {

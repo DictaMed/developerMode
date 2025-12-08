@@ -76,14 +76,32 @@ async function validateDependencies() {
     
     logger.info('🔍 Validation des dépendances...');
     
+    // Log current state before validation
+    logger.info('📊 État global avant validation:', {
+        globals: Object.keys(window).filter(key => key.match(/^[A-Z_]/)),
+        domReady: document.readyState,
+        timestamp: new Date().toISOString()
+    });
+    
     const requiredGlobals = ['APP_CONFIG', 'Utils', 'ErrorHandler'];
     const missingGlobals = requiredGlobals.filter(global => typeof window[global] === 'undefined');
+    
+    logger.info('🔍 Vérification des dépendances critiques:', {
+        required: requiredGlobals,
+        missing: missingGlobals,
+        available: requiredGlobals.map(global => ({
+            name: global,
+            available: typeof window[global] !== 'undefined',
+            type: typeof window[global]
+        }))
+    });
     
     if (missingGlobals.length > 0) {
         const errorMsg = `Dépendances manquantes: ${missingGlobals.join(', ')}`;
         window.errorHandler.critical(errorMsg, 'Dependency Validation', {
             missing: missingGlobals,
-            available: Object.keys(window).filter(key => key.match(/^[A-Z_]/))
+            available: Object.keys(window).filter(key => key.match(/^[A-Z_]/)),
+            scripts: Array.from(document.querySelectorAll('script')).map(s => s.src || 'inline')
         });
         throw new Error(errorMsg);
     }
@@ -91,8 +109,10 @@ async function validateDependencies() {
     // Wait for DOM to be fully ready
     await new Promise(resolve => {
         if (document.readyState === 'loading') {
+            logger.info('⏳ Attente du DOM...');
             document.addEventListener('DOMContentLoaded', resolve);
         } else {
+            logger.info('✅ DOM déjà prêt');
             resolve();
         }
     });
@@ -109,23 +129,47 @@ async function initializeCore() {
     
     try {
         // Core modules are loaded via script tags in HTML
+        // Verify that constructors are available
+        if (typeof AppState === 'undefined') {
+            throw new Error('AppState constructor not available');
+        }
+        if (typeof NotificationSystem === 'undefined') {
+            throw new Error('NotificationSystem constructor not available');
+        }
+        if (typeof LoadingOverlay === 'undefined') {
+            throw new Error('LoadingOverlay constructor not available');
+        }
+        
+        logger.info('📦 Vérification des constructeurs OK, création des instances...');
+        
         appState = new AppState();
         notificationSystem = new NotificationSystem();
         loadingOverlay = new LoadingOverlay();
         
-        // Ensure core systems are properly initialized before proceeding
+        // Verify instances are properly created
         if (!appState || !notificationSystem || !loadingOverlay) {
-            throw new Error('Échec de l\'initialisation des modules core');
+            throw new Error('Échec de la création des instances des modules core');
         }
         
+        // Test basic functionality of critical instances
+        if (typeof appState.setMode !== 'function') {
+            throw new Error('AppState instance invalid - missing setMode method');
+        }
+        
+        // Expose instances globally immediately for other modules
+        window.appState = appState;
+        window.notificationSystem = notificationSystem;
+        window.loadingOverlay = loadingOverlay;
+        
         timer();
-        logger.info('✅ Modules core initialisés');
+        logger.info('✅ Modules core initialisés et exposés globalement');
         
     } catch (error) {
         timer();
         logger.error('❌ Erreur lors de l\'initialisation des modules core', {
             error: error.message,
-            stack: error.stack
+            stack: error.stack,
+            availableGlobals: Object.keys(window).filter(key => key.match(/^[A-Z_]/))
         });
         throw error;
     }
@@ -139,12 +183,24 @@ async function initializeComponents() {
     
     try {
         // Initialize audio recorder manager first (critical dependency)
+        if (typeof AudioRecorderManager === 'undefined') {
+            throw new Error('AudioRecorderManager constructor not available');
+        }
         audioRecorderManager = new AudioRecorderManager(appState);
         await audioRecorderManager.init();
         
+        // Expose audio recorder manager globally
+        window.audioRecorderManager = audioRecorderManager;
+        
         // Initialize navigation system
+        if (typeof TabNavigationSystem === 'undefined') {
+            throw new Error('TabNavigationSystem constructor not available');
+        }
         tabNavigationSystem = new TabNavigationSystem(appState);
         await tabNavigationSystem.init();
+        
+        // Expose navigation system globally
+        window.tabNavigationSystem = tabNavigationSystem;
         
         // Initialize other components with proper error handling
         const componentPromises = [];
@@ -224,6 +280,7 @@ async function initializeComponents() {
         // Data sender
         if (typeof DataSender !== 'undefined') {
             dataSender = new DataSender(appState, audioRecorderManager);
+            window.dataSender = dataSender; // Expose globally for fallback
         }
         
         // Wait for all component initializations to complete

@@ -11,8 +11,14 @@ class TabNavigationSystem {
     }
 
     init() {
-        this.initTabButtons();
-        this.initFixedNavButtons();
+        try {
+            this.initTabButtons();
+            this.initFixedNavButtons();
+            console.log('✅ TabNavigationSystem initialisé');
+        } catch (error) {
+            console.error('❌ Erreur lors de l\'initialisation de TabNavigationSystem:', error);
+            throw error;
+        }
     }
 
     initTabButtons() {

@@ -10,7 +10,29 @@ class AuthModalSystem {
     }
 
     init() {
-        this.initEventListeners();
+        try {
+            console.log('🔧 AuthModalSystem init() started');
+            
+            // Verify DOM elements exist before initializing
+            const authButton = document.getElementById('authButton');
+            const authModal = document.getElementById('authModal');
+            
+            if (!authButton) {
+                console.warn('⚠️ AuthModalSystem: authButton element not found');
+            }
+            
+            if (!authModal) {
+                console.warn('⚠️ AuthModalSystem: authModal element not found');
+            }
+            
+            this.initEventListeners();
+            
+            console.log('✅ AuthModalSystem init() completed successfully');
+            
+        } catch (error) {
+            console.error('❌ AuthModalSystem init() failed:', error);
+            // Don't throw, just log and continue
+        }
     }
 
     initEventListeners() {

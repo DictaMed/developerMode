@@ -6,15 +6,62 @@
 // ===== TEST MODE TAB MODULE =====
 class TestModeTab {
     constructor(appState, navigationSystem, audioRecorderManager, dataSender) {
-        this.appState = appState;
-        this.navigationSystem = navigationSystem;
-        this.audioRecorderManager = audioRecorderManager;
-        this.dataSender = dataSender;
+        this.appState = appState || window.appState;
+        this.navigationSystem = navigationSystem || window.tabNavigationSystem;
+        this.audioRecorderManager = audioRecorderManager || window.audioRecorderManager;
+        this.dataSender = dataSender || window.dataSender;
+        
+        // Log dependency status
+        console.log('📦 TestModeTab constructor - Dependencies status:', {
+            appState: !!this.appState,
+            navigationSystem: !!this.navigationSystem,
+            audioRecorderManager: !!this.audioRecorderManager,
+            dataSender: !!this.dataSender
+        });
     }
 
     init() {
-        this.initEventListeners();
-        this.setupDemoFeatures();
+        try {
+            console.log('🔧 TestModeTab init() started');
+            
+            // Verify dependencies before initialization
+            if (!this.appState) {
+                console.warn('⚠️ TestModeTab: appState not available, trying to get from global');
+                this.appState = window.appState;
+            }
+            
+            if (!this.navigationSystem) {
+                console.warn('⚠️ TestModeTab: navigationSystem not available, trying to get from global');
+                this.navigationSystem = window.tabNavigationSystem;
+            }
+            
+            if (!this.audioRecorderManager) {
+                console.warn('⚠️ TestModeTab: audioRecorderManager not available, trying to get from global');
+                this.audioRecorderManager = window.audioRecorderManager;
+            }
+            
+            if (!this.dataSender) {
+                console.warn('⚠️ TestModeTab: dataSender not available, trying to get from global');
+                this.dataSender = window.dataSender;
+            }
+            
+            console.log('📊 TestModeTab dependencies after fallback resolution:', {
+                appState: !!this.appState,
+                navigationSystem: !!this.navigationSystem,
+                audioRecorderManager: !!this.audioRecorderManager,
+                dataSender: !!this.dataSender
+            });
+            
+            // Initialize components with fallbacks
+            this.initEventListeners();
+            this.setupDemoFeatures();
+            
+            console.log('✅ TestModeTab init() completed successfully');
+            
+        } catch (error) {
+            console.error('❌ TestModeTab init() failed:', error);
+            // Don't throw, just log and continue
+        }
     }
 
     initEventListeners() {
