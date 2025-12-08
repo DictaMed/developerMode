@@ -216,11 +216,19 @@ async function validateDependencies() {
     
     if (missingGlobals.length > 0) {
         const errorMsg = `Dépendances manquantes: ${missingGlobals.join(', ')}`;
-        window.errorHandler.critical(errorMsg, 'Dependency Validation', {
-            missing: missingGlobals,
-            available: Object.keys(window).filter(key => key.match(/^[A-Z_]/)),
-            scripts: Array.from(document.querySelectorAll('script')).map(s => s.src || 'inline')
-        });
+        if (window.errorHandler && window.errorHandler.critical) {
+            window.errorHandler.critical(errorMsg, 'Dependency Validation', {
+                missing: missingGlobals,
+                available: Object.keys(window).filter(key => key.match(/^[A-Z_]/)),
+                scripts: Array.from(document.querySelectorAll('script')).map(s => s.src || 'inline')
+            });
+        } else {
+            console.error('Dependency Validation Error:', errorMsg, {
+                missing: missingGlobals,
+                available: Object.keys(window).filter(key => key.match(/^[A-Z_]/)),
+                scripts: Array.from(document.querySelectorAll('script')).map(s => s.src || 'inline')
+            });
+        }
         throw new Error(errorMsg);
     }
     
