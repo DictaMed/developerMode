@@ -17,33 +17,80 @@ class FormValidationSystem {
     }
 
     initCharCounters() {
-        const inputs = [
-            { id: 'numeroDossier', counterId: 'numeroDossierCounter', maxLength: 50 },
-            { id: 'nomPatient', counterId: 'nomPatientCounter', maxLength: 50 },
-            { id: 'numeroDossierTest', counterId: 'numeroDossierTestCounter', maxLength: 50 },
-            { id: 'nomPatientTest', counterId: 'nomPatientTestCounter', maxLength: 50 },
-            { id: 'numeroDossierDMI', counterId: 'numeroDossierDMICounter', maxLength: 50 },
-            { id: 'nomPatientDMI', counterId: 'nomPatientDMICounter', maxLength: 50 }
-        ];
+        try {
+            const inputs = [
+                { id: 'numeroDossier', counterId: 'numeroDossierCounter', maxLength: 50 },
+                { id: 'nomPatient', counterId: 'nomPatientCounter', maxLength: 50 },
+                { id: 'numeroDossierTest', counterId: 'numeroDossierTestCounter', maxLength: 50 },
+                { id: 'nomPatientTest', counterId: 'nomPatientTestCounter', maxLength: 50 },
+                { id: 'numeroDossierDMI', counterId: 'numeroDossierDMICounter', maxLength: 50 },
+                { id: 'nomPatientDMI', counterId: 'nomPatientDMICounter', maxLength: 50 }
+            ];
 
-        inputs.forEach(({ id, counterId, maxLength }) => {
-            const input = document.getElementById(id);
-            const counter = document.getElementById(counterId);
-            
-            if (input && counter) {
-                input.addEventListener('input', () => {
+            inputs.forEach(({ id, counterId, maxLength }) => {
+                try {
+                    const input = document.getElementById(id);
+                    const counter = document.getElementById(counterId);
+                    
+                    if (!input) {
+                        console.warn(`FormValidationSystem: Input element not found: ${id}`);
+                        return;
+                    }
+                    
+                    if (!counter) {
+                        console.warn(`FormValidationSystem: Counter element not found: ${counterId}`);
+                        return;
+                    }
+                    
+                    // Vérification que maxLength est valide
+                    if (typeof maxLength !== 'number' || maxLength <= 0) {
+                        console.warn(`FormValidationSystem: Invalid maxLength for ${id}: ${maxLength}`);
+                        maxLength = 50; // Valeur par défaut
+                    }
+                    
+                    input.addEventListener('input', () => {
+                        try {
+                            this.updateCharCounter(input, counter, maxLength);
+                        } catch (error) {
+                            console.error(`FormValidationSystem: Error updating counter for ${id}:`, error);
+                        }
+                    });
+                    
+                    // Initialisation du compteur
                     this.updateCharCounter(input, counter, maxLength);
-                });
-            }
-        });
-
-        // Textarea counter
-        const texteLibre = document.getElementById('texteLibre');
-        const texteLibreCounter = document.getElementById('texteLibreCounter');
-        if (texteLibre && texteLibreCounter) {
-            texteLibre.addEventListener('input', () => {
-                texteLibreCounter.textContent = texteLibre.value.length;
+                } catch (inputError) {
+                    console.error(`FormValidationSystem: Error setting up input ${id}:`, inputError);
+                }
             });
+
+            // Textarea counter avec gestion d'erreur améliorée
+            try {
+                const texteLibre = document.getElementById('texteLibre');
+                const texteLibreCounter = document.getElementById('texteLibreCounter');
+                
+                if (!texteLibre) {
+                    console.warn('FormValidationSystem: texteLibre element not found');
+                } else if (!texteLibreCounter) {
+                    console.warn('FormValidationSystem: texteLibreCounter element not found');
+                } else {
+                    texteLibre.addEventListener('input', () => {
+                        try {
+                            texteLibreCounter.textContent = texteLibre.value.length;
+                        } catch (error) {
+                            console.error('FormValidationSystem: Error updating texteLibre counter:', error);
+                        }
+                    });
+                    
+                    // Initialisation
+                    texteLibreCounter.textContent = texteLibre.value.length;
+                }
+            } catch (textareaError) {
+                console.error('FormValidationSystem: Error setting up textarea counter:', textareaError);
+            }
+            
+            console.log('✅ FormValidationSystem char counters initialized');
+        } catch (error) {
+            console.error('FormValidationSystem: Error in initCharCounters:', error);
         }
     }
 

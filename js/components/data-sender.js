@@ -123,40 +123,128 @@ class DataSender {
         const sections = window.APP_CONFIG?.SECTIONS?.[mode] || [];
 
         try {
+            // Vérification des prérequis
+            if (!this.audioRecorderManager) {
+                console.warn('DataSender: AudioRecorderManager not available');
+                return recordings;
+            }
+
+            if (!Array.isArray(sections) || sections.length === 0) {
+                console.warn(`DataSender: No sections defined for mode: ${mode}`);
+                return recordings;
+            }
+
+            console.log(`DataSender: Collecting recordings for ${sections.length} sections in mode ${mode}`);
+
             for (const sectionId of sections) {
                 try {
-                    const recorder = this.audioRecorderManager?.getRecorder(sectionId);
+                    // Validation du sectionId
+                    if (!sectionId || typeof sectionId !== 'string') {
+                        console.warn('DataSender: Invalid sectionId:', sectionId);
+                        continue;
+                    }
+
+                    const recorder = this.audioRecorderManager.getRecorder(sectionId);
                     
-                    if (recorder && recorder.hasRecording && recorder.hasRecording()) {
+                    if (!recorder) {
+                        console.warn(`DataSender: No recorder found for section: ${sectionId}`);
+                        continue;
+                    }
+
+                    // Vérification que le recorder a la méthode hasRecording
+                    if (typeof recorder.hasRecording !== 'function') {
+                        console.warn(`DataSender: Recorder for section ${sectionId} missing hasRecording method`);
+                        continue;
+                    }
+
+                    if (recorder.hasRecording()) {
+                        // Création d'un objet recording cohérent et complet
                         const recording = {
                             sectionId: sectionId,
-                            duration: recorder.getDuration ? recorder.getDuration() : 0,
-                            size: recorder.audioBlob ? recorder.audioBlob.size : 0,
+                            sectionIndex: sections.indexOf(sectionId) + 1,
+                            duration: this.safeGetRecordingDuration(recorder),
+                            size: this.safeGetRecordingSize(recorder),
+                            format: this.safeGetRecordingFormat(recorder),
                             timestamp: new Date().toISOString(),
-                            audioData: null // Will be filled if needed
+                            audioData: null, // Sera rempli si nécessaire
+                            metadata: {
+                                hasAudioData: !!recorder.audioBlob,
+                                blobType: recorder.audioBlob?.type || 'unknown'
+                            }
                         };
 
-                        // Convert audio to base64 if needed
-                        if (recorder.audioBlob) {
+                        // Convert audio to base64 if needed (optionnel pour réduire la taille des données)
+                        if (recorder.audioBlob && recorder.audioBlob.size > 0) {
                             try {
-                                recording.audioData = await this.blobToBase64(recorder.audioBlob);
+                                // Pour les gros fichiers, on pourrait ne pas inclure l'audio dans le payload initial
+                                if (recorder.audioBlob.size <= 5 * 1024 * 1024) { // 5MB limit
+                                    recording.audioData = await this.blobToBase64(recorder.audioBlob);
+                                } else {
+                                    console.log(`DataSender: Skipping audio data for ${sectionId} (file too large: ${recorder.audioBlob.size} bytes)`);
+                                }
                             } catch (error) {
-                                console.warn(`Erreur lors de la conversion audio pour ${sectionId}:`, error);
+                                console.warn(`DataSender: Error converting audio to base64 for ${sectionId}:`, error);
+                                // Continue sans les données audio
                             }
                         }
 
                         recordings.push(recording);
+                        console.log(`DataSender: Added recording for section ${sectionId}`);
                     }
                 } catch (sectionError) {
-                    console.warn(`Erreur lors de la collecte de la section ${sectionId}:`, sectionError);
-                    // Continue with other sections
+                    console.error(`DataSender: Error processing section ${sectionId}:`, sectionError);
+                    // Continue avec les autres sections au lieu d'arrêter tout
                 }
             }
 
+            console.log(`DataSender: Collected ${recordings.length} recordings out of ${sections.length} sections`);
             return recordings;
         } catch (error) {
-            console.error('Erreur lors de la collecte des enregistrements:', error);
+            console.error('DataSender: Critical error in collectRecordings:', error);
             return [];
+        }
+    }
+
+    /**
+     * Récupération sécurisée de la durée d'enregistrement
+     */
+    safeGetRecordingDuration(recorder) {
+        try {
+            if (recorder.getDuration && typeof recorder.getDuration === 'function') {
+                const duration = recorder.getDuration();
+                return typeof duration === 'number' && duration >= 0 ? duration : 0;
+            }
+            return 0;
+        } catch (error) {
+            console.warn('DataSender: Error getting recording duration:', error);
+            return 0;
+        }
+    }
+
+    /**
+     * Récupération sécurisée de la taille d'enregistrement
+     */
+    safeGetRecordingSize(recorder) {
+        try {
+            return recorder.audioBlob?.size || 0;
+        } catch (error) {
+            console.warn('DataSender: Error getting recording size:', error);
+            return 0;
+        }
+    }
+
+    /**
+     * Récupération sécurisée du format d'enregistrement
+     */
+    safeGetRecordingFormat(recorder) {
+        try {
+            if (recorder.getAudioFormat && typeof recorder.getAudioFormat === 'function') {
+                return recorder.getAudioFormat();
+            }
+            return recorder.audioBlob?.type?.split('/')[1] || 'unknown';
+        } catch (error) {
+            console.warn('DataSender: Error getting recording format:', error);
+            return 'unknown';
         }
     }
 

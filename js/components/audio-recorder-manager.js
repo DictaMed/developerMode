@@ -14,23 +14,47 @@ class AudioRecorderManager {
         try {
             const recordingSections = document.querySelectorAll('.recording-section');
             
+            // Vérification de nullité pour les sections d'enregistrement
+            if (!recordingSections || recordingSections.length === 0) {
+                console.warn('⚠️ AudioRecorderManager: No recording sections found in DOM');
+                return;
+            }
+            
             recordingSections.forEach(section => {
                 try {
+                    if (!section) {
+                        console.warn('⚠️ AudioRecorderManager: Null section encountered');
+                        return;
+                    }
+                    
                     const sectionId = section.getAttribute('data-section');
-                    if (sectionId) {
-                        const recorder = new window.AudioRecorder(section);
-                        this.recorders.set(sectionId, recorder);
+                    if (!sectionId) {
+                        console.warn('⚠️ AudioRecorderManager: Section missing data-section attribute');
+                        return;
+                    }
+                    
+                    if (typeof window.AudioRecorder === 'undefined') {
+                        throw new Error('AudioRecorder constructor not available');
+                    }
+                    
+                    const recorder = new window.AudioRecorder(section);
+                    this.recorders.set(sectionId, recorder);
+                    
+                    if (this.appState && typeof this.appState.setRecording === 'function') {
                         this.appState.setRecording(sectionId, recorder);
+                    } else {
+                        console.warn(`⚠️ AudioRecorderManager: AppState not available for section ${sectionId}`);
                     }
                 } catch (sectionError) {
-                    console.warn(`Erreur lors de l'initialisation de la section ${section?.getAttribute('data-section')}:`, sectionError);
+                    console.error(`❌ AudioRecorderManager: Error initializing section ${section?.getAttribute('data-section')}:`, sectionError);
+                    // Continue avec les autres sections au lieu de tout arrêter
                 }
             });
             
-            console.log(`✅ AudioRecorderManager initialisé avec ${this.recorders.size} enregistreurs`);
+            console.log(`✅ AudioRecorderManager initialized with ${this.recorders.size} recorders`);
         } catch (error) {
-            console.error('❌ Erreur lors de l\'initialisation d\'AudioRecorderManager:', error);
-            throw error;
+            console.error('❌ AudioRecorderManager initialization failed:', error);
+            // Ne pas propager l'erreur pour éviter de casser l'application entière
         }
     }
 

@@ -311,27 +311,42 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
     <script src="firebase-config.js"></script>
     
-    <!-- Modules Core -->
+    <!-- ===== ORDRE DE CHARGEMENT OPTIMISÉ DES SCRIPTS ===== -->
+    
+    <!-- 1. DEPENDANCES CRITIQUES EN PREMIER -->
     <script src="js/core/config.js"></script>
     <script src="js/core/utils.js"></script>
-    <script src="js/core/app-state.js"></script>
     <script src="js/core/error-handler.js"></script>
+    <script src="js/core/performance-optimizer.js"></script>
     
-    <!-- Modules Components -->
+    <!-- 2. ÉTAT DE L'APPLICATION -->
+    <script src="js/core/app-state.js"></script>
+    
+    <!-- js/core/app-state3. SYSTÈMES FONDAMENTAUX -->
     <script src="js/components/notification.js"></script>
     <script src="js/components/loading-overlay.js"></script>
+    
+    <!-- 4. GESTIONNAIRE D'AUTHENTIFICATION (CRITIQUE POUR DMI) -->
+    <script src="js/components/firebase-auth-manager.js"></script>
+    <script src="js/components/auth-modal.js"></script>
+    
+    <!-- 5. COMPOSANTS AUDIO (DÉPENDANCE CRITIQUE) -->
     <script src="js/components/audio-recorder.js"></script>
     <script src="js/components/audio-recorder-manager.js"></script>
-    <script src="js/components/data-sender.js"></script>
-    <script src="js/components/navigation.js"></script>
-    <script src="js/components/auto-save.js"></script>
-    <script src="js/components/form-validation.js"></script>
-    <script src="js/components/photo-management.js"></script>
-    <script src="js/components/dmi-data-sender.js"></script>
-    <script src="js/components/auth-modal.js"></script>
-    <script src="js/components/firebase-auth-manager.js"></script>
     
-    <!-- Modules Tabs -->
+    <!-- 6. SYSTÈMES DE NAVIGATION ET VALIDATION -->
+    <script src="js/components/navigation.js"></script>
+    <script src="js/components/form-validation.js"></script>
+    
+    <!-- 7. SYSTÈMES DE DONNÉES ET SAUVEGARDE -->
+    <script src="js/components/data-sender.js"></script>
+    <script src="js/components/auto-save.js"></script>
+    <script src="js/components/dmi-data-sender.js"></script>
+    
+    <!-- 8. SYSTÈMES AUXILIAIRES -->
+    <script src="js/components/photo-management.js"></script>
+    
+    <!-- 9. MODULES D'ONGLETS (DÉPENDENT DES COMPOSANTS CI-DESSUS) -->
     <script src="js/tabs/home.js"></script>
     <script src="js/tabs/normal-mode.js"></script>
     <script src="js/tabs/test-mode.js"></script>
@@ -341,6 +356,9 @@
     
     <!-- Point d'entrée principal -->
     <script src="js/main.js"></script>
+    
+    <!-- Tests unitaires (seulement en développement) -->
+    <script src="tests/unit-tests.js"></script>
 
 </body>
 </html>

@@ -70,18 +70,44 @@ class TabNavigationSystem {
     }
 
     async loadTabContent(tabId) {
-        const tabContent = document.getElementById('tab-content');
-        
-        if (!tabContent) {
-            console.error('Container tab-content non trouvé');
-            return;
-        }
-
         try {
-            // Show loading state
-            tabContent.innerHTML = '<div class="loading-content"><p>Chargement...</p></div>';
+            // Validation des paramètres d'entrée
+            if (!tabId || typeof tabId !== 'string') {
+                console.warn('⚠️ Navigation: Invalid tabId provided:', tabId);
+                return;
+            }
             
-            // Map tab IDs to file names
+            const tabContent = document.getElementById('tab-content');
+            
+            if (!tabContent) {
+                console.error('❌ Navigation: tab-content container not found in DOM');
+                
+                // Tentative de création du container s'il n'existe pas
+                try {
+                    const mainContainer = document.querySelector('main.container');
+                    if (mainContainer) {
+                        const newTabContent = document.createElement('div');
+                        newTabContent.id = 'tab-content';
+                        newTabContent.className = 'tab-content active';
+                        mainContainer.appendChild(newTabContent);
+                        console.log('✅ Navigation: Created missing tab-content container');
+                        return this.loadTabContent(tabId); // Retry
+                    }
+                } catch (createError) {
+                    console.error('❌ Navigation: Failed to create tab-content container:', createError);
+                }
+                return;
+            }
+
+            // Show loading state avec gestion d'erreur
+            try {
+                tabContent.innerHTML = '<div class="loading-content"><p>Chargement...</p></div>';
+            } catch (innerHtmlError) {
+                console.error('❌ Navigation: Error setting loading content:', innerHtmlError);
+                return;
+            }
+            
+            // Map tab IDs to file names avec validation
             const tabFiles = {
                 'home': 'tab-home.html',
                 'mode-normal': 'tab-mode-normal.html',
@@ -93,30 +119,70 @@ class TabNavigationSystem {
             
             const fileName = tabFiles[tabId];
             if (!fileName) {
-                throw new Error(`Fichier de tab non trouvé pour: ${tabId}`);
+                throw new Error(`Tab file not found for: ${tabId}`);
             }
             
-            // Load content from file
-            const response = await fetch(fileName);
-            if (!response.ok) {
-                throw new Error(`Erreur lors du chargement: ${response.status}`);
+            // Load content from file avec timeout et gestion d'erreur
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+                
+                const response = await fetch(fileName, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const content = await response.text();
+                
+                // Vérification du contenu
+                if (!content || content.trim().length === 0) {
+                    throw new Error('Empty content received');
+                }
+                
+                tabContent.innerHTML = content;
+                
+                // Initialize event listeners pour le contenu nouvellement chargé
+                try {
+                    this.initTabContentEventListeners(tabId);
+                } catch (listenerError) {
+                    console.error('❌ Navigation: Error initializing tab event listeners:', listenerError);
+                    // Ne pas faire échouer le chargement complet pour une erreur de listener
+                }
+                
+                console.log(`✅ Navigation: Tab ${tabId} loaded successfully`);
+                
+            } catch (fetchError) {
+                throw new Error(`Failed to load tab content: ${fetchError.message}`);
             }
-            
-            const content = await response.text();
-            tabContent.innerHTML = content;
-            
-            // Initialize event listeners for the newly loaded content
-            this.initTabContentEventListeners(tabId);
             
         } catch (error) {
-            console.error('Erreur lors du chargement du tab:', error);
-            tabContent.innerHTML = `
-                <div class="error-content">
-                    <h2>Erreur de chargement</h2>
-                    <p>Impossible de charger le contenu de cet onglet.</p>
-                    <button class="btn btn-primary" onclick="switchTab('home')">Retour à l'accueil</button>
-                </div>
-            `;
+            console.error(`❌ Navigation: Error loading tab ${tabId}:`, error);
+            
+            // Amélioration de l'affichage d'erreur avec plus de détails
+            try {
+                const tabContent = document.getElementById('tab-content');
+                if (tabContent) {
+                    tabContent.innerHTML = `
+                        <div class="error-content">
+                            <h2>❌ Erreur de chargement</h2>
+                            <p>Impossible de charger le contenu de l'onglet: <strong>${tabId}</strong></p>
+                            <p><small>Erreur: ${error.message}</small></p>
+                            <div class="error-actions">
+                                <button class="btn btn-primary" onclick="switchTab('home')">🏠 Retour à l'accueil</button>
+                                <button class="btn btn-secondary" onclick="location.reload()">🔄 Recharger la page</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (fallbackError) {
+                console.error('❌ Navigation: Error showing fallback error content:', fallbackError);
+                // Fallback ultime si tout échoue
+                alert(`Erreur de navigation: Impossible de charger l'onglet ${tabId}. Veuillez recharger la page.`);
+            }
         }
     }
 

@@ -18,35 +18,60 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const timer = logger.time('Total Initialization Time');
         
-        logger.info('🚀 Initialisation de DictaMed v2.1 (Architecture modulaire améliorée)...');
+        logger.info('🚀 Initialisation de DictaMed v2.2 (Optimisations de performance)...');
         
         // Validate dependencies before initialization
         await validateDependencies();
         
-        // Initialize core systems in order
-        await initializeCore();
-        
-        // Initialize components with proper dependency management
-        await initializeComponents();
-        
-        // Initialize tabs after components are ready
-        await initializeTabs();
-        
-        // Initialize event listeners
-        initializeEventListeners();
-        
-        // Final initialization
-        await finalizeInitialization();
-        
-        timer();
-        logger.info('✅ DictaMed v2.1 initialisé avec succès (Architecture modulaire améliorée)!');
-        
-        // Show success notification after successful initialization
-        if (notificationSystem) {
+        // Check if performance optimizer is available
+        if (window.PerformanceOptimizer) {
+            logger.info('⚡ Using Performance Optimizer for faster initialization...');
+            
+            // Initialize performance optimizer
+            const optimizer = new window.PerformanceOptimizer();
+            optimizer.init();
+            
+            // Enable performance optimizations
+            const criticalResults = await optimizer.enableOptimizations();
+            
+            // Use optimized results
+            appState = criticalResults.appState;
+            notificationSystem = criticalResults.notificationSystem;
+            loadingOverlay = criticalResults.loadingOverlay;
+            
+            // Initialize event listeners with optimizer
+            initializeEventListeners();
+            
+            // Final initialization
+            await finalizeInitialization();
+            
+            // Show success notification
             setTimeout(() => {
-                notificationSystem.success('DictaMed est prêt à l\'utilisation', 'Application initialisée');
+                if (notificationSystem) {
+                    notificationSystem.success('DictaMed est prêt à l\'utilisation (optimisé)', 'Application initialisée');
+                }
+            }, 500);
+            
+        } else {
+            logger.info('📦 Using standard initialization...');
+            
+            // Fallback to standard initialization if optimizer not available
+            await initializeCore();
+            await initializeComponents();
+            await initializeTabs();
+            initializeEventListeners();
+            await finalizeInitialization();
+            
+            // Show success notification
+            setTimeout(() => {
+                if (notificationSystem) {
+                    notificationSystem.success('DictaMed est prêt à l\'utilisation', 'Application initialisée');
+                }
             }, 500);
         }
+        
+        timer();
+        logger.info('✅ DictaMed v2.2 initialisé avec succès!');
         
     } catch (error) {
         logger.critical('❌ Erreur critique lors de l\'initialisation', { 
