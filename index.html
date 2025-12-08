@@ -21,31 +21,31 @@
                 </div>
             </div>
             <div class="nav-tabs-right">
-                <button class="fixed-nav-btn active" data-tab="home" onclick="switchTab('home')">
+                <button class="fixed-nav-btn active" data-tab="home">
                     <span class="nav-icon">🏠</span>
                     Accueil
                 </button>
-                <button class="fixed-nav-btn" data-tab="mode-normal" onclick="switchTab('mode-normal')">
+                <button class="fixed-nav-btn" data-tab="mode-normal">
                     <span class="nav-icon">🏥</span>
                     Mode Normal
                 </button>
-                <button class="fixed-nav-btn" data-tab="mode-test" onclick="switchTab('mode-test')">
+                <button class="fixed-nav-btn" data-tab="mode-test">
                     <span class="nav-icon">🧪</span>
                     Mode Test
                 </button>
-                <button class="fixed-nav-btn" data-tab="mode-dmi" onclick="switchTab('mode-dmi')">
+                <button class="fixed-nav-btn" data-tab="mode-dmi">
                     <span class="nav-icon">📝</span>
                     Saisie Texte
                 </button>
-                <button class="fixed-nav-btn" data-tab="guide" onclick="switchTab('guide')">
+                <button class="fixed-nav-btn" data-tab="guide">
                     <span class="nav-icon">📖</span>
                     Guide
                 </button>
-                <button class="fixed-nav-btn" data-tab="faq" onclick="switchTab('faq')">
+                <button class="fixed-nav-btn" data-tab="faq">
                     <span class="nav-icon">❓</span>
                     FAQ
                 </button>
-                <button class="fixed-nav-btn auth-btn" id="authButton" onclick="toggleAuthModal()">
+                <button class="fixed-nav-btn auth-btn" id="authButton">
                     <span class="nav-icon">🔐</span>
                     <span id="authButtonText">Connexion</span>
                 </button>
@@ -99,10 +99,10 @@
                         Transformez votre voix en texte médical structuré en quelques secondes.
                     </p>
                     <div class="hero-cta">
-                        <button class="btn btn-primary btn-large" onclick="switchTab('mode-test')">
+                        <button class="btn btn-primary btn-large" data-tab="mode-test">
                             🧪 Essayer gratuitement
                         </button>
-                        <button class="btn btn-secondary btn-large" onclick="switchTab('guide')">
+                        <button class="btn btn-secondary btn-large" data-tab="guide">
                             📖 Guide
                         </button>
                     </div>
@@ -140,7 +140,7 @@
                             <h4>Démonstration</h4>
                             <p>Essayez gratuitement</p>
                             <span class="mode-badge">Gratuit</span>
-                            <button class="btn btn-primary btn-small" onclick="switchTab('mode-test')">
+                            <button class="btn btn-primary btn-small" data-tab="mode-test">
                                 Essayer
                             </button>
                         </div>
@@ -150,7 +150,7 @@
                             <h4>Production</h4>
                             <p>Mode professionnel</p>
                             <span class="mode-badge">Sécurisé</span>
-                            <button class="btn btn-secondary btn-small" onclick="switchTab('mode-normal')">
+                            <button class="btn btn-secondary btn-small" data-tab="mode-normal">
                                 Accéder
                             </button>
                         </div>
@@ -160,7 +160,7 @@
                             <h4>Saisie Texte</h4>
                             <p>Texte + photos</p>
                             <span class="mode-badge">Flexible</span>
-                            <button class="btn btn-secondary btn-small" onclick="switchTab('mode-dmi')">
+                            <button class="btn btn-secondary btn-small" data-tab="mode-dmi">
                                 Accéder
                             </button>
                         </div>
@@ -195,7 +195,7 @@
                     <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
                 </div>
                 <h2 id="authModalTitle">Connexion</h2>
-                <button class="auth-modal-close" onclick="closeAuthModal()" aria-label="Fermer">&times;</button>
+                <button class="auth-modal-close" data-action="close-auth" aria-label="Fermer">&times;</button>
             </div>
             
             <div class="auth-modal-body">
@@ -226,7 +226,7 @@
                         </label>
                         <div class="password-input-wrapper">
                             <input type="password" id="modalPasswordInput" placeholder="••••••••" required autocomplete="current-password">
-                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility()" aria-label="Afficher le mot de passe">
+                            <button type="button" class="password-toggle" data-action="toggle-password" aria-label="Afficher le mot de passe">
                                 <span class="eye-icon">👁️</span>
                             </button>
                         </div>
@@ -242,7 +242,7 @@
                             <span class="checkmark"></span>
                             Se souvenir de moi
                         </label>
-                        <a href="#" class="forgot-password" onclick="showForgotPassword()">Mot de passe oublié ?</a>
+                        <a href="#" class="forgot-password" data-action="forgot-password">Mot de passe oublié ?</a>
                     </div>
                     
                     <button type="submit" id="modalEmailSubmitBtn" class="btn btn-primary btn-full btn-glow">
@@ -293,7 +293,7 @@
                         </div>
                     </div>
                     <div class="user-actions-modern">
-                        <button class="btn btn-outline" onclick="switchTab('mode-normal'); closeAuthModal();">
+                        <button class="btn btn-outline" data-tab="mode-normal" data-action="close-after-nav">
                             <span>🏥</span> Mode Normal
                         </button>
                         <button id="modalSignOutBtn" class="btn btn-danger">

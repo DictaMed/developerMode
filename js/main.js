@@ -182,8 +182,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
         // Log memory usage on error
-        if (window.performanceMonitor) {
-            window.performanceMonitor.logger.memory('Memory usage at error');
+        if (window.logger) {
+            window.logger.createLogger('Error').memory('Memory usage at error');
         }
     }
 });

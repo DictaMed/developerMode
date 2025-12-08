@@ -36,9 +36,54 @@
 3. Navigate to different tabs to verify form validation works correctly
 4. Check that the home page loads without audio-related warnings
 
+## NEW ISSUES IDENTIFIED (2025-12-08)
+
+### 5. ❌ CRITICAL: Timing Issue with Global Functions
+**Problem**: `switchTab is not defined` and `toggleAuthModal is not defined` errors persist
+**Root Cause**: Race condition between DOM onclick handlers and JavaScript initialization
+**Evidence**: 
+- HTML onclick handlers call functions before system instances are ready
+- Functions exist but target systems (`tabNavigationSystem`, `authModalSystem`) don't exist yet
+
+### 6. ❌ CRITICAL: Performance Monitor Error  
+**Problem**: `window.performanceMonitor.logger.memory is not a function`
+**Root Cause**: `PerformanceMonitor` class doesn't have a `logger` property
+**Evidence**: 
+```javascript
+// main.js:186 - ERROR: performanceMonitor doesn't have logger
+window.performanceMonitor.logger.memory('Memory usage at error');
+```
+
 ## Files Modified
 
 - `js/core/error-handler.js` - Added missing critical method to Logger
 - `js/main.js` - Made switchTab function available earlier in initialization
 - `js/components/form-validation.js` - Improved DOM element detection and logging
 - `js/components/audio-recorder-manager.js` - Improved logging for missing recording sections
+
+## FIXES APPLIED ✅
+
+### 7. ✅ CRITICAL: Performance Monitor Error Fixed
+**Problem**: `window.performanceMonitor.logger.memory is not a function`
+**Solution Applied**: Changed to `window.logger.createLogger('Error').memory('Memory usage at error')` in main.js line 186
+
+### 8. ✅ CRITICAL: Timing Issue with Global Functions Fixed  
+**Problem**: Race condition between DOM onclick handlers and JavaScript initialization
+**Solution Applied**: 
+- Converted all inline onclick handlers to data attributes and event listeners
+- Moved event binding to navigation system initialization
+- Added initGlobalNavButtons() method to handle all [data-tab] buttons
+- Modified auth modal system to use data-action attributes
+
+### 9. ✅ AUTH MODAL SYSTEM FIXED
+**Problem**: Auth modal functions not available during early clicks
+**Solution Applied**:
+- Added showForgotPassword() method to AuthModalSystem class
+- Updated event listeners to use data-action attributes
+- Replaced global function calls with system method calls
+
+## PENDING FIXES REQUIRED
+
+- [x] Fix performance monitoring error in main.js line 186 ✅ DONE
+- [x] Add system readiness checks to global functions ✅ DONE  
+- [x] Convert inline onclick to event listeners for better timing control ✅ DONE

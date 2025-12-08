@@ -52,16 +52,25 @@ class AuthModalSystem {
             });
         }
 
-        // Close button
-        const closeBtn = document.querySelector('.auth-modal-close');
+        // Close button with data-action attribute
+        const closeBtn = document.querySelector('[data-action="close-auth"]');
         if (closeBtn) {
             closeBtn.addEventListener('click', () => this.close());
         }
 
-        // Password visibility toggle
-        const passwordToggle = document.querySelector('.password-toggle');
+        // Password visibility toggle with data-action attribute
+        const passwordToggle = document.querySelector('[data-action="toggle-password"]');
         if (passwordToggle) {
             passwordToggle.addEventListener('click', () => this.togglePasswordVisibility());
+        }
+
+        // Forgot password with data-action attribute
+        const forgotPasswordLink = document.querySelector('[data-action="forgot-password"]');
+        if (forgotPasswordLink) {
+            forgotPasswordLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showForgotPassword();
+            });
         }
     }
 
@@ -105,6 +114,58 @@ class AuthModalSystem {
         } else {
             passwordInput.type = 'password';
             eyeIcon.textContent = '👁️';
+        }
+    }
+
+    showForgotPassword() {
+        const emailInput = document.getElementById('modalEmailInput');
+        if (!emailInput) {
+            console.warn('Modal email input not found');
+            return;
+        }
+        
+        const email = emailInput.value.trim();
+        if (!email) {
+            if (window.notificationSystem) {
+                window.notificationSystem.warning('Veuillez d\'abord entrer votre adresse email pour réinitialiser votre mot de passe.', 'Email requis');
+            } else {
+                alert('Veuillez d\'abord entrer votre adresse email pour réinitialiser votre mot de passe.');
+            }
+            emailInput.focus();
+            return;
+        }
+        
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().sendPasswordResetEmail(email)
+                .then(() => {
+                    if (window.notificationSystem) {
+                        window.notificationSystem.success('Un email de réinitialisation a été envoyé à ' + email, 'Email envoyé');
+                    } else {
+                        alert('Un email de réinitialisation a été envoyé à ' + email);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Erreur:', error);
+                    if (error.code === 'auth/user-not-found') {
+                        if (window.notificationSystem) {
+                            window.notificationSystem.error('Aucun compte trouvé avec cet email', 'Erreur');
+                        } else {
+                            alert('Aucun compte trouvé avec cet email');
+                        }
+                    } else {
+                        if (window.notificationSystem) {
+                            window.notificationSystem.error('Impossible d\'envoyer l\'email de réinitialisation', 'Erreur');
+                        } else {
+                            alert('Impossible d\'envoyer l\'email de réinitialisation');
+                        }
+                    }
+                });
+        } else {
+            if (window.notificationSystem) {
+                window.notificationSystem.info('Un email de réinitialisation sera envoyé à: ' + email, 'Fonctionnalité de démonstration');
+            } else {
+                alert('Un email de réinitialisation sera envoyé à: ' + email);
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ class TabNavigationSystem {
         try {
             this.initTabButtons();
             this.initFixedNavButtons();
+            this.initGlobalNavButtons();
             console.log('✅ TabNavigationSystem initialisé');
         } catch (error) {
             console.error('❌ Erreur lors de l\'initialisation de TabNavigationSystem:', error);
@@ -36,7 +37,34 @@ class TabNavigationSystem {
         fixedNavBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const targetTab = btn.getAttribute('data-tab');
-                this.switchTab(targetTab);
+                if (targetTab) {
+                    this.switchTab(targetTab);
+                }
+            });
+        });
+    }
+
+    initGlobalNavButtons() {
+        // Handle navigation buttons that don't have the fixed-nav-btn class
+        const globalNavButtons = document.querySelectorAll('[data-tab]');
+        globalNavButtons.forEach(btn => {
+            // Skip if it's already handled by initFixedNavButtons
+            if (btn.classList.contains('fixed-nav-btn')) {
+                return;
+            }
+            
+            btn.addEventListener('click', () => {
+                const targetTab = btn.getAttribute('data-tab');
+                const action = btn.getAttribute('data-action');
+                
+                if (targetTab && (!action || action === 'close-after-nav')) {
+                    this.switchTab(targetTab).then(() => {
+                        // Close modal if action requires it
+                        if (action === 'close-after-nav' && window.authModalSystem) {
+                            window.authModalSystem.close();
+                        }
+                    });
+                }
             });
         });
     }
