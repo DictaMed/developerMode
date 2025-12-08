@@ -218,7 +218,7 @@ class TabNavigationSystem {
         // Initialize specific event listeners based on tab type
         if (tabId === 'mode-normal' || tabId === 'mode-test') {
             // Reinitialize audio recorders for recording sections
-            const recordingSections = document.querySelectorAll('.recording-section');
+            const recordingSections = document.querySelectorAll('.recording-section-enhanced');
             recordingSections.forEach(section => {
                 const sectionId = section.getAttribute('data-section');
                 const existingRecorder = window.audioRecorderManager.getRecorder(sectionId);

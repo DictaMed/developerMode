@@ -159,7 +159,7 @@ class TestModeTab {
 
     addInteractiveGuides() {
         // Guides interactifs pour aider les utilisateurs en mode test
-        const recordingSections = document.querySelectorAll('.recording-section');
+        const recordingSections = document.querySelectorAll('.recording-section-enhanced');
         recordingSections.forEach(section => {
             const sectionTitle = section.querySelector('h3');
             if (sectionTitle) {
