@@ -6,47 +6,23 @@
 
 /* ========== CSS CUSTOM PROPERTIES ========== */
 :root {
-    /* Enhanced Core Colors - Sophisticated Blue & Green Palette */
+    /* Core Colors */
     --blue-primary: #2563eb;
     --blue-light: #3b82f6;
-    --blue-dark: #1d4ed8;
-    --blue-lighter: #dbeafe;
-    --blue-gradient: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-    
     --green-secondary: #10b981;
     --green-light: #34d399;
-    --green-dark: #059669;
-    --green-lighter: #d1fae5;
-    --green-gradient: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-    
-    /* Sophisticated Gradient Combinations */
-    --primary-gradient: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
-    --secondary-gradient: linear-gradient(135deg, #3b82f6 0%, #34d399 100%);
-    --hero-gradient: linear-gradient(135deg, #f0f9ff 0%, #ecfdf5 50%, #f0f9ff 100%);
-    --card-gradient: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 100%);
-    
-    /* Enhanced Gray Scale */
     --gray-dark: #1e293b;
     --gray-medium: #64748b;
     --gray-light: #f1f5f9;
     --gray-lighter: #f8fafc;
-    --gray-border: #e2e8f0;
     --white: #ffffff;
     
-    /* Sophisticated Status Colors */
+    /* Status Colors */
     --red: #ef4444;
     --red-dark: #dc2626;
-    --red-light: #fecaca;
     --orange: #f59e0b;
-    --orange-light: #fed7aa;
     --green-bg: #d1fae5;
     --green-border: #10b981;
-    
-    /* Medical-themed accent colors */
-    --medical-blue: #1e40af;
-    --medical-green: #047857;
-    --clinical-white: #fefefe;
-    --professional-gray: #475569;
     
     /* Layout */
     --container-max: 1600px;
@@ -97,7 +73,7 @@ html {
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     color: var(--gray-dark);
-    background: var(--hero-gradient);
+    background: linear-gradient(135deg, #f0f9ff 0%, #ecfdf5 50%, #f0f9ff 100%);
     background-attachment: fixed;
     min-height: 100vh;
     line-height: 1.6;
@@ -168,149 +144,8 @@ p {
     padding: var(--space-md) var(--space-2xl);
 }
 
-/* Enhanced Logo Design */
+/* Logo */
 .header-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.header-logo:hover {
-    transform: scale(1.02);
-}
-
-/* Medical Icon with Sophisticated Design */
-.header-logo .logo-icon {
-    width: 40px;
-    height: 40px;
-    position: relative;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
-    box-shadow: 
-        0 6px 20px rgba(37, 99, 235, 0.25),
-        0 3px 10px rgba(16, 185, 129, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.header-logo .logo-icon::before {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    right: 2px;
-    bottom: 2px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-}
-
-.header-logo .logo-icon svg {
-    width: 24px;
-    height: 24px;
-    position: relative;
-    z-index: 1;
-}
-
-.header-logo:hover .logo-icon {
-    box-shadow: 
-        0 8px 25px rgba(37, 99, 235, 0.35),
-        0 4px 15px rgba(16, 185, 129, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    transform: translateY(-1px);
-}
-
-/* Enhanced Typography */
-.header-logo .logo-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.1;
-}
-
-.header-logo .logo-dicta {
-    font-size: 20px;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--blue-primary) 0%, #1d4ed8 50%, #3b82f6 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
-    letter-spacing: -0.5px;
-}
-
-.header-logo .logo-med {
-    font-size: 20px;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--green-secondary) 0%, #059669 50%, #34d399 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
-    letter-spacing: -0.5px;
-}
-
-.header-logo .logo-subtitle {
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--gray-medium);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: 1px;
-}
-
-/* Compact Logo Variation for Mobile */
-@media (max-width: 768px) {
-    .header-logo {
-        gap: 8px;
-    }
-    
-    .header-logo .logo-icon {
-        width: 36px;
-        height: 36px;
-    }
-    
-    .header-logo .logo-icon svg {
-        width: 22px;
-        height: 22px;
-    }
-    
-    .header-logo .logo-dicta,
-    .header-logo .logo-med {
-        font-size: 18px;
-    }
-    
-    .header-logo .logo-subtitle {
-        font-size: 8px;
-    }
-}
-
-@media (max-width: 480px) {
-    .header-logo .logo-icon {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .header-logo .logo-icon svg {
-        width: 20px;
-        height: 20px;
-    }
-    
-    .header-logo .logo-dicta,
-    .header-logo .logo-med {
-        font-size: 16px;
-    }
-    
-    .header-logo .logo-subtitle {
-        display: none;
-    }
-}
-
-/* Legacy Logo Support (for backwards compatibility) */
-.header-logo.legacy {
     font-size: 1.8rem;
     font-weight: 800;
     letter-spacing: -0.5px;
@@ -319,16 +154,16 @@ p {
     text-decoration: none;
 }
 
-.header-logo.legacy:hover {
+.header-logo:hover {
     transform: scale(1.05);
 }
 
-.header-logo.legacy .logo-dicta {
+.header-logo .logo-dicta {
     color: var(--blue-primary);
     text-shadow: 2px 2px 4px rgba(37, 99, 235, 0.2);
 }
 
-.header-logo.legacy .logo-med {
+.header-logo .logo-med {
     color: var(--green-secondary);
     text-shadow: 2px 2px 4px rgba(16, 185, 129, 0.2);
 }
@@ -859,37 +694,13 @@ p {
 }
 
 .btn-primary {
-    background: var(--primary-gradient);
+    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
     color: white;
-    box-shadow: 
-        0 4px 14px rgba(37, 99, 235, 0.25),
-        0 2px 8px rgba(16, 185, 129, 0.15);
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.btn-primary::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.6s ease;
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
 }
 
 .btn-primary:hover {
-    box-shadow: 
-        0 8px 25px rgba(37, 99, 235, 0.35),
-        0 4px 15px rgba(16, 185, 129, 0.25),
-        0 0 0 1px rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-}
-
-.btn-primary:hover::before {
-    left: 100%;
+    box-shadow: 0 0 30px rgba(37, 99, 235, 0.5);
 }
 
 .btn-secondary {
@@ -990,7 +801,7 @@ p {
 }
 
 .feature-card-modern {
-    background: var(--card-gradient);
+    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.98) 100%);
     backdrop-filter: blur(20px);
     border-radius: var(--border-radius-xl);
     padding: var(--space-xl);
@@ -1337,70 +1148,14 @@ p {
     animation: logoSlideIn 0.8s ease-out;
 }
 
-/* Auth Modal Logo Styles */
-.auth-modal-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
-}
-
-.auth-modal-logo .logo-icon {
-    width: 36px;
-    height: 36px;
-}
-
-.auth-modal-logo .logo-icon svg {
-    width: 22px;
-    height: 22px;
-}
-
 .auth-modal-logo .logo-dicta {
-    font-size: 18px;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--blue-primary) 0%, #1d4ed8 50%, #3b82f6 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
-    letter-spacing: -0.5px;
-}
-
-.auth-modal-logo .logo-med {
-    font-size: 18px;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--green-secondary) 0%, #059669 50%, #34d399 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
-    letter-spacing: -0.5px;
-}
-
-.auth-modal-logo .logo-subtitle {
-    font-size: 8px;
-    font-weight: 600;
-    color: var(--gray-medium);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: 1px;
-}
-
-/* Legacy styles for backward compatibility */
-.auth-modal-logo.legacy {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.auth-modal-logo.legacy .logo-dicta {
     font-size: 1.4rem;
     font-weight: 900;
     color: var(--blue-primary);
     text-shadow: 2px 2px 4px rgba(37, 99, 235, 0.3);
 }
 
-.auth-modal-logo.legacy .logo-med {
+.auth-modal-logo .logo-med {
     font-size: 1.4rem;
     font-weight: 900;
     color: var(--green-secondary);
