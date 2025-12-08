@@ -105,94 +105,21 @@ class TabNavigationSystem {
                 return;
             }
             
-            const tabContent = document.getElementById('tab-content');
-            
-            if (!tabContent) {
-                console.error('❌ Navigation: tab-content container not found in DOM');
-                
-                // Tentative de création du container s'il n'existe pas
-                try {
-                    const mainContainer = document.querySelector('main.container');
-                    if (mainContainer) {
-                        const newTabContent = document.createElement('div');
-                        newTabContent.id = 'tab-content';
-                        newTabContent.className = 'tab-content active';
-                        mainContainer.appendChild(newTabContent);
-                        console.log('✅ Navigation: Created missing tab-content container');
-                        return this.loadTabContent(tabId); // Retry
-                    }
-                } catch (createError) {
-                    console.error('❌ Navigation: Failed to create tab-content container:', createError);
-                }
-                return;
-            }
-
-            // Show loading state avec gestion d'erreur
-            try {
-                tabContent.innerHTML = '<div class="loading-content"><p>Chargement...</p></div>';
-            } catch (innerHtmlError) {
-                console.error('❌ Navigation: Error setting loading content:', innerHtmlError);
+            // Gestion spéciale pour la page d'accueil (maintenant dans index.html)
+            if (tabId === 'home') {
+                this.showHomeTab();
                 return;
             }
             
-            // Map tab IDs to file names avec validation
-            const tabFiles = {
-                'home': 'tab-home.html',
-                'mode-normal': 'tab-mode-normal.html',
-                'mode-test': 'tab-mode-test.html',
-                'mode-dmi': 'tab-mode-dmi.html',
-                'guide': 'tab-guide.html',
-                'faq': 'tab-faq.html'
-            };
-            
-            const fileName = tabFiles[tabId];
-            if (!fileName) {
-                throw new Error(`Tab file not found for: ${tabId}`);
-            }
-            
-            // Load content from file avec timeout et gestion d'erreur
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-                
-                const response = await fetch(fileName, {
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const content = await response.text();
-                
-                // Vérification du contenu
-                if (!content || content.trim().length === 0) {
-                    throw new Error('Empty content received');
-                }
-                
-                tabContent.innerHTML = content;
-                
-                // Initialize event listeners pour le contenu nouvellement chargé
-                try {
-                    this.initTabContentEventListeners(tabId);
-                } catch (listenerError) {
-                    console.error('❌ Navigation: Error initializing tab event listeners:', listenerError);
-                    // Ne pas faire échouer le chargement complet pour une erreur de listener
-                }
-                
-                console.log(`✅ Navigation: Tab ${tabId} loaded successfully`);
-                
-            } catch (fetchError) {
-                throw new Error(`Failed to load tab content: ${fetchError.message}`);
-            }
+            // Pour les autres onglets, utiliser le système de chargement depuis fichiers
+            await this.loadTabFromFile(tabId);
             
         } catch (error) {
             console.error(`❌ Navigation: Error loading tab ${tabId}:`, error);
             
             // Amélioration de l'affichage d'erreur avec plus de détails
             try {
-                const tabContent = document.getElementById('tab-content');
+                const tabContent = this.getTabContentContainer(tabId);
                 if (tabContent) {
                     tabContent.innerHTML = `
                         <div class="error-content">
@@ -212,6 +139,112 @@ class TabNavigationSystem {
                 alert(`Erreur de navigation: Impossible de charger l'onglet ${tabId}. Veuillez recharger la page.`);
             }
         }
+    }
+    
+    showHomeTab() {
+        // Cacher tous les autres onglets
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+            if (content.id !== 'tab-content') {
+                content.style.display = 'none';
+            }
+        });
+        
+        // Afficher l'onglet d'accueil
+        const homeTabContent = document.getElementById('tab-content');
+        if (homeTabContent) {
+            homeTabContent.classList.add('active');
+            homeTabContent.style.display = 'block';
+        }
+        
+        console.log('✅ Navigation: Home tab displayed successfully');
+    }
+    
+    async loadTabFromFile(tabId) {
+        const tabContent = this.getTabContentContainer(tabId);
+        
+        if (!tabContent) {
+            console.error(`❌ Navigation: tab-content container not found for: ${tabId}`);
+            return;
+        }
+
+        // Show loading state
+        tabContent.innerHTML = '<div class="loading-content"><p>Chargement...</p></div>';
+        
+        // Map tab IDs to file names avec validation
+        const tabFiles = {
+            'mode-normal': 'tab-mode-normal.html',
+            'mode-test': 'tab-mode-test.html',
+            'mode-dmi': 'tab-mode-dmi.html',
+            'guide': 'tab-guide.html',
+            'faq': 'tab-faq.html'
+        };
+        
+        const fileName = tabFiles[tabId];
+        if (!fileName) {
+            throw new Error(`Tab file not found for: ${tabId}`);
+        }
+        
+        // Load content from file avec timeout et gestion d'erreur
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+            
+            const response = await fetch(fileName, {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const content = await response.text();
+            
+            // Vérification du contenu
+            if (!content || content.trim().length === 0) {
+                throw new Error('Empty content received');
+            }
+            
+            // Cacher tous les autres onglets
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+            
+            // Afficher et remplir l'onglet cible
+            tabContent.innerHTML = content;
+            tabContent.classList.add('active');
+            tabContent.style.display = 'block';
+            
+            // Initialize event listeners pour le contenu nouvellement chargé
+            try {
+                this.initTabContentEventListeners(tabId);
+            } catch (listenerError) {
+                console.error('❌ Navigation: Error initializing tab event listeners:', listenerError);
+                // Ne pas faire échouer le chargement complet pour une erreur de listener
+            }
+            
+            console.log(`✅ Navigation: Tab ${tabId} loaded successfully`);
+            
+        } catch (fetchError) {
+            throw new Error(`Failed to load tab content: ${fetchError.message}`);
+        }
+    }
+    
+    getTabContentContainer(tabId) {
+        // Mapping des IDs d'onglets vers les containers
+        const tabContainers = {
+            'home': 'tab-content',
+            'guide': 'guide-content',
+            'faq': 'faq-content',
+            'mode-normal': 'mode-normal-content',
+            'mode-test': 'mode-test-content',
+            'mode-dmi': 'mode-dmi-content'
+        };
+        
+        const containerId = tabContainers[tabId];
+        return containerId ? document.getElementById(containerId) : null;
     }
 
     initTabContentEventListeners(tabId) {
