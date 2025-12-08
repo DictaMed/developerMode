@@ -20,6 +20,9 @@
     /* Status Colors */
     --red: #ef4444;
     --red-dark: #dc2626;
+    --purple-primary: #8b5cf6;
+    --purple-light: #a78bfa;
+    --purple-dark: #7c3aed;
     --orange: #f59e0b;
     --green-bg: #d1fae5;
     --green-border: #10b981;
@@ -627,7 +630,7 @@ p {
 }
 
 .mode-badge.dmi-badge {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--purple-primary) 0%, var(--purple-dark) 100%);
     animation: badgePulse 2s ease-in-out infinite 1s;
 }
 
@@ -950,13 +953,13 @@ p {
 }
 
 .mode-card-modern.dmi-mode {
-    border-color: rgba(245, 158, 11, 0.3);
+    border-color: rgba(139, 92, 246, 0.3);
 }
 
 .mode-card-modern.dmi-mode:hover {
     box-shadow: 
-        0 30px 60px rgba(245, 158, 11, 0.25),
-        0 20px 40px rgba(245, 158, 11, 0.15);
+        0 30px 60px rgba(139, 92, 246, 0.25),
+        0 20px 40px rgba(139, 92, 246, 0.15);
 }
 
 .mode-icon-modern {
@@ -1036,7 +1039,7 @@ p {
 }
 
 .mode-card-modern.dmi-mode .mode-badge {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--purple-primary) 0%, var(--purple-dark) 100%);
 }
 
 /* ========== CARDS & SECTIONS (legacy) ========== */
@@ -1402,7 +1405,7 @@ p {
     left: 0;
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
+    background: linear-gradient(90deg, #ef4444 0%, var(--purple-primary) 50%, #10b981 100%);
     transition: width var(--transition-base);
     border-radius: 2px;
 }
@@ -1877,9 +1880,9 @@ textarea:focus {
 }
 
 .status-badge[data-status="paused"] {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--purple-primary) 0%, var(--purple-dark) 100%);
     color: white;
-    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
 }
 
 .status-badge[data-status="stopped"] {
@@ -2527,8 +2530,8 @@ textarea:focus {
 }
 
 .status-indicator.optional {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%);
-    color: #d97706;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%);
+    color: var(--purple-dark);
 }
 
 .status-dot {
@@ -2549,7 +2552,7 @@ textarea:focus {
 }
 
 .status-indicator[data-status="paused"] .status-dot {
-    background: var(--orange);
+    background: var(--purple-primary);
 }
 
 /* Enhanced Recording Controls */
@@ -2732,9 +2735,9 @@ textarea:focus {
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%);
-    border: 2px solid rgba(245, 158, 11, 0.3);
-    color: #d97706;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%);
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    color: var(--purple-dark);
     padding: 16px 24px;
     border-radius: 12px;
     font-size: 1rem;
@@ -2747,10 +2750,10 @@ textarea:focus {
 }
 
 .btn-toggle-enhanced:hover {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(251, 191, 36, 0.2) 100%);
-    border-color: #d97706;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%);
+    border-color: var(--purple-dark);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
 .toggle-icon {
@@ -2908,7 +2911,7 @@ textarea:focus {
 }
 
 .char-counter.warning {
-    color: var(--orange);
+    color: var(--purple-primary);
 }
 
 .char-counter.danger {
@@ -3388,27 +3391,27 @@ textarea:focus {
 /* DMI Mode Header */
 .dmi-mode-header {
     background: linear-gradient(135deg, 
-        rgba(245, 158, 11, 0.1) 0%, 
-        rgba(251, 191, 36, 0.15) 50%,
-        rgba(252, 211, 77, 0.1) 100%);
-    border: 2px solid rgba(245, 158, 11, 0.2);
+        rgba(139, 92, 246, 0.1) 0%, 
+        rgba(167, 139, 250, 0.15) 50%,
+        rgba(196, 181, 253, 0.1) 100%);
+    border: 2px solid rgba(139, 92, 246, 0.2);
     animation: dmiModeHeaderPulse 3s ease-in-out infinite;
 }
 
 .dmi-mode-title {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #f59e0b 100%);
+    background: linear-gradient(135deg, var(--purple-primary) 0%, var(--purple-dark) 50%, var(--purple-primary) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .dmi-mode-stats .stat-card {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%);
-    border: 1px solid rgba(245, 158, 11, 0.2);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.2);
 }
 
 .dmi-mode-stats .stat-number {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--purple-primary) 0%, var(--purple-dark) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -3423,16 +3426,16 @@ textarea:focus {
 .dmi-header-section {
     background: linear-gradient(135deg, 
         rgba(255, 255, 255, 0.95) 0%, 
-        rgba(254, 243, 199, 0.9) 30%,
-        rgba(253, 230, 138, 0.95) 70%,
+        rgba(243, 232, 255, 0.9) 30%,
+        rgba(233, 213, 255, 0.95) 70%,
         rgba(255, 255, 255, 0.9) 100%);
     backdrop-filter: blur(20px);
     border-radius: var(--border-radius-xl);
     padding: var(--space-2xl);
     margin-bottom: var(--space-2xl);
     box-shadow: 
-        0 20px 40px rgba(245, 158, 11, 0.1),
-        0 8px 16px rgba(217, 119, 6, 0.08),
+        0 20px 40px rgba(139, 92, 246, 0.1),
+        0 8px 16px rgba(124, 58, 237, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.2);
     position: relative;
@@ -3447,7 +3450,7 @@ textarea:focus {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
     animation: dmiFloat 6s ease-in-out infinite;
     pointer-events: none;
 }
@@ -3497,32 +3500,32 @@ textarea:focus {
     align-items: center;
     gap: var(--space-xs);
     padding: var(--space-sm) var(--space-md);
-    background: rgba(245, 158, 11, 0.1);
+    background: rgba(139, 92, 246, 0.1);
     border-radius: 25px;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #d97706;
-    border: 1px solid rgba(245, 158, 11, 0.2);
+    color: var(--purple-dark);
+    border: 1px solid rgba(139, 92, 246, 0.2);
     transition: all var(--transition-base);
 }
 
 .dmi-feature-item:hover {
-    background: rgba(245, 158, 11, 0.15);
+    background: rgba(139, 92, 246, 0.15);
     transform: translateY(-2px);
 }
 
 /* DMI Cards Enhanced */
 .dmi-card-enhanced {
-    background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(254, 243, 199, 0.95) 100%);
+    background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(243, 232, 255, 0.95) 100%);
     backdrop-filter: blur(20px);
     border-radius: var(--border-radius-xl);
     padding: var(--space-2xl);
     margin-bottom: var(--space-xl);
     box-shadow: 
         0 15px 35px rgba(0, 0, 0, 0.08),
-        0 5px 15px rgba(245, 158, 11, 0.08),
+        0 5px 15px rgba(139, 92, 246, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    border: 1px solid rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(139, 92, 246, 0.15);
     transition: all var(--transition-slow);
     position: relative;
     overflow: hidden;
@@ -3536,7 +3539,7 @@ textarea:focus {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(90deg, var(--purple-primary) 0%, var(--purple-dark) 100%);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform var(--transition-slow);
@@ -3549,8 +3552,8 @@ textarea:focus {
 .dmi-card-enhanced:hover {
     transform: translateY(-4px);
     box-shadow: 
-        0 25px 50px rgba(245, 158, 11, 0.15),
-        0 15px 30px rgba(217, 119, 6, 0.1),
+        0 25px 50px rgba(139, 92, 246, 0.15),
+        0 15px 30px rgba(124, 58, 237, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
@@ -3567,7 +3570,7 @@ textarea:focus {
 .dmi-card-icon {
     font-size: 1.8rem;
     padding: var(--space-xs);
-    background: rgba(245, 158, 11, 0.1);
+    background: rgba(139, 92, 246, 0.1);
     border-radius: var(--border-radius);
     display: flex;
     align-items: center;
@@ -3594,7 +3597,7 @@ textarea:focus {
 .dmi-input-icon {
     font-size: 1.2rem;
     padding: var(--space-xs);
-    background: rgba(245, 158, 11, 0.1);
+    background: rgba(139, 92, 246, 0.1);
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -3604,33 +3607,33 @@ textarea:focus {
 .dmi-form-group input {
     width: 100%;
     padding: 16px 20px;
-    border: 2px solid rgba(245, 158, 11, 0.2);
+    border: 2px solid rgba(139, 92, 246, 0.2);
     border-radius: 12px;
     font-size: 1rem;
     transition: all var(--transition-base);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(254, 243, 199, 0.8) 100%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(243, 232, 255, 0.8) 100%);
     backdrop-filter: blur(10px);
     box-shadow: 
         inset 0 2px 4px rgba(0, 0, 0, 0.06),
-        0 1px 3px rgba(245, 158, 11, 0.1);
+        0 1px 3px rgba(139, 92, 246, 0.1);
 }
 
 .dmi-form-group input:focus {
     outline: none;
-    border-color: #f59e0b;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 243, 199, 0.9) 100%);
+    border-color: var(--purple-primary);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(243, 232, 255, 0.9) 100%);
     box-shadow: 
-        0 0 0 4px rgba(245, 158, 11, 0.1),
-        0 8px 25px rgba(245, 158, 11, 0.15),
+        0 0 0 4px rgba(139, 92, 246, 0.1),
+        0 8px 25px rgba(139, 92, 246, 0.15),
         inset 0 2px 4px rgba(0, 0, 0, 0.06);
     transform: translateY(-2px);
 }
 
 .dmi-form-group input:hover {
-    border-color: rgba(245, 158, 11, 0.4);
+    border-color: rgba(139, 92, 246, 0.4);
     box-shadow: 
         inset 0 2px 4px rgba(0, 0, 0, 0.06),
-        0 2px 8px rgba(245, 158, 11, 0.1);
+        0 2px 8px rgba(139, 92, 246, 0.1);
 }
 
 /* DMI Textarea Enhanced */
@@ -3642,36 +3645,36 @@ textarea:focus {
     width: 100%;
     min-height: 200px;
     padding: 20px;
-    border: 2px solid rgba(245, 158, 11, 0.2);
+    border: 2px solid rgba(139, 92, 246, 0.2);
     border-radius: 16px;
     font-size: 1rem;
     font-family: inherit;
     line-height: 1.6;
     transition: all var(--transition-base);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 243, 199, 0.9) 100%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(243, 232, 255, 0.9) 100%);
     backdrop-filter: blur(10px);
     resize: vertical;
     box-shadow: 
         inset 0 2px 4px rgba(0, 0, 0, 0.06),
-        0 1px 3px rgba(245, 158, 11, 0.1);
+        0 1px 3px rgba(139, 92, 246, 0.1);
 }
 
 .dmi-textarea:focus {
     outline: none;
-    border-color: #f59e0b;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(254, 243, 199, 0.95) 100%);
+    border-color: var(--purple-primary);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(243, 232, 255, 0.95) 100%);
     box-shadow: 
-        0 0 0 4px rgba(245, 158, 11, 0.1),
-        0 8px 25px rgba(245, 158, 11, 0.15),
+        0 0 0 4px rgba(139, 92, 246, 0.1),
+        0 8px 25px rgba(139, 92, 246, 0.15),
         inset 0 2px 4px rgba(0, 0, 0, 0.06);
     transform: translateY(-2px);
 }
 
 .dmi-textarea:hover {
-    border-color: rgba(245, 158, 11, 0.4);
+    border-color: rgba(139, 92, 246, 0.4);
     box-shadow: 
         inset 0 2px 4px rgba(0, 0, 0, 0.06),
-        0 2px 8px rgba(245, 158, 11, 0.1);
+        0 2px 8px rgba(139, 92, 246, 0.1);
 }
 
 .dmi-textarea::placeholder {
@@ -3681,11 +3684,11 @@ textarea:focus {
 
 /* DMI Upload Section */
 .dmi-upload-section {
-    border: 2px dashed rgba(245, 158, 11, 0.3);
+    border: 2px dashed rgba(139, 92, 246, 0.3);
     border-radius: 16px;
     padding: var(--space-2xl);
     text-align: center;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.03) 0%, rgba(251, 191, 36, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.03) 0%, rgba(167, 139, 250, 0.05) 100%);
     transition: all var(--transition-base);
     position: relative;
     overflow: hidden;
@@ -3698,7 +3701,7 @@ textarea:focus {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.1), transparent);
+    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
     transition: left 0.6s ease;
 }
 
@@ -3707,14 +3710,14 @@ textarea:focus {
 }
 
 .dmi-upload-section:hover {
-    border-color: rgba(245, 158, 11, 0.5);
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(251, 191, 36, 0.08) 100%);
+    border-color: rgba(139, 92, 246, 0.5);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(167, 139, 250, 0.08) 100%);
     transform: translateY(-2px);
 }
 
 .dmi-upload-icon {
     font-size: 3rem;
-    color: #f59e0b;
+    color: var(--purple-primary);
     margin-bottom: var(--space-md);
     animation: dmiUploadIconFloat 3s ease-in-out infinite;
 }
@@ -3733,7 +3736,7 @@ textarea:focus {
     display: inline-flex;
     align-items: center;
     gap: var(--space-sm);
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--purple-primary) 0%, var(--purple-dark) 100%);
     color: white;
     border: none;
     padding: 12px 24px;
@@ -3742,13 +3745,13 @@ textarea:focus {
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-base);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
 .dmi-upload-btn:hover {
-    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    background: linear-gradient(135deg, var(--purple-dark) 0%, #6d28d9 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
 }
 
 /* DMI Photos Preview */
@@ -3770,7 +3773,7 @@ textarea:focus {
 
 .dmi-photo-item:hover {
     transform: scale(1.05);
-    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.2);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
 }
 
 .dmi-photo-item img {
@@ -3804,16 +3807,16 @@ textarea:focus {
 
 /* DMI Submit Section Enhanced */
 .dmi-submit-section-enhanced {
-    background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(254, 243, 199, 0.95) 100%);
+    background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(243, 232, 255, 0.95) 100%);
     backdrop-filter: blur(20px);
     border-radius: var(--border-radius-xl);
     padding: var(--space-2xl);
     margin-top: var(--space-2xl);
     box-shadow: 
         0 20px 40px rgba(0, 0, 0, 0.08),
-        0 10px 20px rgba(245, 158, 11, 0.08),
+        0 10px 20px rgba(139, 92, 246, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    border: 1px solid rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(139, 92, 246, 0.15);
     text-align: center;
 }
 
@@ -3822,7 +3825,7 @@ textarea:focus {
     display: inline-flex;
     align-items: center;
     gap: var(--space-sm);
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--purple-primary) 0%, var(--purple-dark) 100%);
     color: white;
     border: none;
     padding: 18px 36px;
@@ -3832,7 +3835,7 @@ textarea:focus {
     cursor: pointer;
     transition: all var(--transition-base);
     overflow: hidden;
-    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
     min-width: 250px;
     justify-content: center;
 }
@@ -3844,7 +3847,7 @@ textarea:focus {
     left: -2px;
     right: -2px;
     bottom: -2px;
-    background: linear-gradient(45deg, #f59e0b, #d97706, #f59e0b);
+    background: linear-gradient(45deg, var(--purple-primary), var(--purple-dark), var(--purple-primary));
     background-size: 300% 300%;
     border-radius: inherit;
     z-index: -1;
@@ -3858,9 +3861,9 @@ textarea:focus {
 }
 
 .dmi-submit-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    background: linear-gradient(135deg, var(--purple-dark) 0%, #6d28d9 100%);
     transform: translateY(-3px);
-    box-shadow: 0 12px 35px rgba(245, 158, 11, 0.5);
+    box-shadow: 0 12px 35px rgba(139, 92, 246, 0.5);
 }
 
 .dmi-submit-btn:disabled {
@@ -3889,14 +3892,14 @@ textarea:focus {
 @keyframes dmiModeHeaderPulse {
     0%, 100% {
         box-shadow: 
-            0 20px 40px rgba(245, 158, 11, 0.1),
-            0 8px 16px rgba(217, 119, 6, 0.08),
+            0 20px 40px rgba(139, 92, 246, 0.1),
+            0 8px 16px rgba(124, 58, 237, 0.08),
             inset 0 1px 0 rgba(255, 255, 255, 0.3);
     }
     50% {
         box-shadow: 
-            0 25px 50px rgba(245, 158, 11, 0.15),
-            0 12px 24px rgba(217, 119, 6, 0.12),
+            0 25px 50px rgba(139, 92, 246, 0.15),
+            0 12px 24px rgba(124, 58, 237, 0.12),
             inset 0 1px 0 rgba(255, 255, 255, 0.4);
     }
 }
