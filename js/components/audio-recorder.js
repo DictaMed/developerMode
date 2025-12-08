@@ -22,23 +22,23 @@ class AudioRecorder {
     }
 
     initElements() {
-        this.statusBadge = this.section.querySelector('.status-badge');
+        this.statusBadge = this.section.querySelector('.status-indicator');
         this.timer = this.section.querySelector('.timer');
-        this.recordedBadge = this.section.querySelector('.recorded-badge');
-        this.btnRecord = this.section.querySelector('.btn-record');
-        this.btnPause = this.section.querySelector('.btn-pause');
-        this.btnStop = this.section.querySelector('.btn-stop');
-        this.btnReplay = this.section.querySelector('.btn-replay');
-        this.btnDelete = this.section.querySelector('.btn-delete');
-        this.audioPlayer = this.section.querySelector('.audio-player');
+        this.recordedBadge = this.section.querySelector('.recorded-badge-enhanced');
+        this.btnRecord = this.section.querySelector('.btn-record-enhanced');
+        this.btnPause = this.section.querySelector('.btn-control-enhanced[data-action="pause"]');
+        this.btnStop = this.section.querySelector('.btn-control-enhanced[data-action="stop"]');
+        this.btnReplay = this.section.querySelector('.btn-control-enhanced[data-action="replay"]');
+        this.btnDelete = this.section.querySelector('.btn-control-enhanced[data-action="delete"]');
+        this.audioPlayer = this.section.querySelector('.audio-player-enhanced');
     }
 
     initEventListeners() {
-        this.btnRecord.addEventListener('click', () => this.startRecording());
-        this.btnPause.addEventListener('click', () => this.pauseRecording());
-        this.btnStop.addEventListener('click', () => this.stopRecording());
-        this.btnReplay.addEventListener('click', () => this.replayRecording());
-        this.btnDelete.addEventListener('click', () => this.deleteRecording());
+        if (this.btnRecord) this.btnRecord.addEventListener('click', () => this.startRecording());
+        if (this.btnPause) this.btnPause.addEventListener('click', () => this.pauseRecording());
+        if (this.btnStop) this.btnStop.addEventListener('click', () => this.stopRecording());
+        if (this.btnReplay) this.btnReplay.addEventListener('click', () => this.replayRecording());
+        if (this.btnDelete) this.btnDelete.addEventListener('click', () => this.deleteRecording());
     }
 
     async startRecording() {
@@ -50,7 +50,7 @@ class AudioRecorder {
 
             // Show loading indicator
             this.updateStatus('loading', '⏳ Accès au microphone...');
-            this.btnRecord.disabled = true;
+            if (this.btnRecord) this.btnRecord.disabled = true;
 
             // Request microphone access with optimized settings
             this.stream = await navigator.mediaDevices.getUserMedia({
@@ -87,9 +87,11 @@ class AudioRecorder {
                 this.audioBlob = new Blob(this.audioChunks, { 
                     type: this.supportedMimeType || 'audio/webm' 
                 });
-                const audioUrl = URL.createObjectURL(this.audioBlob);
-                this.audioPlayer.src = audioUrl;
-                this.audioPlayer.classList.remove('hidden');
+                if (this.audioPlayer) {
+                    const audioUrl = URL.createObjectURL(this.audioBlob);
+                    this.audioPlayer.src = audioUrl;
+                    this.audioPlayer.classList.remove('hidden');
+                }
                 
                 window.audioRecorderManager.updateSectionCount();
             });
@@ -109,10 +111,12 @@ class AudioRecorder {
             
             // Update UI
             this.updateStatus('recording', '🔴 En cours');
-            this.btnRecord.classList.add('hidden');
-            this.btnRecord.disabled = false;
-            this.btnPause.classList.remove('hidden');
-            this.btnStop.classList.remove('hidden');
+            if (this.btnRecord) {
+                this.btnRecord.classList.add('hidden');
+                this.btnRecord.disabled = false;
+            }
+            if (this.btnPause) this.btnPause.classList.remove('hidden');
+            if (this.btnStop) this.btnStop.classList.remove('hidden');
             
             // Add visual recording indicator
             this.section.classList.add('is-recording');
@@ -146,7 +150,7 @@ class AudioRecorder {
             this.pausedTime = Date.now() - this.startTime;
             this.stopTimer();
             this.updateStatus('paused', '⏸️ En pause');
-            this.btnPause.textContent = '▶️ Reprendre';
+            if (this.btnPause) this.btnPause.textContent = '▶️ Reprendre';
             this.section.classList.remove('is-recording');
             this.section.classList.add('is-paused');
         } else if (this.mediaRecorder && this.mediaRecorder.state === 'paused') {
@@ -154,7 +158,7 @@ class AudioRecorder {
             this.startTime = Date.now() - this.pausedTime;
             this.startTimer();
             this.updateStatus('recording', '🔴 En cours');
-            this.btnPause.textContent = '⏸️ Pause';
+            if (this.btnPause) this.btnPause.textContent = '⏸️ Pause';
             this.section.classList.remove('is-paused');
             this.section.classList.add('is-recording');
         }
@@ -173,13 +177,15 @@ class AudioRecorder {
 
             // Update UI
             this.updateStatus('ready', 'Prêt');
-            this.btnRecord.classList.add('hidden');
-            this.btnPause.classList.add('hidden');
-            this.btnPause.textContent = '⏸️ Pause';
-            this.btnStop.classList.add('hidden');
-            this.btnReplay.classList.remove('hidden');
-            this.btnDelete.classList.remove('hidden');
-            this.recordedBadge.classList.remove('hidden');
+            if (this.btnRecord) this.btnRecord.classList.add('hidden');
+            if (this.btnPause) {
+                this.btnPause.classList.add('hidden');
+                this.btnPause.textContent = '⏸️ Pause';
+            }
+            if (this.btnStop) this.btnStop.classList.add('hidden');
+            if (this.btnReplay) this.btnReplay.classList.remove('hidden');
+            if (this.btnDelete) this.btnDelete.classList.remove('hidden');
+            if (this.recordedBadge) this.recordedBadge.classList.remove('hidden');
             
             // Mark section as recorded
             this.section.classList.remove('is-recording', 'is-paused');
@@ -193,7 +199,7 @@ class AudioRecorder {
     }
 
     replayRecording() {
-        if (this.audioPlayer.src) {
+        if (this.audioPlayer && this.audioPlayer.src) {
             this.audioPlayer.play();
         }
     }
@@ -220,21 +226,27 @@ class AudioRecorder {
         this.audioBlob = null;
         this.audioChunks = [];
         this.pausedTime = 0;
-        this.timer.textContent = '00:00';
-        this.audioPlayer.src = '';
-        this.audioPlayer.classList.add('hidden');
+        if (this.timer) this.timer.textContent = '00:00';
+        if (this.audioPlayer) {
+            this.audioPlayer.src = '';
+            this.audioPlayer.classList.add('hidden');
+        }
         this.stopTimer();
         
         // Reset UI
         this.updateStatus('ready', '⚪ Prêt');
-        this.btnRecord.classList.remove('hidden');
-        this.btnRecord.disabled = false;
-        this.btnPause.classList.add('hidden');
-        this.btnPause.textContent = '⏸️ Pause';
-        this.btnStop.classList.add('hidden');
-        this.btnReplay.classList.add('hidden');
-        this.btnDelete.classList.add('hidden');
-        this.recordedBadge.classList.add('hidden');
+        if (this.btnRecord) {
+            this.btnRecord.classList.remove('hidden');
+            this.btnRecord.disabled = false;
+        }
+        if (this.btnPause) {
+            this.btnPause.classList.add('hidden');
+            this.btnPause.textContent = '⏸️ Pause';
+        }
+        if (this.btnStop) this.btnStop.classList.add('hidden');
+        if (this.btnReplay) this.btnReplay.classList.add('hidden');
+        if (this.btnDelete) this.btnDelete.classList.add('hidden');
+        if (this.recordedBadge) this.recordedBadge.classList.add('hidden');
         
         // Remove all markings
         this.section.classList.remove('recorded', 'is-recording', 'is-paused');
@@ -247,7 +259,9 @@ class AudioRecorder {
             const elapsed = Date.now() - this.startTime;
             const seconds = Math.floor(elapsed / 1000);
             
-            this.timer.textContent = window.Utils.formatDuration(seconds);
+            if (this.timer) {
+                this.timer.textContent = window.Utils.formatDuration(seconds);
+            }
             
             // Auto stop after maximum duration
             if (seconds >= window.APP_CONFIG.MAX_RECORDING_DURATION) {
@@ -265,8 +279,10 @@ class AudioRecorder {
     }
 
     updateStatus(status, text) {
-        this.statusBadge.setAttribute('data-status', status);
-        this.statusBadge.textContent = text;
+        if (this.statusBadge) {
+            this.statusBadge.setAttribute('data-status', status);
+            this.statusBadge.textContent = text;
+        }
     }
 
     getSupportedMimeType() {
