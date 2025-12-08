@@ -55,55 +55,11 @@
 
     <main class="container">
         <!-- Navigation par onglets originale (maintenant cachée) -->
-        <nav class="tabs-nav" style="display: none;">
-            <div class="tabs-container">
-                <button class="tab-btn active" data-tab="home">
-                    <span class="tab-icon">🏠</span>
-                    Accueil
-                </button>
-                <button class="tab-btn" data-tab="mode-normal">
-                    <span class="tab-icon">🏥</span>
-                    Mode Normal
-                </button>
-                <button class="tab-btn" data-tab="mode-test">
-                    <span class="tab-icon">🧪</span>
-                    Mode Test
-                </button>
-                <button class="tab-btn" data-tab="mode-dmi">
-                    <span class="tab-icon">📝</span>
-                    Saisie Texte
-                </button>
-                <button class="tab-btn" data-tab="guide">
-                    <span class="tab-icon">📖</span>
-                    Guide
-                </button>
-                <button class="tab-btn" data-tab="faq">
-                    <span class="tab-icon">❓</span>
-                    FAQ
-                </button>
-            </div>
-            <div class="swipe-hint">← Glissez pour naviguer →</div>
-        </nav>
-
         <!-- Page d'accueil -->
         <div id="tab-content" class="tab-content active">
             <!-- Hero Section Améliorée -->
             <div class="hero-section-modern">
                 <div class="hero-content-modern">
-                    <div class="hero-stats">
-                        <div class="stat-item">
-                            <span class="stat-number">10k+</span>
-                            <span class="stat-label">Dictées</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">500+</span>
-                            <span class="stat-label">Médecins</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">99%</span>
-                            <span class="stat-label">Précision</span>
-                        </div>
-                    </div>
                     
                     <h1 class="hero-title">
                         <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
@@ -127,20 +83,6 @@
                         </button>
                     </div>
                     
-                    <div class="hero-features-preview">
-                        <div class="preview-item">
-                            <span class="preview-icon">⚡</span>
-                            <span>Instantané</span>
-                        </div>
-                        <div class="preview-item">
-                            <span class="preview-icon">🔒</span>
-                            <span>Sécurisé</span>
-                        </div>
-                        <div class="preview-item">
-                            <span class="preview-icon">🎯</span>
-                            <span>Précis</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -152,7 +94,7 @@
                         <div class="feature-card-modern">
                             <div class="feature-icon-modern">🎤</div>
                             <h4>Dictée Vocale Avancée</h4>
-                            <p>Transcription en temps réel avec IA médicale spécialisée. Reconnaissance de 50+ spécialités médicales.</p>
+                            <p>Transcription en temps réel avec IA spécialisée.</p>
                             <div class="feature-highlight">
                                 <span class="highlight-text">+ de 10 000 termes médicaux</span>
                             </div>
@@ -160,7 +102,7 @@
                         <div class="feature-card-modern">
                             <div class="feature-icon-modern">🔒</div>
                             <h4>Sécurité Maximale</h4>
-                            <p>Conformité RGPD, chiffrement end-to-end, hébergement sécurisé en France. Aucune donnée stockée.</p>
+                            <p>Sécurité RGPD avec chiffrement end-to-end.</p>
                             <div class="feature-highlight">
                                 <span class="highlight-text">Certifié HDS</span>
                             </div>
@@ -168,7 +110,7 @@
                         <div class="feature-card-modern">
                             <div class="feature-icon-modern">⚡</div>
                             <h4>Performance Ultra-Rapide</h4>
-                            <p>Résultats en moins de 3 secondes. Interface intuitive conçue pour les professionnels de santé.</p>
+                            <p>Résultats ultra-rapides en moins de 3 secondes.</p>
                             <div class="feature-highlight">
                                 <span class="highlight-text">99.2% de précision</span>
                             </div>
@@ -182,7 +124,7 @@
                         <div class="mode-card-modern demo-mode">
                             <div class="mode-icon-modern">🧪</div>
                             <h4>Mode Démonstration</h4>
-                            <p>Découvrez DictaMed sans inscription. Idéal pour tester toutes les fonctionnalités avec des données exemples.</p>
+                            <p>Testez DictaMed gratuitement sans inscription.</p>
                             <div class="mode-features">
                                 <span class="feature-item">✅ Aucune inscription</span>
                                 <span class="feature-item">✅ Données exemples</span>
@@ -197,7 +139,7 @@
                         <div class="mode-card-modern production-mode">
                             <div class="mode-icon-modern">🏥</div>
                             <h4>Mode Production</h4>
-                            <p>Solution complète pour les professionnels. Sauvegarde sécurisée, intégrations et support prioritaire.</p>
+                            <p>Solution professionnelle avec sauvegarde sécurisée.</p>
                             <div class="mode-features">
                                 <span class="feature-item">✅ Comptes sécurisés</span>
                                 <span class="feature-item">✅ Sauvegarde cloud</span>
@@ -212,7 +154,7 @@
                         <div class="mode-card-modern dmi-mode">
                             <div class="mode-icon-modern">📝</div>
                             <h4>Mode Saisie Texte</h4>
-                            <p>Saisie manuelle enrichie avec gestion de photos médicales. Parfait pour les cas complexes.</p>
+                            <p>Saisie manuelle avec gestion de photos.</p>
                             <div class="mode-features">
                                 <span class="feature-item">✅ Texte structuré</span>
                                 <span class="feature-item">✅ Photos médicales</span>
@@ -226,36 +168,6 @@
                     </div>
                 </div>
                 
-                <!-- Section témoignages/avantages -->
-                <div class="testimonials-section">
-                    <h2>💬 Ils nous font confiance</h2>
-                    <div class="testimonials-grid">
-                        <div class="testimonial-card">
-                            <div class="testimonial-content">
-                                <p>"DictaMed a révolutionné ma pratique. Fini lesCRIMDFastidieuses!"</p>
-                            </div>
-                            <div class="testimonial-author">
-                                <div class="author-avatar">👨‍⚕️</div>
-                                <div class="author-info">
-                                    <span class="author-name">Dr. Martin</span>
-                                    <span class="author-title">Cardiologue</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="testimonial-card">
-                            <div class="testimonial-content">
-                                <p>"Une précision exceptionnelle et un gain de temps considérable."</p>
-                            </div>
-                            <div class="testimonial-author">
-                                <div class="author-avatar">👩‍⚕️</div>
-                                <div class="author-info">
-                                    <span class="author-name">Dr. Dubois</span>
-                                    <span class="author-title">Généraliste</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
