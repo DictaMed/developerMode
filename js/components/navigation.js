@@ -217,20 +217,11 @@ class TabNavigationSystem {
     initTabContentEventListeners(tabId) {
         // Initialize specific event listeners based on tab type
         if (tabId === 'mode-normal' || tabId === 'mode-test') {
-            // Reinitialize audio recorders for recording sections
-            const recordingSections = document.querySelectorAll('.recording-section-enhanced');
-            recordingSections.forEach(section => {
-                const sectionId = section.getAttribute('data-section');
-                const existingRecorder = window.audioRecorderManager.getRecorder(sectionId);
-                
-                // Create new recorder if doesn't exist or if tab changed
-                if (!existingRecorder) {
-                    const recorder = new window.AudioRecorder(section);
-                    window.audioRecorderManager.recorders.set(sectionId, recorder);
-                    window.appState.setRecording(sectionId, recorder);
-                }
-            });
-            
+            // Initialize audio recorders through manager (will handle retry logic)
+            if (window.audioRecorderManager) {
+                window.audioRecorderManager.init();
+            }
+
             // Update section count
             this.updateSectionCount();
         }

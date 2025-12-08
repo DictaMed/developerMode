@@ -13,15 +13,12 @@ class AudioRecorderManager {
     init() {
         try {
             const recordingSections = document.querySelectorAll('.recording-section-enhanced');
-            
+
             // Vérification de nullité pour les sections d'enregistrement
             if (!recordingSections || recordingSections.length === 0) {
-                // Only warn in development environment - this is expected on home page
-                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                    console.debug('ℹ️ AudioRecorderManager: No recording sections found in DOM (expected on home page)');
-                } else {
-                    console.debug('ℹ️ AudioRecorderManager: No recording sections found in current tab');
-                }
+                // Schedule retry after short delay for tab loading
+                console.debug('ℹ️ AudioRecorderManager: No recording sections found, scheduling retry...');
+                setTimeout(() => this.init(), 100);
                 return;
             }
             

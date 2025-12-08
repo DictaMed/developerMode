@@ -34,11 +34,19 @@ class AudioRecorder {
     }
 
     initEventListeners() {
-        if (this.btnRecord) this.btnRecord.addEventListener('click', () => this.startRecording());
+        // Add error handling guards
+        if (!this.btnRecord) {
+            console.error(`AudioRecorder: Record button not found for section ${this.sectionId}`);
+            return;
+        }
+
+        this.btnRecord.addEventListener('click', () => this.startRecording());
         if (this.btnPause) this.btnPause.addEventListener('click', () => this.pauseRecording());
         if (this.btnStop) this.btnStop.addEventListener('click', () => this.stopRecording());
         if (this.btnReplay) this.btnReplay.addEventListener('click', () => this.replayRecording());
         if (this.btnDelete) this.btnDelete.addEventListener('click', () => this.deleteRecording());
+
+        console.log(`AudioRecorder: Event listeners initialized for section ${this.sectionId}`);
     }
 
     async startRecording() {

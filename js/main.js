@@ -305,8 +305,8 @@ async function initializeComponents() {
             throw new Error('AudioRecorderManager constructor not available');
         }
         audioRecorderManager = new AudioRecorderManager(appState);
-        await audioRecorderManager.init();
-        
+        // Note: init() will be called when tabs load to ensure DOM elements exist
+
         // Expose audio recorder manager globally
         window.audioRecorderManager = audioRecorderManager;
         
