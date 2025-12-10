@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic Firebase Auth - Correction</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+        .info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .firebase-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .status-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+        }
+        .status-card .icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .status-card .label {
+            font-weight: bold;
+            color: #495057;
+        }
+        .status-card .value {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Diagnostic et Correction Firebase Auth</h1>
+        
+        <div id="firebase-status" class="firebase-status">
+            <!-- Les statuts Firebase seront affichés ici -->
+        </div>
+
+        <div class="test-section">
+            <h3>📊 État du Diagnostic</h3>
+            <div id="diagnostic-results">
+                <div class="status info">⏳ Diagnostic en cours...</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Tests Firebase</h3>
+            <button class="test-button" onclick="testFirebaseAuth()">Tester Firebase Auth</button>
+            <button class="test-button" onclick="testSignUp()">Tester Inscription</button>
+            <button class="test-button" onclick="testGoogleSignIn()">Tester Google Sign-In</button>
+            <button class="test-button" onclick="runDiagnostic()">Relancer Diagnostic</button>
+            <button class="test-button" onclick="forceFix()">Forcer Correction</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Console de Log</h3>
+            <div id="log-output" class="log">
+                <!-- Les logs seront affichés ici -->
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>💡 Instructions</h3>
+            <div class="status info">
+                <strong>Si vous voyez l'erreur "window.firebase.auth is not a function" :</strong>
+                <ol>
+                    <li>Attendez que Firebase se charge complètement (3-5 secondes)</li>
+                    <li>Cliquez sur "Forcer Correction" si le problème persiste</li>
+                    <li>Vérifiez la console pour les erreurs détaillées</li>
+                    <li>Assurez-vous que Firebase est correctement configuré dans la console</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Modulaire v9+ -->
+    <script type="module">
+        // Import des modules Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
+        import {
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword,
+            signOut,
+            sendPasswordResetEmail,
+            onAuthStateChanged,
+            GoogleAuthProvider,
+            signInWithPopup
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9XYvHxbp3VW0PCW0W7xfoWuiMxsjoUZE",
+            authDomain: "dictamed2025.firebaseapp.com",
+            projectId: "dictamed2025",
+            storageBucket: "dictamed2025.firebasestorage.app",
+            messagingSenderId: "242034923776",
+            appId: "1:242034923776:web:bd315e890c715b1d263be5",
+            measurementId: "G-1B8DZ4B73R"
+        };
+        
+        // Initialisation Firebase avec gestion d'erreurs
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const analytics = getAnalytics(app);
+            
+            // Rendre Firebase disponible globalement
+            window.firebase = {
+                app: app,
+                auth: auth,
+                analytics: analytics,
+                signInWithEmailAndPassword,
+                createUserWithEmailAndPassword,
+                signOut,
+                sendPasswordResetEmail,
+                onAuthStateChanged,
+                GoogleAuthProvider,
+                signInWithPopup
+            };
+            
+            console.log('✅ Firebase SDK modulaire initialisé');
+            
+            // Déclencher l'événement firebaseReady
+            window.dispatchEvent(new CustomEvent('firebaseReady', { 
+                detail: { firebase: window.firebase } 
+            }));
+            
+        } catch (error) {
+            console.error('❌ Erreur Firebase:', error);
+            window.firebaseError = error;
+        }
+    </script>
+
+    <!-- Script de correction Firebase -->
+    <script src="firebase-auth-fix.js"></script>
+
+    <!-- Script de diagnostic -->
+    <script src="firebase-auth-diagnostic.js"></script>
+
+    <script>
+        // Interface utilisateur pour les tests
+        function addLog(message, type = 'info') {
+            const logDiv = document.getElementById('log-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<span style="color: #666;">[${timestamp}]</span> ${message}`;
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateFirebaseStatus() {
+            const statusDiv = document.getElementById('firebase-status');
+            const hasFirebase = typeof window.firebase !== 'undefined';
+            const hasAuth = hasFirebase && typeof window.firebase.auth !== 'undefined';
+            const authType = hasFirebase ? typeof window.firebase.auth : 'undefined';
+            
+            statusDiv.innerHTML = `
+                <div class="status-card">
+                    <div class="icon">${hasFirebase ? '✅' : '❌'}</div>
+                    <div class="label">Firebase SDK</div>
+                    <div class="value">${hasFirebase ? 'Chargé' : 'Non chargé'}</div>
+                </div>
+                <div class="status-card">
+                    <div class="icon">${hasAuth ? '✅' : '❌'}</div>
+                    <div class="label">Firebase Auth</div>
+                    <div class="value">${hasAuth ? 'Disponible' : 'Non disponible'}</div>
+                </div>
+                <div class="status-card">
+                    <div class="icon">${authType === 'object' ? '✅' : '⚠️'}</div>
+                    <div class="label">Type Auth</div>
+                    <div class="value">${authType}</div>
+                </div>
+                <div class="status-card">
+                    <div class="icon">${window.FirebaseAuthManager ? '✅' : '❌'}</div>
+                    <div class="label">AuthManager</div>
+                    <div class="value">${window.FirebaseAuthManager ? 'Disponible' : 'Non chargé'}</div>
+                </div>
+            `;
+        }
+
+        async function testFirebaseAuth() {
+            addLog('🧪 Test Firebase Auth...');
+            try {
+                if (window.FirebaseAuthManager) {
+                    const result = await window.FirebaseAuthManager.checkAuthConfiguration();
+                    addLog(`📊 Résultat: ${JSON.stringify(result)}`);
+                } else {
+                    addLog('❌ FirebaseAuthManager non disponible', 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Erreur: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSignUp() {
+            addLog('🧪 Test inscription...');
+            try {
+                if (window.FirebaseAuthManager) {
+                    const result = await window.FirebaseAuthManager.signUp('test@example.com', 'password123');
+                    addLog(`📊 Résultat: ${JSON.stringify(result)}`);
+                } else {
+                    addLog('❌ FirebaseAuthManager non disponible', 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Erreur: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGoogleSignIn() {
+            addLog('🧪 Test Google Sign-In...');
+            try {
+                if (window.FirebaseAuthManager) {
+                    const result = await window.FirebaseAuthManager.signInWithGoogle();
+                    addLog(`📊 Résultat: ${JSON.stringify(result)}`);
+                } else {
+                    addLog('❌ FirebaseAuthManager non disponible', 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Erreur: ${error.message}`, 'error');
+            }
+        }
+
+        async function runDiagnostic() {
+            addLog('🔍 Lancement du diagnostic...');
+            if (window.FirebaseAuthDiagnostic) {
+                await window.FirebaseAuthDiagnostic.run();
+                addLog('✅ Diagnostic terminé');
+            } else {
+                addLog('❌ FirebaseAuthDiagnostic non disponible', 'error');
+            }
+        }
+
+        async function forceFix() {
+            addLog('🔧 Forçage de la correction...');
+            if (window.forceFirebaseFix) {
+                await window.forceFirebaseFix();
+                addLog('✅ Correction forcée');
+            } else {
+                addLog('❌ Fonction forceFirebaseFix non disponible', 'error');
+            }
+            updateFirebaseStatus();
+        }
+
+        // Mise à jour initiale
+        setTimeout(updateFirebaseStatus, 1000);
+        setTimeout(addLog('🚀 Page de diagnostic chargée', 'info'), 500);
+
+        // Écouter les événements Firebase
+        window.addEventListener('firebaseReady', () => {
+            addLog('📢 Firebase prêt - Mise à jour des statuts');
+            updateFirebaseStatus();
+        });
+
+        // Mise à jour périodique
+        setInterval(updateFirebaseStatus, 2000);
+    </script>
+</body>
+</html>

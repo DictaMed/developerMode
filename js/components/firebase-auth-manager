@@ -47,57 +47,61 @@ class FirebaseAuthManager {
             }, 10000);
         });
     }
-/**
- * DictaMed - Gestionnaire d'authentification Firebase (SDK Modulaire v9+)
- * Version: 4.0.0 - Migration complète vers SDK modulaire avec sécurité renforcée
- */
-
-class FirebaseAuthManager {
-    constructor() {
-        this.isInitialized = false;
-        this.currentUser = null;
-        this.auth = null;
-        this.rateLimitMap = new Map(); // Rate limiting par IP/email
-        this.sessionTimeout = 30 * 60 * 1000; // 30 minutes
-        this.retryAttempts = new Map(); // Retry attempts tracking
-    }
 
     static init() {
         try {
-            console.log('🔧 FirebaseAuthManager v4.0.0 init() started');
+            console.log('🔧 FirebaseAuthManager v4.1.0 init() started');
             
-            // Vérifier si Firebase modulaire est disponible
-            if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
-                console.warn('⚠️ Firebase Auth modulaire not available - using fallback implementation');
-                FirebaseAuthManager.showFallbackMessage();
-                return;
-            }
-
-            // Initialiser l'instance
-            const authManager = new FirebaseAuthManager();
-            authManager.auth = window.firebase.auth;
-            
-            // Configuration Firebase Auth avec SDK modulaire
-            const { onAuthStateChanged } = window.firebase;
-            onAuthStateChanged(authManager.auth, (user) => {
-                if (user) {
-                    console.log('✅ User authenticated:', user.email);
-                    authManager.currentUser = user;
-                    authManager.updateAuthUI(user);
-                    authManager.handleAuthSuccess(user);
-                } else {
-                    console.log('ℹ️ User not authenticated');
-                    authManager.currentUser = null;
-                    authManager.updateAuthUI(null);
-                    authManager.handleAuthLogout();
+            // Attendre que Firebase soit prêt
+            FirebaseAuthManager.waitForFirebase().then(() => {
+                // Vérifier si Firebase modulaire est disponible
+                if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
+                    console.warn('⚠️ Firebase Auth modulaire not available - using fallback implementation');
+                    FirebaseAuthManager.showFallbackMessage();
+                    return;
                 }
-            });
 
-            authManager.isInitialized = true;
-            console.log('✅ FirebaseAuthManager v4.0.0 init() completed');
-            
-            // Tester l'état d'authentification
-            FirebaseAuthManager.testAuthStatus();
+                // Vérifier que auth est bien un objet (pas une fonction)
+                if (typeof window.firebase.auth !== 'object') {
+                    console.error('❌ window.firebase.auth is not an object:', typeof window.firebase.auth);
+                    FirebaseAuthManager.showErrorMessage(new Error('Firebase Auth non correctement initialisé'));
+                    return;
+                }
+
+                // Initialiser l'instance
+                const authManager = new FirebaseAuthManager();
+                authManager.auth = window.firebase.auth;
+                
+                // Configuration Firebase Auth avec SDK modulaire
+                if (typeof window.firebase.onAuthStateChanged === 'function') {
+                    window.firebase.onAuthStateChanged(authManager.auth, (user) => {
+                        if (user) {
+                            console.log('✅ User authenticated:', user.email);
+                            authManager.currentUser = user;
+                            authManager.updateAuthUI(user);
+                            authManager.handleAuthSuccess(user);
+                        } else {
+                            console.log('ℹ️ User not authenticated');
+                            authManager.currentUser = null;
+                            authManager.updateAuthUI(null);
+                            authManager.handleAuthLogout();
+                        }
+                    });
+                } else {
+                    console.error('❌ onAuthStateChanged function not available');
+                    FirebaseAuthManager.showErrorMessage(new Error('Fonction onAuthStateChanged non disponible'));
+                    return;
+                }
+
+                authManager.isInitialized = true;
+                console.log('✅ FirebaseAuthManager v4.1.0 init() completed');
+                
+                // Tester l'état d'authentification
+                FirebaseAuthManager.testAuthStatus();
+            }).catch((error) => {
+                console.error('❌ Error waiting for Firebase:', error);
+                FirebaseAuthManager.showErrorMessage(error);
+            });
             
         } catch (error) {
             console.error('❌ FirebaseAuthManager init() failed:', error);
