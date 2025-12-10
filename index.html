@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="style-optimized.css">
     <link rel="icon" type="image/png" sizes="32x32" href="icon-72x72.png">
     <link rel="icon" type="image/png" sizes="16x16" href="icon-72x72.png">
+    
+    <!-- CSS de Fallback - S'active si style-optimized.css ne se charge pas -->
+    <link rel="stylesheet" href="style-fallback.css">
 </head>
 <body>
     <!-- Navigation fixe horizontale en header -->
@@ -82,368 +85,177 @@
             <div class="swipe-hint">← Glissez pour naviguer →</div>
         </nav>
 
-        <!-- Page d'accueil Ultra-Améliorée -->
+        <!-- Page d'accueil -->
         <div id="tab-content" class="tab-content active">
-            <!-- Hero Section Ultra-Modernisée -->
-            <div class="hero-section-ultra-modern">
-                <!-- Éléments décoratifs d'arrière-plan -->
-                <div class="hero-background-elements">
-                    <div class="floating-particle particle-1"></div>
-                    <div class="floating-particle particle-2"></div>
-                    <div class="floating-particle particle-3"></div>
-                    <div class="floating-particle particle-4"></div>
-                    <div class="floating-particle particle-5"></div>
-                </div>
-                
+            <!-- Hero Section Améliorée -->
+            <div class="hero-section-modern">
                 <div class="hero-content-modern">
-                    <!-- Badge de statut premium -->
-                    <div class="premium-status-badge">
-                        <div class="status-indicator-dot"></div>
-                        <span class="status-text">IA Médicale Certifiée HDS</span>
-                        <div class="certification-badge">✓</div>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">10k+</span>
+                            <span class="stat-label">Dictées</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">500+</span>
+                            <span class="stat-label">Médecins</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">99%</span>
+                            <span class="stat-label">Précision</span>
+                        </div>
                     </div>
                     
-                    <h1 class="hero-title-modern">
-                        <span class="logo-text-modern">
-                            <span class="logo-dicta-modern">Dicta</span><span class="logo-med-modern">Med</span>
-                        </span>
+                    <h1 class="hero-title">
+                        <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
                     </h1>
-                    
-                    <div class="hero-subtitle-modern">
-                        <span class="subtitle-main">Dictée médicale</span>
-                        <span class="subtitle-highlight">intelligente nouvelle génération</span>
-                    </div>
-                    
-                    <p class="hero-description-modern">
-                        Révolutionnez votre pratique médicale avec notre intelligence artificielle avancée. 
-                        Transformez vos paroles en documents médicaux structurés, sécurisés et conformes 
-                        en moins de 3 secondes avec une précision de 99.2%.
+                    <p class="hero-subtitle">
+                        Dictée médicale intelligente nouvelle génération
+                    </p>
+                    <p class="hero-description">
+                        Révolutionnez votre pratique médicale avec notre IA avancée. 
+                        Transformez vos paroles en documents médicaux structurés, sécurisés et conformes.
                     </p>
                     
-                    <!-- Statistiques avancées -->
-                    <div class="hero-stats-modern">
-                        <div class="stat-card-modern">
-                            <div class="stat-value-modern">99.2%</div>
-                            <div class="stat-label-modern">Précision IA</div>
-                            <div class="stat-trend">↗ +0.3%</div>
-                        </div>
-                        <div class="stat-card-modern">
-                            <div class="stat-value-modern"><3s</div>
-                            <div class="stat-label-modern">Temps moyen</div>
-                            <div class="stat-trend">⚡ Instantané</div>
-                        </div>
-                        <div class="stat-card-modern">
-                            <div class="stat-value-modern">50+</div>
-                            <div class="stat-label-modern">Spécialités</div>
-                            <div class="stat-trend">🏥 Toutes spécialités</div>
-                        </div>
-                        <div class="stat-card-modern">
-                            <div class="stat-value-modern">24/7</div>
-                            <div class="stat-label-modern">Disponibilité</div>
-                            <div class="stat-trend">🌐 Cloud sécurisé</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Call-to-Action amélioré -->
-                    <div class="hero-cta-modern">
-                        <button class="btn btn-primary-modern primary-cta" data-tab="mode-test">
-                            <span class="btn-icon-modern">🚀</span>
-                            <span class="btn-text-modern">Essayer gratuitement</span>
-                            <span class="btn-arrow-modern">→</span>
-                            <div class="btn-ripple"></div>
+                    <div class="hero-cta">
+                        <button class="btn btn-primary btn-large" data-tab="mode-test">
+                            <span class="btn-icon">🚀</span>
+                            Commencer maintenant
                         </button>
-                        <button class="btn btn-outline-modern secondary-cta" data-tab="guide">
-                            <span class="btn-icon-modern">📋</span>
-                            <span class="btn-text-modern">Voir la démo interactive</span>
+                        <button class="btn btn-secondary btn-large" data-tab="guide">
+                            <span class="btn-icon">📋</span>
+                            Voir la démo
                         </button>
                     </div>
                     
-                    <!-- Garanties et certifications -->
-                    <div class="hero-guarantees">
-                        <div class="guarantee-item">
-                            <div class="guarantee-icon">🔒</div>
-                            <span>Conformité RGPD</span>
+                    <div class="hero-features-preview">
+                        <div class="preview-item">
+                            <span class="preview-icon">⚡</span>
+                            <span>Instantané</span>
                         </div>
-                        <div class="guarantee-item">
-                            <div class="guarantee-icon">🛡️</div>
-                            <span>Sécurité maximale</span>
+                        <div class="preview-item">
+                            <span class="preview-icon">🔒</span>
+                            <span>Sécurisé</span>
                         </div>
-                        <div class="guarantee-item">
-                            <div class="guarantee-icon">⚡</div>
-                            <span>Traitement instantané</span>
-                        </div>
-                        <div class="guarantee-item">
-                            <div class="guarantee-icon">🏆</div>
-                            <span>Certifié HDS</span>
+                        <div class="preview-item">
+                            <span class="preview-icon">🎯</span>
+                            <span>Précis</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Section Fonctionnalités Ultra-Améliorée -->
-            <div class="features-section-ultra-modern">
-                <div class="section-header-modern">
-                    <h2 class="section-title-modern">Pourquoi DictaMed révolutionne la médecine ?</h2>
-                    <p class="section-subtitle-modern">Découvrez les technologies qui transforment votre quotidien médical</p>
-                </div>
-                
-                <div class="features-grid-ultra-modern">
-                    <div class="feature-card-ultra-modern">
-                        <div class="feature-visual">
-                            <div class="feature-icon-container">
-                                <div class="feature-icon-ultra">🎤</div>
-                                <div class="icon-glow"></div>
-                            </div>
-                            <div class="feature-particles">
-                                <div class="particle particle-a"></div>
-                                <div class="particle particle-b"></div>
-                                <div class="particle particle-c"></div>
+            <!-- Section Fonctionnalités et Modes - Enrichie -->
+            <div class="features-modes-section">
+                <div class="features-overview">
+                    <h2>🚀 Pourquoi DictaMed révolutionne la médecine ?</h2>
+                    <div class="features-grid-modern">
+                        <div class="feature-card-modern">
+                            <div class="feature-icon-modern">🎤</div>
+                            <h4>Dictée Vocale Avancée</h4>
+                            <p>Transcription en temps réel avec IA médicale spécialisée. Reconnaissance de 50+ spécialités médicales.</p>
+                            <div class="feature-highlight">
+                                <span class="highlight-text">+ de 10 000 termes médicaux</span>
                             </div>
                         </div>
-                        <div class="feature-content-ultra">
-                            <h4 class="feature-title-ultra">Dictée Vocale Avancée</h4>
-                            <p class="feature-description-ultra">Intelligence artificielle spécialisée médicalement avec reconnaissance optimisée pour plus de 50 spécialités médicales et 10,000 termes techniques.</p>
-                            <div class="feature-highlights">
-                                <span class="highlight-tag">+10k termes</span>
-                                <span class="highlight-tag">50+ spécialités</span>
-                                <span class="highlight-tag">Temps réel</span>
+                        <div class="feature-card-modern">
+                            <div class="feature-icon-modern">🔒</div>
+                            <h4>Sécurité Maximale</h4>
+                            <p>Conformité RGPD, chiffrement end-to-end, hébergement sécurisé en France. Aucune donnée stockée.</p>
+                            <div class="feature-highlight">
+                                <span class="highlight-text">Certifié HDS</span>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="feature-card-ultra-modern">
-                        <div class="feature-visual">
-                            <div class="feature-icon-container">
-                                <div class="feature-icon-ultra">🔒</div>
-                                <div class="icon-glow"></div>
-                            </div>
-                            <div class="feature-particles">
-                                <div class="particle particle-a"></div>
-                                <div class="particle particle-b"></div>
-                                <div class="particle particle-c"></div>
-                            </div>
-                        </div>
-                        <div class="feature-content-ultra">
-                            <h4 class="feature-title-ultra">Sécurité Maximale</h4>
-                            <p class="feature-description-ultra">Conformité RGPD totale, chiffrement end-to-end, hébergement sécurisé en France. Aucune donnée stockée localement.</p>
-                            <div class="feature-highlights">
-                                <span class="highlight-tag">Certifié HDS</span>
-                                <span class="highlight-tag">RGPD</span>
-                                <span class="highlight-tag">France</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="feature-card-ultra-modern">
-                        <div class="feature-visual">
-                            <div class="feature-icon-container">
-                                <div class="feature-icon-ultra">⚡</div>
-                                <div class="icon-glow"></div>
-                            </div>
-                            <div class="feature-particles">
-                                <div class="particle particle-a"></div>
-                                <div class="particle particle-b"></div>
-                                <div class="particle particle-c"></div>
-                            </div>
-                        </div>
-                        <div class="feature-content-ultra">
-                            <h4 class="feature-title-ultra">Performance Ultra-Rapide</h4>
-                            <p class="feature-description-ultra">Résultats en moins de 3 secondes. Interface intuitive conçue spécialement pour les professionnels de santé exigeants.</p>
-                            <div class="feature-highlights">
-                                <span class="highlight-tag">99.2% précision</span>
-                                <span class="highlight-tag"><3s traitement</span>
-                                <span class="highlight-tag">Interface pro</span>
+                        <div class="feature-card-modern">
+                            <div class="feature-icon-modern">⚡</div>
+                            <h4>Performance Ultra-Rapide</h4>
+                            <p>Résultats en moins de 3 secondes. Interface intuitive conçue pour les professionnels de santé.</p>
+                            <div class="feature-highlight">
+                                <span class="highlight-text">99.2% de précision</span>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Section Modes Ultra-Améliorée -->
-            <div class="modes-section-ultra-modern">
-                <div class="section-header-modern">
-                    <h2 class="section-title-modern">Choisissez votre mode d'utilisation</h2>
-                    <p class="section-subtitle-modern">Trois solutions adaptées à tous les besoins médicaux</p>
-                </div>
-                
-                <div class="modes-grid-ultra-modern">
-                    <div class="mode-card-ultra-modern demo-mode-ultra">
-                        <div class="mode-visual-premium">
-                            <div class="mode-icon-premium">🧪</div>
-                            <div class="mode-glow-demo"></div>
-                            <div class="mode-badge-premium demo-badge">100% Gratuit</div>
-                        </div>
-                        <div class="mode-content-ultra">
-                            <h4 class="mode-title-ultra">Mode Démonstration</h4>
-                            <p class="mode-description-ultra">Découvrez DictaMed sans inscription. Idéal pour tester toutes les fonctionnalités avec des données exemples réalistes.</p>
-                            <div class="mode-features-ultra">
-                                <div class="feature-item-ultra">
-                                    <span class="feature-check">✅</span>
-                                    <span>Aucune inscription requise</span>
-                                </div>
-                                <div class="feature-item-ultra">
-                                    <span class="feature-check">✅</span>
-                                    <span>Données exemples complètes</span>
-                                </div>
-                                <div class="feature-item-ultra">
-                                    <span class="feature-check">✅</span>
-                                    <span>Toutes les fonctionnalités</span>
-                                </div>
+                <div class="modes-overview">
+                    <h2>🎯 Choisissez votre mode d'utilisation</h2>
+                    <div class="modes-grid-modern">
+                        <div class="mode-card-modern demo-mode">
+                            <div class="mode-icon-modern">🧪</div>
+                            <h4>Mode Démonstration</h4>
+                            <p>Découvrez DictaMed sans inscription. Idéal pour tester toutes les fonctionnalités avec des données exemples.</p>
+                            <div class="mode-features">
+                                <span class="feature-item">✅ Aucune inscription</span>
+                                <span class="feature-item">✅ Données exemples</span>
+                                <span class="feature-item">✅ Toutes fonctionnalités</span>
                             </div>
-                            <button class="btn btn-demo-modern" data-tab="mode-test">
-                                <span class="btn-icon-modern">🚀</span>
-                                <span class="btn-text-modern">Découvrir maintenant</span>
+                            <span class="mode-badge demo-badge">100% Gratuit</span>
+                            <button class="btn btn-primary btn-small" data-tab="mode-test">
+                                🚀 Découvrir
                             </button>
                         </div>
-                    </div>
-                    
-                    <div class="mode-card-ultra-modern production-mode-ultra">
-                        <div class="mode-visual-premium">
-                            <div class="mode-icon-premium">🏥</div>
-                            <div class="mode-glow-production"></div>
-                            <div class="mode-badge-premium production-badge">Professionnel</div>
-                        </div>
-                        <div class="mode-content-ultra">
-                            <h4 class="mode-title-ultra">Mode Production</h4>
-                            <p class="mode-description-ultra">Solution complète pour les professionnels de santé. Sauvegarde sécurisée, intégrations et support prioritaire dédié.</p>
-                            <div class="mode-features-ultra">
-                                <div class="feature-item-ultra">
-                                    <span class="feature-check">✅</span>
-                                    <span>Comptes sécurisés chiffrés</span>
-                                </div>
-                                <div class="feature-item-ultra">
-                                    <span class="feature-check">✅</span>
-                                    <span>Sauvegarde cloud automatique</span>
-                                </div>
-                                <div class="feature-item-ultra">
-                                    <span class="feature-check">✅</span>
-                                    <span>Support prioritaire 24/7</span>
-                                </div>
+
+                        <div class="mode-card-modern production-mode">
+                            <div class="mode-icon-modern">🏥</div>
+                            <h4>Mode Production</h4>
+                            <p>Solution complète pour les professionnels. Sauvegarde sécurisée, intégrations et support prioritaire.</p>
+                            <div class="mode-features">
+                                <span class="feature-item">✅ Comptes sécurisés</span>
+                                <span class="feature-item">✅ Sauvegarde cloud</span>
+                                <span class="feature-item">✅ Support dédié</span>
                             </div>
-                            <button class="btn btn-production-modern" data-tab="mode-normal">
-                                <span class="btn-icon-modern">🔐</span>
-                                <span class="btn-text-modern">Accéder au mode pro</span>
+                            <span class="mode-badge production-badge">Professionnel</span>
+                            <button class="btn btn-secondary btn-small" data-tab="mode-normal">
+                                🔐 Accéder
                             </button>
                         </div>
-                    </div>
-                    
-                    <div class="mode-card-ultra-modern dmi-mode-ultra">
-                        <div class="mode-visual-premium">
-                            <div class="mode-icon-premium">📝</div>
-                            <div class="mode-glow-dmi"></div>
-                            <div class="mode-badge-premium dmi-badge">Flexible</div>
-                        </div>
-                        <div class="mode-content-ultra">
-                            <h4 class="mode-title-ultra">Mode Saisie Texte</h4>
-                            <p class="mode-description-ultra">Saisie manuelle enrichie avec gestion de photos médicales. Parfait pour les cas complexes nécessitant validation croisée.</p>
-                            <div class="mode-features-ultra">
-                                <div class="feature-item-ultra">
-                                    <span class="feature-check">✅</span>
-                                    <span>Texte structuré intelligent</span>
-                                </div>
-                                <div class="feature-item-ultra">
-                                    <span class="feature-check">✅</span>
-                                    <span>Gestion photos médicales</span>
-                                </div>
-                                <div class="feature-item-ultra">
-                                    <span class="feature-check">✅</span>
-                                    <span>Validation croisée IA</span>
-                                </div>
+
+                        <div class="mode-card-modern dmi-mode">
+                            <div class="mode-icon-modern">📝</div>
+                            <h4>Mode Saisie Texte</h4>
+                            <p>Saisie manuelle enrichie avec gestion de photos médicales. Parfait pour les cas complexes.</p>
+                            <div class="mode-features">
+                                <span class="feature-item">✅ Texte structuré</span>
+                                <span class="feature-item">✅ Photos médicales</span>
+                                <span class="feature-item">✅ Validation croisée</span>
                             </div>
-                            <button class="btn btn-dmi-modern" data-tab="mode-dmi">
-                                <span class="btn-icon-modern">✏️</span>
-                                <span class="btn-text-modern">Commencer la saisie</span>
+                            <span class="mode-badge dmi-badge">Flexible</span>
+                            <button class="btn btn-secondary btn-small" data-tab="mode-dmi">
+                                ✏️ Saisir
                             </button>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Section Témoignages -->
-            <div class="testimonials-section-ultra-modern">
-                <div class="section-header-modern">
-                    <h2 class="section-title-modern">Ils nous font confiance</h2>
-                    <p class="section-subtitle-modern">Découvrez les retours de professionnels de santé</p>
-                </div>
                 
-                <div class="testimonials-grid-ultra-modern">
-                    <div class="testimonial-card-ultra-modern">
-                        <div class="testimonial-content-ultra">
-                            <div class="quote-icon-ultra">"</div>
-                            <p class="testimonial-text-ultra">DictaMed a révolutionné ma pratique. La précision est incredible et le gain de temps considérable. Mes comptes-rendus sont maintenant standardisés et de qualité.</p>
-                        </div>
-                        <div class="testimonial-author-ultra">
-                            <div class="author-avatar-ultra">👨‍⚕️</div>
-                            <div class="author-info-ultra">
-                                <div class="author-name-ultra">Dr. Martin Dubois</div>
-                                <div class="author-title-ultra">Cardiologue, Hôpital Saint-Louis</div>
+                <!-- Section témoignages/avantages -->
+                <div class="testimonials-section">
+                    <h2>💬 Ils nous font confiance</h2>
+                    <div class="testimonials-grid">
+                        <div class="testimonial-card">
+                            <div class="testimonial-content">
+                                <p>"DictaMed a révolutionné ma pratique. Fini lesCRIMDFastidieuses!"</p>
+                            </div>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">👨‍⚕️</div>
+                                <div class="author-info">
+                                    <span class="author-name">Dr. Martin</span>
+                                    <span class="author-title">Cardiologue</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="testimonial-card-ultra-modern">
-                        <div class="testimonial-content-ultra">
-                            <div class="quote-icon-ultra">"</div>
-                            <p class="testimonial-text-ultra">Interface intuitive, sécurité exemplaire et résultats précis. L'IA comprend parfaitement le jargon médical. Un outil indispensable pour ma consultation.</p>
-                        </div>
-                        <div class="testimonial-author-ultra">
-                            <div class="author-avatar-ultra">👩‍⚕️</div>
-                            <div class="author-info-ultra">
-                                <div class="author-name-ultra">Dr. Sophie Laurent</div>
-                                <div class="author-title-ultra">Médecin généraliste, Lyon</div>
+                        <div class="testimonial-card">
+                            <div class="testimonial-content">
+                                <p>"Une précision exceptionnelle et un gain de temps considérable."</p>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div class="testimonial-card-ultra-modern">
-                        <div class="testimonial-content-ultra">
-                            <div class="quote-icon-ultra">"</div>
-                            <p class="testimonial-text-ultra">Gagnez 2h par jour ! La dictée vocale fonctionne parfaitement même avec l'accent du Sud. Mes patients apprécient la qualité de mes comptes-rendus.</p>
-                        </div>
-                        <div class="testimonial-author-ultra">
-                            <div class="author-avatar-ultra">👨‍⚕️</div>
-                            <div class="author-info-ultra">
-                                <div class="author-name-ultra">Dr. Pierre Moreau</div>
-                                <div class="author-title-ultra">Chirurgien, Marseille</div>
+                            <div class="testimonial-author">
+                                <div class="author-avatar">👩‍⚕️</div>
+                                <div class="author-info">
+                                    <span class="author-name">Dr. Dubois</span>
+                                    <span class="author-title">Généraliste</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Guide (caché par défaut) -->
-        <div id="guide-content" class="tab-content" style="display: none;">
-            <div id="guide-container">
-                <!-- Le contenu sera chargé dynamiquement -->
-            </div>
-        </div>
-
-        <!-- FAQ (caché par défaut) -->
-        <div id="faq-content" class="tab-content" style="display: none;">
-            <div id="faq-container">
-                <!-- Le contenu sera chargé dynamiquement -->
-            </div>
-        </div>
-
-        <!-- Mode Normal (caché par défaut) -->
-        <div id="mode-normal-content" class="tab-content" style="display: none;">
-            <div id="mode-normal-container">
-                <!-- Le contenu sera chargé dynamiquement -->
-            </div>
-        </div>
-
-        <!-- Mode Test (caché par défaut) -->
-        <div id="mode-test-content" class="tab-content" style="display: none;">
-            <div id="mode-test-container">
-                <!-- Le contenu sera chargé dynamiquement -->
-            </div>
-        </div>
-
-        <!-- Mode DMI (caché par défaut) -->
-        <div id="mode-dmi-content" class="tab-content" style="display: none;">
-            <div id="mode-dmi-container">
-                <!-- Le contenu sera chargé dynamiquement -->
             </div>
         </div>
 
@@ -465,7 +277,7 @@
         </div>
     </footer>
 
-    <!-- Modal d'authentification amélioré -->
+    <!-- Modal d'authentification optimisé -->
     <div id="authModal" class="auth-modal hidden">
         <div class="auth-modal-content">
             <div class="auth-modal-header">
@@ -508,6 +320,10 @@
                                 <span class="eye-icon">👁️</span>
                             </button>
                         </div>
+                        <div class="password-strength hidden" id="passwordStrength">
+                            <div class="strength-bar"></div>
+                            <span class="strength-text">Force du mot de passe</span>
+                        </div>
                     </div>
                     
                     <div class="auth-options">
@@ -522,6 +338,7 @@
                     <button type="submit" id="modalEmailSubmitBtn" class="btn btn-primary btn-full btn-glow">
                         <span class="btn-text">Se connecter</span>
                         <span class="btn-icon">→</span>
+                        <div class="loading-spinner-small hidden"></div>
                     </button>
                     
                     <div class="auth-separator">
@@ -595,7 +412,7 @@
     <!-- 2. ÉTAT DE L'APPLICATION -->
     <script src="js/core/app-state.js"></script>
     
-    <!-- 3. SYSTÈMES FONDAMENTAUX -->
+    <!-- js/core/app-state3. SYSTÈMES FONDAMENTAUX -->
     <script src="js/components/notification.js"></script>
     <script src="js/components/loading-overlay.js"></script>
     
@@ -625,15 +442,13 @@
     <script src="js/tabs/test-mode.js"></script>
     
     <!-- Script de diagnostic -->
-    <script src="diagnostic-nav.js"></script>
-    <script src="fix-navigation.js"></script>
     <script src="diagnostic-debug.js"></script>
     
     <!-- Point d'entrée principal -->
     <script src="js/main.js"></script>
     
     <!-- Tests unitaires (seulement en développement) -->
-    <!-- <script src="tests/unit-tests.js"></script> -->
+    <script src="tests/unit-tests.js"></script>
 
 </body>
 </html>

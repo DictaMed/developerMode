@@ -1,1289 +1,183 @@
 <h1>📖 Guide d'utilisation</h1>
 
-<!-- Enhanced Hero Section -->
-<div class="guide-hero-section">
-    <div class="guide-hero-content">
-        <div class="guide-hero-icon">📖</div>
-        <h2>Maîtrisez DictaMed en quelques étapes</h2>
-        <p>Découvrez comment utiliser efficacement notre solution de dictée médicale</p>
-        <div class="guide-features-preview">
-            <div class="preview-feature">
-                <span class="preview-icon">⚡</span>
-                <span>Rapide</span>
+<!-- Workflow Section -->
+<div class="workflow">
+    <div class="workflow-step">
+        <div class="workflow-icon">📋</div>
+        <h4>Informations</h4>
+        <p>Saisissez les données patient</p>
+    </div>
+    <div class="workflow-arrow">→</div>
+    <div class="workflow-step">
+        <div class="workflow-icon">🎤</div>
+        <h4>Enregistrement</h4>
+        <p>Dictez chaque section</p>
+    </div>
+    <div class="workflow-arrow">→</div>
+    <div class="workflow-step">
+        <div class="workflow-icon">📤</div>
+        <h4>Envoi</h4>
+        <p>Transmettez votre dossier</p>
+    </div>
+</div>
+
+<!-- Modes Grid -->
+<div class="steps-grid">
+    <div class="step-card">
+        <div class="step-number">1</div>
+        <h3>Mode Normal</h3>
+        <p>Mode de production simplifié sans authentification. Vos données sont traitées de manière sécurisée et confidentielle.</p>
+    </div>
+    
+    <div class="step-card">
+        <div class="step-number">2</div>
+        <h3>Mode Test</h3>
+        <p>Mode de démonstration sans authentification. Les données sont envoyées vers un Google Sheet public pour visualisation.</p>
+    </div>
+    
+    <div class="step-card">
+        <div class="step-number">3</div>
+        <h3>Saisie Texte</h3>
+        <p>Mode de saisie directe avec possibilité d'ajouter des photos. Idéal pour les comptes-rendus textuels.</p>
+    </div>
+</div>
+
+<!-- FAQ Section -->
+<div class="faq-section">
+    <h2 class="faq-title">❓ Questions Fréquentes</h2>
+    
+    <div class="faq-container">
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-icon">💡</span>
+                <span class="faq-text">Qu'est-ce que DictaMed ?</span>
+                <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+                <p>DictaMed est une solution innovante de dictée médicale intelligente qui permet aux professionnels de santé de transformer leurs enregistrements vocaux en données structurées pour faciliter la collecte de données médicales et la création de fichiers SPSS.</p>
             </div>
-            <div class="preview-feature">
-                <span class="preview-icon">🔒</span>
-                <span>Sécurisé</span>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-icon">🧪</span>
+                <span class="faq-text">Comment fonctionne le Mode Test ?</span>
+                <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+                <p>Le Mode Test est une démonstration gratuite accessible sans authentification. Il vous permet d'enregistrer des données fictives et de voir en temps réel comment elles sont transcrites dans un Google Sheet public. C'est l'occasion idéale pour découvrir DictaMed avant de vous engager.</p>
             </div>
-            <div class="preview-feature">
-                <span class="preview-icon">🎯</span>
-                <span>Précis</span>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-icon">🔒</span>
+                <span class="faq-text">Mes données sont-elles sécurisées ?</span>
+                <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+                <p>Absolument. DictaMed est conforme au RGPD et utilise un chiffrement de bout en bout pour toutes les données en Mode Normal. Les enregistrements sont stockés de manière sécurisée et ne sont accessibles qu'aux personnes autorisées avec leurs identifiants personnels.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-icon">🌐</span>
+                <span class="faq-text">Quels navigateurs sont compatibles ?</span>
+                <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+                <p>DictaMed fonctionne sur tous les navigateurs modernes : Google Chrome (recommandé), Mozilla Firefox, Microsoft Edge et Safari. L'application est également optimisée pour mobile et tablette.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-icon">⏸️</span>
+                <span class="faq-text">Puis-je mettre en pause un enregistrement ?</span>
+                <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+                <p>Oui, chaque section d'enregistrement dispose d'une fonction pause qui vous permet d'interrompre temporairement votre dictée et de la reprendre ensuite. Le timer exclut automatiquement le temps de pause.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-icon">💰</span>
+                <span class="faq-text">Comment obtenir un devis ?</span>
+                <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+                <p>Contactez-nous par email à <a href="mailto:DictaMed.SPSS@gmail.com">DictaMed.SPSS@gmail.com</a> en fournissant les informations listées dans l'onglet Contact. Nous vous répondrons sous 48 heures ouvrées avec un devis personnalisé adapté à vos besoins.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-icon">🎯</span>
+                <span class="faq-text">Quelle est la précision de la transcription ?</span>
+                <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+                <p>Notre système d'intelligence artificielle atteint une précision supérieure à 95% pour les données médicales structurées, particulièrement lorsque les consignes de dictée sont respectées (parler clairement, environnement calme).</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-icon">⚙️</span>
+                <span class="faq-text">Puis-je personnaliser les paramètres ?</span>
+                <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+                <p>Oui, chaque client en Mode Normal reçoit une configuration personnalisée adaptée à ses variables SPSS spécifiques. Le nombre de sections et les champs peuvent être ajustés selon vos besoins.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-icon">📊</span>
+                <span class="faq-text">Y a-t-il une limite au nombre d'enregistrements ?</span>
+                <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+                <p>En Mode Test, vous pouvez effectuer un nombre illimité d'essais. En Mode Normal, le nombre d'enregistrements est défini selon votre forfait (nombre de patients de votre étude).</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">
+                <span class="faq-icon">📁</span>
+                <span class="faq-text">Que se passe-t-il après la transcription ?</span>
+                <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+                <p>Les données transcrites sont automatiquement ajoutées à votre Google Sheet personnalisé où vous pouvez les vérifier et les corriger si nécessaire. Une fois validées, elles sont exportées vers votre fichier SPSS prêt pour l'analyse statistique.</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Enhanced Workflow Section -->
-<div class="workflow-enhanced">
-    <div class="workflow-header">
-        <h3>Processus en 3 étapes</h3>
-        <p>Un workflow simple et intuitif pour vos dictées médicales</p>
-    </div>
-    <div class="workflow-steps">
-        <div class="workflow-step-enhanced">
-            <div class="step-enhanced-icon">📋</div>
-            <div class="step-enhanced-content">
-                <h4>Informations Patient</h4>
-                <p>Saisissez les données de base du patient</p>
-                <div class="step-features">
-                    <span class="step-feature">👤 Identification</span>
-                    <span class="step-feature">📅 Date</span>
-                    <span class="step-feature">🏥 Contexte</span>
-                </div>
-            </div>
-            <div class="step-number">1</div>
-        </div>
-        
-        <div class="workflow-arrow-enhanced">→</div>
-        
-        <div class="workflow-step-enhanced">
-            <div class="step-enhanced-icon">🎤</div>
-            <div class="step-enhanced-content">
-                <h4>Enregistrement Vocal</h4>
-                <p>Dictez chaque section médicale</p>
-                <div class="step-features">
-                    <span class="step-feature">⏱️ 2 min max/section</span>
-                    <span class="step-feature">⏸️ Pause possible</span>
-                    <span class="step-feature">🎯 Dictée guidée</span>
-                </div>
-            </div>
-            <div class="step-number">2</div>
-        </div>
-        
-        <div class="workflow-arrow-enhanced">→</div>
-        
-        <div class="workflow-step-enhanced">
-            <div class="step-enhanced-icon">📤</div>
-            <div class="step-enhanced-content">
-                <h4>Envoi & Transcription</h4>
-                <p>Transmettez et obtenez vos données</p>
-                <div class="step-features">
-                    <span class="step-feature">🔄 Traitement IA</span>
-                    <span class="step-feature">📊 Export SPSS</span>
-                    <span class="step-feature">✅ Validation</span>
-                </div>
-            </div>
-            <div class="step-number">3</div>
-        </div>
-    </div>
+<!-- Tips Section -->
+<div class="card instructions-card">
+    <h3>💡 Conseils d'utilisation</h3>
+    <ul>
+        <li>Parlez clairement et à un rythme normal</li>
+        <li>Évitez les bruits de fond pendant l'enregistrement</li>
+        <li>Une section ne peut pas dépasser 2 minutes</li>
+        <li>Sauvegardez régulièrement vos données</li>
+        <li>Utilisez le mode test pour vous familiariser</li>
+    </ul>
 </div>
-
-<!-- Enhanced Modes Grid -->
-<div class="modes-section-enhanced">
-    <div class="modes-header">
-        <h3>Choisissez votre mode d'utilisation</h3>
-        <p>Trois modes adaptés à vos besoins</p>
-    </div>
-    <div class="modes-grid-enhanced">
-        <div class="mode-card-enhanced normal-mode">
-            <div class="mode-card-icon">🏥</div>
-            <div class="mode-badge normal-badge">Mode Normal</div>
-            <h4>Production Médicale</h4>
-            <p>Mode de production simplifié sans authentification. Vos données sont traitées de manière sécurisée et confidentielle selon les normes médicales.</p>
-            <div class="mode-features">
-                <div class="mode-feature">
-                    <span class="feature-icon">🔒</span>
-                    <span>Sécurisé RGPD</span>
-                </div>
-                <div class="mode-feature">
-                    <span class="feature-icon">⚡</span>
-                    <span>Rapide</span>
-                </div>
-                <div class="mode-feature">
-                    <span class="feature-icon">📊</span>
-                    <span>Export SPSS</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="mode-card-enhanced test-mode">
-            <div class="mode-card-icon">🧪</div>
-            <div class="mode-badge test-badge">Mode Test</div>
-            <h4>Démonstration</h4>
-            <p>Mode de démonstration sans authentification. Les données sont envoyées vers un Google Sheet public pour visualisation en temps réel.</p>
-            <div class="mode-features">
-                <div class="mode-feature">
-                    <span class="feature-icon">🌐</span>
-                    <span>Public</span>
-                </div>
-                <div class="mode-feature">
-                    <span class="feature-icon">👁️</span>
-                    <span>Temps réel</span>
-                </div>
-                <div class="mode-feature">
-                    <span class="feature-icon">🎯</span>
-                    <span>Démo</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="mode-card-enhanced dmi-mode">
-            <div class="mode-card-icon">📝</div>
-            <div class="mode-badge dmi-badge">Saisie Texte</div>
-            <h4>Mode DMI</h4>
-            <p>Mode de saisie directe avec possibilité d'ajouter des photos. Idéal pour les comptes-rendus textuels et l'intégration d'images médicales.</p>
-            <div class="mode-features">
-                <div class="mode-feature">
-                    <span class="feature-icon">📷</span>
-                    <span>Photos</span>
-                </div>
-                <div class="mode-feature">
-                    <span class="feature-icon">📄</span>
-                    <span>Texte libre</span>
-                </div>
-                <div class="mode-feature">
-                    <span class="feature-icon">📋</span>
-                    <span>Formulaires</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-       
-
-<!-- Call to Action Section -->
-<div class="cta-section">
-    <div class="cta-card">
-        <div class="cta-content">
-            <h3>Prêt à commencer ?</h3>
-            <p>Découvrez DictaMed dès maintenant avec le mode test ou contactez-nous pour un devis personnalisé</p>
-            <div class="cta-actions">
-                <a href="#" class="btn btn-primary btn-large btn-glow">
-                    <span class="btn-icon">🧪</span>
-                    <span class="btn-text">Essayer le mode test</span>
-                </a>
-                <a href="mailto:DictaMed.SPSS@gmail.com" class="btn btn-secondary btn-large">
-                    <span class="btn-icon">📧</span>
-                    <span class="btn-text">Demander un devis</span>
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-/* Enhanced Guide Hero Section */
-.guide-hero-section {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.1) 0%, 
-        rgba(59, 130, 246, 0.15) 30%,
-        rgba(139, 92, 246, 0.1) 70%,
-        rgba(16, 185, 129, 0.1) 100%);
-    border-radius: var(--border-radius-xl);
-    padding: var(--space-2xl);
-    margin-bottom: var(--space-2xl);
-    text-align: center;
-    border: 1px solid rgba(37, 99, 235, 0.1);
-    position: relative;
-    overflow: hidden;
-}
-
-.guide-hero-section::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(37, 99, 235, 0.03) 0%, transparent 50%);
-    animation: float 10s ease-in-out infinite;
-    pointer-events: none;
-}
-
-.guide-hero-content {
-    position: relative;
-    z-index: 1;
-}
-
-.guide-hero-icon {
-    font-size: 4.5rem;
-    margin-bottom: var(--space-lg);
-    animation: iconFloat 4s ease-in-out infinite;
-}
-
-.guide-hero-content h2 {
-    font-size: 2.8rem;
-    font-weight: 900;
-    margin-bottom: var(--space-md);
-    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--purple-primary) 50%, var(--green-secondary) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.guide-hero-content p {
-    font-size: 1.3rem;
-    color: var(--gray-medium);
-    margin-bottom: var(--space-xl);
-}
-
-.guide-features-preview {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-lg);
-    flex-wrap: wrap;
-}
-
-.preview-feature {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    padding: var(--space-sm) var(--space-md);
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 25px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--gray-dark);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
-    transition: all var(--transition-base);
-}
-
-.preview-feature:hover {
-    transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.preview-icon {
-    font-size: 1.2rem;
-}
-
-/* Enhanced Workflow Section */
-.workflow-enhanced {
-    background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 100%);
-    backdrop-filter: blur(20px);
-    border-radius: var(--border-radius-xl);
-    padding: var(--space-2xl);
-    margin-bottom: var(--space-2xl);
-    box-shadow: 
-        0 15px 35px rgba(0, 0, 0, 0.08),
-        0 5px 15px rgba(0, 0, 0, 0.05),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.workflow-header {
-    text-align: center;
-    margin-bottom: var(--space-2xl);
-}
-
-.workflow-header h3 {
-    font-size: 2.2rem;
-    font-weight: 800;
-    margin-bottom: var(--space-sm);
-    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.workflow-header p {
-    font-size: 1.2rem;
-    color: var(--gray-medium);
-    margin: 0;
-}
-
-.workflow-steps {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-lg);
-    flex-wrap: wrap;
-}
-
-.workflow-step-enhanced {
-    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.98) 100%);
-    backdrop-filter: blur(20px);
-    border-radius: var(--border-radius-xl);
-    padding: var(--space-xl);
-    text-align: center;
-    box-shadow: 
-        0 10px 25px rgba(0, 0, 0, 0.08),
-        0 4px 6px rgba(0, 0, 0, 0.05),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    transition: all var(--transition-slow);
-    position: relative;
-    overflow: hidden;
-    min-width: 280px;
-    flex: 1;
-    max-width: 320px;
-}
-
-.workflow-step-enhanced::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--transition-slow);
-}
-
-.workflow-step-enhanced:hover::before {
-    transform: scaleX(1);
-}
-
-.workflow-step-enhanced:hover {
-    transform: translateY(-6px);
-    box-shadow: 
-        0 20px 40px rgba(37, 99, 235, 0.15),
-        0 10px 20px rgba(16, 185, 129, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-}
-
-.step-enhanced-icon {
-    font-size: 3rem;
-    margin-bottom: var(--space-md);
-    display: block;
-    animation: iconFloat 3s ease-in-out infinite;
-}
-
-.workflow-step-enhanced:nth-child(1) .step-enhanced-icon {
-    animation-delay: 0s;
-}
-
-.workflow-step-enhanced:nth-child(3) .step-enhanced-icon {
-    animation-delay: 1s;
-}
-
-.workflow-step-enhanced:nth-child(5) .step-enhanced-icon {
-    animation-delay: 2s;
-}
-
-.step-enhanced-content h4 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--gray-dark);
-    margin-bottom: var(--space-sm);
-}
-
-.step-enhanced-content p {
-    color: var(--gray-medium);
-    font-size: 1rem;
-    line-height: 1.6;
-    margin-bottom: var(--space-md);
-}
-
-.step-features {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-}
-
-.step-feature {
-    font-size: 0.85rem;
-    color: var(--gray-medium);
-    background: rgba(37, 99, 235, 0.08);
-    padding: var(--space-xs) var(--space-sm);
-    border-radius: 12px;
-    border: 1px solid rgba(37, 99, 235, 0.15);
-}
-
-.step-number {
-    position: absolute;
-    top: -10px;
-    right: -10px;
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    font-weight: 700;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-}
-
-.workflow-arrow-enhanced {
-    font-size: 2.5rem;
-    color: var(--blue-primary);
-    font-weight: 700;
-    animation: arrowPulse 2s ease-in-out infinite;
-    flex-shrink: 0;
-}
-
-/* Enhanced Modes Section */
-.modes-section-enhanced {
-    margin-bottom: var(--space-2xl);
-}
-
-.modes-header {
-    text-align: center;
-    margin-bottom: var(--space-xl);
-}
-
-.modes-header h3 {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin-bottom: var(--space-sm);
-    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.modes-header p {
-    font-size: 1.2rem;
-    color: var(--gray-medium);
-    margin: 0;
-}
-
-.modes-grid-enhanced {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: var(--space-xl);
-}
-
-.mode-card-enhanced {
-    background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 100%);
-    backdrop-filter: blur(20px);
-    border-radius: var(--border-radius-xl);
-    padding: var(--space-2xl);
-    text-align: center;
-    box-shadow: 
-        0 15px 35px rgba(0, 0, 0, 0.08),
-        0 5px 15px rgba(0, 0, 0, 0.05),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    transition: all var(--transition-slow);
-    position: relative;
-    overflow: hidden;
-}
-
-.mode-card-enhanced::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--transition-slow);
-}
-
-.mode-card-enhanced:hover::before {
-    transform: scaleX(1);
-}
-
-.mode-card-enhanced:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 
-        0 25px 50px rgba(37, 99, 235, 0.15),
-        0 15px 30px rgba(16, 185, 129, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
-}
-
-.mode-card-icon {
-    font-size: 3.5rem;
-    margin-bottom: var(--space-lg);
-    display: block;
-    animation: iconFloat 4s ease-in-out infinite;
-}
-
-.normal-mode .mode-card-icon {
-    animation-delay: 0s;
-}
-
-.test-mode .mode-card-icon {
-    animation-delay: 1s;
-}
-
-.dmi-mode .mode-card-icon {
-    animation-delay: 2s;
-}
-
-.mode-badge {
-    display: inline-block;
-    padding: var(--space-sm) var(--space-lg);
-    border-radius: 25px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: var(--space-lg);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.normal-badge {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    animation: badgePulse 2s ease-in-out infinite;
-}
-
-.test-badge {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    color: white;
-    animation: badgePulse 2s ease-in-out infinite 0.5s;
-}
-
-.dmi-badge {
-    background: linear-gradient(135deg, var(--purple-primary) 0%, var(--purple-dark) 100%);
-    color: white;
-    animation: badgePulse 2s ease-in-out infinite 1s;
-}
-
-.mode-card-enhanced h4 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--gray-dark);
-    margin-bottom: var(--space-md);
-}
-
-.mode-card-enhanced p {
-    color: var(--gray-medium);
-    font-size: 1.1rem;
-    line-height: 1.7;
-    margin-bottom: var(--space-lg);
-}
-
-.mode-features {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-}
-
-.mode-feature {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    padding: var(--space-sm) var(--space-md);
-    background: rgba(37, 99, 235, 0.05);
-    border-radius: var(--border-radius);
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--gray-dark);
-    border: 1px solid rgba(37, 99, 235, 0.1);
-}
-
-.feature-icon {
-    font-size: 1.1rem;
-    color: var(--blue-primary);
-}
-
-/* Enhanced FAQ Section */
-.faq-section-enhanced {
-    margin-bottom: var(--space-2xl);
-}
-
-.faq-header {
-    text-align: center;
-    margin-bottom: var(--space-xl);
-}
-
-.faq-title {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin-bottom: var(--space-sm);
-    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.faq-header p {
-    font-size: 1.2rem;
-    color: var(--gray-medium);
-    margin: 0;
-}
-
-.faq-container-enhanced {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-.faq-item-enhanced {
-    background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 100%);
-    backdrop-filter: blur(20px);
-    border-radius: var(--border-radius-xl);
-    box-shadow: 
-        0 10px 25px rgba(0, 0, 0, 0.08),
-        0 4px 6px rgba(0, 0, 0, 0.05),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    overflow: hidden;
-    transition: all var(--transition-slow);
-}
-
-.faq-item-enhanced:hover {
-    box-shadow: 
-        0 15px 35px rgba(37, 99, 235, 0.12),
-        0 6px 15px rgba(0, 0, 0, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    transform: translateY(-2px);
-}
-
-.faq-item-enhanced.active {
-    box-shadow: 
-        0 20px 40px rgba(37, 99, 235, 0.15),
-        0 8px 20px rgba(16, 185, 129, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
-    border-color: rgba(37, 99, 235, 0.2);
-}
-
-.faq-question-enhanced {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: var(--space-lg);
-    padding: var(--space-xl);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--gray-dark);
-    text-align: left;
-    transition: all var(--transition-base);
-}
-
-.faq-question-enhanced:hover {
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.03) 0%, rgba(16, 185, 129, 0.03) 100%);
-}
-
-.faq-item-enhanced.active .faq-question-enhanced {
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
-}
-
-.faq-icon-enhanced {
-    font-size: 1.8rem;
-    padding: var(--space-md);
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
-    border-radius: var(--border-radius-lg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all var(--transition-base);
-}
-
-.faq-item-enhanced:hover .faq-icon-enhanced {
-    transform: scale(1.05) rotate(5deg);
-}
-
-.faq-item-enhanced.active .faq-icon-enhanced {
-    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
-    transform: scale(1.1);
-    color: white;
-}
-
-.faq-text-enhanced {
-    flex: 1;
-    line-height: 1.4;
-}
-
-.faq-arrow-enhanced {
-    font-size: 1rem;
-    color: var(--gray-medium);
-    transition: transform var(--transition-base);
-    flex-shrink: 0;
-}
-
-.faq-item-enhanced.active .faq-arrow-enhanced {
-    transform: rotate(180deg);
-    color: var(--blue-primary);
-}
-
-.faq-answer-enhanced {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height var(--transition-slow), padding var(--transition-slow);
-    padding: 0 var(--space-xl);
-    background: linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.6) 100%);
-}
-
-.faq-item-enhanced.active .faq-answer-enhanced {
-    max-height: 500px;
-    padding: var(--space-lg) var(--space-xl) var(--space-xl) var(--space-xl);
-}
-
-.faq-answer-content p {
-    color: var(--gray-medium);
-    font-size: 1.1rem;
-    line-height: 1.7;
-    margin-bottom: var(--space-lg);
-}
-
-.contact-link {
-    color: var(--blue-primary);
-    font-weight: 600;
-    text-decoration: none;
-    transition: color var(--transition-fast);
-}
-
-.contact-link:hover {
-    color: var(--green-secondary);
-    text-decoration: underline;
-}
-
-/* FAQ Content Grids and Features */
-.faq-benefits, .test-features, .security-grid, .pause-features, .contact-info, .customization-options {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: var(--space-md);
-    margin-top: var(--space-md);
-}
-
-.benefit-item, .test-feature, .security-feature, .pause-feature, .contact-item, .option-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-xs);
-    padding: var(--space-md);
-    background: rgba(37, 99, 235, 0.05);
-    border-radius: var(--border-radius);
-    border: 1px solid rgba(37, 99, 235, 0.1);
-    text-align: center;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--gray-dark);
-}
-
-.benefit-icon, .test-icon, .security-icon, .pause-icon, .contact-icon, .option-icon {
-    font-size: 1.5rem;
-    color: var(--blue-primary);
-}
-
-.browser-compatibility {
-    display: flex;
-    gap: var(--space-sm);
-    margin-top: var(--space-md);
-    flex-wrap: wrap;
-}
-
-.browser-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    padding: var(--space-sm) var(--space-md);
-    background: rgba(100, 116, 139, 0.1);
-    border-radius: var(--border-radius);
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--gray-medium);
-}
-
-.browser-item.recommended {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.1) 100%);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    color: var(--blue-primary);
-}
-
-.browser-icon {
-    font-size: 1.1rem;
-}
-
-.accuracy-stats {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-xl);
-    margin-top: var(--space-md);
-}
-
-.stat-item {
-    text-align: center;
-}
-
-.stat-number {
-    display: block;
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--blue-primary);
-    line-height: 1;
-}
-
-.stat-label {
-    font-size: 0.9rem;
-    color: var(--gray-medium);
-    font-weight: 600;
-}
-
-.limits-comparison {
-    display: flex;
-    gap: var(--space-lg);
-    margin-top: var(--space-md);
-}
-
-.limit-item {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-xs);
-    padding: var(--space-lg);
-    border-radius: var(--border-radius);
-    text-align: center;
-}
-
-.test-limit {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.1) 100%);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-}
-
-.normal-limit {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-.limit-icon {
-    font-size: 1.5rem;
-    color: var(--blue-primary);
-}
-
-.limit-value {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--gray-dark);
-}
-
-.post-transcription-flow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-md);
-    margin-top: var(--space-md);
-    flex-wrap: wrap;
-}
-
-.flow-step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-xs);
-    padding: var(--space-md);
-    background: rgba(37, 99, 235, 0.08);
-    border-radius: var(--border-radius);
-    border: 1px solid rgba(37, 99, 235, 0.15);
-    text-align: center;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--gray-dark);
-}
-
-.flow-number {
-    width: 24px;
-    height: 24px;
-    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    font-weight: 700;
-}
-
-.flow-arrow {
-    font-size: 1.2rem;
-    color: var(--blue-primary);
-    font-weight: 700;
-}
-
-/* Enhanced Tips Section */
-.tips-section-enhanced {
-    margin-bottom: var(--space-2xl);
-}
-
-.tips-card {
-    background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 100%);
-    backdrop-filter: blur(20px);
-    border-radius: var(--border-radius-xl);
-    padding: var(--space-2xl);
-    box-shadow: 
-        0 15px 35px rgba(0, 0, 0, 0.08),
-        0 5px 15px rgba(0, 0, 0, 0.05),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.tips-header {
-    text-align: center;
-    margin-bottom: var(--space-xl);
-}
-
-.tips-icon {
-    font-size: 3rem;
-    margin-bottom: var(--space-md);
-    animation: iconFloat 3s ease-in-out infinite;
-}
-
-.tips-header h3 {
-    font-size: 2.2rem;
-    font-weight: 800;
-    margin-bottom: var(--space-sm);
-    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.tips-header p {
-    font-size: 1.2rem;
-    color: var(--gray-medium);
-    margin: 0;
-}
-
-.tips-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-lg);
-}
-
-.tip-item {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-md);
-    padding: var(--space-lg);
-    background: rgba(37, 99, 235, 0.03);
-    border-radius: var(--border-radius-lg);
-    border: 1px solid rgba(37, 99, 235, 0.1);
-    transition: all var(--transition-base);
-}
-
-.tip-item:hover {
-    background: rgba(37, 99, 235, 0.06);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
-}
-
-.tip-icon {
-    font-size: 2rem;
-    padding: var(--space-sm);
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
-    border-radius: var(--border-radius);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.tip-content h4 {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--gray-dark);
-    margin-bottom: var(--space-xs);
-}
-
-.tip-content p {
-    font-size: 0.95rem;
-    color: var(--gray-medium);
-    line-height: 1.6;
-    margin: 0;
-}
-
-/* Enhanced CTA Section */
-.cta-section {
-    margin-top: var(--space-2xl);
-    text-align: center;
-}
-
-.cta-card {
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.1) 0%, 
-        rgba(59, 130, 246, 0.15) 30%,
-        rgba(139, 92, 246, 0.1) 70%,
-        rgba(16, 185, 129, 0.1) 100%);
-    backdrop-filter: blur(20px);
-    border-radius: var(--border-radius-xl);
-    padding: var(--space-2xl);
-    box-shadow: 
-        0 20px 40px rgba(37, 99, 235, 0.1),
-        0 8px 16px rgba(16, 185, 129, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    border: 1px solid rgba(37, 99, 235, 0.1);
-    position: relative;
-    overflow: hidden;
-}
-
-.cta-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--blue-primary) 0%, var(--purple-primary) 50%, var(--green-secondary) 100%);
-    animation: ctaGlow 3s ease-in-out infinite;
-}
-
-.cta-content h3 {
-    font-size: 2.2rem;
-    font-weight: 800;
-    margin-bottom: var(--space-md);
-    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--purple-primary) 50%, var(--green-secondary) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.cta-content p {
-    font-size: 1.2rem;
-    color: var(--gray-medium);
-    margin-bottom: var(--space-xl);
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.cta-actions {
-    display: flex;
-    gap: var(--space-lg);
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-/* Animations */
-@keyframes arrowPulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(1.1);
-        opacity: 0.8;
-    }
-}
-
-@keyframes ctaGlow {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.6;
-    }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .guide-hero-section {
-        padding: var(--space-xl);
-        margin-bottom: var(--space-xl);
-    }
-    
-    .guide-hero-icon {
-        font-size: 3.5rem;
-    }
-    
-    .guide-hero-content h2 {
-        font-size: 2.2rem;
-    }
-    
-    .guide-hero-content p {
-        font-size: 1.1rem;
-    }
-    
-    .guide-features-preview {
-        gap: var(--space-sm);
-    }
-    
-    .preview-feature {
-        font-size: 0.9rem;
-        padding: var(--space-xs) var(--space-sm);
-    }
-    
-    .workflow-enhanced {
-        padding: var(--space-xl);
-    }
-    
-    .workflow-steps {
-        flex-direction: column;
-        gap: var(--space-xl);
-    }
-    
-    .workflow-arrow-enhanced {
-        transform: rotate(90deg);
-    }
-    
-    .workflow-step-enhanced {
-        min-width: auto;
-        max-width: none;
-        width: 100%;
-    }
-    
-    .modes-grid-enhanced {
-        grid-template-columns: 1fr;
-        gap: var(--space-lg);
-    }
-    
-    .mode-card-enhanced {
-        padding: var(--space-xl);
-    }
-    
-    .mode-card-enhanced h4 {
-        font-size: 1.6rem;
-    }
-    
-    .faq-question-enhanced {
-        padding: var(--space-lg);
-        font-size: 1.1rem;
-        gap: var(--space-md);
-    }
-    
-    .faq-icon-enhanced {
-        font-size: 1.5rem;
-        padding: var(--space-sm);
-    }
-    
-    .faq-item-enhanced.active .faq-answer-enhanced {
-        padding: var(--space-md) var(--space-lg) var(--space-lg) var(--space-lg);
-    }
-    
-    .tips-grid {
-        grid-template-columns: 1fr;
-        gap: var(--space-md);
-    }
-    
-    .tip-item {
-        padding: var(--space-md);
-    }
-    
-    .cta-card {
-        padding: var(--space-xl);
-    }
-    
-    .cta-content h3 {
-        font-size: 1.8rem;
-    }
-    
-    .cta-content p {
-        font-size: 1.1rem;
-    }
-    
-    .cta-actions {
-        flex-direction: column;
-        align-items: center;
-        gap: var(--space-md);
-    }
-}
-
-@media (max-width: 480px) {
-    .guide-hero-section {
-        padding: var(--space-lg);
-    }
-    
-    .guide-hero-icon {
-        font-size: 3rem;
-    }
-    
-    .guide-hero-content h2 {
-        font-size: 1.8rem;
-    }
-    
-    .guide-hero-content p {
-        font-size: 1rem;
-    }
-    
-    .workflow-enhanced {
-        padding: var(--space-lg);
-    }
-    
-    .workflow-header h3 {
-        font-size: 1.8rem;
-    }
-    
-    .workflow-header p {
-        font-size: 1rem;
-    }
-    
-    .step-enhanced-icon {
-        font-size: 2.5rem;
-    }
-    
-    .step-enhanced-content h4 {
-        font-size: 1.2rem;
-    }
-    
-    .modes-header h3 {
-        font-size: 2rem;
-    }
-    
-    .modes-header p {
-        font-size: 1rem;
-    }
-    
-    .mode-card-enhanced {
-        padding: var(--space-lg);
-    }
-    
-    .mode-card-icon {
-        font-size: 3rem;
-    }
-    
-    .mode-card-enhanced h4 {
-        font-size: 1.4rem;
-    }
-    
-    .mode-card-enhanced p {
-        font-size: 1rem;
-    }
-    
-    .faq-title {
-        font-size: 2rem;
-    }
-    
-    .faq-header p {
-        font-size: 1rem;
-    }
-    
-    .faq-question-enhanced {
-        padding: var(--space-md);
-        font-size: 1rem;
-        flex-wrap: wrap;
-    }
-    
-    .faq-text-enhanced {
-        flex: 1;
-        min-width: calc(100% - 80px);
-    }
-    
-    .tips-header h3 {
-        font-size: 1.8rem;
-    }
-    
-    .tips-header p {
-        font-size: 1rem;
-    }
-    
-    .cta-content h3 {
-        font-size: 1.6rem;
-    }
-    
-    .cta-content p {
-        font-size: 1rem;
-    }
-}
-</style>
 
 <script>
-function toggleFaqEnhanced(button) {
-    const item = button.closest('.faq-item-enhanced');
+function toggleFaq(button) {
+    const item = button.closest('.faq-item');
     const isActive = item.classList.contains('active');
     
     // Close all other items
-    document.querySelectorAll('.faq-item-enhanced').forEach(el => {
+    document.querySelectorAll('.faq-item').forEach(el => {
         el.classList.remove('active');
     });
     
