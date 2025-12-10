@@ -395,12 +395,21 @@
         </div>
     </div>
 
-    <!-- Firebase SDK Modulaire v9+ -->
+    <!-- Firebase SDK Modulaire v9+ - Configuration et Initialisation -->
     <script type="module">
         // Import des modules Firebase
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
+        import {
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword,
+            signOut,
+            sendPasswordResetEmail,
+            onAuthStateChanged,
+            GoogleAuthProvider,
+            signInWithPopup
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         
         // Configuration Firebase
         const firebaseConfig = {
@@ -418,20 +427,24 @@
         const auth = getAuth(app);
         const analytics = getAnalytics(app);
         
-        // Rendre Firebase disponible globalement pour compatibilité
+        // Rendre Firebase et les fonctions disponibles globalement pour compatibilité
         window.firebase = {
             app: app,
             auth: auth,
-            analytics: analytics
+            analytics: analytics,
+            // Fonctions modulaires exposées pour compatibilité
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword,
+            signOut,
+            sendPasswordResetEmail,
+            onAuthStateChanged,
+            GoogleAuthProvider,
+            signInWithPopup
         };
         
-        console.log('✅ Firebase SDK modulaire initialisé');
+        console.log('✅ Firebase SDK modulaire v9+ initialisé avec succès');
+        console.log('📦 Modules chargés:', Object.keys(window.firebase));
     </script>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
-    <script src="firebase-config.js"></script>
     
     <!-- ===== ORDRE DE CHARGEMENT OPTIMISÉ DES SCRIPTS ===== -->
     

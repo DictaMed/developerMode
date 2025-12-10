@@ -1,6 +1,6 @@
 /**
  * DictaMed - Système modal d'authentification
- * Version: 3.0.0 - Migration Firebase SDK modulaire
+ * Version: 4.0.0 - SDK modulaire avec UX améliorée et validation temps réel
  */
 
 // ===== AUTHENTICATION MODAL SYSTEM =====
@@ -8,11 +8,17 @@ class AuthModalSystem {
     constructor() {
         this.isOpen = false;
         this.currentMode = 'signin'; // 'signin' or 'signup'
+        this.validationTimeouts = new Map(); // Pour la validation en temps réel
+        this.passwordStrength = { score: 0, strength: 'Très faible', feedback: [] };
+        this.isValidating = false; // Pour éviter les validations concurrentes
     }
 
+    /**
+     * Initialisation du système avec validation temps réel
+     */
     init() {
         try {
-            console.log('🔧 AuthModalSystem init() started');
+            console.log('🔧 AuthModalSystem v4.0.0 init() started');
             
             // Verify DOM elements exist before initializing
             const authButton = document.getElementById('authButton');
@@ -27,12 +33,312 @@ class AuthModalSystem {
             }
             
             this.initEventListeners();
+            this.initRealTimeValidation();
+            this.initPasswordStrengthIndicator();
             
-            console.log('✅ AuthModalSystem init() completed successfully');
+            console.log('✅ AuthModalSystem v4.0.0 init() completed successfully');
             
         } catch (error) {
             console.error('❌ AuthModalSystem init() failed:', error);
             // Don't throw, just log and continue
+        }
+    }
+
+    /**
+     * Validation en temps réel des champs
+     */
+    initRealTimeValidation() {
+        const emailInput = document.getElementById('modalEmailInput');
+        const passwordInput = document.getElementById('modalPasswordInput');
+
+        if (emailInput) {
+            // Validation email en temps réel
+            emailInput.addEventListener('input', (e) => {
+                this.debounceValidation('email', () => this.validateEmail(e.target.value), 500);
+                this.updateSubmitButtonState();
+            });
+
+            emailInput.addEventListener('blur', (e) => {
+                this.validateEmail(e.target.value, true);
+                this.updateSubmitButtonState();
+            });
+        }
+
+        if (passwordInput) {
+            // Validation mot de passe en temps réel
+            passwordInput.addEventListener('input', (e) => {
+                this.updatePasswordStrength(e.target.value);
+                this.debounceValidation('password', () => this.validatePassword(e.target.value), 300);
+                this.updateSubmitButtonState();
+            });
+
+            passwordInput.addEventListener('blur', (e) => {
+                this.validatePassword(e.target.value, true);
+                this.updateSubmitButtonState();
+            });
+        }
+    }
+
+    /**
+     * Indicateur de force du mot de passe
+     */
+    initPasswordStrengthIndicator() {
+        const passwordStrengthDiv = document.getElementById('passwordStrength');
+        if (passwordStrengthDiv) {
+            passwordStrengthDiv.classList.remove('hidden');
+        }
+    }
+
+    /**
+     * Système de debouncing pour la validation
+     */
+    debounceValidation(field, validationFn, delay) {
+        // Clear existing timeout
+        if (this.validationTimeouts.has(field)) {
+            clearTimeout(this.validationTimeouts.get(field));
+        }
+
+        // Set new timeout
+        const timeout = setTimeout(() => {
+            validationFn();
+            this.validationTimeouts.delete(field);
+        }, delay);
+
+        this.validationTimeouts.set(field, timeout);
+    }
+
+    /**
+     * Validation email en temps réel
+     */
+    validateEmail(email, showFeedback = false) {
+        const emailInput = document.getElementById('modalEmailInput');
+
+        if (!emailInput) return;
+
+        // Remove existing validation classes
+        emailInput.classList.remove('valid', 'invalid');
+
+        if (!email) {
+            if (showFeedback) {
+                this.showFieldError(emailInput, 'L\'adresse email est requise');
+            }
+            return false;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isValid = emailRegex.test(email);
+
+        if (isValid) {
+            emailInput.classList.add('valid');
+            if (showFeedback) {
+                this.clearFieldError(emailInput);
+            }
+        } else {
+            emailInput.classList.add('invalid');
+            if (showFeedback) {
+                this.showFieldError(emailInput, 'Format d\'email invalide');
+            }
+        }
+
+        return isValid;
+    }
+
+    /**
+     * Validation mot de passe en temps réel
+     */
+    validatePassword(password, showFeedback = false) {
+        const passwordInput = document.getElementById('modalPasswordInput');
+
+        if (!passwordInput) return;
+
+        // Remove existing validation classes
+        passwordInput.classList.remove('valid', 'invalid');
+
+        if (!password) {
+            if (showFeedback) {
+                this.showFieldError(passwordInput, 'Le mot de passe est requis');
+            }
+            return false;
+        }
+
+        const isValid = password.length >= 6;
+
+        if (isValid) {
+            passwordInput.classList.add('valid');
+            if (showFeedback) {
+                this.clearFieldError(passwordInput);
+            }
+        } else {
+            passwordInput.classList.add('invalid');
+            if (showFeedback) {
+                this.showFieldError(passwordInput, 'Le mot de passe doit contenir au moins 6 caractères');
+            }
+        }
+
+        return isValid;
+    }
+
+    /**
+     * Mise à jour de l'indicateur de force du mot de passe
+     */
+    updatePasswordStrength(password) {
+        const authManager = FirebaseAuthManager.getInstance();
+        this.passwordStrength = authManager.evaluatePasswordStrength(password);
+        
+        const passwordStrengthDiv = document.getElementById('passwordStrength');
+        const strengthBar = passwordStrengthDiv?.querySelector('.strength-bar');
+        const strengthText = passwordStrengthDiv?.querySelector('.strength-text');
+
+        if (passwordStrengthDiv && strengthBar && strengthText) {
+            // Mettre à jour la barre de progression
+            const percentage = (this.passwordStrength.score / 5) * 100;
+            strengthBar.style.width = `${percentage}%`;
+            
+            // Mettre à jour le texte et les couleurs
+            strengthText.textContent = `Force: ${this.passwordStrength.strength}`;
+            
+            // Classes CSS pour les couleurs
+            strengthBar.className = 'strength-bar';
+            if (this.passwordStrength.score >= 4) {
+                strengthBar.classList.add('strength-strong');
+            } else if (this.passwordStrength.score >= 3) {
+                strengthBar.classList.add('strength-medium');
+            } else {
+                strengthBar.classList.add('strength-weak');
+            }
+
+            // Afficher les conseils si il y en a
+            if (this.passwordStrength.feedback.length > 0 && password.length > 0) {
+                this.showPasswordFeedback(this.passwordStrength.feedback);
+            } else {
+                this.hidePasswordFeedback();
+            }
+        }
+    }
+
+    /**
+     * Affichage des conseils pour le mot de passe
+     */
+    showPasswordFeedback(feedback) {
+        let feedbackDiv = document.getElementById('passwordFeedback');
+        if (!feedbackDiv) {
+            feedbackDiv = document.createElement('div');
+            feedbackDiv.id = 'passwordFeedback';
+            feedbackDiv.className = 'password-feedback';
+            
+            const passwordInput = document.getElementById('modalPasswordInput');
+            if (passwordInput && passwordInput.parentNode) {
+                passwordInput.parentNode.appendChild(feedbackDiv);
+            }
+        }
+
+        feedbackDiv.innerHTML = feedback.map(tip => 
+            `<div class="feedback-item">• ${tip}</div>`
+        ).join('');
+        
+        feedbackDiv.classList.remove('hidden');
+    }
+
+    /**
+     * Masquage des conseils pour le mot de passe
+     */
+    hidePasswordFeedback() {
+        const feedbackDiv = document.getElementById('passwordFeedback');
+        if (feedbackDiv) {
+            feedbackDiv.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Affichage d'erreur pour un champ spécifique
+     */
+    showFieldError(input, message) {
+        this.clearFieldError(input);
+        
+        const errorElement = document.createElement('div');
+        errorElement.className = 'field-error';
+        errorElement.textContent = message;
+        
+        input.parentNode.appendChild(errorElement);
+        input.classList.add('invalid');
+    }
+
+    /**
+     * Nettoyage d'erreur pour un champ spécifique
+     */
+    clearFieldError(input) {
+        const existingError = input.parentNode.querySelector('.field-error');
+        if (existingError) {
+            existingError.remove();
+        }
+        input.classList.remove('invalid');
+    }
+
+    /**
+     * Validation complète du formulaire
+     */
+    validateForm() {
+        const emailInput = document.getElementById('modalEmailInput');
+        const passwordInput = document.getElementById('modalPasswordInput');
+
+        if (!emailInput || !passwordInput) {
+            return { isValid: false, errors: ['Éléments du formulaire manquants'] };
+        }
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        const errors = [];
+
+        // Validation email
+        if (!email) {
+            errors.push('L\'adresse email est requise');
+        } else if (!this.validateEmail(email)) {
+            errors.push('L\'adresse email n\'est pas valide');
+        }
+
+        // Validation mot de passe
+        if (!password) {
+            errors.push('Le mot de passe est requis');
+        } else if (password.length < 6) {
+            errors.push('Le mot de passe doit contenir au moins 6 caractères');
+        }
+
+        // Validation spécifique pour l'inscription
+        if (this.currentMode === 'signup') {
+            if (this.passwordStrength.score < 2) {
+                errors.push('Le mot de passe est trop faible');
+            }
+        }
+
+        return {
+            isValid: errors.length === 0,
+            errors: errors
+        };
+    }
+
+    /**
+     * Mise à jour de l'état du bouton de soumission
+     */
+    updateSubmitButtonState() {
+        const submitBtn = document.getElementById('modalEmailSubmitBtn');
+        if (!submitBtn) return;
+
+        const validation = this.validateForm();
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnIcon = submitBtn.querySelector('.btn-icon');
+        const spinner = submitBtn.querySelector('.loading-spinner-small');
+
+        if (validation.isValid) {
+            submitBtn.disabled = false;
+            if (btnText) btnText.textContent = this.currentMode === 'signup' ? 'S\'inscrire' : 'Se connecter';
+            if (btnIcon) btnIcon.textContent = '→';
+            if (spinner) spinner.classList.add('hidden');
+        } else {
+            submitBtn.disabled = true;
+            if (btnText) btnText.textContent = 'Formulaire incomplet';
+            if (btnIcon) btnIcon.textContent = '⚠️';
+            if (spinner) spinner.classList.add('hidden');
         }
     }
 
@@ -79,11 +385,17 @@ class AuthModalSystem {
         const modalSignUpTab = document.getElementById('modalSignUpTab');
         
         if (modalSignInTab) {
-            modalSignInTab.addEventListener('click', () => this.switchMode('signin'));
+            modalSignInTab.addEventListener('click', () => {
+                this.switchMode('signin');
+                this.updateSubmitButtonState();
+            });
         }
         
         if (modalSignUpTab) {
-            modalSignUpTab.addEventListener('click', () => this.switchMode('signup'));
+            modalSignUpTab.addEventListener('click', () => {
+                this.switchMode('signup');
+                this.updateSubmitButtonState();
+            });
         }
 
         // Email form submission
@@ -133,6 +445,7 @@ class AuthModalSystem {
         }
         
         console.log(`🔄 Mode switched to: ${mode}`);
+        this.updateSubmitButtonState();
     }
 
     toggle() {
@@ -160,6 +473,9 @@ class AuthModalSystem {
             if (firstInput) {
                 setTimeout(() => firstInput.focus(), 100);
             }
+
+            // Update button state
+            this.updateSubmitButtonState();
         }
     }
 
@@ -224,10 +540,16 @@ class AuthModalSystem {
     async handleEmailAuth(event) {
         event.preventDefault();
         
+        // Validation complète avant soumission
+        const validation = this.validateForm();
+        if (!validation.isValid) {
+            this.showError(validation.errors.join('. '));
+            return;
+        }
+        
         const emailInput = document.getElementById('modalEmailInput');
         const passwordInput = document.getElementById('modalPasswordInput');
         const submitBtn = document.getElementById('modalEmailSubmitBtn');
-        const errorDiv = document.getElementById('modalAuthError');
         
         if (!emailInput || !passwordInput || !submitBtn) {
             console.warn('Required auth form elements not found');
@@ -236,11 +558,6 @@ class AuthModalSystem {
 
         const email = emailInput.value.trim();
         const password = passwordInput.value;
-
-        if (!email || !password) {
-            this.showError('Veuillez remplir tous les champs');
-            return;
-        }
 
         // Show loading state
         const btnText = submitBtn.querySelector('.btn-text');
@@ -320,6 +637,7 @@ class AuthModalSystem {
             if (btnIcon) btnIcon.textContent = '→';
             if (spinner) spinner.classList.add('hidden');
             submitBtn.disabled = false;
+            this.updateSubmitButtonState();
         }
     }
 

@@ -1,23 +1,25 @@
 /**
- * DictaMed - Gestionnaire d'authentification Firebase (SDK Compat)
- * Version: 3.0.1 - Utilisation du SDK Compat pour compatibilité maximale
+ * DictaMed - Gestionnaire d'authentification Firebase (SDK Modulaire v9+)
+ * Version: 4.0.0 - Migration complète vers SDK modulaire avec sécurité renforcée
  */
 
-// ===== FIREBASE AUTHENTICATION MANAGER =====
 class FirebaseAuthManager {
     constructor() {
         this.isInitialized = false;
         this.currentUser = null;
         this.auth = null;
+        this.rateLimitMap = new Map(); // Rate limiting par IP/email
+        this.sessionTimeout = 30 * 60 * 1000; // 30 minutes
+        this.retryAttempts = new Map(); // Retry attempts tracking
     }
 
     static init() {
         try {
-            console.log('🔧 FirebaseAuthManager init() started');
+            console.log('🔧 FirebaseAuthManager v4.0.0 init() started');
             
-            // Vérifier si Firebase est disponible
+            // Vérifier si Firebase modulaire est disponible
             if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
-                console.warn('⚠️ Firebase Auth not available - using fallback implementation');
+                console.warn('⚠️ Firebase Auth modulaire not available - using fallback implementation');
                 FirebaseAuthManager.showFallbackMessage();
                 return;
             }
@@ -26,21 +28,24 @@ class FirebaseAuthManager {
             const authManager = new FirebaseAuthManager();
             authManager.auth = window.firebase.auth;
             
-            // Configuration Firebase Auth avec SDK Compat
-            window.firebase.auth().onAuthStateChanged((user) => {
+            // Configuration Firebase Auth avec SDK modulaire
+            const { onAuthStateChanged } = window.firebase;
+            onAuthStateChanged(authManager.auth, (user) => {
                 if (user) {
                     console.log('✅ User authenticated:', user.email);
                     authManager.currentUser = user;
                     authManager.updateAuthUI(user);
+                    authManager.handleAuthSuccess(user);
                 } else {
                     console.log('ℹ️ User not authenticated');
                     authManager.currentUser = null;
                     authManager.updateAuthUI(null);
+                    authManager.handleAuthLogout();
                 }
             });
 
             authManager.isInitialized = true;
-            console.log('✅ FirebaseAuthManager init() completed');
+            console.log('✅ FirebaseAuthManager v4.0.0 init() completed');
             
             // Tester l'état d'authentification
             FirebaseAuthManager.testAuthStatus();
@@ -51,12 +56,106 @@ class FirebaseAuthManager {
         }
     }
 
+    /**
+     * Vérification de rate limiting pour éviter les attaques par force brute
+     */
+    checkRateLimit(identifier, maxAttempts = 5, timeWindow = 15 * 60 * 1000) {
+        const now = Date.now();
+        const attempts = this.rateLimitMap.get(identifier) || [];
+        
+        // Nettoyer les anciennes tentatives
+        const recentAttempts = attempts.filter(timestamp => now - timestamp < timeWindow);
+        
+        if (recentAttempts.length >= maxAttempts) {
+            const waitTime = timeWindow - (now - recentAttempts[0]);
+            throw new Error(`Trop de tentatives. Réessayez dans ${Math.ceil(waitTime / 1000)} secondes.`);
+        }
+        
+        // Ajouter la tentative actuelle
+        recentAttempts.push(now);
+        this.rateLimitMap.set(identifier, recentAttempts);
+        
+        return true;
+    }
+
+    /**
+     * Validation renforcée des données d'entrée
+     */
+    validateInput(email, password, displayName = null) {
+        const errors = [];
+
+        // Validation email
+        if (!email || typeof email !== 'string') {
+            errors.push('L\'adresse email est requise');
+        } else {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errors.push('L\'adresse email n\'est pas valide');
+            }
+        }
+
+        // Validation mot de passe
+        if (!password || typeof password !== 'string') {
+            errors.push('Le mot de passe est requis');
+        } else {
+            if (password.length < 6) {
+                errors.push('Le mot de passe doit contenir au moins 6 caractères');
+            }
+            if (password.length > 128) {
+                errors.push('Le mot de passe ne peut pas dépasser 128 caractères');
+            }
+        }
+
+        // Validation nom d'affichage (optionnel)
+        if (displayName && typeof displayName === 'string') {
+            if (displayName.length < 2 || displayName.length > 50) {
+                errors.push('Le nom d\'affichage doit contenir entre 2 et 50 caractères');
+            }
+        }
+
+        if (errors.length > 0) {
+            throw new Error(errors.join('. '));
+        }
+
+        return true;
+    }
+
+    /**
+     * Évaluation de la force du mot de passe
+     */
+    evaluatePasswordStrength(password) {
+        let score = 0;
+        const feedback = [];
+
+        if (password.length >= 8) score += 1;
+        else feedback.push('Utilisez au moins 8 caractères');
+
+        if (/[a-z]/.test(password)) score += 1;
+        else feedback.push('Ajoutez des lettres minuscules');
+
+        if (/[A-Z]/.test(password)) score += 1;
+        else feedback.push('Ajoutez des lettres majuscules');
+
+        if (/[0-9]/.test(password)) score += 1;
+        else feedback.push('Ajoutez des chiffres');
+
+        if (/[^a-zA-Z0-9]/.test(password)) score += 1;
+        else feedback.push('Ajoutez des caractères spéciaux');
+
+        let strength = 'Très faible';
+        if (score >= 4) strength = 'Fort';
+        else if (score >= 3) strength = 'Moyen';
+        else if (score >= 2) strength = 'Faible';
+
+        return { score, strength, feedback };
+    }
+
     static async testAuthStatus() {
-        console.log('🧪 Testing Firebase Auth status...');
+        console.log('🧪 Testing Firebase Auth status (Modulaire v9+)...');
         
         try {
             if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
-                console.error('❌ Firebase not available');
+                console.error('❌ Firebase modulaire not available');
                 return false;
             }
 
@@ -69,16 +168,17 @@ class FirebaseAuthManager {
             });
 
             // Test de l'authentification
-            const currentUser = window.firebase.auth().currentUser;
+            const currentUser = window.firebase.auth.currentUser;
             console.log('👤 Current user:', currentUser ? currentUser.email : 'none');
 
             // Test des providers disponibles
             try {
-                const auth = window.firebase.auth();
+                const auth = window.firebase.auth;
                 console.log('🔐 Auth methods available:', {
                     emailPassword: 'available',
                     google: 'available',
-                    currentUser: !!currentUser
+                    currentUser: !!currentUser,
+                    sdkVersion: 'modular_v9+'
                 });
             } catch (methodError) {
                 console.warn('⚠️ Some auth methods may not be available:', methodError);
@@ -101,10 +201,10 @@ class FirebaseAuthManager {
         1. Vérifiez que Firebase Auth est activé dans la console
         2. Activez le provider "Email/Password"
         3. Configurez les domaines autorisés
+        4. Assurez-vous que le SDK modulaire est correctement chargé
         `;
         console.warn(message);
         
-        // Afficher une notification si le système est disponible
         if (window.notificationSystem) {
             window.notificationSystem.info(
                 'Authentification Firebase non configurée. Certaines fonctionnalités sont limitées.',
@@ -139,10 +239,85 @@ class FirebaseAuthManager {
         }
     }
 
+    /**
+     * Gestion des événements d'authentification réussie
+     */
+    handleAuthSuccess(user) {
+        // Logger l'événement (en production, envoyer vers analytics)
+        console.log('🔐 Auth success event:', {
+            uid: user.uid,
+            email: user.email,
+            emailVerified: user.emailVerified,
+            timestamp: new Date().toISOString()
+        });
+
+        // Sauvegarder la session
+        this.saveSession(user);
+    }
+
+    /**
+     * Gestion des événements de déconnexion
+     */
+    handleAuthLogout() {
+        // Nettoyer la session
+        this.clearSession();
+        
+        // Logger l'événement
+        console.log('🚪 Auth logout event:', {
+            timestamp: new Date().toISOString()
+        });
+    }
+
+    /**
+     * Sauvegarde de session avec timeout
+     */
+    saveSession(user) {
+        const sessionData = {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            loginTime: Date.now(),
+            timeout: this.sessionTimeout
+        };
+        
+        localStorage.setItem('dictamed_session', JSON.stringify(sessionData));
+    }
+
+    /**
+     * Nettoyage de session
+     */
+    clearSession() {
+        localStorage.removeItem('dictamed_session');
+    }
+
+    /**
+     * Vérification de session expirée
+     */
+    checkSessionTimeout() {
+        const sessionData = localStorage.getItem('dictamed_session');
+        if (!sessionData) return false;
+
+        try {
+            const session = JSON.parse(sessionData);
+            const now = Date.now();
+            const sessionAge = now - session.loginTime;
+
+            if (sessionAge > session.timeout) {
+                this.clearSession();
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            this.clearSession();
+            return false;
+        }
+    }
+
     static isAuthenticated() {
         try {
             if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
-                const user = window.firebase.auth().currentUser;
+                const user = window.firebase.auth.currentUser;
                 return user !== null;
             }
             return false;
@@ -155,7 +330,7 @@ class FirebaseAuthManager {
     static getCurrentUser() {
         try {
             if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
-                const user = window.firebase.auth().currentUser;
+                const user = window.firebase.auth.currentUser;
                 if (user) {
                     return {
                         uid: user.uid,
@@ -176,11 +351,18 @@ class FirebaseAuthManager {
         try {
             console.log('🔐 Attempting sign in for:', email);
             
+            const authManager = FirebaseAuthManager.getInstance();
+            
+            // Vérifications de sécurité
+            authManager.checkRateLimit(email);
+            authManager.validateInput(email, password);
+            
             if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
                 throw new Error('Firebase Auth not available');
             }
 
-            const result = await window.firebase.auth().signInWithEmailAndPassword(email, password);
+            const { signInWithEmailAndPassword } = window.firebase;
+            const result = await signInWithEmailAndPassword(window.firebase.auth, email, password);
             console.log('✅ Sign in successful:', result.user.email);
             
             return {
@@ -201,11 +383,18 @@ class FirebaseAuthManager {
         try {
             console.log('✨ Attempting sign up for:', email);
             
+            const authManager = FirebaseAuthManager.getInstance();
+            
+            // Vérifications de sécurité
+            authManager.checkRateLimit(email);
+            authManager.validateInput(email, password, displayName);
+            
             if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
                 throw new Error('Firebase Auth not available');
             }
 
-            const result = await window.firebase.auth().createUserWithEmailAndPassword(email, password);
+            const { createUserWithEmailAndPassword } = window.firebase;
+            const result = await createUserWithEmailAndPassword(window.firebase.auth, email, password);
             const user = result.user;
 
             // Mettre à jour le profil si un nom d'affichage est fourni
@@ -259,8 +448,12 @@ class FirebaseAuthManager {
 
     static async signOut() {
         try {
+            const authManager = FirebaseAuthManager.getInstance();
+            
             if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
-                await window.firebase.auth().signOut();
+                const { signOut } = window.firebase;
+                await signOut(window.firebase.auth);
+                authManager.clearSession();
                 console.log('✅ Sign out successful');
                 return { success: true };
             }
@@ -275,11 +468,15 @@ class FirebaseAuthManager {
         try {
             console.log('🔑 Sending password reset email to:', email);
             
+            const authManager = FirebaseAuthManager.getInstance();
+            authManager.checkRateLimit(`reset_${email}`);
+            
             if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
                 throw new Error('Firebase Auth not available');
             }
 
-            await window.firebase.auth().sendPasswordResetEmail(email);
+            const { sendPasswordResetEmail } = window.firebase;
+            await sendPasswordResetEmail(window.firebase.auth, email);
             console.log('✅ Password reset email sent');
             
             return { success: true };
@@ -310,25 +507,25 @@ class FirebaseAuthManager {
     }
 
     static async checkAuthConfiguration() {
-        console.log('🔍 Checking Firebase Auth configuration...');
+        console.log('🔍 Checking Firebase Auth configuration (Modulaire v9+)...');
         
         try {
             if (typeof window.firebase === 'undefined') {
                 return {
                     isConfigured: false,
-                    error: 'Firebase SDK not loaded'
+                    error: 'Firebase SDK modulaire not loaded'
                 };
             }
 
             if (!window.firebase.auth) {
                 return {
                     isConfigured: false,
-                    error: 'Firebase Auth SDK not loaded'
+                    error: 'Firebase Auth SDK modulaire not loaded'
                 };
             }
 
             // Tester une opération simple pour vérifier la configuration
-            const auth = window.firebase.auth();
+            const auth = window.firebase.auth;
             const config = window.firebase.app.options;
             
             const authConfig = {
@@ -340,7 +537,8 @@ class FirebaseAuthManager {
                     google: true,
                     anonymous: true
                 },
-                currentUser: auth.currentUser ? auth.currentUser.email : null
+                currentUser: auth.currentUser ? auth.currentUser.email : null,
+                sdkVersion: 'modular_v9+'
             };
 
             console.log('📊 Auth configuration:', authConfig);
@@ -359,12 +557,16 @@ class FirebaseAuthManager {
         try {
             console.log('🔐 Attempting Google sign in');
             
+            const authManager = FirebaseAuthManager.getInstance();
+            authManager.checkRateLimit('google_signin');
+            
             if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
                 throw new Error('Firebase Auth not available');
             }
 
-            const provider = new window.firebase.auth.GoogleAuthProvider();
-            const result = await window.firebase.auth().signInWithPopup(provider);
+            const { GoogleAuthProvider, signInWithPopup } = window.firebase;
+            const provider = new GoogleAuthProvider();
+            const result = await signInWithPopup(window.firebase.auth, provider);
             
             console.log('✅ Google sign in successful:', result.user.email);
             
@@ -396,6 +598,16 @@ class FirebaseAuthManager {
                 code: error.code
             };
         }
+    }
+
+    /**
+     * Singleton pattern pour obtenir l'instance
+     */
+    static getInstance() {
+        if (!this.instance) {
+            this.instance = new FirebaseAuthManager();
+        }
+        return this.instance;
     }
 }
 
