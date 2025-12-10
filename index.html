@@ -395,6 +395,38 @@
         </div>
     </div>
 
+    <!-- Firebase SDK Modulaire v9+ -->
+    <script type="module">
+        // Import des modules Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
+        
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9XYvHxbp3VW0PCW0W7xfoWuiMxsjoUZE",
+            authDomain: "dictamed2025.firebaseapp.com",
+            projectId: "dictamed2025",
+            storageBucket: "dictamed2025.firebasestorage.app",
+            messagingSenderId: "242034923776",
+            appId: "1:242034923776:web:bd315e890c715b1d263be5",
+            measurementId: "G-1B8DZ4B73R"
+        };
+        
+        // Initialisation Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const analytics = getAnalytics(app);
+        
+        // Rendre Firebase disponible globalement pour compatibilité
+        window.firebase = {
+            app: app,
+            auth: auth,
+            analytics: analytics
+        };
+        
+        console.log('✅ Firebase SDK modulaire initialisé');
+    </script>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>

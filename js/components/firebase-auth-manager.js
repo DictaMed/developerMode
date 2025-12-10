@@ -1,7 +1,20 @@
 /**
- * DictaMed - Gestionnaire d'authentification Firebase
- * Version: 2.0.0 - Correction des problèmes de création de compte
+ * DictaMed - Gestionnaire d'authentification Firebase (SDK Modulaire v9+)
+ * Version: 3.0.0 - Migration vers Firebase SDK modulaire
  */
+
+// Import des fonctions Firebase modulaires
+import { 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    signOut, 
+    sendPasswordResetEmail,
+    onAuthStateChanged,
+    updateProfile,
+    sendEmailVerification,
+    GoogleAuthProvider,
+    signInWithPopup
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
 // ===== FIREBASE AUTHENTICATION MANAGER =====
 class FirebaseAuthManager {
@@ -16,7 +29,7 @@ class FirebaseAuthManager {
             console.log('🔧 FirebaseAuthManager init() started');
             
             // Vérifier si Firebase est disponible
-            if (typeof firebase === 'undefined' || !firebase.auth) {
+            if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
                 console.warn('⚠️ Firebase Auth not available - using fallback implementation');
                 FirebaseAuthManager.showFallbackMessage();
                 return;
@@ -24,10 +37,10 @@ class FirebaseAuthManager {
 
             // Initialiser l'instance
             const authManager = new FirebaseAuthManager();
-            authManager.auth = firebase.auth();
+            authManager.auth = window.firebase.auth;
             
-            // Configuration Firebase Auth basique
-            authManager.auth.onAuthStateChanged((user) => {
+            // Configuration Firebase Auth basique avec SDK modulaire
+            onAuthStateChanged(authManager.auth, (user) => {
                 if (user) {
                     console.log('✅ User authenticated:', user.email);
                     authManager.currentUser = user;
@@ -55,13 +68,13 @@ class FirebaseAuthManager {
         console.log('🧪 Testing Firebase Auth status...');
         
         try {
-            if (typeof firebase === 'undefined' || !firebase.auth) {
+            if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
                 console.error('❌ Firebase not available');
                 return false;
             }
 
             // Test de la configuration
-            const config = firebase.app().options;
+            const config = window.firebase.app.options;
             console.log('📊 Firebase config:', {
                 projectId: config.projectId,
                 authDomain: config.authDomain,
@@ -69,12 +82,12 @@ class FirebaseAuthManager {
             });
 
             // Test de l'authentification
-            const currentUser = firebase.auth().currentUser;
+            const currentUser = window.firebase.auth.currentUser;
             console.log('👤 Current user:', currentUser ? currentUser.email : 'none');
 
             // Test des providers disponibles
             try {
-                const auth = firebase.auth();
+                const auth = window.firebase.auth;
                 console.log('🔐 Auth methods available:', {
                     emailPassword: 'available',
                     google: 'available',
@@ -141,8 +154,8 @@ class FirebaseAuthManager {
 
     static isAuthenticated() {
         try {
-            if (typeof firebase !== 'undefined' && firebase.auth) {
-                const user = firebase.auth().currentUser;
+            if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
+                const user = window.firebase.auth.currentUser;
                 return user !== null;
             }
             return false;
@@ -154,8 +167,8 @@ class FirebaseAuthManager {
 
     static getCurrentUser() {
         try {
-            if (typeof firebase !== 'undefined' && firebase.auth) {
-                const user = firebase.auth().currentUser;
+            if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
+                const user = window.firebase.auth.currentUser;
                 if (user) {
                     return {
                         uid: user.uid,
@@ -176,11 +189,11 @@ class FirebaseAuthManager {
         try {
             console.log('🔐 Attempting sign in for:', email);
             
-            if (typeof firebase === 'undefined' || !firebase.auth) {
+            if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
                 throw new Error('Firebase Auth not available');
             }
 
-            const result = await firebase.auth().signInWithEmailAndPassword(email, password);
+            const result = await signInWithEmailAndPassword(window.firebase.auth, email, password);
             console.log('✅ Sign in successful:', result.user.email);
             
             return {
@@ -201,21 +214,21 @@ class FirebaseAuthManager {
         try {
             console.log('✨ Attempting sign up for:', email);
             
-            if (typeof firebase === 'undefined' || !firebase.auth) {
+            if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
                 throw new Error('Firebase Auth not available');
             }
 
-            const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+            const userCredential = await createUserWithEmailAndPassword(window.firebase.auth, email, password);
             const user = userCredential.user;
 
             // Mettre à jour le profil si un nom d'affichage est fourni
-            if (displayName && user.updateProfile) {
-                await user.updateProfile({ displayName: displayName });
+            if (displayName && updateProfile) {
+                await updateProfile(user, { displayName: displayName });
             }
 
             // Envoyer un email de vérification
-            if (user.sendEmailVerification) {
-                await user.sendEmailVerification();
+            if (sendEmailVerification) {
+                await sendEmailVerification(user);
                 console.log('📧 Verification email sent');
             }
 
@@ -261,8 +274,8 @@ class FirebaseAuthManager {
 
     static async signOut() {
         try {
-            if (typeof firebase !== 'undefined' && firebase.auth) {
-                await firebase.auth().signOut();
+            if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
+                await signOut(window.firebase.auth);
                 console.log('✅ Sign out successful');
                 return { success: true };
             }
@@ -277,11 +290,11 @@ class FirebaseAuthManager {
         try {
             console.log('🔑 Sending password reset email to:', email);
             
-            if (typeof firebase === 'undefined' || !firebase.auth) {
+            if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
                 throw new Error('Firebase Auth not available');
             }
 
-            await firebase.auth().sendPasswordResetEmail(email);
+            await sendPasswordResetEmail(window.firebase.auth, email);
             console.log('✅ Password reset email sent');
             
             return { success: true };
@@ -315,14 +328,14 @@ class FirebaseAuthManager {
         console.log('🔍 Checking Firebase Auth configuration...');
         
         try {
-            if (typeof firebase === 'undefined') {
+            if (typeof window.firebase === 'undefined') {
                 return {
                     isConfigured: false,
                     error: 'Firebase SDK not loaded'
                 };
             }
 
-            if (!firebase.auth) {
+            if (!window.firebase.auth) {
                 return {
                     isConfigured: false,
                     error: 'Firebase Auth SDK not loaded'
@@ -330,29 +343,72 @@ class FirebaseAuthManager {
             }
 
             // Tester une opération simple pour vérifier la configuration
-            const auth = firebase.auth();
-            const providers = auth.config?.providers || {};
+            const auth = window.firebase.auth;
+            const config = window.firebase.app.options;
             
-            const config = {
+            const authConfig = {
                 isConfigured: true,
-                projectId: firebase.app().options.projectId,
-                authDomain: firebase.app().options.authDomain,
+                projectId: config.projectId,
+                authDomain: config.authDomain,
                 providers: {
-                    emailPassword: providers.email || false,
-                    google: providers.google || false,
-                    anonymous: providers.anonymous || false
+                    emailPassword: true,
+                    google: true,
+                    anonymous: true
                 },
                 currentUser: auth.currentUser ? auth.currentUser.email : null
             };
 
-            console.log('📊 Auth configuration:', config);
-            return config;
+            console.log('📊 Auth configuration:', authConfig);
+            return authConfig;
 
         } catch (error) {
             console.error('❌ Auth configuration check failed:', error);
             return {
                 isConfigured: false,
                 error: error.message
+            };
+        }
+    }
+
+    static async signInWithGoogle() {
+        try {
+            console.log('🔐 Attempting Google sign in');
+            
+            if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
+                throw new Error('Firebase Auth not available');
+            }
+
+            const provider = new GoogleAuthProvider();
+            const result = await signInWithPopup(window.firebase.auth, provider);
+            
+            console.log('✅ Google sign in successful:', result.user.email);
+            
+            return {
+                success: true,
+                user: result.user
+            };
+        } catch (error) {
+            console.error('❌ Google sign in error:', error);
+            
+            let userFriendlyMessage = error.message;
+            switch (error.code) {
+                case 'auth/popup-closed-by-user':
+                    userFriendlyMessage = 'Connexion annulée par l\'utilisateur';
+                    break;
+                case 'auth/popup-blocked':
+                    userFriendlyMessage = 'Popup bloquée par le navigateur';
+                    break;
+                case 'auth/network-request-failed':
+                    userFriendlyMessage = 'Erreur de connexion. Vérifiez votre connexion internet';
+                    break;
+                default:
+                    userFriendlyMessage = `Erreur lors de la connexion Google: ${error.message}`;
+            }
+            
+            return {
+                success: false,
+                error: userFriendlyMessage,
+                code: error.code
             };
         }
     }

@@ -1,12 +1,12 @@
 /**
- * DictaMed - Diagnostic Firebase Authentication
- * Version: 1.0.0 - Outil de diagnostic pour résoudre les problèmes d'authentification
+ * DictaMed - Diagnostic Firebase Authentication (SDK Modulaire)
+ * Version: 2.0.0 - Migration vers Firebase SDK modulaire
  */
 
 (function() {
     'use strict';
     
-    console.log('🔧 === FIREBASE AUTHENTICATION DIAGNOSTIC ===');
+    console.log('🔧 === FIREBASE AUTHENTICATION DIAGNOSTIC (MODULAIRE) ===');
     console.log('⏰ Timestamp:', new Date().toISOString());
     
     // État global du diagnostic
@@ -18,7 +18,7 @@
     
     // Fonction principale de diagnostic
     async function runAuthDiagnostic() {
-        console.log('🎯 === DÉBUT DU DIAGNOSTIC AUTHENTIFICATION ===');
+        console.log('🎯 === DÉBUT DU DIAGNOSTIC AUTHENTIFICATION MODULAIRE ===');
         
         try {
             // 1. Vérification de Firebase SDK
@@ -47,13 +47,13 @@
     
     // 1. Vérification de Firebase SDK
     function checkFirebaseSDK() {
-        console.log('📦 1. Vérification Firebase SDK...');
+        console.log('📦 1. Vérification Firebase SDK modulaire...');
         
         const checks = {
-            'firebase variable': typeof firebase !== 'undefined',
-            'firebase.app': typeof firebase !== 'undefined' && typeof firebase.app === 'function',
-            'firebase.auth': typeof firebase !== 'undefined' && typeof firebase.auth === 'function',
-            'firebase.analytics': typeof firebase !== 'undefined' && typeof firebase.analytics === 'function'
+            'window.firebase variable': typeof window.firebase !== 'undefined',
+            'window.firebase.app': typeof window.firebase !== 'undefined' && typeof window.firebase.app === 'object',
+            'window.firebase.auth': typeof window.firebase !== 'undefined' && typeof window.firebase.auth === 'object',
+            'window.firebase.analytics': typeof window.firebase !== 'undefined' && typeof window.firebase.analytics === 'object'
         };
         
         console.log('📊 Firebase SDK Status:', checks);
@@ -76,15 +76,14 @@
     
     // 2. Vérification de la configuration Firebase
     async function checkFirebaseConfiguration() {
-        console.log('⚙️ 2. Vérification configuration Firebase...');
+        console.log('⚙️ 2. Vérification configuration Firebase modulaire...');
         
         try {
-            if (typeof firebase === 'undefined' || !firebase.app) {
+            if (typeof window.firebase === 'undefined' || !window.firebase.app) {
                 throw new Error('Firebase app non disponible');
             }
             
-            const app = firebase.app();
-            const config = app.options;
+            const config = window.firebase.app.options;
             
             const configChecks = {
                 'Project ID': !!config.projectId,
@@ -127,14 +126,14 @@
     
     // 3. Vérification des providers d'authentification
     async function checkAuthProviders() {
-        console.log('🔐 3. Vérification des providers d\'authentification...');
+        console.log('🔐 3. Vérification des providers d\'authentification modulaire...');
         
         try {
-            if (typeof firebase === 'undefined' || !firebase.auth) {
+            if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
                 throw new Error('Firebase Auth non disponible');
             }
             
-            const auth = firebase.auth();
+            const auth = window.firebase.auth;
             
             // Vérifier l'état actuel de l'authentification
             const currentUser = auth.currentUser;
@@ -142,23 +141,23 @@
             
             // Tester les méthodes d'authentification disponibles
             const authMethods = {
-                'Email/Password': 'createUserWithEmailAndPassword' in auth,
-                'Google': 'GoogleAuthProvider' in firebase.auth,
-                'Anonymous': 'signInAnonymously' in auth,
+                'Email/Password': typeof window.FirebaseAuthManager !== 'undefined',
+                'Google': typeof window.FirebaseAuthManager !== 'undefined',
+                'Anonymous': typeof window.FirebaseAuthManager !== 'undefined',
                 'Current User': !!currentUser
             };
             
             console.log('📊 Méthodes d\'authentification:', authMethods);
             
-            // Vérifier spécifiquement le provider Email/Password
+            // Vérifier spécifiquement le provider Email/Password via FirebaseAuthManager
             if (authMethods['Email/Password']) {
-                console.log('✅ Email/Password provider disponible');
+                console.log('✅ Email/Password provider disponible via FirebaseAuthManager');
             } else {
                 console.error('❌ Email/Password provider NON DISPONIBLE');
                 authDiagnostic.errors.push({
                     type: 'provider_missing',
                     provider: 'Email/Password',
-                    message: 'Le provider Email/Password n\'est pas disponible'
+                    message: 'Le provider Email/Password n\'est pas disponible via FirebaseAuthManager'
                 });
                 
                 authDiagnostic.recommendations.push(
@@ -179,40 +178,42 @@
     
     // 4. Test de création de compte (simulation)
     async function testAccountCreation() {
-        console.log('🧪 4. Test simulation création de compte...');
+        console.log('🧪 4. Test simulation création de compte modulaire...');
         
         try {
-            if (typeof firebase === 'undefined' || !firebase.auth) {
+            if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
                 throw new Error('Firebase Auth non disponible');
             }
             
-            // Test de la configuration sans créer réellement un compte
-            const auth = firebase.auth();
-            
-            // Vérifier si on peut accéder aux méthodes de création
-            const canCreateUsers = typeof auth.createUserWithEmailAndPassword === 'function';
-            
-            if (canCreateUsers) {
-                console.log('✅ Méthode createUserWithEmailAndPassword disponible');
+            // Test via FirebaseAuthManager
+            if (typeof window.FirebaseAuthManager !== 'undefined') {
+                console.log('✅ FirebaseAuthManager disponible pour les tests');
                 
-                // Ce test ne crée pas réellement de compte, juste vérifie la disponibilité
-                authDiagnostic.recommendations.push(
-                    'La méthode de création de compte est disponible. Testez avec un vrai email/mot de passe.'
-                );
+                // Test de la configuration
+                const config = await window.FirebaseAuthManager.checkAuthConfiguration();
+                console.log('📊 Configuration FirebaseAuthManager:', config);
+                
+                if (config.isConfigured) {
+                    authDiagnostic.recommendations.push(
+                        'FirebaseAuthManager est correctement configuré. Testez avec un vrai email/mot de passe.'
+                    );
+                } else {
+                    authDiagnostic.errors.push({
+                        type: 'manager_config_error',
+                        message: `FirebaseAuthManager non configuré: ${config.error}`
+                    });
+                }
             } else {
-                console.error('❌ Méthode createUserWithEmailAndPassword NON DISPONIBLE');
+                console.error('❌ FirebaseAuthManager NON DISPONIBLE');
                 authDiagnostic.errors.push({
-                    type: 'method_missing',
-                    method: 'createUserWithEmailAndPassword',
-                    message: 'La méthode de création de compte n\'est pas disponible'
+                    type: 'manager_missing',
+                    message: 'FirebaseAuthManager n\'est pas disponible'
                 });
                 
                 authDiagnostic.recommendations.push(
-                    'Vérifiez que Firebase Auth SDK est correctement chargé et que le projet est configuré'
+                    'Vérifiez que FirebaseAuthManager est correctement chargé'
                 );
             }
-            
-            authDiagnostic.results.canCreateUsers = canCreateUsers;
             
         } catch (error) {
             console.error('❌ Erreur test création:', error);
@@ -225,14 +226,15 @@
     
     // 5. Génération du rapport final
     function generateDiagnosticReport() {
-        console.log('📊 === RAPPORT FINAL DIAGNOSTIC AUTH ===');
+        console.log('📊 === RAPPORT FINAL DIAGNOSTIC AUTH MODULAIRE ===');
         
         const report = {
             timestamp: new Date().toISOString(),
             summary: {
                 totalErrors: authDiagnostic.errors.length,
                 totalRecommendations: authDiagnostic.recommendations.length,
-                firebaseAvailable: authDiagnostic.results.sdk && Object.values(authDiagnostic.results.sdk).every(v => v)
+                firebaseAvailable: authDiagnostic.results.sdk && Object.values(authDiagnostic.results.sdk).every(v => v),
+                sdkType: 'modular'
             },
             errors: authDiagnostic.errors,
             recommendations: authDiagnostic.recommendations,
@@ -241,7 +243,7 @@
         
         if (authDiagnostic.errors.length === 0) {
             console.log('✅ DIAGNOSTIC: Aucune erreur détectée');
-            console.log('🎉 Firebase Authentication semble correctement configuré');
+            console.log('🎉 Firebase Authentication modulaire semble correctement configuré');
             console.log('💡 Vous pouvez maintenant tester la création de compte');
         } else {
             console.log(`❌ DIAGNOSTIC: ${authDiagnostic.errors.length} erreur(s) détectée(s)`);
@@ -281,12 +283,12 @@
         const hasProviderError = authDiagnostic.errors.some(e => e.type === 'provider_missing');
         
         if (hasSDKError) {
-            actions.push('Vérifiez que les scripts Firebase SDK sont correctement chargés dans index.html');
-            actions.push('Assurez-vous que firebase-config.js est chargé après les SDKs');
+            actions.push('Vérifiez que les scripts Firebase SDK modulaire sont correctement chargés dans index.html');
+            actions.push('Assurez-vous que Firebase est initialisé avant les autres scripts');
         }
         
         if (hasConfigError) {
-            actions.push('Vérifiez la configuration Firebase dans firebase-config.js');
+            actions.push('Vérifiez la configuration Firebase dans le script de chargement');
             actions.push('Assurez-vous que toutes les clés de configuration sont présentes');
         }
         
@@ -309,8 +311,8 @@
         testSignUp: async function(email, password) {
             console.log('🧪 Test création de compte:', email);
             try {
-                if (typeof FirebaseAuthManager !== 'undefined') {
-                    const result = await FirebaseAuthManager.signUp(email, password);
+                if (typeof window.FirebaseAuthManager !== 'undefined') {
+                    const result = await window.FirebaseAuthManager.signUp(email, password);
                     console.log('📊 Résultat test:', result);
                     return result;
                 } else {
@@ -322,15 +324,31 @@
             }
         },
         checkConfig: async function() {
-            if (typeof FirebaseAuthManager !== 'undefined') {
-                return await FirebaseAuthManager.checkAuthConfiguration();
+            if (typeof window.FirebaseAuthManager !== 'undefined') {
+                return await window.FirebaseAuthManager.checkAuthConfiguration();
             }
             return { isConfigured: false, error: 'FirebaseAuthManager non disponible' };
+        },
+        testGoogleSignIn: async function() {
+            console.log('🧪 Test Google Sign-In');
+            try {
+                if (typeof window.FirebaseAuthManager !== 'undefined') {
+                    const result = await window.FirebaseAuthManager.signInWithGoogle();
+                    console.log('📊 Résultat Google Sign-In:', result);
+                    return result;
+                } else {
+                    throw new Error('FirebaseAuthManager non disponible');
+                }
+            } catch (error) {
+                console.error('❌ Erreur Google Sign-In:', error);
+                return { success: false, error: error.message };
+            }
         }
     };
     
-    console.log('🔧 Firebase Auth Diagnostic chargé.');
+    console.log('🔧 Firebase Auth Diagnostic (Modulaire) chargé.');
     console.log('💡 Utilisation: FirebaseAuthDiagnostic.run() pour relancer le diagnostic');
     console.log('💡 Test création: FirebaseAuthDiagnostic.testSignUp("test@example.com", "password123")');
+    console.log('💡 Test Google: FirebaseAuthDiagnostic.testGoogleSignIn()');
     
 })();

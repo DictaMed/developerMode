@@ -1,6 +1,6 @@
 /**
  * DictaMed - Système modal d'authentification
- * Version: 2.1.0 - Correction des problèmes de création de compte
+ * Version: 3.0.0 - Migration Firebase SDK modulaire
  */
 
 // ===== AUTHENTICATION MODAL SYSTEM =====
@@ -325,20 +325,17 @@ class AuthModalSystem {
 
     async handleGoogleSignIn() {
         try {
-            if (typeof firebase === 'undefined' || !firebase.auth) {
-                this.showError('Firebase Auth n\'est pas disponible');
-                return;
-            }
-
-            const provider = new firebase.auth.GoogleAuthProvider();
-            const result = await firebase.auth().signInWithPopup(provider);
+            // Utiliser FirebaseAuthManager pour Google Sign-In
+            const result = await FirebaseAuthManager.signInWithGoogle();
             
-            if (result.user) {
+            if (result.success) {
                 this.showSuccess('Connexion réussie avec Google!');
                 setTimeout(() => {
                     this.close();
                     this.updateAuthButton();
                 }, 1500);
+            } else {
+                this.showError(result.error || 'Erreur lors de la connexion avec Google');
             }
         } catch (error) {
             console.error('Google sign in error:', error);
