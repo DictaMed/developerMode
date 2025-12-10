@@ -24,14 +24,31 @@ class FirebaseAuthManager {
             firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
                     console.log('✅ User authenticated:', user.email);
+                    this.updateAuthUI(user);
                 } else {
                     console.log('ℹ️ User not authenticated');
+                    this.updateAuthUI(null);
                 }
             });
 
             console.log('✅ FirebaseAuthManager (temporary) init() completed');
         } catch (error) {
             console.error('❌ FirebaseAuthManager init() failed:', error);
+        }
+    }
+
+    static updateAuthUI(user) {
+        const authButton = document.getElementById('authButton');
+        const authButtonText = document.getElementById('authButtonText');
+        
+        if (authButton && authButtonText) {
+            if (user) {
+                authButtonText.textContent = user.displayName || user.email || 'Connecté';
+                authButton.classList.add('authenticated');
+            } else {
+                authButtonText.textContent = 'Connexion';
+                authButton.classList.remove('authenticated');
+            }
         }
     }
 

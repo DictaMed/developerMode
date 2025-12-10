@@ -292,13 +292,35 @@ class DataSender {
     }
 
     async sendToEndpoint(data, mode) {
-        const endpoint = window.APP_CONFIG?.ENDPOINTS?.[mode];
+        let endpoint;
         
-        if (!endpoint) {
-            throw new Error(`Endpoint non configuré pour le mode: ${mode}`);
-        }
-
         try {
+            // Récupérer l'utilisateur actuel
+            const currentUser = window.FirebaseAuthManager?.getCurrentUser();
+            const userId = currentUser?.uid;
+            
+            if (userId) {
+                console.log(`DataSender: Retrieving webhook for user ${userId} in mode ${mode}`);
+                
+                // Précharger les webhooks pour cet utilisateur si pas déjà fait
+                if (window.WebhookManager && !this.webhooksPreloaded) {
+                    window.WebhookManager.preloadUserWebhooks(userId);
+                    this.webhooksPreloaded = true;
+                }
+                
+                // Récupérer le webhook dynamique
+                endpoint = await window.WebhookManager.getUserWebhook(userId, mode);
+            } else {
+                console.log('DataSender: No authenticated user, using default endpoint');
+                endpoint = window.WebhookManager?.getDefaultEndpoint(mode) ||
+                          window.APP_CONFIG?.FALLBACK_ENDPOINTS?.[mode] ||
+                          window.APP_CONFIG?.ENDPOINTS?.[mode];
+            }
+            
+            if (!endpoint) {
+                throw new Error(`Endpoint non configuré pour le mode: ${mode}`);
+            }
+
             console.log(`Envoi des données vers: ${endpoint}`);
             
             // For demo purposes, we'll simulate the API call
@@ -308,6 +330,21 @@ class DataSender {
             return response;
         } catch (error) {
             console.error('Erreur lors de l\'envoi vers l\'endpoint:', error);
+            
+            // Essayer avec l'endpoint de fallback en cas d'erreur
+            if (endpoint !== (window.APP_CONFIG?.FALLBACK_ENDPOINTS?.[mode])) {
+                console.log('DataSender: Retrying with fallback endpoint');
+                try {
+                    const fallbackEndpoint = window.APP_CONFIG?.FALLBACK_ENDPOINTS?.[mode];
+                    if (fallbackEndpoint) {
+                        const response = await this.simulateApiCall(data, fallbackEndpoint);
+                        return response;
+                    }
+                } catch (fallbackError) {
+                    console.error('Erreur avec l\'endpoint de fallback:', fallbackError);
+                }
+            }
+            
             throw new Error('Erreur réseau: ' + error.message);
         }
     }

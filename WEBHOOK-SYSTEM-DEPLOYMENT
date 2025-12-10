@@ -1,0 +1,326 @@
+# 🎯 Guide de Déploiement - Système de Webhooks Uniques par Utilisateur DictaMed
+
+## 📋 Vue d'Ensemble
+
+Ce guide décrit le déploiement complet du système de webhooks uniques par utilisateur pour DictaMed. Chaque utilisateur authentifié aura maintenant un webhook personnalisé assigné par l'administrateur.
+
+## 🔧 Prérequis
+
+### Firebase Configuration
+- Projet Firebase `dictamed-2025` configuré
+- Firebase Authentication activé
+- Firestore Database activé
+- Règles de sécurité déployées
+
+### Code Déployé
+- ✅ `js/components/webhook-manager.js` - Gestionnaire de webhooks
+- ✅ `js/core/config.js` - Configuration mise à jour
+- ✅ `js/components/data-sender.js` - Envoi dynamique
+- ✅ `firestore.rules` - Règles de sécurité
+- ✅ `webhook-admin.js` - Script d'administration
+
+## 🚀 Étapes de Déploiement
+
+### Phase 1 : Configuration Firebase (30 minutes)
+
+#### 1.1 Activer Firestore Database
+```bash
+# Via la console Firebase
+1. Aller sur console.firebase.google.com
+2. Sélectionner le projet dictamed-2025
+3. Firestore Database > Créer une base de données
+4. Mode Production
+5. Localisation: europe-west (France)
+```
+
+#### 1.2 Déployer les Règles de Sécurité
+```bash
+# Utiliser Firebase CLI
+firebase deploy --only firestore:rules
+
+# Ou via la console Firebase
+# Firestore Database > Règles > Coller le contenu de firestore.rules > Publier
+```
+
+#### 1.3 Vérifier la Configuration
+```javascript
+// Tester dans la console Firebase
+firebase.firestore().collection('userWebhooks').doc('test').set({
+    webhookUrl: 'https://example.com/test',
+    isActive: true,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+});
+```
+
+### Phase 2 : Déploiement du Code (15 minutes)
+
+#### 2.1 Copier les Fichiers
+```bash
+# Assurer que tous les fichiers sont présents:
+js/components/webhook-manager.js
+js/core/config.js (mis à jour)
+js/components/data-sender.js (mis à jour)
+webhook-admin.js (pour l'admin)
+```
+
+#### 2.2 Vérifier l'Inclusion dans l'Application
+```html
+<!-- Ajouter dans index.html si pas déjà présent -->
+<script src="js/components/webhook-manager.js"></script>
+```
+
+#### 2.3 Tester en Mode Développement
+```javascript
+// Dans la console du navigateur
+console.log('WebhookManager disponible:', typeof WebhookManager);
+console.log('Configuration:', window.APP_CONFIG);
+```
+
+### Phase 3 : Configuration des Utilisateurs (45 minutes)
+
+#### 3.1 Accéder au Script d'Administration
+```javascript
+// Dans la console Firebase > Functions > Logs
+// Ou créer une page d'administration temporaire
+<script src="webhook-admin.js"></script>
+<script>
+    // Charger le script d'admin
+    WebhookAdmin.showUsageInstructions();
+</script>
+```
+
+#### 3.2 Identifier les Utilisateurs Actuels
+```javascript
+// Lister tous les utilisateurs
+const users = await firebase.auth().listUsers();
+console.log('Utilisateurs trouvés:', users.users.length);
+
+// Ou utiliser la console Firebase
+// Authentication > Users
+```
+
+#### 3.3 Assigner les Webhooks
+```javascript
+// Exemple: Assigner les webhooks par défaut à un utilisateur
+await WebhookAdmin.assignDefaultWebhooks('USER_UID_HERE', 'Médecin - Cabinet principal');
+
+// Ou webhooks personnalisés
+await WebhookAdmin.assignWebhookToUser(
+    'USER_UID_HERE',
+    'https://n8n.srv1104707.hstgr.cloud/webhook/DrMartinCabinet',
+    true,
+    'Dr. Martin - Cabinet principal'
+);
+```
+
+#### 3.4 Migration en Lot (si nécessaire)
+```javascript
+// Pour migrer tous les utilisateurs existants
+const usersWithoutWebhooks = await WebhookAdmin.findUsersWithoutWebhooks();
+if (usersWithoutWebhooks.success) {
+    await WebhookAdmin.batchAssignDefaultWebhooks(
+        usersWithoutWebhooks.usersWithoutWebhooks,
+        'Migration automatique'
+    );
+}
+```
+
+### Phase 4 : Tests et Validation (30 minutes)
+
+#### 4.1 Test avec Utilisateur Pilote
+```javascript
+// 1. Se connecter avec un utilisateur de test
+// 2. Vérifier les logs dans la console
+console.log('Webhook récupéré:', await WebhookManager.getUserWebhook('USER_UID', 'test'));
+
+// 3. Tester l'envoi de données
+// 4. Vérifier les logs Firebase pour les mises à jour lastUsed
+```
+
+#### 4.2 Validation des Fallbacks
+```javascript
+// Tester avec un utilisateur sans webhook
+const userWithoutWebhook = 'FAKE_USER_ID';
+const endpoint = await WebhookManager.getUserWebhook(userWithoutWebhook, 'test');
+console.log('Fallback endpoint:', endpoint);
+```
+
+#### 4.3 Monitoring des Erreurs
+```javascript
+// Vérifier les logs en temps réel
+firebase.firestore().collection('userWebhooks').onSnapshot(snapshot => {
+    snapshot.docChanges().forEach(change => {
+        if (change.type === 'modified') {
+            console.log('Webhook mis à jour:', change.doc.id, change.doc.data());
+        }
+    });
+});
+```
+
+## 📊 Fonctionnalités Implémentées
+
+### ✅ WebhookManager
+- **Récupération dynamique** des webhooks par utilisateur et mode
+- **Cache intelligent** avec expiration (5 minutes)
+- **Validation des URLs** (HTTPS obligatoire)
+- **Fallback automatique** vers endpoints par défaut
+- **Mise à jour des statistiques** d'utilisation
+
+### ✅ Sécurité Firestore
+- **Accès utilisateur limité** à son propre webhook uniquement
+- **Validation des données** côté serveur
+- **Champs contrôlés** pour modification
+- **HTTPS obligatoire** pour les webhooks
+
+### ✅ Administration
+- **Assignation individuelle** ou en lot
+- **Gestion des statuts** actif/inactif
+- **Statistiques d'utilisation** et logs
+- **Export/Import** des configurations
+- **Validation** des URLs avant assignment
+
+### ✅ Compatibilité
+- **Migration transparente** depuis endpoints fixes
+- **Fallback robuste** en cas d'erreur
+- **Pas d'impact utilisateur** - expérience identique
+- **Performance optimisée** avec cache
+
+## 🔍 Surveillance et Maintenance
+
+### Métriques Clés
+```javascript
+// Obtenir les statistiques du cache
+const cacheStats = WebhookManager.getCacheStats();
+console.log('Cache stats:', cacheStats);
+
+// Nettoyer le cache expiré
+const cleaned = WebhookManager.cleanupExpiredCache();
+console.log('Entrées nettoyées:', cleaned);
+```
+
+### Alertes Recommandées
+- **Webhook inactif** détecté
+- **Erreur de récupération** webhook
+- **Utilisation anormale** (trop de requêtes)
+- **URLs invalides** assignées
+
+### Maintenance Régulière
+```javascript
+// Nettoyage hebdomadaire du cache
+setInterval(() => {
+    WebhookManager.cleanupExpiredCache();
+}, 7 * 24 * 60 * 60 * 1000);
+
+// Export mensuel des webhooks
+const exportData = await WebhookAdmin.exportWebhooks();
+```
+
+## 🛠️ Dépannage
+
+### Problèmes Courants
+
+#### 1. Webhook non trouvé
+```javascript
+// Vérifier la configuration Firestore
+const doc = await firebase.firestore().collection('userWebhooks').doc('USER_ID').get();
+if (!doc.exists) {
+    console.log('Aucun webhook configuré pour cet utilisateur');
+}
+```
+
+#### 2. Erreur de permission
+```
+// Vérifier les règles Firestore
+// Firestore Database > Règles > Tester avec le simulateur
+```
+
+#### 3. Performance dégradée
+```javascript
+// Vérifier le cache
+const stats = WebhookManager.getCacheStats();
+if (stats.expiredEntries > stats.validEntries) {
+    WebhookManager.cleanupExpiredCache();
+}
+```
+
+### Logs de Débogage
+```javascript
+// Activer les logs détaillés
+localStorage.setItem('webhook-debug', 'true');
+
+// Dans WebhookManager, vérifier les logs console
+console.log('WebhookManager: Debug mode enabled');
+```
+
+## 📋 Checklist de Déploiement
+
+### Avant le Déploiement
+- [ ] Firebase project configuré
+- [ ] Firestore activé
+- [ ] Code testé en développement
+- [ ] Règles de sécurité validées
+- [ ] Utilisateurs identifiés
+
+### Pendant le Déploiement
+- [ ] Règles Firestore déployées
+- [ ] Code mis en production
+- [ ] Script d'admin chargé
+- [ ] Webhooks assignés aux utilisateurs pilotes
+- [ ] Tests fonctionnels validés
+
+### Après le Déploiement
+- [ ] Migration complète des utilisateurs
+- [ ] Monitoring activé
+- [ ] Documentation utilisateur mise à jour
+- [ ] Formation administrateur terminée
+- [ ] Plan de rollback défini
+
+## 🔄 Plan de Rollback
+
+En cas de problème, revenir au système précédent :
+
+### 1. Désactiver temporairement le WebhookManager
+```javascript
+// Dans config.js, remettre les endpoints fixes
+ENDPOINTS: {
+    normal: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMedNormalMode',
+    test: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed',
+    dmi: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed'
+}
+```
+
+### 2. Sauvegarder les données Firestore
+```javascript
+// Export des webhooks avant rollback
+const backup = await WebhookAdmin.exportWebhooks();
+```
+
+### 3. Redéployer la version précédente
+```bash
+git revert HEAD  # ou git checkout previous-version
+firebase deploy
+```
+
+## 📞 Support
+
+### Contacts
+- **Développeur**: [Contact technique]
+- **Administrateur Firebase**: [Contact admin]
+- **Support n8n**: [Contact n8n]
+
+### Ressources
+- **Documentation Firebase**: https://firebase.google.com/docs
+- **Firestore Rules**: https://firebase.google.com/docs/firestore/security
+- **Logs Firebase**: Console Firebase > Logs
+
+### Procédure d'Escalade
+1. **Niveau 1**: Vérifier logs console et Firebase
+2. **Niveau 2**: Tester avec utilisateur de test
+3. **Niveau 3**: Rollback temporaire si nécessaire
+4. **Niveau 4**: Contacter support technique
+
+---
+
+**📅 Version**: 1.0.0  
+**👨‍💼 Dernière mise à jour**: 2025-12-10  
+**🎯 Statut**: Prêt pour déploiement

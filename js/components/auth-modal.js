@@ -85,6 +85,24 @@ class AuthModalSystem {
         if (modalSignUpTab) {
             modalSignUpTab.addEventListener('click', () => this.switchMode('signup'));
         }
+
+        // Email form submission
+        const modalEmailAuthForm = document.getElementById('modalEmailAuthForm');
+        if (modalEmailAuthForm) {
+            modalEmailAuthForm.addEventListener('submit', (e) => this.handleEmailAuth(e));
+        }
+
+        // Google sign in button
+        const modalGoogleSignInBtn = document.getElementById('modalGoogleSignInBtn');
+        if (modalGoogleSignInBtn) {
+            modalGoogleSignInBtn.addEventListener('click', () => this.handleGoogleSignIn());
+        }
+
+        // Sign out button
+        const modalSignOutBtn = document.getElementById('modalSignOutBtn');
+        if (modalSignOutBtn) {
+            modalSignOutBtn.addEventListener('click', () => this.handleSignOut());
+        }
     }
 
     switchMode(mode) {
@@ -215,6 +233,156 @@ class AuthModalSystem {
             } else {
                 alert('Un email de réinitialisation sera envoyé à: ' + email);
             }
+        }
+    }
+
+    async handleEmailAuth(event) {
+        event.preventDefault();
+        
+        const emailInput = document.getElementById('modalEmailInput');
+        const passwordInput = document.getElementById('modalPasswordInput');
+        const submitBtn = document.getElementById('modalEmailSubmitBtn');
+        const errorDiv = document.getElementById('modalAuthError');
+        
+        if (!emailInput || !passwordInput || !submitBtn) {
+            console.warn('Required auth form elements not found');
+            return;
+        }
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!email || !password) {
+            this.showError('Veuillez remplir tous les champs');
+            return;
+        }
+
+        // Show loading state
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnIcon = submitBtn.querySelector('.btn-icon');
+        const spinner = submitBtn.querySelector('.loading-spinner-small');
+        
+        if (btnText) btnText.textContent = this.currentMode === 'signup' ? 'Inscription...' : 'Connexion...';
+        if (btnIcon) btnIcon.textContent = '';
+        if (spinner) spinner.classList.remove('hidden');
+        submitBtn.disabled = true;
+
+        try {
+            let result;
+            if (this.currentMode === 'signup') {
+                result = await firebase.auth().createUserWithEmailAndPassword(email, password);
+            } else {
+                result = await firebase.auth().signInWithEmailAndPassword(email, password);
+            }
+
+            if (result.user) {
+                this.showSuccess(this.currentMode === 'signup' ? 'Inscription réussie!' : 'Connexion réussie!');
+                setTimeout(() => {
+                    this.close();
+                    this.updateAuthButton();
+                }, 1500);
+            }
+        } catch (error) {
+            console.error('Auth error:', error);
+            let errorMessage = 'Une erreur est survenue';
+            
+            switch (error.code) {
+                case 'auth/user-not-found':
+                    errorMessage = 'Aucun compte trouvé avec cet email';
+                    break;
+                case 'auth/wrong-password':
+                    errorMessage = 'Mot de passe incorrect';
+                    break;
+                case 'auth/email-already-in-use':
+                    errorMessage = 'Cet email est déjà utilisé';
+                    break;
+                case 'auth/weak-password':
+                    errorMessage = 'Le mot de passe est trop faible';
+                    break;
+                case 'auth/invalid-email':
+                    errorMessage = 'Format d\'email invalide';
+                    break;
+                default:
+                    errorMessage = error.message;
+            }
+            
+            this.showError(errorMessage);
+        } finally {
+            // Reset button state
+            if (btnText) btnText.textContent = this.currentMode === 'signup' ? 'S\'inscrire' : 'Se connecter';
+            if (btnIcon) btnIcon.textContent = '→';
+            if (spinner) spinner.classList.add('hidden');
+            submitBtn.disabled = false;
+        }
+    }
+
+    async handleGoogleSignIn() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        
+        try {
+            const result = await firebase.auth().signInWithPopup(provider);
+            if (result.user) {
+                this.showSuccess('Connexion réussie avec Google!');
+                setTimeout(() => {
+                    this.close();
+                    this.updateAuthButton();
+                }, 1500);
+            }
+        } catch (error) {
+            console.error('Google sign in error:', error);
+            this.showError('Erreur lors de la connexion avec Google');
+        }
+    }
+
+    async handleSignOut() {
+        try {
+            await firebase.auth().signOut();
+            this.showSuccess('Déconnexion réussie');
+            setTimeout(() => {
+                this.close();
+                this.updateAuthButton();
+            }, 1000);
+        } catch (error) {
+            console.error('Sign out error:', error);
+            this.showError('Erreur lors de la déconnexion');
+        }
+    }
+
+    showError(message) {
+        const errorDiv = document.getElementById('modalAuthError');
+        if (errorDiv) {
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 5000);
+        }
+    }
+
+    showSuccess(message) {
+        if (window.notificationSystem) {
+            window.notificationSystem.success(message, 'Authentification');
+        } else {
+            alert(message);
+        }
+    }
+
+    updateAuthButton() {
+        const authButton = document.getElementById('authButton');
+        const authButtonText = document.getElementById('authButtonText');
+        
+        if (!authButton || !authButtonText) return;
+
+        const user = firebase.auth().currentUser;
+        
+        if (user) {
+            authButtonText.textContent = user.displayName || user.email || 'Connecté';
+            authButton.classList.add('authenticated');
+        } else {
+            authButtonText.textContent = 'Connexion';
+            authButton.classList.remove('authenticated');
         }
     }
 }

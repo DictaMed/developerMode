@@ -1,0 +1,94 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Collection pour les webhooks utilisateur
+    match /userWebhooks/{userId} {
+      
+      // Lecture: seuls les utilisateurs authentifiés peuvent lire leur propre webhook
+      allow read: if request.auth != null 
+                  && request.auth.uid == userId
+                  && isValidUserWebhookRequest(request.resource.data);
+      
+      // Écriture: seuls les utilisateurs authentifiés peuvent modifier leur propre webhook
+      // et seulement certains champs
+      allow write: if request.auth != null 
+                   && request.auth.uid == userId
+                   && isValidUserWebhookWrite(request.resource.data);
+      
+      // Création: mêmes règles que l'écriture
+      allow create: if request.auth != null 
+                    && request.auth.uid == userId
+                    && isValidUserWebhookWrite(request.resource.data);
+      
+      // Suppression: seuls les utilisateurs peuvent supprimer leur propre webhook
+      allow delete: if request.auth != null 
+                    && request.auth.uid == userId;
+    }
+    
+    // Collection pour l'administration (optionnelle)
+    match /adminWebhooks/{document=**} {
+      // Seul l'admin peut accéder à cette collection
+      allow read, write: if request.auth != null 
+                         && isAdminUser();
+    }
+    
+    // Collection pour les logs d'utilisation (optionnelle)
+    match /webhookLogs/{logId} {
+      // Lecture: admin seulement
+      allow read: if request.auth != null && isAdminUser();
+      
+      // Écriture: automatique par les Cloud Functions
+      allow write: if request.auth != null && isCloudFunction();
+    }
+    
+    // Fonctions de validation
+    
+    // Vérifie si l'utilisateur est un admin
+    function isAdminUser() {
+      return request.auth.token.admin == true || 
+             request.auth.token.role == 'admin' ||
+             request.auth.uid in get(/databases/$(database)/documents/adminUsers).data.adminUIDs;
+    }
+    
+    // Vérifie si la requête vient d'une Cloud Function
+    function isCloudFunction() {
+      return request.auth.token.firebase.sign_in_provider == 'firebase' &&
+             request.auth.token.email_verified == true &&
+             request.auth.token.email.matches('.*@dictamed\\.fr$');
+    }
+    
+    // Valide la structure d'un webhook utilisateur
+    function isValidUserWebhookRequest(data) {
+      return data.keys().hasAll(['webhookUrl', 'isActive', 'createdAt']) &&
+             data.webhookUrl is string &&
+             data.isActive is bool &&
+             data.createdAt is timestamp;
+    }
+    
+    // Valide les champs modifiables lors de l'écriture
+    function isValidUserWebhookWrite(data) {
+      // Champs autorisés pour modification
+      return (data.keys().hasAll(['webhookUrl', 'isActive']) ||
+              (data.keys().hasOnly(['webhookUrl']) && data.webhookUrl is string) ||
+              (data.keys().hasOnly(['isActive']) && data.isActive is bool) ||
+              (data.keys().hasOnly(['notes']) && data.notes is string)) &&
+             // Validation des types
+             (data.webhookUrl == null || data.webhookUrl is string) &&
+             (data.isActive == null || data.isActive is bool) &&
+             (data.notes == null || data.notes is string) &&
+             // Validation de l'URL si fournie
+             (data.webhookUrl == null || validateWebhookUrl(data.webhookUrl)) &&
+             // Limitation de la taille des notes
+             (data.notes == null || data.notes.size() <= 500);
+    }
+    
+    // Valide l'URL du webhook
+    function validateWebhookUrl(url) {
+      return url.matches('https://.*') && 
+             url.matches('.*webhook.*') &&
+             url.size() > 10 && 
+             url.size() <= 2048;
+    }
+  }
+}
