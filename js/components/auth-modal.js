@@ -1,6 +1,6 @@
 /**
  * DictaMed - Système modal d'authentification
- * Version: 2.0.0 - Refactorisé pour une meilleure organisation
+ * Version: 2.1.0 - Correction des problèmes de création de compte
  */
 
 // ===== AUTHENTICATION MODAL SYSTEM =====
@@ -202,38 +202,23 @@ class AuthModalSystem {
             return;
         }
         
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-            firebase.auth().sendPasswordResetEmail(email)
-                .then(() => {
+        // Utiliser FirebaseAuthManager pour l'email de réinitialisation
+        FirebaseAuthManager.sendPasswordResetEmail(email)
+            .then(result => {
+                if (result.success) {
                     if (window.notificationSystem) {
                         window.notificationSystem.success('Un email de réinitialisation a été envoyé à ' + email, 'Email envoyé');
                     } else {
                         alert('Un email de réinitialisation a été envoyé à ' + email);
                     }
-                })
-                .catch((error) => {
-                    console.error('Erreur:', error);
-                    if (error.code === 'auth/user-not-found') {
-                        if (window.notificationSystem) {
-                            window.notificationSystem.error('Aucun compte trouvé avec cet email', 'Erreur');
-                        } else {
-                            alert('Aucun compte trouvé avec cet email');
-                        }
-                    } else {
-                        if (window.notificationSystem) {
-                            window.notificationSystem.error('Impossible d\'envoyer l\'email de réinitialisation', 'Erreur');
-                        } else {
-                            alert('Impossible d\'envoyer l\'email de réinitialisation');
-                        }
-                    }
-                });
-        } else {
-            if (window.notificationSystem) {
-                window.notificationSystem.info('Un email de réinitialisation sera envoyé à: ' + email, 'Fonctionnalité de démonstration');
-            } else {
-                alert('Un email de réinitialisation sera envoyé à: ' + email);
-            }
-        }
+                } else {
+                    this.showError(result.error);
+                }
+            })
+            .catch(error => {
+                console.error('Password reset error:', error);
+                this.showError('Impossible d\'envoyer l\'email de réinitialisation');
+            });
     }
 
     async handleEmailAuth(event) {
@@ -270,40 +255,62 @@ class AuthModalSystem {
         try {
             let result;
             if (this.currentMode === 'signup') {
-                result = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                // Utiliser le nouveau FirebaseAuthManager.signUp
+                result = await FirebaseAuthManager.signUp(email, password);
+                if (result.success) {
+                    if (result.emailSent) {
+                        this.showSuccess('Inscription réussie! Vérifiez votre email pour confirmer votre compte.');
+                    } else {
+                        this.showSuccess('Inscription réussie!');
+                    }
+                }
             } else {
-                result = await firebase.auth().signInWithEmailAndPassword(email, password);
+                // Utiliser FirebaseAuthManager.signIn
+                result = await FirebaseAuthManager.signIn(email, password);
+                if (result.success) {
+                    this.showSuccess('Connexion réussie!');
+                }
             }
 
-            if (result.user) {
-                this.showSuccess(this.currentMode === 'signup' ? 'Inscription réussie!' : 'Connexion réussie!');
+            if (result.success) {
                 setTimeout(() => {
                     this.close();
                     this.updateAuthButton();
                 }, 1500);
+            } else {
+                this.showError(result.error || 'Une erreur est survenue');
             }
         } catch (error) {
             console.error('Auth error:', error);
+            
+            // Gérer les erreurs qui arrivent malgré les vérifications
             let errorMessage = 'Une erreur est survenue';
             
-            switch (error.code) {
-                case 'auth/user-not-found':
-                    errorMessage = 'Aucun compte trouvé avec cet email';
-                    break;
-                case 'auth/wrong-password':
-                    errorMessage = 'Mot de passe incorrect';
-                    break;
-                case 'auth/email-already-in-use':
-                    errorMessage = 'Cet email est déjà utilisé';
-                    break;
-                case 'auth/weak-password':
-                    errorMessage = 'Le mot de passe est trop faible';
-                    break;
-                case 'auth/invalid-email':
-                    errorMessage = 'Format d\'email invalide';
-                    break;
-                default:
-                    errorMessage = error.message;
+            if (error.code) {
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = 'Aucun compte trouvé avec cet email';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Mot de passe incorrect';
+                        break;
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'Cet email est déjà utilisé';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'Le mot de passe est trop faible';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Format d\'email invalide';
+                        break;
+                    case 'auth/network-request-failed':
+                        errorMessage = 'Erreur de connexion. Vérifiez votre connexion internet';
+                        break;
+                    default:
+                        errorMessage = error.message;
+                }
+            } else if (error.message) {
+                errorMessage = error.message;
             }
             
             this.showError(errorMessage);
@@ -317,10 +324,15 @@ class AuthModalSystem {
     }
 
     async handleGoogleSignIn() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        
         try {
+            if (typeof firebase === 'undefined' || !firebase.auth) {
+                this.showError('Firebase Auth n\'est pas disponible');
+                return;
+            }
+
+            const provider = new firebase.auth.GoogleAuthProvider();
             const result = await firebase.auth().signInWithPopup(provider);
+            
             if (result.user) {
                 this.showSuccess('Connexion réussie avec Google!');
                 setTimeout(() => {
@@ -330,18 +342,30 @@ class AuthModalSystem {
             }
         } catch (error) {
             console.error('Google sign in error:', error);
-            this.showError('Erreur lors de la connexion avec Google');
+            
+            let errorMessage = 'Erreur lors de la connexion avec Google';
+            if (error.code === 'auth/popup-closed-by-user') {
+                errorMessage = 'Connexion annulée par l\'utilisateur';
+            } else if (error.code === 'auth/popup-blocked') {
+                errorMessage = 'Popup bloquée par le navigateur';
+            }
+            
+            this.showError(errorMessage);
         }
     }
 
     async handleSignOut() {
         try {
-            await firebase.auth().signOut();
-            this.showSuccess('Déconnexion réussie');
-            setTimeout(() => {
-                this.close();
-                this.updateAuthButton();
-            }, 1000);
+            const result = await FirebaseAuthManager.signOut();
+            if (result.success) {
+                this.showSuccess('Déconnexion réussie');
+                setTimeout(() => {
+                    this.close();
+                    this.updateAuthButton();
+                }, 1000);
+            } else {
+                this.showError(result.error || 'Erreur lors de la déconnexion');
+            }
         } catch (error) {
             console.error('Sign out error:', error);
             this.showError('Erreur lors de la déconnexion');
@@ -375,7 +399,7 @@ class AuthModalSystem {
         
         if (!authButton || !authButtonText) return;
 
-        const user = firebase.auth().currentUser;
+        const user = FirebaseAuthManager.getCurrentUser();
         
         if (user) {
             authButtonText.textContent = user.displayName || user.email || 'Connecté';
