@@ -1,6 +1,6 @@
 /**
- * DictaMed - Gestionnaire d'authentification Firebase (SDK Modulaire v9+)
- * Version: 5.0.0 - Correction complète des bugs d'initialisation et compatibilité
+ * DictaMed - Gestionnaire d'authentification Firebase (Compat SDK)
+ * Version: 5.1.0 - Correction des appels Firebase Auth
  */
 
 class FirebaseAuthManager {
@@ -8,44 +8,43 @@ class FirebaseAuthManager {
         this.isInitialized = false;
         this.currentUser = null;
         this.auth = null;
-        this.rateLimitMap = new Map(); // Rate limiting par IP/email
-        this.sessionTimeout = 30 * 60 * 1000; // 30 minutes
-        this.retryAttempts = new Map(); // Retry attempts tracking
-        this.initPromise = null; // Pour éviter les initialisations multiples
+        this.rateLimitMap = new Map();
+        this.sessionTimeout = 30 * 60 * 1000;
+        this.retryAttempts = new Map();
+        this.initPromise = null;
     }
 
     static async init() {
         try {
-            console.log('🔧 FirebaseAuthManager v5.0.0 init() started');
+            console.log('🔧 FirebaseAuthManager v5.1.0 init() started');
             
-            // Éviter les initialisations multiples
             if (this.instance && this.instance.isInitialized) {
                 console.log('✅ FirebaseAuthManager already initialized');
                 return this.instance;
             }
             
-            // Attendre que Firebase soit disponible
             await FirebaseAuthManager.waitForFirebase();
             
             console.log('✅ Firebase est prêt, initialisation FirebaseAuthManager...');
             
-            // Initialiser l'instance
             const authManager = new FirebaseAuthManager();
-            authManager.auth = window.firebase.auth;
             
-            // Vérifier que l'auth est correctement configuré
+            // ✅ CORRECTION: Utiliser firebase.auth() pour obtenir l'instance
+            if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
+                throw new Error('Firebase SDK not loaded');
+            }
+            
+            authManager.auth = window.firebase.auth();
+            
             if (!authManager.auth) {
                 throw new Error('Firebase Auth not properly initialized');
             }
             
-            // Configuration Firebase Auth avec gestion d'erreurs améliorée
+            console.log('✅ Firebase Auth instance created:', authManager.auth);
+            
+            // Configuration du listener d'authentification
             try {
-                const { onAuthStateChanged } = window.firebase;
-                if (typeof onAuthStateChanged !== 'function') {
-                    throw new Error('onAuthStateChanged function not available');
-                }
-                
-                onAuthStateChanged(authManager.auth, (user) => {
+                authManager.auth.onAuthStateChanged((user) => {
                     if (user) {
                         console.log('✅ User authenticated:', user.email);
                         authManager.currentUser = user;
@@ -64,9 +63,10 @@ class FirebaseAuthManager {
             }
 
             authManager.isInitialized = true;
-            console.log('✅ FirebaseAuthManager v5.0.0 init() completed');
+            this.instance = authManager;
             
-            // Tester l'état d'authentification
+            console.log('✅ FirebaseAuthManager v5.1.0 init() completed');
+            
             await FirebaseAuthManager.testAuthStatus();
             
             return authManager;
@@ -78,11 +78,7 @@ class FirebaseAuthManager {
         }
     }
     
-    /**
-     * Attendre que Firebase soit disponible avec timeout amélioré
-     */
     static async waitForFirebase(timeout = 15000, retryCount = 3) {
-        const startTime = Date.now();
         let attempt = 0;
         
         const checkFirebaseReady = () => {
@@ -90,10 +86,9 @@ class FirebaseAuthManager {
                 attempt++;
                 console.log(`🔍 Attempt ${attempt} to check Firebase readiness`);
                 
-                // Vérifier d'abord si Firebase est déjà disponible
-                if (typeof window.firebase !== 'undefined' &&
-                    window.firebase.auth &&
-                    typeof window.firebase.auth === 'object') {
+                if (typeof window.firebase !== 'undefined' && 
+                    window.firebase.auth && 
+                    typeof window.firebase.auth === 'function') {
                     console.log('✅ Firebase already available');
                     resolve(true);
                     return;
@@ -110,11 +105,10 @@ class FirebaseAuthManager {
                     resolve(true);
                 };
                 
-                // Vérifier périodiquement si Firebase est disponible
                 const checkInterval = setInterval(() => {
                     if (typeof window.firebase !== 'undefined' &&
                         window.firebase.auth &&
-                        typeof window.firebase.auth === 'object') {
+                        typeof window.firebase.auth === 'function') {
                         clearInterval(checkInterval);
                         if (!resolved) {
                             resolved = true;
@@ -127,7 +121,6 @@ class FirebaseAuthManager {
                 
                 window.addEventListener('firebaseReady', handleFirebaseReady);
                 
-                // Timeout après la durée spécifiée
                 setTimeout(() => {
                     clearInterval(checkInterval);
                     if (!resolved) {
@@ -139,7 +132,6 @@ class FirebaseAuthManager {
             });
         };
         
-        // Implémenter un mécanisme de réessai
         for (let i = 0; i < retryCount; i++) {
             try {
                 return await checkFirebaseReady();
@@ -147,22 +139,17 @@ class FirebaseAuthManager {
                 console.warn(`⚠️ Firebase readiness check attempt ${i + 1} failed:`, error.message);
                 if (i === retryCount - 1) {
                     console.error('❌ All Firebase readiness checks failed');
-                    throw new Error(`Firebase SDK not available after ${retryCount} attempts - ${error.message}`);
+                    throw new Error(`Firebase SDK not available after ${retryCount} attempts`);
                 }
-                // Attendre avant de réessayer
                 await new Promise(resolve => setTimeout(resolve, 1000));
             }
         }
     }
 
-    /**
-     * Vérification de rate limiting pour éviter les attaques par force brute
-     */
     checkRateLimit(identifier, maxAttempts = 5, timeWindow = 15 * 60 * 1000) {
         const now = Date.now();
         const attempts = this.rateLimitMap.get(identifier) || [];
         
-        // Nettoyer les anciennes tentatives
         const recentAttempts = attempts.filter(timestamp => now - timestamp < timeWindow);
         
         if (recentAttempts.length >= maxAttempts) {
@@ -170,20 +157,15 @@ class FirebaseAuthManager {
             throw new Error(`Trop de tentatives. Réessayez dans ${Math.ceil(waitTime / 1000)} secondes.`);
         }
         
-        // Ajouter la tentative actuelle
         recentAttempts.push(now);
         this.rateLimitMap.set(identifier, recentAttempts);
         
         return true;
     }
 
-    /**
-     * Validation renforcée des données d'entrée
-     */
     validateInput(email, password, displayName = null) {
         const errors = [];
 
-        // Validation email
         if (!email || typeof email !== 'string') {
             errors.push('L\'adresse email est requise');
         } else {
@@ -193,7 +175,6 @@ class FirebaseAuthManager {
             }
         }
 
-        // Validation mot de passe
         if (!password || typeof password !== 'string') {
             errors.push('Le mot de passe est requis');
         } else {
@@ -205,7 +186,6 @@ class FirebaseAuthManager {
             }
         }
 
-        // Validation nom d'affichage (optionnel)
         if (displayName && typeof displayName === 'string') {
             if (displayName.length < 2 || displayName.length > 50) {
                 errors.push('Le nom d\'affichage doit contenir entre 2 et 50 caractères');
@@ -219,9 +199,6 @@ class FirebaseAuthManager {
         return true;
     }
 
-    /**
-     * Évaluation de la force du mot de passe
-     */
     evaluatePasswordStrength(password) {
         let score = 0;
         const feedback = [];
@@ -250,65 +227,36 @@ class FirebaseAuthManager {
     }
 
     static async testAuthStatus() {
-        console.log('🧪 Testing Firebase Auth status (Modulaire v9+)...');
+        console.log('🧪 Testing Firebase Auth status...');
         
         try {
             if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
-                console.error('❌ Firebase modulaire not available');
+                console.error('❌ Firebase not available');
                 return false;
             }
 
-            // Test de la configuration
-            const config = window.firebase.app.options;
+            const auth = window.firebase.auth();
+            const config = window.firebase.app().options;
+            
             console.log('📊 Firebase config:', {
                 projectId: config.projectId,
                 authDomain: config.authDomain,
                 hasApiKey: !!config.apiKey
             });
 
-            // Test de l'authentification
-            const currentUser = window.firebase.auth.currentUser;
+            const currentUser = auth.currentUser;
             console.log('👤 Current user:', currentUser ? currentUser.email : 'none');
 
-            // Test des providers disponibles
-            try {
-                const auth = window.firebase.auth;
-                console.log('🔐 Auth methods available:', {
-                    emailPassword: 'available',
-                    google: 'available',
-                    currentUser: !!currentUser,
-                    sdkVersion: 'modular_v9+'
-                });
-            } catch (methodError) {
-                console.warn('⚠️ Some auth methods may not be available:', methodError);
-            }
+            console.log('🔐 Auth methods available:', {
+                emailPassword: 'available',
+                google: 'available',
+                currentUser: !!currentUser
+            });
 
             return true;
         } catch (error) {
             console.error('❌ Auth status test failed:', error);
             return false;
-        }
-    }
-
-    static showFallbackMessage() {
-        const message = `
-        🔧 Firebase Auth en mode fallback
-        
-        Les fonctionnalités d'authentification sont limitées.
-        Pour activer l'authentification complète :
-        
-        1. Vérifiez que Firebase Auth est activé dans la console
-        2. Activez le provider "Email/Password"
-        3. Configurez les domaines autorisés
-        4. Assurez-vous que le SDK modulaire est correctement chargé
-        `;
-        console.warn(message);
-        
-        if (window.notificationSystem) {
-            window.notificationSystem.info(
-                'Authentification Firebase non configurée. Certaines fonctionnalités sont limitées.',
-                'Configuration Firebase'
-            );
         }
     }
 
@@ -323,7 +271,7 @@ class FirebaseAuthManager {
         }
     }
 
-    static updateAuthUI(user) {
+    updateAuthUI(user) {
         const authButton = document.getElementById('authButton');
         const authButtonText = document.getElementById('authButtonText');
         
@@ -338,11 +286,7 @@ class FirebaseAuthManager {
         }
     }
 
-    /**
-     * Gestion des événements d'authentification réussie
-     */
     handleAuthSuccess(user) {
-        // Logger l'événement (en production, envoyer vers analytics)
         console.log('🔐 Auth success event:', {
             uid: user.uid,
             email: user.email,
@@ -350,32 +294,20 @@ class FirebaseAuthManager {
             timestamp: new Date().toISOString()
         });
 
-        // Sauvegarder la session
         this.saveSession(user);
-        
-        // Dispatcher un événement personnalisé pour informer les autres composants
         this.dispatchAuthStateChange('authenticated', user);
     }
 
-    /**
-     * Gestion des événements de déconnexion
-     */
     handleAuthLogout() {
-        // Nettoyer la session
         this.clearSession();
         
-        // Logger l'événement
         console.log('🚪 Auth logout event:', {
             timestamp: new Date().toISOString()
         });
         
-        // Dispatcher un événement personnalisé pour informer les autres composants
         this.dispatchAuthStateChange('loggedOut', null);
     }
 
-    /**
-     * Dispatcher un événement de changement d'état d'authentification
-     */
     dispatchAuthStateChange(state, user) {
         const authEvent = new CustomEvent('authStateChanged', {
             detail: {
@@ -386,7 +318,6 @@ class FirebaseAuthManager {
         });
         window.dispatchEvent(authEvent);
         
-        // Notifier aussi le gestionnaire de navigation admin
         if (window.adminNavigationManager && typeof window.adminNavigationManager.forceCheck === 'function') {
             window.adminNavigationManager.forceCheck();
         }
@@ -394,9 +325,6 @@ class FirebaseAuthManager {
         console.log('📡 Auth state change event dispatched:', state);
     }
 
-    /**
-     * Sauvegarde de session avec timeout
-     */
     saveSession(user) {
         const sessionData = {
             uid: user.uid,
@@ -409,41 +337,15 @@ class FirebaseAuthManager {
         localStorage.setItem('dictamed_session', JSON.stringify(sessionData));
     }
 
-    /**
-     * Nettoyage de session
-     */
     clearSession() {
         localStorage.removeItem('dictamed_session');
-    }
-
-    /**
-     * Vérification de session expirée
-     */
-    checkSessionTimeout() {
-        const sessionData = localStorage.getItem('dictamed_session');
-        if (!sessionData) return false;
-
-        try {
-            const session = JSON.parse(sessionData);
-            const now = Date.now();
-            const sessionAge = now - session.loginTime;
-
-            if (sessionAge > session.timeout) {
-                this.clearSession();
-                return false;
-            }
-
-            return true;
-        } catch (error) {
-            this.clearSession();
-            return false;
-        }
     }
 
     static isAuthenticated() {
         try {
             if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
-                const user = window.firebase.auth.currentUser;
+                const auth = window.firebase.auth();
+                const user = auth.currentUser;
                 return user !== null;
             }
             return false;
@@ -456,7 +358,8 @@ class FirebaseAuthManager {
     static getCurrentUser() {
         try {
             if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
-                const user = window.firebase.auth.currentUser;
+                const auth = window.firebase.auth();
+                const user = auth.currentUser;
                 if (user) {
                     return {
                         uid: user.uid,
@@ -479,7 +382,6 @@ class FirebaseAuthManager {
             
             const authManager = FirebaseAuthManager.getInstance();
             
-            // Vérifications de sécurité
             authManager.checkRateLimit(email);
             authManager.validateInput(email, password);
             
@@ -487,8 +389,10 @@ class FirebaseAuthManager {
                 throw new Error('Firebase Auth not available');
             }
 
-            const { signInWithEmailAndPassword } = window.firebase;
-            const result = await signInWithEmailAndPassword(window.firebase.auth, email, password);
+            // ✅ CORRECTION: Appel correct pour compat SDK
+            const auth = window.firebase.auth();
+            const result = await auth.signInWithEmailAndPassword(email, password);
+            
             console.log('✅ Sign in successful:', result.user.email);
             
             return {
@@ -498,19 +402,27 @@ class FirebaseAuthManager {
         } catch (error) {
             console.error('❌ Sign in error:', error);
             
-            // Gestion spécifique des erreurs API key
-            if (error.message && error.message.includes('api-key-not-valid')) {
-                return {
-                    success: false,
-                    error: 'Configuration Firebase invalide. Veuillez vérifier la clé API dans la console Firebase.',
-                    code: error.code,
-                    needsConfigUpdate: true
-                };
+            let userFriendlyMessage = error.message;
+            switch (error.code) {
+                case 'auth/user-not-found':
+                    userFriendlyMessage = 'Aucun compte trouvé avec cette adresse email';
+                    break;
+                case 'auth/wrong-password':
+                    userFriendlyMessage = 'Mot de passe incorrect';
+                    break;
+                case 'auth/invalid-email':
+                    userFriendlyMessage = 'L\'adresse email n\'est pas valide';
+                    break;
+                case 'auth/network-request-failed':
+                    userFriendlyMessage = 'Erreur de connexion. Vérifiez votre connexion internet';
+                    break;
+                default:
+                    userFriendlyMessage = `Erreur lors de la connexion: ${error.message}`;
             }
             
             return {
                 success: false,
-                error: error.message,
+                error: userFriendlyMessage,
                 code: error.code
             };
         }
@@ -522,7 +434,6 @@ class FirebaseAuthManager {
             
             const authManager = FirebaseAuthManager.getInstance();
             
-            // Vérifications de sécurité
             authManager.checkRateLimit(email);
             authManager.validateInput(email, password, displayName);
             
@@ -530,16 +441,15 @@ class FirebaseAuthManager {
                 throw new Error('Firebase Auth not available');
             }
 
-            const { createUserWithEmailAndPassword } = window.firebase;
-            const result = await createUserWithEmailAndPassword(window.firebase.auth, email, password);
+            // ✅ CORRECTION: Appel correct pour compat SDK
+            const auth = window.firebase.auth();
+            const result = await auth.createUserWithEmailAndPassword(email, password);
             const user = result.user;
 
-            // Mettre à jour le profil si un nom d'affichage est fourni
             if (displayName) {
                 await user.updateProfile({ displayName: displayName });
             }
 
-            // Envoyer un email de vérification
             await user.sendEmailVerification();
             console.log('📧 Verification email sent');
 
@@ -553,7 +463,6 @@ class FirebaseAuthManager {
         } catch (error) {
             console.error('❌ Sign up error:', error);
             
-            // Messages d'erreur plus spécifiques
             let userFriendlyMessage = error.message;
             switch (error.code) {
                 case 'auth/email-already-in-use':
@@ -588,8 +497,8 @@ class FirebaseAuthManager {
             const authManager = FirebaseAuthManager.getInstance();
             
             if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
-                const { signOut } = window.firebase;
-                await signOut(window.firebase.auth);
+                const auth = window.firebase.auth();
+                await auth.signOut();
                 authManager.clearSession();
                 console.log('✅ Sign out successful');
                 return { success: true };
@@ -612,8 +521,9 @@ class FirebaseAuthManager {
                 throw new Error('Firebase Auth not available');
             }
 
-            const { sendPasswordResetEmail } = window.firebase;
-            await sendPasswordResetEmail(window.firebase.auth, email);
+            // ✅ CORRECTION: Appel correct pour compat SDK
+            const auth = window.firebase.auth();
+            await auth.sendPasswordResetEmail(email);
             console.log('✅ Password reset email sent');
             
             return { success: true };
@@ -643,53 +553,6 @@ class FirebaseAuthManager {
         }
     }
 
-    static async checkAuthConfiguration() {
-        console.log('🔍 Checking Firebase Auth configuration (Modulaire v9+)...');
-        
-        try {
-            if (typeof window.firebase === 'undefined') {
-                return {
-                    isConfigured: false,
-                    error: 'Firebase SDK modulaire not loaded'
-                };
-            }
-
-            if (!window.firebase.auth) {
-                return {
-                    isConfigured: false,
-                    error: 'Firebase Auth SDK modulaire not loaded'
-                };
-            }
-
-            // Tester une opération simple pour vérifier la configuration
-            const auth = window.firebase.auth;
-            const config = window.firebase.app.options;
-            
-            const authConfig = {
-                isConfigured: true,
-                projectId: config.projectId,
-                authDomain: config.authDomain,
-                providers: {
-                    emailPassword: true,
-                    google: true,
-                    anonymous: true
-                },
-                currentUser: auth.currentUser ? auth.currentUser.email : null,
-                sdkVersion: 'modular_v9+'
-            };
-
-            console.log('📊 Auth configuration:', authConfig);
-            return authConfig;
-
-        } catch (error) {
-            console.error('❌ Auth configuration check failed:', error);
-            return {
-                isConfigured: false,
-                error: error.message
-            };
-        }
-    }
-
     static async signInWithGoogle() {
         try {
             console.log('🔐 Attempting Google sign in');
@@ -701,7 +564,7 @@ class FirebaseAuthManager {
                 throw new Error('Firebase Auth not available');
             }
 
-            // Use compatible SDK approach
+            // ✅ CORRECTION: Appel correct pour compat SDK
             const provider = new window.firebase.auth.GoogleAuthProvider();
             const auth = window.firebase.auth();
             const result = await auth.signInWithPopup(provider);
@@ -714,16 +577,6 @@ class FirebaseAuthManager {
             };
         } catch (error) {
             console.error('❌ Google sign in error:', error);
-            
-            // Gestion spécifique des erreurs API key
-            if (error.message && error.message.includes('api-key-not-valid')) {
-                return {
-                    success: false,
-                    error: 'Configuration Firebase invalide. Veuillez vérifier la clé API dans la console Firebase.',
-                    code: error.code,
-                    needsConfigUpdate: true
-                };
-            }
             
             let userFriendlyMessage = error.message;
             switch (error.code) {
@@ -748,9 +601,6 @@ class FirebaseAuthManager {
         }
     }
 
-    /**
-     * Singleton pattern pour obtenir l'instance
-     */
     static getInstance() {
         if (!this.instance) {
             this.instance = new FirebaseAuthManager();
@@ -759,19 +609,16 @@ class FirebaseAuthManager {
     }
 }
 
-// Export pour utilisation dans d'autres modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = FirebaseAuthManager;
 } else {
     window.FirebaseAuthManager = FirebaseAuthManager;
 }
 
-// Initialisation automatique quand le DOM est chargé
 if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => FirebaseAuthManager.init());
     } else {
-        // DOM déjà chargé
         setTimeout(() => FirebaseAuthManager.init(), 100);
     }
 }
