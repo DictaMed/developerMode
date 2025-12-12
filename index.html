@@ -269,18 +269,20 @@
             appId: "1:242034923776:web:bd315e890c715b1d263be5",
             measurementId: "G-1B8DZ4B73R"
         };
-        
+         
         // Charger Firebase SDK modulaire avec cache-busting
         const loadFirebase = async () => {
             try {
                 console.log('🔄 Chargement Firebase avec cache-busting...');
                 console.log('🔑 Configuration API Key:', firebaseConfig.apiKey);
-                
+                 
                 // Importer les modules Firebase avec timestamp pour éviter le cache
                 const timestamp = Date.now();
-                const { initializeApp } = await import(`https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js?v=${timestamp}`);
+                const { initializeApp, getApp } = await import(`https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js?v=${timestamp}`);
                 const {
                     getAuth,
+                    initializeAuth,
+                    browserLocalPersistence,
                     onAuthStateChanged,
                     signInWithEmailAndPassword,
                     createUserWithEmailAndPassword,
@@ -289,16 +291,20 @@
                     GoogleAuthProvider,
                     signInWithPopup
                 } = await import(`https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js?v=${timestamp}`);
-                
+                 
                 console.log('📦 Modules Firebase importés avec succès');
-                
-                // Initialiser Firebase
+                 
+                // Initialiser Firebase App
                 const app = initializeApp(firebaseConfig);
-                const auth = getAuth(app);
-                
                 console.log('🎯 Firebase App initialisé:', app.name);
-                console.log('🔐 Firebase Auth configuré:', auth.config.projectId);
                 
+                // Initialiser Auth avec persistence pour Firebase v10+
+                const auth = initializeAuth(app, {
+                    persistence: browserLocalPersistence
+                });
+                
+                console.log('🔐 Firebase Auth configuré:', auth.config.projectId);
+                 
                 // Rendre disponible globalement pour compatibilité
                 window.firebase = {
                     app: app,
@@ -312,22 +318,23 @@
                     GoogleAuthProvider: GoogleAuthProvider,
                     signInWithPopup: signInWithPopup
                 };
-                
+                 
                 console.log('✅ Firebase SDK modulaire initialisé avec succès');
                 console.log('📊 Projet:', firebaseConfig.projectId);
                 console.log('🔑 API Key validée');
-                
+                 
                 // Dispatcher un événement pour informer les autres scripts
                 window.dispatchEvent(new Event('firebaseReady'));
-                
+                 
                 return window.firebase;
-                
+                 
             } catch (error) {
                 console.error('❌ Erreur Firebase SDK modulaire:', error);
                 console.error('📋 Détails de l\'erreur:', {
                     message: error.message,
                     code: error.code,
-                    config: firebaseConfig
+                    config: firebaseConfig,
+                    stack: error.stack
                 });
                 throw error;
             }
