@@ -260,7 +260,8 @@
     </div>
 
     <!-- Firebase SDK v9+ Compat -->
-    <script>
+    <!-- Firebase SDK v10+ Modulaire -->
+    <script type="module">
         // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyC9XYvHxbp3VW0PCW0W7MxsjoUZE",
@@ -272,45 +273,62 @@
             measurementId: "G-1B8DZ4B73R"
         };
         
-        // Charger Firebase SDK compat
-        const loadFirebase = () => {
-            return new Promise((resolve, reject) => {
-                if (window.firebase && window.firebase.apps.length > 0) {
-                    resolve(window.firebase);
-                    return;
-                }
+        // Charger Firebase SDK modulaire
+        const loadFirebase = async () => {
+            try {
+                // Importer les modules Firebase
+                const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
+                const {
+                    getAuth,
+                    onAuthStateChanged,
+                    signInWithEmailAndPassword,
+                    createUserWithEmailAndPassword,
+                    signOut,
+                    sendPasswordResetEmail,
+                    GoogleAuthProvider,
+                    signInWithPopup
+                } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
                 
-                const script = document.createElement('script');
-                script.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
-                script.onload = () => {
-                    try {
-                        // Initialiser Firebase
-                        const app = firebase.initializeApp(firebaseConfig);
-                        const auth = firebase.auth();
-                        
-                        // Rendre disponible globalement
-                        window.firebase = {
-                            ...window.firebase,
-                            app: app,
-                            auth: auth
-                        };
-                        
-                        console.log('✅ Firebase SDK compat initialisé avec succès');
-                        resolve(window.firebase);
-                    } catch (error) {
-                        console.error('❌ Erreur Firebase:', error);
-                        reject(error);
-                    }
+                // Initialiser Firebase
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                
+                // Rendre disponible globalement pour compatibilité
+                window.firebase = {
+                    app: app,
+                    auth: auth,
+                    // Méthodes d'authentification
+                    onAuthStateChanged: onAuthStateChanged,
+                    signInWithEmailAndPassword: signInWithEmailAndPassword,
+                    createUserWithEmailAndPassword: createUserWithEmailAndPassword,
+                    signOut: signOut,
+                    sendPasswordResetEmail: sendPasswordResetEmail,
+                    GoogleAuthProvider: GoogleAuthProvider,
+                    signInWithPopup: signInWithPopup
                 };
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
+                
+                console.log('✅ Firebase SDK modulaire initialisé avec succès');
+                console.log('📊 Configuré pour:', firebaseConfig.projectId);
+                
+                // Dispatcher un événement pour informer les autres scripts
+                window.dispatchEvent(new Event('firebaseReady'));
+                
+                return window.firebase;
+                
+            } catch (error) {
+                console.error('❌ Erreur Firebase SDK modulaire:', error);
+                throw error;
+            }
         };
         
-        // Initialisation différée pour éviter les conflits
+        // Charger Firebase immédiatement
         window.initFirebase = loadFirebase;
+        
+        // Charger automatiquement
+        loadFirebase().catch(error => {
+            console.error('❌ Échec du chargement Firebase:', error);
+        });
     </script>
-    
     <!-- ===== ORDRE DE CHARGEMENT OPTIMISÉ DES SCRIPTS ===== -->
     
     <!-- 1. DEPENDANCES CRITIQUES EN PREMIER -->
