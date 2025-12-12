@@ -1,6 +1,6 @@
 /**
  * DictaMed - Gestionnaire d'authentification Firebase (SDK Modulaire v9+)
- * Version: 4.1.0 - Correction pour "window.firebase.auth is not a function"
+ * Version: 5.0.0 - Correction complète des bugs d'initialisation et compatibilité
  */
 
 class FirebaseAuthManager {
@@ -11,46 +11,40 @@ class FirebaseAuthManager {
         this.rateLimitMap = new Map(); // Rate limiting par IP/email
         this.sessionTimeout = 30 * 60 * 1000; // 30 minutes
         this.retryAttempts = new Map(); // Retry attempts tracking
+        this.initPromise = null; // Pour éviter les initialisations multiples
     }
 
-    static init() {
+    static async init() {
         try {
-            console.log('🔧 FirebaseAuthManager v4.2.0 init() started');
+            console.log('🔧 FirebaseAuthManager v5.0.0 init() started');
             
-            // Attendre que Firebase soit prêt
-            const waitForFirebase = () => {
-                return new Promise((resolve, reject) => {
-                    if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
-                        resolve();
-                        return;
-                    }
-                    
-                    // Écouter l'événement firebaseReady
-                    const handleFirebaseReady = () => {
-                        window.removeEventListener('firebaseReady', handleFirebaseReady);
-                        resolve();
-                    };
-                    
-                    window.addEventListener('firebaseReady', handleFirebaseReady);
-                    
-                    // Timeout après 10 secondes
-                    setTimeout(() => {
-                        window.removeEventListener('firebaseReady', handleFirebaseReady);
-                        reject(new Error('Firebase timeout'));
-                    }, 10000);
-                });
-            };
+            // Éviter les initialisations multiples
+            if (this.instance && this.instance.isInitialized) {
+                console.log('✅ FirebaseAuthManager already initialized');
+                return this.instance;
+            }
             
-            // Initialiser quand Firebase est prêt
-            waitForFirebase().then(() => {
-                console.log('✅ Firebase est prêt, initialisation FirebaseAuthManager...');
-                
-                // Initialiser l'instance
-                const authManager = new FirebaseAuthManager();
-                authManager.auth = window.firebase.auth;
-                
-                // Configuration Firebase Auth avec SDK modulaire
+            // Attendre que Firebase soit disponible
+            await FirebaseAuthManager.waitForFirebase();
+            
+            console.log('✅ Firebase est prêt, initialisation FirebaseAuthManager...');
+            
+            // Initialiser l'instance
+            const authManager = new FirebaseAuthManager();
+            authManager.auth = window.firebase.auth;
+            
+            // Vérifier que l'auth est correctement configuré
+            if (!authManager.auth) {
+                throw new Error('Firebase Auth not properly initialized');
+            }
+            
+            // Configuration Firebase Auth avec gestion d'erreurs améliorée
+            try {
                 const { onAuthStateChanged } = window.firebase;
+                if (typeof onAuthStateChanged !== 'function') {
+                    throw new Error('onAuthStateChanged function not available');
+                }
+                
                 onAuthStateChanged(authManager.auth, (user) => {
                     if (user) {
                         console.log('✅ User authenticated:', user.email);
@@ -64,22 +58,82 @@ class FirebaseAuthManager {
                         authManager.handleAuthLogout();
                     }
                 });
+            } catch (authError) {
+                console.error('❌ Erreur configuration Auth:', authError);
+                throw new Error(`Auth configuration failed: ${authError.message}`);
+            }
 
-                authManager.isInitialized = true;
-                console.log('✅ FirebaseAuthManager v4.2.0 init() completed');
-                
-                // Tester l'état d'authentification
-                FirebaseAuthManager.testAuthStatus();
-                
-            }).catch(error => {
-                console.error('❌ FirebaseAuthManager init() failed - Firebase not ready:', error);
-                FirebaseAuthManager.showFallbackMessage();
-            });
+            authManager.isInitialized = true;
+            console.log('✅ FirebaseAuthManager v5.0.0 init() completed');
+            
+            // Tester l'état d'authentification
+            await FirebaseAuthManager.testAuthStatus();
+            
+            return authManager;
             
         } catch (error) {
             console.error('❌ FirebaseAuthManager init() failed:', error);
             FirebaseAuthManager.showErrorMessage(error);
+            throw error;
         }
+    }
+    
+    /**
+     * Attendre que Firebase soit disponible avec timeout amélioré
+     */
+    static async waitForFirebase(timeout = 15000) {
+        const startTime = Date.now();
+        
+        // Vérifier d'abord si Firebase est déjà disponible
+        if (typeof window.firebase !== 'undefined' && 
+            window.firebase.auth && 
+            typeof window.firebase.auth === 'object' &&
+            typeof window.firebase.auth === 'function') {
+            console.log('✅ Firebase already available');
+            return true;
+        }
+        
+        console.log('⏳ Waiting for Firebase to be ready...');
+        
+        // Attendre l'événement firebaseReady
+        return new Promise((resolve, reject) => {
+            let resolved = false;
+            
+            const handleFirebaseReady = () => {
+                if (resolved) return;
+                resolved = true;
+                window.removeEventListener('firebaseReady', handleFirebaseReady);
+                console.log('✅ Firebase ready event received');
+                resolve();
+            };
+            
+            // Vérifier périodiquement si Firebase est disponible
+            const checkInterval = setInterval(() => {
+                if (typeof window.firebase !== 'undefined' && 
+                    window.firebase.auth && 
+                    typeof window.firebase.auth === 'object') {
+                    clearInterval(checkInterval);
+                    if (!resolved) {
+                        resolved = true;
+                        window.removeEventListener('firebaseReady', handleFirebaseReady);
+                        console.log('✅ Firebase detected via polling');
+                        resolve();
+                    }
+                }
+            }, 100);
+            
+            window.addEventListener('firebaseReady', handleFirebaseReady);
+            
+            // Timeout après la durée spécifiée
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                if (!resolved) {
+                    window.removeEventListener('firebaseReady', handleFirebaseReady);
+                    console.error('❌ Firebase timeout after', timeout, 'ms');
+                    reject(new Error(`Firebase SDK timeout after ${timeout}ms - SDK may not be loaded`));
+                }
+            }, timeout);
+        });
     }
 
     /**
@@ -415,7 +469,7 @@ class FirebaseAuthManager {
             }
 
             const { signInWithEmailAndPassword } = window.firebase;
-            const result = await signInWithEmailAndPassword(authManager.auth, email, password);
+            const result = await signInWithEmailAndPassword(window.firebase.auth, email, password);
             console.log('✅ Sign in successful:', result.user.email);
             
             return {
@@ -426,7 +480,7 @@ class FirebaseAuthManager {
             console.error('❌ Sign in error:', error);
             
             // Gestion spécifique des erreurs API key
-            if (error.message.includes('api-key-not-valid')) {
+            if (error.message && error.message.includes('api-key-not-valid')) {
                 return {
                     success: false,
                     error: 'Configuration Firebase invalide. Veuillez vérifier la clé API dans la console Firebase.',
@@ -458,7 +512,7 @@ class FirebaseAuthManager {
             }
 
             const { createUserWithEmailAndPassword } = window.firebase;
-            const result = await createUserWithEmailAndPassword(authManager.auth, email, password);
+            const result = await createUserWithEmailAndPassword(window.firebase.auth, email, password);
             const user = result.user;
 
             // Mettre à jour le profil si un nom d'affichage est fourni
@@ -516,7 +570,7 @@ class FirebaseAuthManager {
             
             if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
                 const { signOut } = window.firebase;
-                await signOut(authManager.auth);
+                await signOut(window.firebase.auth);
                 authManager.clearSession();
                 console.log('✅ Sign out successful');
                 return { success: true };
@@ -540,7 +594,7 @@ class FirebaseAuthManager {
             }
 
             const { sendPasswordResetEmail } = window.firebase;
-            await sendPasswordResetEmail(authManager.auth, email);
+            await sendPasswordResetEmail(window.firebase.auth, email);
             console.log('✅ Password reset email sent');
             
             return { success: true };
@@ -630,7 +684,7 @@ class FirebaseAuthManager {
 
             const { GoogleAuthProvider, signInWithPopup } = window.firebase;
             const provider = new GoogleAuthProvider();
-            const result = await signInWithPopup(authManager.auth, provider);
+            const result = await signInWithPopup(window.firebase.auth, provider);
             
             console.log('✅ Google sign in successful:', result.user.email);
             
@@ -642,7 +696,7 @@ class FirebaseAuthManager {
             console.error('❌ Google sign in error:', error);
             
             // Gestion spécifique des erreurs API key
-            if (error.message.includes('api-key-not-valid')) {
+            if (error.message && error.message.includes('api-key-not-valid')) {
                 return {
                     success: false,
                     error: 'Configuration Firebase invalide. Veuillez vérifier la clé API dans la console Firebase.',
