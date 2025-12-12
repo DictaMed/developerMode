@@ -21,6 +21,8 @@ class AuthSystemDiagnostic {
             // Tests de base
             await this.testFirebaseSDK();
             await this.testFirebaseInitialization();
+            await this.testFirebaseConfig();
+            await this.testSDKCompatibility();
             await this.testAuthManager();
             await this.testPasswordStrength();
             await this.testErrorHandling();
@@ -43,15 +45,26 @@ class AuthSystemDiagnostic {
      */
     async testFirebaseSDK() {
         try {
+            // Vérification de la disponibilité de Firebase
             if (typeof firebase === 'undefined') {
-                throw new Error('Firebase SDK non chargé');
+                throw new Error('Firebase SDK non chargé - Vérifiez les scripts CDN');
+            }
+            
+            // Vérification des modules Firebase
+            if (!firebase.app) {
+                throw new Error('firebase.app non disponible - firebase-app.js manquant');
             }
             
             if (!firebase.auth) {
-                throw new Error('Firebase Auth SDK non disponible');
+                throw new Error('firebase.auth non disponible - firebase-auth.js manquant');
             }
             
-            this.addResult('Firebase SDK', true, 'SDK Firebase chargé correctement');
+            // Vérification de la version
+            if (firebase.SDK_VERSION) {
+                this.addResult('Firebase SDK', true, `SDK v${firebase.SDK_VERSION} chargé correctement`);
+            } else {
+                this.addResult('Firebase SDK', true, 'SDK Firebase chargé correctement (version non détectée)');
+            }
         } catch (error) {
             this.addResult('Firebase SDK', false, error.message);
         }
@@ -62,20 +75,57 @@ class AuthSystemDiagnostic {
      */
     async testFirebaseInitialization() {
         try {
+            // Vérification des applications Firebase
             if (!firebase.apps || firebase.apps.length === 0) {
-                throw new Error('Firebase non initialisé');
+                throw new Error('Firebase non initialisé - initializeApp() non appelé');
             }
             
             const app = firebase.app();
             const auth = firebase.auth();
             
             if (!auth) {
-                throw new Error('Firebase Auth non disponible');
+                throw new Error('Firebase Auth non disponible - Vérifiez firebase-auth.js');
             }
             
-            this.addResult('Firebase Initialization', true, `App: ${app.name}, Auth: Configuré`);
+            // Vérification de la configuration de l'app
+            const config = app.options;
+            if (!config.apiKey || !config.projectId) {
+                throw new Error('Configuration Firebase incomplète');
+            }
+            
+            this.addResult('Firebase Initialization', true, `App: ${app.name}, Projet: ${config.projectId}`);
         } catch (error) {
             this.addResult('Firebase Initialization', false, error.message);
+        }
+    }
+
+    /**
+     * Test de compatibilité SDK Firebase
+     */
+    async testSDKCompatibility() {
+        try {
+            // Vérification du type de SDK utilisé
+            const isCompatSDK = typeof firebase.app === 'function' && firebase.app.compat;
+            const isModularSDK = typeof firebase.app === 'function' && !firebase.app.compat;
+            
+            let sdkType = 'Inconnu';
+            if (isCompatSDK) {
+                sdkType = 'Compat SDK (v8)';
+            } else if (isModularSDK) {
+                sdkType = 'Modular SDK (v9+)';
+            }
+            
+            // Vérification de la disponibilité des providers
+            const auth = firebase.auth();
+            const googleProvider = new firebase.auth.GoogleAuthProvider();
+            
+            if (!googleProvider) {
+                throw new Error('GoogleAuthProvider non disponible - Vérifiez firebase-auth.js');
+            }
+            
+            this.addResult('SDK Compatibility', true, `${sdkType} - Google Provider OK`);
+        } catch (error) {
+            this.addResult('SDK Compatibility', false, error.message);
         }
     }
 
@@ -85,7 +135,7 @@ class AuthSystemDiagnostic {
     async testAuthManager() {
         try {
             if (typeof window.FirebaseAuthManager === 'undefined') {
-                throw new Error('FirebaseAuthManager non défini');
+                throw new Error('FirebaseAuthManager non défini - Vérifiez firebase-auth-manager.js');
             }
             
             const authManager = window.FirebaseAuthManager;
@@ -100,7 +150,7 @@ class AuthSystemDiagnostic {
                 'evaluatePasswordStrength'
             ];
             
-            const missingMethods = requiredMethods.filter(method => 
+            const missingMethods = requiredMethods.filter(method =>
                 typeof authManager[method] !== 'function'
             );
             
@@ -109,14 +159,21 @@ class AuthSystemDiagnostic {
             }
             
             // Test de l'instance singleton
-            const instance1 = authManager.getInstance();
-            const instance2 = authManager.getInstance();
-            
-            if (instance1 !== instance2) {
-                throw new Error('Singleton pattern non respecté');
+            if (typeof authManager.getInstance === 'function') {
+                const instance1 = authManager.getInstance();
+                const instance2 = authManager.getInstance();
+                
+                if (instance1 !== instance2) {
+                    throw new Error('Singleton pattern non respecté');
+                }
             }
             
-            this.addResult('FirebaseAuthManager', true, 'Toutes les méthodes disponibles');
+            // Test de l'état d'initialisation
+            if (typeof authManager.isInitialized !== 'undefined' && !authManager.isInitialized) {
+                this.addResult('FirebaseAuthManager', true, 'Méthodes disponibles - Non initialisé');
+            } else {
+                this.addResult('FirebaseAuthManager', true, 'Toutes les méthodes disponibles');
+            }
         } catch (error) {
             this.addResult('FirebaseAuthManager', false, error.message);
         }
@@ -187,6 +244,45 @@ class AuthSystemDiagnostic {
     }
 
     /**
+     * Test de la configuration Firebase
+     */
+    async testFirebaseConfig() {
+        try {
+            if (!firebase.apps || firebase.apps.length === 0) {
+                throw new Error('Firebase non initialisé');
+            }
+            
+            const app = firebase.app();
+            const config = app.options;
+            
+            // Vérification des champs essentiels
+            const requiredFields = ['apiKey', 'authDomain', 'projectId', 'appId'];
+            const missingFields = requiredFields.filter(field => !config[field]);
+            
+            if (missingFields.length > 0) {
+                throw new Error(`Configuration incomplète: ${missingFields.join(', ')}`);
+            }
+            
+            // Vérification du format des champs
+            if (!config.apiKey.startsWith('AIza')) {
+                throw new Error('API Key semble invalide (doit commencer par AIza)');
+            }
+            
+            if (!config.authDomain.includes('firebaseapp.com')) {
+                throw new Error('Auth Domain semble invalide');
+            }
+            
+            if (!config.projectId || config.projectId.length < 5) {
+                throw new Error('Project ID semble invalide');
+            }
+            
+            this.addResult('Firebase Config', true, 'Configuration valide');
+        } catch (error) {
+            this.addResult('Firebase Config', false, error.message);
+        }
+    }
+
+    /**
      * Test des éléments d'interface utilisateur
      */
     async testUIElements() {
@@ -200,7 +296,7 @@ class AuthSystemDiagnostic {
                 'modalEmailSubmitBtn'
             ];
             
-            const missingElements = requiredElements.filter(elementId => 
+            const missingElements = requiredElements.filter(elementId =>
                 !document.getElementById(elementId)
             );
             
