@@ -1,0 +1,504 @@
+/**
+ * DictaMed - Styles CSS pour l'Interface d'Administration des Webhooks
+ * Version: 1.0.0 - Styles modernes et responsifs
+ */
+
+/* ===== CONTENEUR PRINCIPAL ===== */
+.admin-webhook-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ===== EN-TÊTE ADMIN ===== */
+.admin-webhook-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+}
+
+.admin-webhook-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.admin-webhook-header p {
+    margin: 0 0 20px 0;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.admin-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.admin-info span {
+    font-size: 1rem;
+}
+
+/* ===== STATISTIQUES ===== */
+.admin-stats {
+    margin-bottom: 30px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    color: white;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #718096;
+    font-weight: 500;
+}
+
+/* ===== SECTION UTILISATEURS ===== */
+.users-section {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.users-section h2 {
+    margin: 0 0 25px 0;
+    font-size: 1.8rem;
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.users-controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 250px;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.filter-select {
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* ===== LISTE DES UTILISATEURS ===== */
+.users-list {
+    display: grid;
+    gap: 20px;
+}
+
+.user-card {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 25px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.user-card:hover {
+    border-color: #cbd5e0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.user-card.active {
+    border-color: #48bb78;
+    background: #f0fff4;
+}
+
+.user-card.inactive {
+    border-color: #f56565;
+    background: #fff5f5;
+}
+
+.user-card.no-webhook {
+    border-color: #ed8936;
+    background: #fffaf0;
+}
+
+/* ===== INFO UTILISATEUR ===== */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 5px;
+}
+
+.user-email {
+    color: #4a5568;
+    margin-bottom: 3px;
+    font-size: 0.9rem;
+}
+
+.user-uid {
+    color: #718096;
+    font-size: 0.8rem;
+    font-family: monospace;
+    margin-bottom: 8px;
+}
+
+.user-status {
+    margin-top: 8px;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+    background: #c6f6d5;
+    color: #22543d;
+}
+
+.status-badge.inactive {
+    background: #fed7d7;
+    color: #742a2a;
+}
+
+.status-badge.no-webhook {
+    background: #feebc8;
+    color: #7c2d12;
+}
+
+/* ===== GESTION WEBHOOK ===== */
+.webhook-management {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.webhook-input-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.webhook-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.webhook-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.webhook-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.webhook-meta {
+    padding: 10px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.webhook-meta small {
+    color: #718096;
+    font-size: 0.8rem;
+}
+
+/* ===== BOUTONS ===== */
+.btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.btn-success {
+    background: #48bb78;
+    color: white;
+}
+
+.btn-warning {
+    background: #ed8936;
+    color: white;
+}
+
+.btn-danger {
+    background: #f56565;
+    color: white;
+}
+
+.btn-info {
+    background: #4299e1;
+    color: white;
+}
+
+.btn-save {
+    background: #38b2ac;
+    color: white;
+    white-space: nowrap;
+}
+
+/* ===== CHARGEMENT ===== */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    color: white;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===== ACCÈS REFUSÉ ===== */
+.access-denied {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.access-denied-content {
+    max-width: 500px;
+    padding: 40px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.access-denied h1 {
+    color: #e53e3e;
+    margin-bottom: 20px;
+}
+
+.access-denied p {
+    margin-bottom: 15px;
+    color: #4a5568;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .admin-webhook-container {
+        padding: 15px;
+    }
+    
+    .admin-webhook-header {
+        padding: 20px;
+    }
+    
+    .admin-webhook-header h1 {
+        font-size: 2rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .users-controls {
+        flex-direction: column;
+    }
+    
+    .search-input {
+        min-width: unset;
+    }
+    
+    .user-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .webhook-input-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .webhook-controls {
+        justify-content: center;
+    }
+    
+    .webhook-meta {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-webhook-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .webhook-controls {
+        flex-direction: column;
+    }
+    
+    .btn {
+        justify-content: center;
+    }
+}
