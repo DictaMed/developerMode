@@ -25,7 +25,8 @@ class AdminWebhookManager {
                 return false;
             }
 
-            this.currentAdminUser = FirebaseAuthManager.getCurrentUser();
+            const authManager = window.FirebaseAuthManager || FirebaseAuthManager.getInstance();
+            this.currentAdminUser = authManager.getCurrentUser();
             console.log('✅ Admin authentifié:', this.currentAdminUser.email);
 
             // Charger les données
@@ -51,7 +52,8 @@ class AdminWebhookManager {
      * Vérification de l'authentification admin
      */
     checkAdminAuth() {
-        const currentUser = FirebaseAuthManager.getCurrentUser();
+        const authManager = window.FirebaseAuthManager || FirebaseAuthManager.getInstance();
+        const currentUser = authManager.getCurrentUser();
         if (!currentUser) {
             this.showError('Vous devez être connecté pour accéder à cette interface.');
             return false;

@@ -296,7 +296,7 @@ class DataSender {
         
         try {
             // Récupérer l'utilisateur actuel
-            const currentUser = window.FirebaseAuthManager?.getCurrentUser();
+            const currentUser = window.FirebaseAuthManager?.getCurrentUser?.() || null;
             const userId = currentUser?.uid;
             
             if (userId) {

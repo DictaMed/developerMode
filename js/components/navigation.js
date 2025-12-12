@@ -102,7 +102,7 @@ class TabNavigationSystem {
             return;
         }
 
-        const isAuthenticated = window.FirebaseAuthManager && window.FirebaseAuthManager.isAuthenticated();
+        const isAuthenticated = window.FirebaseAuthManager && window.FirebaseAuthManager.isAuthenticated && window.FirebaseAuthManager.isAuthenticated();
         
         if (isAuthenticated) {
             this.normalModeButton.style.display = '';
@@ -318,7 +318,7 @@ class TabNavigationSystem {
         }
         
         // Normal mode and DMI mode require authentication
-        if ((tabId === window.APP_CONFIG.MODES.NORMAL || tabId === window.APP_CONFIG.MODES.DMI) && window.FirebaseAuthManager && !window.FirebaseAuthManager.isAuthenticated()) {
+        if ((tabId === window.APP_CONFIG.MODES.NORMAL || tabId === window.APP_CONFIG.MODES.DMI) && window.FirebaseAuthManager && window.FirebaseAuthManager.isAuthenticated && !window.FirebaseAuthManager.isAuthenticated()) {
             window.notificationSystem.warning('Veuillez vous connecter pour accéder à ce mode', 'Authentification requise');
             return false;
         }

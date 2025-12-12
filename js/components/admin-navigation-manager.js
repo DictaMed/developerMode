@@ -110,7 +110,7 @@ class AdminNavigationManager {
     getCurrentUser() {
         try {
             // Essayer avec FirebaseAuthManager
-            if (typeof window.FirebaseAuthManager !== 'undefined') {
+            if (typeof window.FirebaseAuthManager !== 'undefined' && window.FirebaseAuthManager.getCurrentUser) {
                 const user = window.FirebaseAuthManager.getCurrentUser();
                 if (user) {
                     return user;

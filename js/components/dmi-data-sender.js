@@ -86,7 +86,7 @@ class DMIDataSender {
         };
 
         // Add Firebase user email if connected
-        if (window.FirebaseAuthManager && window.FirebaseAuthManager.getCurrentUser()) {
+        if (window.FirebaseAuthManager && window.FirebaseAuthManager.getCurrentUser && window.FirebaseAuthManager.getCurrentUser()) {
             const currentUser = window.FirebaseAuthManager.getCurrentUser();
             if (currentUser && currentUser.email) {
                 payload.userEmail = currentUser.email;

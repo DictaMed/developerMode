@@ -182,7 +182,7 @@ class AuthModalSystem {
      * Mise à jour de l'indicateur de force du mot de passe
      */
     updatePasswordStrength(password) {
-        const authManager = FirebaseAuthManager.getInstance();
+        const authManager = window.FirebaseAuthManager || FirebaseAuthManager.getInstance();
         this.passwordStrength = authManager.evaluatePasswordStrength(password);
         
         const passwordStrengthDiv = document.getElementById('passwordStrength');
@@ -519,7 +519,8 @@ class AuthModalSystem {
         }
         
         // Utiliser FirebaseAuthManager pour l'email de réinitialisation
-        FirebaseAuthManager.sendPasswordResetEmail(email)
+        const authManager = window.FirebaseAuthManager || FirebaseAuthManager.getInstance();
+        authManager.sendPasswordResetEmail(email)
             .then(result => {
                 if (result.success) {
                     if (window.notificationSystem) {
@@ -571,9 +572,11 @@ class AuthModalSystem {
 
         try {
             let result;
+            const authManager = window.FirebaseAuthManager || FirebaseAuthManager.getInstance();
+            
             if (this.currentMode === 'signup') {
                 // Utiliser le nouveau FirebaseAuthManager.signUp
-                result = await FirebaseAuthManager.signUp(email, password);
+                result = await authManager.signUp(email, password);
                 if (result.success) {
                     if (result.emailSent) {
                         this.showSuccess('Inscription réussie! Vérifiez votre email pour confirmer votre compte.');
@@ -583,7 +586,7 @@ class AuthModalSystem {
                 }
             } else {
                 // Utiliser FirebaseAuthManager.signIn
-                result = await FirebaseAuthManager.signIn(email, password);
+                result = await authManager.signIn(email, password);
                 if (result.success) {
                     this.showSuccess('Connexion réussie!');
                 }
@@ -649,7 +652,8 @@ class AuthModalSystem {
     async handleGoogleSignIn() {
         try {
             // Utiliser FirebaseAuthManager pour Google Sign-In
-            const result = await FirebaseAuthManager.signInWithGoogle();
+            const authManager = window.FirebaseAuthManager || FirebaseAuthManager.getInstance();
+            const result = await authManager.signInWithGoogle();
             
             if (result.success) {
                 this.showSuccess('Connexion réussie avec Google!');
@@ -676,7 +680,8 @@ class AuthModalSystem {
 
     async handleSignOut() {
         try {
-            const result = await FirebaseAuthManager.signOut();
+            const authManager = window.FirebaseAuthManager || FirebaseAuthManager.getInstance();
+            const result = await authManager.signOut();
             if (result.success) {
                 this.showSuccess('Déconnexion réussie');
                 setTimeout(() => {
@@ -742,7 +747,8 @@ class AuthModalSystem {
         
         if (!authButton || !authButtonText) return;
 
-        const user = FirebaseAuthManager.getCurrentUser();
+        const authManager = window.FirebaseAuthManager || FirebaseAuthManager.getInstance();
+        const user = authManager.getCurrentUser();
         
         if (user) {
             authButtonText.textContent = user.displayName || user.email || 'Connecté';
@@ -759,4 +765,34 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = AuthModalSystem;
 } else {
     window.AuthModalSystem = AuthModalSystem;
+}
+
+// Initialisation automatique quand le DOM est prêt
+if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            // Attendre que FirebaseAuthManager soit initialisé
+            const initAuthModal = () => {
+                if (window.FirebaseAuthManager) {
+                    window.authModalSystem = new AuthModalSystem();
+                    window.authModalSystem.init();
+                } else {
+                    // Réessayer dans 100ms
+                    setTimeout(initAuthModal, 100);
+                }
+            };
+            initAuthModal();
+        });
+    } else {
+        // DOM déjà chargé
+        const initAuthModal = () => {
+            if (window.FirebaseAuthManager) {
+                window.authModalSystem = new AuthModalSystem();
+                window.authModalSystem.init();
+            } else {
+                setTimeout(initAuthModal, 100);
+            }
+        };
+        initAuthModal();
+    }
 }

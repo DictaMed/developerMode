@@ -109,7 +109,8 @@ class AuthSecurityManager {
         });
 
         // Déconnecter l'utilisateur
-        FirebaseAuthManager.signOut().then(() => {
+        const authManager = window.FirebaseAuthManager || FirebaseAuthManager.getInstance();
+        authManager.signOut().then(() => {
             if (window.notificationSystem) {
                 window.notificationSystem.warning(
                     'Votre session a expiré. Veuillez vous reconnecter.',
