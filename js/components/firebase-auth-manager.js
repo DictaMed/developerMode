@@ -286,6 +286,12 @@ class FirebaseAuthManager {
             }
         });
         window.dispatchEvent(authEvent);
+        
+        // Notifier aussi le gestionnaire de navigation admin
+        if (window.adminNavigationManager && typeof window.adminNavigationManager.forceCheck === 'function') {
+            window.adminNavigationManager.forceCheck();
+        }
+        
         console.log('📡 Auth state change event dispatched:', state);
     }
 

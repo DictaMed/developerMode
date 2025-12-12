@@ -45,7 +45,7 @@
                     <span class="nav-icon">❓</span>
                     FAQ
                 </button>
-                <button class="fixed-nav-btn" onclick="window.open('admin-webhooks.html', '_blank')">
+                <button class="fixed-nav-btn admin-nav-btn" id="adminNavBtn" style="display: none;" onclick="window.open('admin-webhooks.html', '_blank')">
                     <span class="nav-icon">🎛️</span>
                     Admin
                 </button>
@@ -327,6 +327,7 @@
     <!-- 4. GESTIONNAIRE D'AUTHENTIFICATION (CRITIQUE POUR DMI) -->
     <script src="js/components/firebase-auth-manager.js"></script>
     <script src="js/components/auth-modal.js"></script>
+    <script src="js/components/admin-navigation-manager.js"></script>
     
     <!-- 5. COMPOSANTS AUDIO (DÉPENDANCE CRITIQUE) -->
     <script src="js/components/audio-recorder.js"></script>
