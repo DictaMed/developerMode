@@ -81,59 +81,78 @@ class FirebaseAuthManager {
     /**
      * Attendre que Firebase soit disponible avec timeout amélioré
      */
-    static async waitForFirebase(timeout = 15000) {
+    static async waitForFirebase(timeout = 15000, retryCount = 3) {
         const startTime = Date.now();
+        let attempt = 0;
         
-        // Vérifier d'abord si Firebase est déjà disponible
-        if (typeof window.firebase !== 'undefined' && 
-            window.firebase.auth && 
-            typeof window.firebase.auth === 'object' &&
-            typeof window.firebase.auth === 'function') {
-            console.log('✅ Firebase already available');
-            return true;
-        }
-        
-        console.log('⏳ Waiting for Firebase to be ready...');
-        
-        // Attendre l'événement firebaseReady
-        return new Promise((resolve, reject) => {
-            let resolved = false;
-            
-            const handleFirebaseReady = () => {
-                if (resolved) return;
-                resolved = true;
-                window.removeEventListener('firebaseReady', handleFirebaseReady);
-                console.log('✅ Firebase ready event received');
-                resolve();
-            };
-            
-            // Vérifier périodiquement si Firebase est disponible
-            const checkInterval = setInterval(() => {
-                if (typeof window.firebase !== 'undefined' && 
-                    window.firebase.auth && 
+        const checkFirebaseReady = () => {
+            return new Promise((resolve, reject) => {
+                attempt++;
+                console.log(`🔍 Attempt ${attempt} to check Firebase readiness`);
+                
+                // Vérifier d'abord si Firebase est déjà disponible
+                if (typeof window.firebase !== 'undefined' &&
+                    window.firebase.auth &&
                     typeof window.firebase.auth === 'object') {
+                    console.log('✅ Firebase already available');
+                    resolve(true);
+                    return;
+                }
+                
+                console.log('⏳ Waiting for Firebase to be ready...');
+                
+                let resolved = false;
+                const handleFirebaseReady = () => {
+                    if (resolved) return;
+                    resolved = true;
+                    window.removeEventListener('firebaseReady', handleFirebaseReady);
+                    console.log('✅ Firebase ready event received');
+                    resolve(true);
+                };
+                
+                // Vérifier périodiquement si Firebase est disponible
+                const checkInterval = setInterval(() => {
+                    if (typeof window.firebase !== 'undefined' &&
+                        window.firebase.auth &&
+                        typeof window.firebase.auth === 'object') {
+                        clearInterval(checkInterval);
+                        if (!resolved) {
+                            resolved = true;
+                            window.removeEventListener('firebaseReady', handleFirebaseReady);
+                            console.log('✅ Firebase detected via polling');
+                            resolve(true);
+                        }
+                    }
+                }, 100);
+                
+                window.addEventListener('firebaseReady', handleFirebaseReady);
+                
+                // Timeout après la durée spécifiée
+                setTimeout(() => {
                     clearInterval(checkInterval);
                     if (!resolved) {
-                        resolved = true;
                         window.removeEventListener('firebaseReady', handleFirebaseReady);
-                        console.log('✅ Firebase detected via polling');
-                        resolve();
+                        console.error('❌ Firebase timeout after', timeout, 'ms');
+                        reject(new Error(`Firebase SDK timeout after ${timeout}ms - SDK may not be loaded`));
                     }
+                }, timeout);
+            });
+        };
+        
+        // Implémenter un mécanisme de réessai
+        for (let i = 0; i < retryCount; i++) {
+            try {
+                return await checkFirebaseReady();
+            } catch (error) {
+                console.warn(`⚠️ Firebase readiness check attempt ${i + 1} failed:`, error.message);
+                if (i === retryCount - 1) {
+                    console.error('❌ All Firebase readiness checks failed');
+                    throw new Error(`Firebase SDK not available after ${retryCount} attempts - ${error.message}`);
                 }
-            }, 100);
-            
-            window.addEventListener('firebaseReady', handleFirebaseReady);
-            
-            // Timeout après la durée spécifiée
-            setTimeout(() => {
-                clearInterval(checkInterval);
-                if (!resolved) {
-                    window.removeEventListener('firebaseReady', handleFirebaseReady);
-                    console.error('❌ Firebase timeout after', timeout, 'ms');
-                    reject(new Error(`Firebase SDK timeout after ${timeout}ms - SDK may not be loaded`));
-                }
-            }, timeout);
-        });
+                // Attendre avant de réessayer
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
     }
 
     /**

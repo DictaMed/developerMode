@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Firebase Auth Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Firebase Auth Fix</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Firebase Initialization</h2>
+        <button onclick="testFirebaseInitialization()">Test Firebase Init</button>
+        <div id="test1Result" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Sign Up Functionality</h2>
+        <button onclick="testSignUp()">Test Sign Up</button>
+        <div id="test2Result" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Auth Status Check</h2>
+        <button onclick="testAuthStatus()">Test Auth Status</button>
+        <div id="test3Result" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Console Logs</h2>
+        <div id="consoleLogs" style="height: 300px; overflow-y: auto; background-color: #f5f5f5; padding: 10px; border-radius: 3px;"></div>
+    </div>
+
+    <!-- Firebase SDK v10+ Modulaire -->
+    <script type="module">
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9XYvHxbp3VW0PCW0W7xfoWuiMxsjoUZE",
+            authDomain: "dictamed2025.firebaseapp.com",
+            projectId: "dictamed2025",
+            storageBucket: "dictamed2025.firebasestorage.app",
+            messagingSenderId: "242034923776",
+            appId: "1:242034923776:web:bd315e890c715b1d263be5",
+            measurementId: "G-1B8DZ4B73R"
+        };
+        
+        // Charger Firebase SDK modulaire avec cache-busting
+        const loadFirebase = async () => {
+            try {
+                console.log('🔄 Chargement Firebase avec cache-busting...');
+                console.log('🔑 Configuration API Key:', firebaseConfig.apiKey);
+                
+                // Importer les modules Firebase avec timestamp pour éviter le cache
+                const timestamp = Date.now();
+                const { initializeApp } = await import(`https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js?v=${timestamp}`);
+                const {
+                    getAuth,
+                    onAuthStateChanged,
+                    signInWithEmailAndPassword,
+                    createUserWithEmailAndPassword,
+                    signOut,
+                    sendPasswordResetEmail,
+                    GoogleAuthProvider,
+                    signInWithPopup
+                } = await import(`https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js?v=${timestamp}`);
+                
+                console.log('📦 Modules Firebase importés avec succès');
+                
+                // Initialiser Firebase
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                
+                console.log('🎯 Firebase App initialisé:', app.name);
+                console.log('🔐 Firebase Auth configuré:', auth.config.projectId);
+                
+                // Rendre disponible globalement pour compatibilité
+                window.firebase = {
+                    app: app,
+                    auth: auth,
+                    // Méthodes d'authentification
+                    onAuthStateChanged: onAuthStateChanged,
+                    signInWithEmailAndPassword: signInWithEmailAndPassword,
+                    createUserWithEmailAndPassword: createUserWithEmailAndPassword,
+                    signOut: signOut,
+                    sendPasswordResetEmail: sendPasswordResetEmail,
+                    GoogleAuthProvider: GoogleAuthProvider,
+                    signInWithPopup: signInWithPopup
+                };
+                
+                console.log('✅ Firebase SDK modulaire initialisé avec succès');
+                console.log('📊 Projet:', firebaseConfig.projectId);
+                console.log('🔑 API Key validée');
+                
+                // Dispatcher un événement pour informer les autres scripts
+                window.dispatchEvent(new Event('firebaseReady'));
+                
+                return window.firebase;
+                
+            } catch (error) {
+                console.error('❌ Erreur Firebase SDK modulaire:', error);
+                console.error('📋 Détails de l\'erreur:', {
+                    message: error.message,
+                    code: error.code,
+                    config: firebaseConfig
+                });
+                throw error;
+            }
+        };
+        
+        // Charger Firebase immédiatement
+        window.initFirebase = loadFirebase;
+        
+        // Charger automatiquement avec retry
+        const initializeWithRetry = async (attempts = 3) => {
+            for (let i = 0; i < attempts; i++) {
+                try {
+                    await loadFirebase();
+                    break;
+                } catch (error) {
+                    console.warn(`⚠️ Tentative ${i + 1} échouée:`, error.message);
+                    if (i === attempts - 1) {
+                        console.error('❌ Échec du chargement Firebase après', attempts, 'tentatives');
+                        throw error;
+                    }
+                    // Attendre avant de réessayer
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+        };
+        
+        initializeWithRetry();
+    </script>
+    
+    <script src="js/components/firebase-auth-manager.js"></script>
+    
+    <script>
+        // Rediriger les logs console vers la page
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        const originalConsoleWarn = console.warn;
+        const originalConsoleInfo = console.info;
+        
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            appendToConsole('INFO', args);
+        };
+        
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            appendToConsole('ERROR', args);
+        };
+        
+        console.warn = function(...args) {
+            originalConsoleWarn.apply(console, args);
+            appendToConsole('WARN', args);
+        };
+        
+        console.info = function(...args) {
+            originalConsoleInfo.apply(console, args);
+            appendToConsole('INFO', args);
+        };
+        
+        function appendToConsole(level, args) {
+            const consoleLogs = document.getElementById('consoleLogs');
+            const message = args.map(arg => {
+                if (typeof arg === 'object') {
+                    return JSON.stringify(arg, null, 2);
+                }
+                return arg;
+            }).join(' ');
+            
+            const logEntry = document.createElement('div');
+            logEntry.style.marginBottom = '5px';
+            
+            const levelSpan = document.createElement('span');
+            levelSpan.style.fontWeight = 'bold';
+            levelSpan.style.marginRight = '10px';
+            
+            if (level === 'ERROR') {
+                levelSpan.textContent = '❌ ERROR:';
+                levelSpan.style.color = '#721c24';
+            } else if (level === 'WARN') {
+                levelSpan.textContent = '⚠️ WARN:';
+                levelSpan.style.color = '#856404';
+            } else {
+                levelSpan.textContent = 'ℹ️ INFO:';
+                levelSpan.style.color = '#0c5460';
+            }
+            
+            logEntry.appendChild(levelSpan);
+            logEntry.appendChild(document.createTextNode(message));
+            consoleLogs.appendChild(logEntry);
+            consoleLogs.scrollTop = consoleLogs.scrollHeight;
+        }
+        
+        async function testFirebaseInitialization() {
+            const resultDiv = document.getElementById('test1Result');
+            resultDiv.innerHTML = '<span style="color: #0056b3;">Testing Firebase initialization...</span>';
+            resultDiv.className = 'test-result info';
+            
+            try {
+                // Wait for Firebase to be ready
+                await new Promise((resolve) => {
+                    const checkFirebase = () => {
+                        if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
+                            resolve();
+                        } else {
+                            setTimeout(checkFirebase, 100);
+                        }
+                    };
+                    checkFirebase();
+                });
+                
+                // Test FirebaseAuthManager initialization
+                await FirebaseAuthManager.init();
+                
+                resultDiv.innerHTML = '<span style="color: #155724;">✅ Firebase initialization successful!</span>';
+                resultDiv.className = 'test-result success';
+            } catch (error) {
+                resultDiv.innerHTML = `<span style="color: #721c24;">❌ Firebase initialization failed: ${error.message}</span>`;
+                resultDiv.className = 'test-result error';
+            }
+        }
+        
+        async function testSignUp() {
+            const resultDiv = document.getElementById('test2Result');
+            resultDiv.innerHTML = '<span style="color: #0056b3;">Testing sign up functionality...</span>';
+            resultDiv.className = 'test-result info';
+            
+            try {
+                // Ensure FirebaseAuthManager is initialized
+                await FirebaseAuthManager.init();
+                
+                // Test with a random email to avoid conflicts
+                const testEmail = `test-${Math.random().toString(36).substring(2, 11)}@example.com`;
+                const testPassword = 'testPassword123!';
+                
+                resultDiv.innerHTML = `<span style="color: #0056b3;">Testing sign up with email: ${testEmail}</span>`;
+                
+                const result = await FirebaseAuthManager.signUp(testEmail, testPassword);
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `<span style="color: #155724;">✅ Sign up successful! User: ${result.user.email}</span>`;
+                    resultDiv.className = 'test-result success';
+                    
+                    // Clean up by deleting the test user
+                    try {
+                        await result.user.delete();
+                        console.log('🧹 Test user cleaned up successfully');
+                    } catch (cleanupError) {
+                        console.warn('⚠️ Could not clean up test user:', cleanupError.message);
+                    }
+                } else {
+                    resultDiv.innerHTML = `<span style="color: #721c24;">❌ Sign up failed: ${result.error}</span>`;
+                    resultDiv.className = 'test-result error';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span style="color: #721c24;">❌ Sign up test failed: ${error.message}</span>`;
+                resultDiv.className = 'test-result error';
+            }
+        }
+        
+        async function testAuthStatus() {
+            const resultDiv = document.getElementById('test3Result');
+            resultDiv.innerHTML = '<span style="color: #0056b3;">Testing auth status...</span>';
+            resultDiv.className = 'test-result info';
+            
+            try {
+                const authStatus = await FirebaseAuthManager.checkAuthConfiguration();
+                
+                if (authStatus.isConfigured) {
+                    resultDiv.innerHTML = `<span style="color: #155724;">✅ Auth configured: Project ${authStatus.projectId}</span>`;
+                    resultDiv.className = 'test-result success';
+                } else {
+                    resultDiv.innerHTML = `<span style="color: #721c24;">❌ Auth not configured: ${authStatus.error}</span>`;
+                    resultDiv.className = 'test-result error';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span style="color: #721c24;">❌ Auth status test failed: ${error.message}</span>`;
+                resultDiv.className = 'test-result error';
+            }
+        }
+        
+        // Initialize the test page
+        console.log('🧪 Firebase Auth Fix Test Page Initialized');
+        console.log('📋 Please click the test buttons above to verify the fix');
+    </script>
+</body>
+</html>
