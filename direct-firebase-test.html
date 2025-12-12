@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Firebase Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-size: 18px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        button {
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #consoleOutput {
+            text-align: left;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .console-line {
+            margin-bottom: 5px;
+        }
+        .console-success {
+            color: #28a745;
+        }
+        .console-error {
+            color: #dc3545;
+        }
+        .console-info {
+            color: #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <h1>Direct Firebase Test</h1>
+    <p>This test works when opened directly from the file system</p>
+    
+    <div id="status" class="status info">Loading Firebase SDK...</div>
+    
+    <div style="margin: 20px 0;">
+        <button id="testInitBtn" onclick="testFirebaseInit()" disabled>Test Firebase Initialization</button>
+        <button id="testAuthBtn" onclick="testAuthFunctions()" disabled>Test Auth Functions</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <div id="consoleOutput"></div>
+
+    <!-- Load Firebase SDK directly - works from file system -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
+    <script>
+        // Simple console logging to page
+        function logToPage(message, type = 'info') {
+            const consoleOutput = document.getElementById('consoleOutput');
+            const line = document.createElement('div');
+            line.className = `console-line console-${type}`;
+            line.textContent = message;
+            consoleOutput.appendChild(line);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9XYvHxbp3VW0PCW0W7xfoWuiMxsjoUZE",
+            authDomain: "dictamed2025.firebaseapp.com",
+            projectId: "dictamed2025",
+            storageBucket: "dictamed2025.firebasestorage.app",
+            messagingSenderId: "242034923776",
+            appId: "1:242034923776:web:bd315e890c715b1d263be5",
+            measurementId: "G-1B8DZ4B73R"
+        };
+        
+        // Initialize Firebase when page loads
+        window.addEventListener('load', function() {
+            const statusDiv = document.getElementById('status');
+            
+            try {
+                logToPage('🔄 Starting Firebase initialization...', 'info');
+                
+                // Initialize Firebase
+                const app = firebase.initializeApp(firebaseConfig);
+                logToPage('✅ Firebase app initialized: ' + app.name, 'success');
+                
+                // Get auth instance
+                const auth = firebase.auth();
+                logToPage('✅ Firebase auth initialized', 'success');
+                
+                // Set persistence
+                auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+                    .then(() => {
+                        logToPage('✅ Persistence configured successfully', 'success');
+                        
+                        statusDiv.textContent = '✅ Firebase is ready!';
+                        statusDiv.className = 'status success';
+                        
+                        document.getElementById('testInitBtn').disabled = false;
+                        document.getElementById('testAuthBtn').disabled = false;
+                        
+                        logToPage('🎉 Firebase SDK is ready to use!', 'success');
+                        logToPage('Project: ' + firebaseConfig.projectId, 'info');
+                        
+                        // Make firebase available globally
+                        window.firebase = firebase;
+                        
+                        // Dispatch event for other scripts
+                        setTimeout(() => {
+                            window.dispatchEvent(new Event('firebaseReady'));
+                        }, 100);
+                        
+                    })
+                    .catch((error) => {
+                        logToPage('❌ Error setting persistence: ' + error.message, 'error');
+                        statusDiv.textContent = '❌ Error: ' + error.message;
+                        statusDiv.className = 'status error';
+                    });
+                    
+            } catch (error) {
+                logToPage('❌ Firebase initialization error: ' + error.message, 'error');
+                statusDiv.textContent = '❌ Initialization error: ' + error.message;
+                statusDiv.className = 'status error';
+            }
+        });
+        
+        function testFirebaseInit() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h3>Testing Firebase Initialization</h3>';
+            
+            try {
+                if (typeof firebase === 'undefined') {
+                    resultsDiv.innerHTML += '<p class="error">❌ Firebase is not available</p>';
+                    return;
+                }
+                
+                const app = firebase.app();
+                const auth = firebase.auth();
+                
+                resultsDiv.innerHTML += `
+                    <p class="success">✅ Firebase is working!</p>
+                    <p><strong>App Name:</strong> ${app.name}</p>
+                    <p><strong>Project ID:</strong> ${firebaseConfig.projectId}</p>
+                    <p><strong>Current User:</strong> ${auth.currentUser ? auth.currentUser.email : 'None'}</p>
+                `;
+                
+                logToPage('✅ Firebase initialization test passed', 'success');
+                
+            } catch (error) {
+                resultsDiv.innerHTML += `<p class="error">❌ Test failed: ${error.message}</p>`;
+                logToPage('❌ Firebase test error: ' + error.message, 'error');
+            }
+        }
+        
+        function testAuthFunctions() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h3>Testing Auth Functions</h3>';
+            
+            try {
+                const auth = firebase.auth();
+                
+                // Test basic auth methods availability
+                const methods = {
+                    'signInWithEmailAndPassword': typeof auth.signInWithEmailAndPassword,
+                    'createUserWithEmailAndPassword': typeof auth.createUserWithEmailAndPassword,
+                    'signOut': typeof auth.signOut,
+                    'sendPasswordResetEmail': typeof auth.sendPasswordResetEmail,
+                    'GoogleAuthProvider': typeof firebase.auth.GoogleAuthProvider
+                };
+                
+                let allAvailable = true;
+                let methodList = '<ul>';
+                
+                for (const [method, type] of Object.entries(methods)) {
+                    const status = type === 'function' ? '✅' : '❌';
+                    const color = type === 'function' ? 'success' : 'error';
+                    methodList += `<li class="${color}">${status} ${method}: ${type}</li>`;
+                    if (type !== 'function') allAvailable = false;
+                }
+                methodList += '</ul>';
+                
+                if (allAvailable) {
+                    resultsDiv.innerHTML += '<p class="success">✅ All auth methods are available!</p>' + methodList;
+                    logToPage('✅ All auth methods are available', 'success');
+                } else {
+                    resultsDiv.innerHTML += '<p class="error">❌ Some auth methods are missing!</p>' + methodList;
+                    logToPage('⚠️ Some auth methods are missing', 'error');
+                }
+                
+            } catch (error) {
+                resultsDiv.innerHTML += `<p class="error">❌ Auth test failed: ${error.message}</p>`;
+                logToPage('❌ Auth test error: ' + error.message, 'error');
+            }
+        }
+        
+        // Log original console methods as well
+        console.log = function(...args) {
+            logToPage('INFO: ' + args.join(' '), 'info');
+        };
+        
+        console.error = function(...args) {
+            logToPage('ERROR: ' + args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            logToPage('WARN: ' + args.join(' '), 'error');
+        };
+        
+        logToPage('📋 Direct Firebase Test loaded', 'info');
+        logToPage('🔍 This test works when opened directly from file system', 'info');
+    </script>
+</body>
+</html>

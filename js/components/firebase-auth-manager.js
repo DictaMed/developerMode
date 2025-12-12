@@ -701,12 +701,13 @@ class FirebaseAuthManager {
                 throw new Error('Firebase Auth not available');
             }
 
-            const { GoogleAuthProvider, signInWithPopup } = window.firebase;
-            const provider = new GoogleAuthProvider();
-            const result = await signInWithPopup(window.firebase.auth, provider);
-            
+            // Use compatible SDK approach
+            const provider = new window.firebase.auth.GoogleAuthProvider();
+            const auth = window.firebase.auth();
+            const result = await auth.signInWithPopup(provider);
+             
             console.log('✅ Google sign in successful:', result.user.email);
-            
+             
             return {
                 success: true,
                 user: result.user
