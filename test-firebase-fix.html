@@ -73,8 +73,12 @@
         <div id="consoleLogs" style="height: 300px; overflow-y: auto; background-color: #f5f5f5; padding: 10px; border-radius: 3px;"></div>
     </div>
 
-    <!-- Firebase SDK v10+ Modulaire -->
-    <script type="module">
+    <!-- Firebase SDK v10+ Modulaire - Approche traditionnelle plus fiable -->
+    <!-- Charger les scripts Firebase de manière séquentielle -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
+    <script>
         // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyC9XYvHxbp3VW0PCW0W7xfoWuiMxsjoUZE",
@@ -86,66 +90,41 @@
             measurementId: "G-1B8DZ4B73R"
         };
         
-        // Charger Firebase SDK modulaire avec cache-busting
-        const loadFirebase = async () => {
+        // Initialiser Firebase lorsque les scripts sont chargés
+        document.addEventListener('DOMContentLoaded', function() {
             try {
-                console.log('🔄 Chargement Firebase avec cache-busting...');
+                console.log('🔄 Initialisation Firebase avec approche compatible...');
                 console.log('🔑 Configuration API Key:', firebaseConfig.apiKey);
                 
-                // Importer les modules Firebase avec timestamp pour éviter le cache
-                const timestamp = Date.now();
-                const { initializeApp, getApp } = await import(`https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js?v=${timestamp}`);
-                const {
-                    getAuth,
-                    initializeAuth,
-                    browserLocalPersistence,
-                    onAuthStateChanged,
-                    signInWithEmailAndPassword,
-                    createUserWithEmailAndPassword,
-                    signOut,
-                    sendPasswordResetEmail,
-                    GoogleAuthProvider,
-                    signInWithPopup
-                } = await import(`https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js?v=${timestamp}`);
+                // Initialiser Firebase
+                const app = firebase.initializeApp(firebaseConfig);
+                const auth = firebase.auth();
                 
-                console.log('📦 Modules Firebase importés avec succès');
-                
-                // Initialiser Firebase App
-                const app = initializeApp(firebaseConfig);
                 console.log('🎯 Firebase App initialisé:', app.name);
+                console.log('🔐 Firebase Auth configuré:', auth.app.options.projectId);
                 
-                // Initialiser Auth avec persistence pour Firebase v10+
-                const auth = initializeAuth(app, {
-                    persistence: browserLocalPersistence
-                });
-                
-                console.log('🔐 Firebase Auth configuré:', auth.config.projectId);
-                
-                // Rendre disponible globalement pour compatibilité
-                window.firebase = {
-                    app: app,
-                    auth: auth,
-                    // Méthodes d'authentification
-                    onAuthStateChanged: onAuthStateChanged,
-                    signInWithEmailAndPassword: signInWithEmailAndPassword,
-                    createUserWithEmailAndPassword: createUserWithEmailAndPassword,
-                    signOut: signOut,
-                    sendPasswordResetEmail: sendPasswordResetEmail,
-                    GoogleAuthProvider: GoogleAuthProvider,
-                    signInWithPopup: signInWithPopup
-                };
-                
-                console.log('✅ Firebase SDK modulaire initialisé avec succès');
-                console.log('📊 Projet:', firebaseConfig.projectId);
-                console.log('🔑 API Key validée');
-                
-                // Dispatcher un événement pour informer les autres scripts
-                window.dispatchEvent(new Event('firebaseReady'));
-                
-                return window.firebase;
-                
+                // Configurer la persistence
+                auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+                    .then(() => {
+                        console.log('💾 Persistence configurée avec succès');
+                        
+                        // Rendre disponible globalement (déjà disponible via firebase namespace)
+                        window.firebase = firebase;
+                        
+                        console.log('✅ Firebase SDK compatible initialisé avec succès');
+                        console.log('📊 Projet:', firebaseConfig.projectId);
+                        console.log('🔑 API Key validée');
+                        
+                        // Dispatcher un événement pour informer les autres scripts
+                        window.dispatchEvent(new Event('firebaseReady'));
+                    })
+                    .catch((error) => {
+                        console.error('❌ Erreur de configuration de persistence:', error);
+                        throw error;
+                    });
+                    
             } catch (error) {
-                console.error('❌ Erreur Firebase SDK modulaire:', error);
+                console.error('❌ Erreur Firebase SDK compatible:', error);
                 console.error('📋 Détails de l\'erreur:', {
                     message: error.message,
                     code: error.code,
@@ -154,30 +133,7 @@
                 });
                 throw error;
             }
-        };
-        
-        // Charger Firebase immédiatement
-        window.initFirebase = loadFirebase;
-        
-        // Charger automatiquement avec retry
-        const initializeWithRetry = async (attempts = 3) => {
-            for (let i = 0; i < attempts; i++) {
-                try {
-                    await loadFirebase();
-                    break;
-                } catch (error) {
-                    console.warn(`⚠️ Tentative ${i + 1} échouée:`, error.message);
-                    if (i === attempts - 1) {
-                        console.error('❌ Échec du chargement Firebase après', attempts, 'tentatives');
-                        throw error;
-                    }
-                    // Attendre avant de réessayer
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-            }
-        };
-        
-        initializeWithRetry();
+        });
     </script>
     
     <script src="js/components/firebase-auth-manager.js"></script>
