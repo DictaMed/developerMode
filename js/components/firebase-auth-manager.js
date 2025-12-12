@@ -1,6 +1,6 @@
 /**
  * DictaMed - Gestionnaire d'authentification Firebase (SDK Modulaire v9+)
- * Version: 4.0.0 - Migration complète vers SDK modulaire avec sécurité renforcée
+ * Version: 4.1.0 - Correction pour "window.firebase.auth is not a function"
  */
 
 class FirebaseAuthManager {
@@ -15,7 +15,7 @@ class FirebaseAuthManager {
 
     static init() {
         try {
-            console.log('🔧 FirebaseAuthManager v4.0.0 init() started');
+            console.log('🔧 FirebaseAuthManager v4.1.0 init() started');
             
             // Vérifier si Firebase modulaire est disponible
             if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
@@ -45,7 +45,7 @@ class FirebaseAuthManager {
             });
 
             authManager.isInitialized = true;
-            console.log('✅ FirebaseAuthManager v4.0.0 init() completed');
+            console.log('✅ FirebaseAuthManager v4.1.0 init() completed');
             
             // Tester l'état d'authentification
             FirebaseAuthManager.testAuthStatus();
@@ -253,6 +253,9 @@ class FirebaseAuthManager {
 
         // Sauvegarder la session
         this.saveSession(user);
+        
+        // Dispatcher un événement personnalisé pour informer les autres composants
+        this.dispatchAuthStateChange('authenticated', user);
     }
 
     /**
@@ -266,6 +269,30 @@ class FirebaseAuthManager {
         console.log('🚪 Auth logout event:', {
             timestamp: new Date().toISOString()
         });
+        
+        // Dispatcher un événement personnalisé pour informer les autres composants
+        this.dispatchAuthStateChange('loggedOut', null);
+    }
+
+    /**
+     * Dispatcher un événement de changement d'état d'authentification
+     */
+    dispatchAuthStateChange(state, user) {
+        const authEvent = new CustomEvent('authStateChanged', {
+            detail: {
+                state: state,
+                user: user,
+                timestamp: new Date().toISOString()
+            }
+        });
+        window.dispatchEvent(authEvent);
+        
+        // Notifier aussi le gestionnaire de navigation admin
+        if (window.adminNavigationManager && typeof window.adminNavigationManager.forceCheck === 'function') {
+            window.adminNavigationManager.forceCheck();
+        }
+        
+        console.log('📡 Auth state change event dispatched:', state);
     }
 
     /**

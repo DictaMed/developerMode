@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration des Webhooks - DictaMed</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Styles CSS -->
+    <link rel="stylesheet" href="style-optimized.css">
+    <link rel="stylesheet" href="admin-webhook-styles.css">
+    
+    <!-- Configuration Firebase -->
+    <script>
+        // Configuration Firebase - À remplacer par vos vraies clés
+        const firebaseConfig = {
+            apiKey: "demo-api-key",
+            authDomain: "dictamed-demo.firebaseapp.com",
+            projectId: "dictamed-demo",
+            storageBucket: "dictamed-demo.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+        
+        // Initialisation Firebase
+        if (typeof firebase !== 'undefined') {
+            firebase.initializeApp(firebaseConfig);
+        }
+    </script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>🎙️ DictaMed</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="tab-guide.html">Guide</a></li>
+                <li><a href="tab-faq.html">FAQ</a></li>
+                <li><a href="admin-webhooks.html" class="active admin-link">Admin Webhooks</a></li>
+                <li><a href="auth-test.html">Auth Test</a></li>
+                <li><a href="audio-recorder-test.html">Audio Test</a></li>
+            </ul>
+            <div class="nav-auth">
+                <button id="authButton" class="auth-button">
+                    <span id="authButtonText">Connexion</span>
+                </button>
+            </div>
+            <div class="nav-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <main class="main-content">
+        <div id="adminWebhookContainer">
+            <!-- Le contenu sera généré dynamiquement par AdminWebhookManager -->
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <p>Chargement de l'interface d'administration...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal d'authentification -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Authentification</h2>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="signin">Connexion</button>
+                <button class="auth-tab" data-tab="signup">Inscription</button>
+            </div>
+            
+            <!-- Formulaire de connexion -->
+            <div id="signinForm" class="auth-form active">
+                <div class="form-group">
+                    <label for="signinEmail">Email</label>
+                    <input type="email" id="signinEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="signinPassword">Mot de passe</label>
+                    <input type="password" id="signinPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary" id="signinBtn">
+                    Se connecter
+                </button>
+            </div>
+            
+            <!-- Formulaire d'inscription -->
+            <div id="signupForm" class="auth-form">
+                <div class="form-group">
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Mot de passe</label>
+                    <input type="password" id="signupPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupDisplayName">Nom d'affichage</label>
+                    <input type="text" id="signupDisplayName">
+                </div>
+                <button type="submit" class="btn btn-primary" id="signupBtn">
+                    S'inscrire
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/core/config.js"></script>
+    <script src="js/core/utils.js"></script>
+    <script src="js/core/error-handler.js"></script>
+    <script src="js/core/app-state.js"></script>
+    <script src="js/components/notification.js"></script>
+    <script src="js/components/auth-modal.js"></script>
+    <script src="js/components/firebase-auth-manager.js"></script>
+    <script src="js/components/admin-webhook-manager.js"></script>
+    
+    <script>
+        // Initialisation de l'application d'administration
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Initialisation de l\'interface d\'administration des webhooks...');
+            
+            // Attendre que Firebase soit initialisé
+            await new Promise(resolve => {
+                if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                    resolve();
+                } else {
+                    const checkFirebase = setInterval(() => {
+                        if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                            clearInterval(checkFirebase);
+                            resolve();
+                        }
+                    }, 100);
+                }
+            });
+            
+            // Initialiser les composants
+            if (window.notificationSystem) {
+                window.notificationSystem.init();
+            }
+            
+            if (window.FirebaseAuthManager) {
+                FirebaseAuthManager.init();
+            }
+            
+            // Initialiser l'interface admin après authentification
+            let adminInitialized = false;
+            
+            const initAdminInterface = async () => {
+                if (adminInitialized) return;
+                
+                const currentUser = FirebaseAuthManager.getCurrentUser();
+                if (currentUser) {
+                    if (currentUser.email === 'akio963@gmail.com') {
+                        // Créer l'instance du gestionnaire d'admin
+                        window.adminWebhookManager = new AdminWebhookManager();
+                        const success = await window.adminWebhookManager.init();
+                        adminInitialized = success;
+                    } else {
+                        // Afficher message d'accès refusé
+                        document.getElementById('adminWebhookContainer').innerHTML = `
+                            <div class="access-denied">
+                                <div class="access-denied-content">
+                                    <h1>🚫 Accès Refusé</h1>
+                                    <p>Cette interface est réservée à l'administrateur.</p>
+                                    <p>Veuillez vous connecter avec le compte administrateur : <strong>akio963@gmail.com</strong></p>
+                                    <button class="btn btn-primary" onclick="location.reload()">
+                                        🔄 Actualiser la page
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    // Si pas d'utilisateur, afficher message de connexion
+                    document.getElementById('adminWebhookContainer').innerHTML = `
+                        <div class="access-denied">
+                            <div class="access-denied-content">
+                                <h1>🔐 Connexion Requise</h1>
+                                <p>Veuillez vous connecter pour accéder à l'interface d'administration.</p>
+                                <button class="btn btn-primary" onclick="document.getElementById('authButton').click()">
+                                    🔑 Se connecter
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+            };
+            
+            // Écouter les changements d'état d'authentification
+            window.addEventListener('authStateChanged', async (event) => {
+                await initAdminInterface();
+            });
+            
+            // Vérifier l'état initial
+            await initAdminInterface();
+        });
+        
+        // Gestion du menu mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const navToggle = document.querySelector('.nav-toggle');
+            const navMenu = document.querySelector('.nav-menu');
+            
+            if (navToggle && navMenu) {
+                navToggle.addEventListener('click', () => {
+                    navMenu.classList.toggle('active');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

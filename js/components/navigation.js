@@ -8,6 +8,7 @@ class TabNavigationSystem {
     constructor(appState) {
         this.appState = appState;
         this.activeTab = 'home';
+        this.normalModeButton = null;
     }
 
     init() {
@@ -15,6 +16,8 @@ class TabNavigationSystem {
             this.initTabButtons();
             this.initFixedNavButtons();
             this.initGlobalNavButtons();
+            this.initNormalModeButton();
+            this.initAuthStateListener();
             console.log('✅ TabNavigationSystem initialisé');
         } catch (error) {
             console.error('❌ Erreur lors de l\'initialisation de TabNavigationSystem:', error);
@@ -67,6 +70,49 @@ class TabNavigationSystem {
                 }
             });
         });
+    }
+
+    initNormalModeButton() {
+        // Find the normal mode button in the fixed navigation
+        this.normalModeButton = document.querySelector('.fixed-nav-btn[data-tab="mode-normal"]');
+        
+        // Initialize the visibility based on current authentication status
+        this.updateNormalModeButtonVisibility();
+    }
+
+    initAuthStateListener() {
+        // Listen for authentication state changes
+        const checkAuthState = () => {
+            this.updateNormalModeButtonVisibility();
+        };
+
+        // Check immediately
+        setTimeout(checkAuthState, 1000); // Wait for Firebase to initialize
+
+        // Set up a periodic check for auth state changes
+        // This is a fallback in case Firebase auth state change events don't fire
+        setInterval(checkAuthState, 5000); // Check every 5 seconds
+
+        // Listen for custom auth events that might be fired by other components
+        window.addEventListener('authStateChanged', checkAuthState);
+    }
+
+    updateNormalModeButtonVisibility() {
+        if (!this.normalModeButton) {
+            return;
+        }
+
+        const isAuthenticated = window.FirebaseAuthManager && window.FirebaseAuthManager.isAuthenticated();
+        
+        if (isAuthenticated) {
+            this.normalModeButton.style.display = '';
+            this.normalModeButton.classList.remove('auth-required-hidden');
+            console.log('🔓 Normal mode button visible - user authenticated');
+        } else {
+            this.normalModeButton.style.display = 'none';
+            this.normalModeButton.classList.add('auth-required-hidden');
+            console.log('🔒 Normal mode button hidden - user not authenticated');
+        }
     }
 
     async switchTab(tabId) {
@@ -266,13 +312,13 @@ class TabNavigationSystem {
     }
 
     checkTabAccess(tabId) {
-        // Test mode always accessible
+        // Test mode, guide, FAQ and home are always accessible
         if (tabId === window.APP_CONFIG.MODES.TEST || tabId === 'guide' || tabId === 'faq' || tabId === window.APP_CONFIG.MODES.HOME) {
             return true;
         }
         
-        // DMI mode requires authentication, Normal mode no longer requires it
-        if (tabId === window.APP_CONFIG.MODES.DMI && window.FirebaseAuthManager && !window.FirebaseAuthManager.isAuthenticated()) {
+        // Normal mode and DMI mode require authentication
+        if ((tabId === window.APP_CONFIG.MODES.NORMAL || tabId === window.APP_CONFIG.MODES.DMI) && window.FirebaseAuthManager && !window.FirebaseAuthManager.isAuthenticated()) {
             window.notificationSystem.warning('Veuillez vous connecter pour accéder à ce mode', 'Authentification requise');
             return false;
         }
