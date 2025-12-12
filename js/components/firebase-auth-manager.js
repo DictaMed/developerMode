@@ -13,58 +13,9 @@ class FirebaseAuthManager {
         this.retryAttempts = new Map(); // Retry attempts tracking
     }
 
-    /**
-     * Attendre que Firebase soit prêt
-     */
-    static waitForFirebase() {
-        return new Promise((resolve, reject) => {
-            // Si Firebase est déjà prêt
-            if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
-                console.log('✅ Firebase déjà prêt');
-                resolve();
-                return;
-            }
-
-            console.log('⏳ Attente de Firebase...');
-
-            // Écouter l'événement firebaseReady
-            const firebaseReadyHandler = (event) => {
-                window.removeEventListener('firebaseReady', firebaseReadyHandler);
-                console.log('📢 Événement firebaseReady reçu');
-                resolve();
-            };
-
-            window.addEventListener('firebaseReady', firebaseReadyHandler);
-
-            // Timeout après 10 secondes
-            setTimeout(() => {
-                window.removeEventListener('firebaseReady', firebaseReadyHandler);
-                if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
-                    reject(new Error('Firebase n\'a pas pu être initialisé dans le délai imparti'));
-                } else {
-                    resolve();
-                }
-            }, 10000);
-        });
-    }
-/**
- * DictaMed - Gestionnaire d'authentification Firebase (SDK Modulaire v9+)
- * Version: 4.0.0 - Migration complète vers SDK modulaire avec sécurité renforcée
- */
-
-class FirebaseAuthManager {
-    constructor() {
-        this.isInitialized = false;
-        this.currentUser = null;
-        this.auth = null;
-        this.rateLimitMap = new Map(); // Rate limiting par IP/email
-        this.sessionTimeout = 30 * 60 * 1000; // 30 minutes
-        this.retryAttempts = new Map(); // Retry attempts tracking
-    }
-
     static init() {
         try {
-            console.log('🔧 FirebaseAuthManager v4.0.0 init() started');
+            console.log('🔧 FirebaseAuthManager v4.1.0 init() started');
             
             // Vérifier si Firebase modulaire est disponible
             if (typeof window.firebase === 'undefined' || !window.firebase.auth) {
@@ -94,7 +45,7 @@ class FirebaseAuthManager {
             });
 
             authManager.isInitialized = true;
-            console.log('✅ FirebaseAuthManager v4.0.0 init() completed');
+            console.log('✅ FirebaseAuthManager v4.1.0 init() completed');
             
             // Tester l'état d'authentification
             FirebaseAuthManager.testAuthStatus();
@@ -302,6 +253,9 @@ class FirebaseAuthManager {
 
         // Sauvegarder la session
         this.saveSession(user);
+        
+        // Dispatcher un événement personnalisé pour informer les autres composants
+        this.dispatchAuthStateChange('authenticated', user);
     }
 
     /**
@@ -315,6 +269,24 @@ class FirebaseAuthManager {
         console.log('🚪 Auth logout event:', {
             timestamp: new Date().toISOString()
         });
+        
+        // Dispatcher un événement personnalisé pour informer les autres composants
+        this.dispatchAuthStateChange('loggedOut', null);
+    }
+
+    /**
+     * Dispatcher un événement de changement d'état d'authentification
+     */
+    dispatchAuthStateChange(state, user) {
+        const authEvent = new CustomEvent('authStateChanged', {
+            detail: {
+                state: state,
+                user: user,
+                timestamp: new Date().toISOString()
+            }
+        });
+        window.dispatchEvent(authEvent);
+        console.log('📡 Auth state change event dispatched:', state);
     }
 
     /**
