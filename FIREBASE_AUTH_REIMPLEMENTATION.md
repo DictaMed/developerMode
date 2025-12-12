@@ -80,6 +80,13 @@ const firebaseConfig = {
 };
 ```
 
+### SDK Version et Configuration
+**🔧 Utilise Firebase SDK v10.7.1 Compat (v8 syntax)**
+- ✅ `firebase-app-compat.js` - Application core
+- ✅ `firebase-auth-compat.js` - Authentication module
+- ✅ Syntaxe v8: `firebase.auth()`, `firebase.initializeApp()`
+- ✅ Compatible avec l'existant et facile à migrer
+
 ### Services Firebase Activés
 - ✅ Firebase Authentication
 - ✅ Google OAuth Provider
@@ -209,7 +216,34 @@ console.error('❌ FirebaseAuthManager init failed: [error]');
 console.warn('⚠️ Configuration update needed: [reason]');
 ```
 
-## 📈 Améliorations Futures Possibles
+## 🔧 Dépannage et Support
+
+### Diagnostic Automatique
+Pour diagnostiquer rapidement les problèmes :
+
+```javascript
+// Lancer le diagnostic complet
+runAuthDiagnostic();
+```
+
+### Guide de Dépannage Complet
+Consultez le guide détaillé : **[FIREBASE_TROUBLESHOOTING_GUIDE.md](./FIREBASE_TROUBLESHOOTING_GUIDE.md)**
+
+### Problèmes Courants Résolus
+- ✅ **SDK Version**: Utilise v8 Compat SDK pour éviter les problèmes d'import
+- ✅ **Module Auth**: firebase-auth-compat.js correctement chargé
+- ✅ **Ordre d'initialisation**: Firebase initialisé avant Auth
+- ✅ **Configuration**: Validation automatique de la config
+- ✅ **Google Provider**: Test de disponibilité intégré
+
+### Messages de Diagnostic
+- ✅ `Firebase SDK`: Vérifie le chargement des scripts
+- ✅ `Firebase Initialization`: Valide initializeApp()
+- ✅ `Firebase Config`: Contrôle la configuration
+- ✅ `SDK Compatibility`: Détecte v8 vs v9
+- ✅ `FirebaseAuthManager`: Teste les méthodes
+
+##  Améliorations Futures Possibles
 
 1. **2FA (Two-Factor Authentication)**: Intégration complète
 2. **Authentification Biométrique**: Support WebAuthn
@@ -225,5 +259,7 @@ Le nouveau système d'authentification Firebase offre:
 - ✅ **Expérience Utilisateur Améliorée**: Validation temps réel, feedback instantané
 - ✅ **Maintenabilité**: Code bien structuré et documenté
 - ✅ **Extensibilité**: Architecture prête pour de nouvelles fonctionnalités
+- ✅ **SDK Robuste**: v8 Compat SDK pour éviter les problèmes de compatibilité
+- ✅ **Diagnostic Avancé**: Outils de dépannage intégrés
 
-Le système est maintenant **entièrement opérationnel** et prêt pour la production.
+Le système est maintenant **entièrement opérationnel** et prêt pour la production avec un support de dépannage complet.
