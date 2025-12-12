@@ -13,75 +13,75 @@
 </head>
 <body>
     <!-- Navigation fixe horizontale en header -->
-    <div class="fixed-nav-header" id="fixedNavHeader">
+    <header class="fixed-nav-header" id="fixedNavHeader">
         <div class="fixed-nav-container">
             <div class="nav-logo-left">
                 <div class="header-logo">
                     <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
                 </div>
             </div>
-            <div class="nav-tabs-right">
-                <button class="fixed-nav-btn active" data-tab="home">
+            <nav class="nav-tabs-right" aria-label="Navigation principale">
+                <button class="fixed-nav-btn active" data-tab="home" aria-label="Page d'accueil">
                     <span class="nav-icon">🏠</span>
                     Accueil
                 </button>
-                <button class="fixed-nav-btn" data-tab="mode-normal">
+                <button class="fixed-nav-btn" data-tab="mode-normal" aria-label="Mode normal">
                     <span class="nav-icon">🏥</span>
                     Mode Normal
                 </button>
-                <button class="fixed-nav-btn" data-tab="mode-test">
+                <button class="fixed-nav-btn" data-tab="mode-test" aria-label="Mode test">
                     <span class="nav-icon">🧪</span>
                     Mode Test
                 </button>
-                <button class="fixed-nav-btn" data-tab="mode-dmi">
+                <button class="fixed-nav-btn" data-tab="mode-dmi" aria-label="Mode DMI">
                     <span class="nav-icon">📝</span>
                     mode DMI
                 </button>
-                <button class="fixed-nav-btn" data-tab="guide">
+                <button class="fixed-nav-btn" data-tab="guide" aria-label="Guide d'utilisation">
                     <span class="nav-icon">📖</span>
                     Guide
                 </button>
-                <button class="fixed-nav-btn" data-tab="faq">
+                <button class="fixed-nav-btn" data-tab="faq" aria-label="Questions fréquentes">
                     <span class="nav-icon">❓</span>
                     FAQ
                 </button>
-                <button class="fixed-nav-btn admin-nav-btn" id="adminNavBtn" style="display: none;" onclick="window.open('admin-webhooks.html', '_blank')">
+                <button class="fixed-nav-btn admin-nav-btn" id="adminNavBtn" style="display: none;" onclick="window.open('admin-webhooks.html', '_blank')" aria-label="Administration">
                     <span class="nav-icon">🎛️</span>
                     Admin
                 </button>
-                <button class="fixed-nav-btn auth-btn" id="authButton">
+                <button class="fixed-nav-btn auth-btn" id="authButton" aria-label="Authentification">
                     <span class="nav-icon">🔐</span>
                     <span id="authButtonText">Connexion</span>
                 </button>
-            </div>
+            </nav>
         </div>
-    </div>
+    </header>
 
     <main class="container">
         <!-- Navigation par onglets originale (maintenant cachée) -->
-        <nav class="tabs-nav" style="display: none;">
+        <nav class="tabs-nav" style="display: none;" aria-label="Navigation par onglets">
             <div class="tabs-container">
-                <button class="tab-btn active" data-tab="home">
+                <button class="tab-btn active" data-tab="home" aria-label="Page d'accueil">
                     <span class="tab-icon">🏠</span>
                     Accueil
                 </button>
-                <button class="tab-btn" data-tab="mode-normal">
+                <button class="tab-btn" data-tab="mode-normal" aria-label="Mode normal">
                     <span class="tab-icon">🏥</span>
                     Mode Normal
                 </button>
-                <button class="tab-btn" data-tab="mode-test">
+                <button class="tab-btn" data-tab="mode-test" aria-label="Mode test">
                     <span class="tab-icon">🧪</span>
                     Mode Test
                 </button>
-                <button class="tab-btn" data-tab="mode-dmi">
+                <button class="tab-btn" data-tab="mode-dmi" aria-label="Mode DMI">
                     <span class="tab-icon">📝</span>
                     mode DMI
                 </button>
-                <button class="tab-btn" data-tab="guide">
+                <button class="tab-btn" data-tab="guide" aria-label="Guide d'utilisation">
                     <span class="tab-icon">📖</span>
                     Guide
                 </button>
-                <button class="tab-btn" data-tab="faq">
+                <button class="tab-btn" data-tab="faq" aria-label="Questions fréquentes">
                     <span class="tab-icon">❓</span>
                     FAQ
                 </button>
@@ -90,13 +90,13 @@
         </nav>
 
         <!-- Page d'accueil -->
-        <div id="tab-content" class="tab-content active">
-            
-                    
-                    <h1 class="hero-title">
+        <section id="tab-content" class="tab-content active" role="main">
+            <div class="hero-section-modern">
+                <div class="hero-content-modern">
+                    <h1 class="hero-title" role="heading" aria-level="1">
                         <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
                     </h1>
-                    <p class="hero-subtitle">
+                    <p class="hero-subtitle" role="doc-subtitle">
                         Dictée médicale intelligente nouvelle génération
                     </p>
                     <p class="hero-description">
@@ -104,36 +104,37 @@
                         Transformez vos paroles en documents médicaux structurés, sécurisés et conformes.
                     </p>
                     
-                    <div class="hero-cta">
-                        <button class="btn btn-primary btn-large" data-tab="mode-test">
-                            <span class="btn-icon">🚀</span>
+                    <div class="hero-cta" role="group" aria-label="Actions principales">
+                        <button class="btn btn-primary btn-large" data-tab="mode-test" aria-label="Commencer maintenant">
+                            <span class="btn-icon" aria-hidden="true">🚀</span>
                             Commencer maintenant
                         </button>
-                        <button class="btn btn-secondary btn-large" data-tab="guide">
-                            <span class="btn-icon">📋</span>
+                        <button class="btn btn-secondary btn-large" data-tab="guide" aria-label="Voir la démonstration">
+                            <span class="btn-icon" aria-hidden="true">📋</span>
                             Voir la démo
                         </button>
                     </div>
                     
-                    <div class="hero-features-preview">
-                        <div class="preview-item">
-                            <span class="preview-icon">⚡</span>
+                    <div class="hero-features-preview" role="list" aria-label="Fonctionnalités principales">
+                        <div class="preview-item" role="listitem">
+                            <span class="preview-icon" aria-hidden="true">⚡</span>
                             <span>Instantané</span>
                         </div>
-                        <div class="preview-item">
-                            <span class="preview-icon">🔒</span>
+                        <div class="preview-item" role="listitem">
+                            <span class="preview-icon" aria-hidden="true">🔒</span>
                             <span>Sécurisé</span>
                         </div>
-                        <div class="preview-item">
-                            <span class="preview-icon">🎯</span>
+                        <div class="preview-item" role="listitem">
+                            <span class="preview-icon" aria-hidden="true">🎯</span>
                             <span>Précis</span>
                         </div>
                     </div>
                 </div>
             </div>
+        </section>
+    </main>
 
-
-    <footer>
+    <footer role="contentinfo">
         <div class="container">
             <p>&copy; 2024 DictaMed - Dictée médicale intelligente</p>
             <p>Pour toute question ou assistance, contactez <a href="mailto:support@dictamed.fr">support@dictamed.fr</a></p>
@@ -141,46 +142,46 @@
     </footer>
 
     <!-- Modal d'authentification optimisé -->
-    <div id="authModal" class="auth-modal hidden">
+    <div id="authModal" class="auth-modal hidden" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
         <div class="auth-modal-content">
             <div class="auth-modal-header">
                 <div class="auth-modal-logo">
                     <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
                 </div>
                 <h2 id="authModalTitle">Connexion</h2>
-                <button class="auth-modal-close" data-action="close-auth" aria-label="Fermer">&times;</button>
+                <button class="auth-modal-close" data-action="close-auth" aria-label="Fermer la modal">&times;</button>
             </div>
             
             <div class="auth-modal-body">
-                <div class="auth-mode-toggle">
-                    <button type="button" id="modalSignInTab" class="auth-tab-btn active">
-                        <span class="auth-tab-icon">🔐</span>
+                <div class="auth-mode-toggle" role="tablist" aria-label="Type d'authentification">
+                    <button type="button" id="modalSignInTab" class="auth-tab-btn active" role="tab" aria-selected="true" aria-controls="modalEmailAuthForm">
+                        <span class="auth-tab-icon" aria-hidden="true">🔐</span>
                         Connexion
                     </button>
-                    <button type="button" id="modalSignUpTab" class="auth-tab-btn">
-                        <span class="auth-tab-icon">✨</span>
+                    <button type="button" id="modalSignUpTab" class="auth-tab-btn" role="tab" aria-selected="false" aria-controls="modalEmail <span class="AuthForm">
+                       auth-tab-icon" aria-hidden="true">✨</span>
                         Inscription
                     </button>
                 </div>
                 
-                <form id="modalEmailAuthForm" class="auth-email-form">
+                <form id="modalEmailAuthForm" class="auth-email-form" role="tabpanel">
                     <div class="form-group-modern">
                         <label for="modalEmailInput">
-                            <span class="input-icon">📧</span>
+                            <span class="input-icon" aria-hidden="true">📧</span>
                             Email
                         </label>
-                        <input type="email" id="modalEmailInput" placeholder="votre@email.com" required autocomplete="email">
+                        <input type="email" id="modalEmailInput" placeholder="votre@email.com" required autocomplete="email" aria-describedby="emailHelp">
                     </div>
                     
                     <div class="form-group-modern">
                         <label for="modalPasswordInput">
-                            <span class="input-icon">🔒</span>
+                            <span class="input-icon" aria-hidden="true">🔒</span>
                             Mot de passe
                         </label>
                         <div class="password-input-wrapper">
-                            <input type="password" id="modalPasswordInput" placeholder="••••••••" required autocomplete="current-password">
+                            <input type="password" id="modalPasswordInput" placeholder="••••••••" required autocomplete="current-password" aria-describedby="passwordHelp">
                             <button type="button" class="password-toggle" data-action="toggle-password" aria-label="Afficher le mot de passe">
-                                <span class="eye-icon">👁️</span>
+                                <span class="eye-icon" aria-hidden="true">👁️</span>
                             </button>
                         </div>
                         <div class="password-strength hidden" id="passwordStrength">
@@ -198,18 +199,18 @@
                         <a href="#" class="forgot-password" data-action="forgot-password">Mot de passe oublié ?</a>
                     </div>
                     
-                    <button type="submit" id="modalEmailSubmitBtn" class="btn btn-primary btn-full btn-glow">
+                    <button type="submit" id="modalEmailSubmitBtn" class="btn btn-primary btn-full btn-glow" aria-describedby="submitHelp">
                         <span class="btn-text">Se connecter</span>
-                        <span class="btn-icon">→</span>
-                        <div class="loading-spinner-small hidden"></div>
+                        <span class="btn-icon" aria-hidden="true">→</span>
+                        <div class="loading-spinner-small hidden" aria-hidden="true"></div>
                     </button>
                     
-                    <div class="auth-separator">
+                    <div class="auth-separator" role="separator" aria-label="Ou continuer avec">
                         <span>ou continuer avec</span>
                     </div>
                     
-                    <button type="button" id="modalGoogleSignInBtn" class="btn btn-google btn-full">
-                        <svg class="google-icon" viewBox="0 0 24 24">
+                    <button type="button" id="modalGoogleSignInBtn" class="btn btn-google btn-full" aria-label="Se connecter avec Google">
+                        <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -218,13 +219,13 @@
                         Continuer avec Google
                     </button>
                     
-                    <div id="modalAuthError" class="auth-error hidden"></div>
+                    <div id="modalAuthError" class="auth-error hidden" role="alert" aria-live="polite"></div>
                     
                     <div class="auth-footer">
                         <p class="terms-text">
                             En vous connectant, vous acceptez nos 
-                            <a href="#">Conditions d'utilisation</a> et 
-                            <a href="#">Politique de confidentialité</a>
+                            <a href="#" aria-label="Conditions d'utilisation">Conditions d'utilisation</a> et 
+                            <a href="#" aria-label="Politique de confidentialité">Politique de confidentialité</a>
                         </p>
                     </div>
                 </form>
@@ -233,24 +234,24 @@
                 <div id="modalUserProfile" class="user-profile-compact hidden">
                     <div class="user-info-modern">
                         <div class="user-avatar-modern" id="modalUserAvatar">
-                            <div class="avatar-placeholder-modern" id="modalAvatarPlaceholder">👤</div>
-                            <div class="avatar-status-indicator"></div>
+                            <div class="avatar-placeholder-modern" id="modalAvatarPlaceholder" aria-label="Avatar utilisateur">👤</div>
+                            <div class="avatar-status-indicator" aria-hidden="true"></div>
                         </div>
                         <div class="user-details-modern">
                             <h4 id="modalUserName">Utilisateur</h4>
                             <p id="modalUserEmail">email@example.com</p>
                             <span class="connection-status-modern">
-                                <span class="status-dot"></span>
+                                <span class="status-dot" aria-hidden="true"></span>
                                 Connecté
                             </span>
                         </div>
                     </div>
                     <div class="user-actions-modern">
-                        <button class="btn btn-outline" data-tab="mode-normal" data-action="close-after-nav">
-                            <span>🏥</span> Mode Normal
+                        <button class="btn btn-outline" data-tab="mode-normal" data-action="close-after-nav" aria-label="Accéder au mode normal">
+                            <span aria-hidden="true">🏥</span> Mode Normal
                         </button>
-                        <button id="modalSignOutBtn" class="btn btn-danger">
-                            <span>🚪</span> Déconnexion
+                        <button id="modalSignOutBtn" class="btn btn-danger" aria-label="Se déconnecter">
+                            <span aria-hidden="true">🚪</span> Déconnexion
                         </button>
                     </div>
                 </div>
@@ -258,13 +259,12 @@
         </div>
     </div>
 
-    <!-- Firebase SDK v9+ Compat(window.firebase));
-    - Configuration et <script>
+    <!-- Firebase SDK v9+ Compat -->
+    <script>
         // Configuration Firebase
- Initialisation -->
-    = {
-            apiKey: "AI        const firebaseConfigzaSyC9XYvHxbp3VW0PCW0W7MxsjoUZE",
-            authxfoWuiDomain: "dictamed2025.firebaseapp.com",
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9XYvHxbp3VW0PCW0W7MxsjoUZE",
+            authDomain: "dictamed2025.firebaseapp.com",
             projectId: "dictamed2025",
             storageBucket: "dictamed2025.firebasestorage.app",
             messagingSenderId: "242034923776",
@@ -310,7 +310,6 @@
         // Initialisation différée pour éviter les conflits
         window.initFirebase = loadFirebase;
     </script>
-    </script>
     
     <!-- ===== ORDRE DE CHARGEMENT OPTIMISÉ DES SCRIPTS ===== -->
     
@@ -323,7 +322,7 @@
     <!-- 2. ÉTAT DE L'APPLICATION -->
     <script src="js/core/app-state.js"></script>
     
-    <!-- js/core/app-state3. SYSTÈMES FONDAMENTAUX -->
+    <!-- 3. SYSTÈMES FONDAMENTAUX -->
     <script src="js/components/notification.js"></script>
     <script src="js/components/loading-overlay.js"></script>
     
