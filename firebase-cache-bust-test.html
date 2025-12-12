@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Firebase - Cache Busting</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .info { color: #17a2b8; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .result.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Test Firebase avec Cache Busting</h1>
+        <p class="info">Cette page force le rafraîchissement du cache pour éviter les problèmes de caching.</p>
+        
+        <!-- Status en temps réel -->
+        <div class="result info">
+            <h3>📊 Status du test:</h3>
+            <div id="testStatus">En attente...</div>
+        </div>
+        
+        <!-- Test de configuration -->
+        <div class="result info">
+            <h3>🔑 Configuration Firebase:</h3>
+            <pre id="configDisplay"></pre>
+        </div>
+        
+        <!-- Contrôles de test -->
+        <div>
+            <button onclick="forceFirebaseTest()">🔄 Tester Firebase (Force refresh)</button>
+            <button onclick="testSignUp()">📝 Test Inscription</button>
+            <button onclick="testSignIn()">🔐 Test Connexion</button>
+            <button onclick="testGoogle()">🔍 Test Google</button>
+        </div>
+        
+        <!-- Résultats -->
+        <div id="testResults"></div>
+        
+        <!-- Logs en temps réel -->
+        <div class="result info">
+            <h3>📋 Logs en temps réel:</h3>
+            <div id="logs" style="max-height: 300px; overflow-y: auto;">
+                <p><em>Les logs apparaîtront ici...</em></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration Firebase avec timestamp pour cache busting
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9XYvHxbp3VW0PCW0W7xfoWuiMxsjoUZE",
+            authDomain: "dictamed2025.firebaseapp.com",
+            projectId: "dictamed2025",
+            storageBucket: "dictamed2025.firebasestorage.app",
+            messagingSenderId: "242034923776",
+            appId: "1:242034923776:web:bd315e890c715b1d263be5",
+            measurementId: "G-1B8DZ4B73R"
+        };
+        
+        // Fonction de logging
+        function addLog(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<span class="${type}">[${timestamp}] ${message}</span>`;
+            logsDiv.appendChild(logEntry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+        
+        // Afficher la configuration
+        function showConfig() {
+            document.getElementById('configDisplay').textContent = JSON.stringify(firebaseConfig, null, 2);
+            addLog('Configuration affichée', 'info');
+        }
+        
+        // Test Firebase avec force refresh
+        async function forceFirebaseTest() {
+            const statusDiv = document.getElementById('testStatus');
+            const resultsDiv = document.getElementById('testResults');
+            
+            statusDiv.innerHTML = '🔄 Test en cours...';
+            addLog('Début du test Firebase avec cache busting', 'info');
+            
+            try {
+                // Forcer le cache busting avec timestamp unique
+                const timestamp = Date.now();
+                const cacheBustParam = `?_cb=${timestamp}`;
+                
+                addLog(`Chargement des modules Firebase avec cache busting...`, 'info');
+                
+                // Charger les modules Firebase
+                const { initializeApp } = await import(`https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js${cacheBustParam}`);
+                const { 
+                    getAuth, 
+                    onAuthStateChanged,
+                    signInWithEmailAndPassword,
+                    createUserWithEmailAndPassword,
+                    signOut,
+                    sendPasswordResetEmail,
+                    GoogleAuthProvider,
+                    signInWithPopup
+                } = await import(`https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js${cacheBustParam}`);
+                
+                addLog('✅ Modules Firebase chargés avec succès', 'success');
+                
+                // Initialiser Firebase
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                
+                addLog(`🎯 App initialisé: ${app.name}`, 'success');
+                addLog(`🔐 Auth configuré pour: ${auth.config.projectId}`, 'success');
+                
+                // Tester la configuration
+                const config = app.options;
+                addLog(`📊 Projet: ${config.projectId}`, 'info');
+                addLog(`🔑 API Key: ${config.apiKey.substring(0, 10)}...`, 'info');
+                
+                statusDiv.innerHTML = '✅ Firebase chargé avec succès!';
+                statusDiv.className = 'success';
+                
+                resultsDiv.innerHTML = `
+                    <div class="result success">
+                        <h3>🎉 Test réussi!</h3>
+                        <p>✅ SDK Firebase chargé</p>
+                        <p>✅ Application initialisée</p>
+                        <p>✅ Auth configuré</p>
+                        <p>✅ API Key valide</p>
+                    </div>
+                `;
+                
+                // Rendre Firebase disponible globalement
+                window.firebase = {
+                    app: app,
+                    auth: auth,
+                    signInWithEmailAndPassword: signInWithEmailAndPassword,
+                    createUserWithEmailAndPassword: createUserWithEmailAndPassword,
+                    signOut: signOut,
+                    sendPasswordResetEmail: sendPasswordResetEmail,
+                    GoogleAuthProvider: GoogleAuthProvider,
+                    signInWithPopup: signInWithPopup
+                };
+                
+                addLog('🚀 Firebase prêt pour les tests d\'authentification', 'success');
+                
+            } catch (error) {
+                console.error('Erreur Firebase:', error);
+                addLog(`❌ Erreur: ${error.message}`, 'error');
+                
+                statusDiv.innerHTML = `❌ Erreur: ${error.message}`;
+                statusDiv.className = 'error';
+                
+                resultsDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Erreur de test</h3>
+                        <p><strong>Message:</strong> ${error.message}</p>
+                        <p><strong>Code:</strong> ${error.code || 'N/A'}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Test d'inscription
+        async function testSignUp() {
+            if (!window.firebase) {
+                addLog('⚠️ Firebase pas encore chargé, please testez d\'abord', 'warning');
+                return;
+            }
+            
+            const testEmail = `test_${Date.now()}@example.com`;
+            const testPassword = 'testpass123';
+            
+            addLog(`Test inscription: ${testEmail}`, 'info');
+            
+            try {
+                const { createUserWithEmailAndPassword } = window.firebase;
+                const result = await createUserWithEmailAndPassword(window.firebase.auth, testEmail, testPassword);
+                
+                addLog(`✅ Inscription réussie: ${result.user.email}`, 'success');
+                
+                document.getElementById('testResults').innerHTML += `
+                    <div class="result success">
+                        <h3>✅ Inscription réussie!</h3>
+                        <p>Email: ${result.user.email}</p>
+                        <p>UID: ${result.user.uid}</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                addLog(`❌ Erreur inscription: ${error.message}`, 'error');
+                
+                document.getElementById('testResults').innerHTML += `
+                    <div class="result error">
+                        <h3>❌ Erreur d'inscription</h3>
+                        <p><strong>Message:</strong> ${error.message}</p>
+                        <p><strong>Code:</strong> ${error.code}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Test de connexion
+        async function testSignIn() {
+            if (!window.firebase) {
+                addLog('⚠️ Firebase pas encore chargé', 'warning');
+                return;
+            }
+            
+            const testEmail = 'test@example.com';
+            const testPassword = 'testpass123';
+            
+            addLog(`Test connexion: ${testEmail}`, 'info');
+            
+            try {
+                const { signInWithEmailAndPassword } = window.firebase;
+                const result = await signInWithEmailAndPassword(window.firebase.auth, testEmail, testPassword);
+                
+                addLog(`✅ Connexion réussie: ${result.user.email}`, 'success');
+                
+                document.getElementById('testResults').innerHTML += `
+                    <div class="result success">
+                        <h3>✅ Connexion réussie!</h3>
+                        <p>Email: ${result.user.email}</p>
+                        <p>UID: ${result.user.uid}</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                addLog(`❌ Erreur connexion: ${error.message}`, 'error');
+                
+                document.getElementById('testResults').innerHTML += `
+                    <div class="result error">
+                        <h3>❌ Erreur de connexion</h3>
+                        <p><strong>Message:</strong> ${error.message}</p>
+                        <p><strong>Code:</strong> ${error.code}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Test Google
+        async function testGoogle() {
+            if (!window.firebase) {
+                addLog('⚠️ Firebase pas encore chargé', 'warning');
+                return;
+            }
+            
+            addLog('Test connexion Google...', 'info');
+            
+            try {
+                const { GoogleAuthProvider, signInWithPopup } = window.firebase;
+                const provider = new GoogleAuthProvider();
+                const result = await signInWithPopup(window.firebase.auth, provider);
+                
+                addLog(`✅ Connexion Google réussie: ${result.user.email}`, 'success');
+                
+                document.getElementById('testResults').innerHTML += `
+                    <div class="result success">
+                        <h3>✅ Connexion Google réussie!</h3>
+                        <p>Email: ${result.user.email}</p>
+                        <p>Provider: ${result.user.providerId}</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                addLog(`❌ Erreur Google: ${error.message}`, 'error');
+                
+                document.getElementById('testResults').innerHTML += `
+                    <div class="result error">
+                        <h3>❌ Erreur Google</h3>
+                        <p><strong>Message:</strong> ${error.message}</p>
+                        <p><strong>Code:</strong> ${error.code}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Initialisation
+        window.addEventListener('load', () => {
+            addLog('🚀 Page chargée avec cache busting', 'info');
+            showConfig();
+            
+            // Auto-test après 2 secondes
+            setTimeout(() => {
+                addLog('⏰ Démarrage automatique du test...', 'info');
+                forceFirebaseTest();
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
