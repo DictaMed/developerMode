@@ -595,7 +595,12 @@ class AuthModalSystem {
                     this.updateAuthButton();
                 }, 1500);
             } else {
-                this.showError(result.error || 'Une erreur est survenue');
+                // Gestion spéciale des erreurs de configuration API key
+                if (result.needsConfigUpdate) {
+                    this.showConfigError(result.error);
+                } else {
+                    this.showError(result.error || 'Une erreur est survenue');
+                }
             }
         } catch (error) {
             console.error('Auth error:', error);
@@ -705,6 +710,29 @@ class AuthModalSystem {
             window.notificationSystem.success(message, 'Authentification');
         } else {
             alert(message);
+        }
+    }
+    
+    showConfigError(message) {
+        const errorDiv = document.getElementById('modalAuthError');
+        if (errorDiv) {
+            const fullMessage = `
+                ${message}
+                
+                🔧 Solutions:
+                1. Vérifiez la clé API dans Firebase Console
+                2. Ajoutez votre domaine dans les domaines autorisés
+                3. Assurez-vous que l'authentification est activée
+                
+                📋 Consultez FIREBASE_API_KEY_FIX_GUIDE.md pour plus de détails.
+            `;
+            errorDiv.innerHTML = fullMessage.replace(/\n\s+/g, '<br>');
+            errorDiv.classList.remove('hidden');
+            
+            // Auto-hide after 10 seconds for config errors
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 10000);
         }
     }
 

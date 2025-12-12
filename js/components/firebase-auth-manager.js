@@ -424,6 +424,17 @@ class FirebaseAuthManager {
             };
         } catch (error) {
             console.error('❌ Sign in error:', error);
+            
+            // Gestion spécifique des erreurs API key
+            if (error.message.includes('api-key-not-valid')) {
+                return {
+                    success: false,
+                    error: 'Configuration Firebase invalide. Veuillez vérifier la clé API dans la console Firebase.',
+                    code: error.code,
+                    needsConfigUpdate: true
+                };
+            }
+            
             return {
                 success: false,
                 error: error.message,
@@ -629,6 +640,16 @@ class FirebaseAuthManager {
             };
         } catch (error) {
             console.error('❌ Google sign in error:', error);
+            
+            // Gestion spécifique des erreurs API key
+            if (error.message.includes('api-key-not-valid')) {
+                return {
+                    success: false,
+                    error: 'Configuration Firebase invalide. Veuillez vérifier la clé API dans la console Firebase.',
+                    code: error.code,
+                    needsConfigUpdate: true
+                };
+            }
             
             let userFriendlyMessage = error.message;
             switch (error.code) {
