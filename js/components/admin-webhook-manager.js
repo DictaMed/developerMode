@@ -1,6 +1,6 @@
 /**
  * DictaMed - Gestionnaire d'Interface d'Administration des Webhooks
- * Version: 1.0.0 - Interface complète pour gérer les webhooks utilisateur
+ * Version: 1.0.1 - Correction du chargement des utilisateurs côté client
  */
 
 class AdminWebhookManager {
@@ -68,25 +68,66 @@ class AdminWebhookManager {
     }
 
     /**
-     * Chargement de tous les utilisateurs
+     * Chargement de tous les utilisateurs (version corrigée côté client)
      */
     async loadUsers() {
         try {
             console.log('👥 Chargement des utilisateurs...');
             
             const db = firebase.firestore();
+            this.users = [];
             
-            // Récupérer tous les utilisateurs depuis Firebase Auth
-            const listUsersResult = await firebase.auth().listUsers(1000);
-            this.users = listUsersResult.users.map(user => ({
-                uid: user.uid,
-                email: user.email,
-                displayName: user.displayName || 'Non défini',
-                emailVerified: user.emailVerified,
-                createdAt: new Date(user.metadata.creationTime).toISOString()
-            }));
-
-            console.log(`✅ ${this.users.length} utilisateurs chargés`);
+            // Méthode 1: Essayer de charger depuis une collection userProfiles (si elle existe)
+            try {
+                const profilesSnapshot = await db.collection('userProfiles').get();
+                if (!profilesSnapshot.empty) {
+                    this.users = profilesSnapshot.docs.map(doc => ({
+                        uid: doc.id,
+                        ...doc.data()
+                    }));
+                    console.log(`✅ ${this.users.length} utilisateurs chargés depuis userProfiles`);
+                    return this.users;
+                }
+            } catch (profileError) {
+                console.log('ℹ️ Collection userProfiles non accessible, utilisation de la méthode alternative');
+            }
+            
+            // Méthode 2: Déduire les utilisateurs depuis les webhooks existants
+            const webhooksSnapshot = await db.collection('userWebhooks').get();
+            const webhookUsers = [];
+            
+            for (const doc of webhooksSnapshot.docs) {
+                const webhookData = doc.data();
+                // Essayer de récupérer les infos utilisateur depuis les données du webhook
+                if (webhookData.userEmail || webhookData.createdBy) {
+                    webhookUsers.push({
+                        uid: doc.id,
+                        email: webhookData.userEmail || webhookData.createdBy || 'Email non disponible',
+                        displayName: webhookData.userName || 'Nom non disponible',
+                        emailVerified: true,
+                        createdAt: webhookData.createdAt ?
+                            (webhookData.createdAt.toDate ? webhookData.createdAt.toDate().toISOString() : new Date().toISOString())
+                            : new Date().toISOString(),
+                        hasWebhook: true
+                    });
+                }
+            }
+            
+            // Méthode 3: Ajouter l'utilisateur admin actuel s'il n'est pas dans la liste
+            const currentUser = window.FirebaseAuthManager?.getCurrentUser();
+            if (currentUser && !webhookUsers.find(u => u.uid === currentUser.uid)) {
+                webhookUsers.push({
+                    uid: currentUser.uid,
+                    email: currentUser.email,
+                    displayName: currentUser.displayName || 'Administrateur',
+                    emailVerified: currentUser.emailVerified,
+                    createdAt: currentUser.metadata?.creationTime || new Date().toISOString(),
+                    hasWebhook: false
+                });
+            }
+            
+            this.users = webhookUsers;
+            console.log(`✅ ${this.users.length} utilisateurs déduits depuis les webhooks`);
             return this.users;
 
         } catch (error) {
@@ -401,7 +442,7 @@ class AdminWebhookManager {
     }
 
     /**
-     * Sauvegarde d'un webhook pour un utilisateur
+     * Sauvegarde d'un webhook pour un utilisateur (version améliorée)
      */
     async saveWebhook(userId) {
         try {
@@ -424,7 +465,7 @@ class AdminWebhookManager {
                 throw new Error('Utilisateur non trouvé');
             }
 
-            // Préparer les données
+            // Préparer les données du webhook
             const webhookData = {
                 webhookUrl: webhookUrl,
                 isActive: true,
@@ -445,12 +486,39 @@ class AdminWebhookManager {
             const db = firebase.firestore();
             await db.collection('userWebhooks').doc(userId).set(webhookData, { merge: true });
 
+            // NOUVEAU: Sauvegarder/mettre à jour les infos utilisateur dans userProfiles
+            try {
+                const userProfileData = {
+                    email: user.email,
+                    displayName: user.displayName,
+                    emailVerified: user.emailVerified,
+                    createdAt: user.createdAt ? 
+                        (user.createdAt.toDate ? user.createdAt.toDate() : new Date(user.createdAt)) 
+                        : firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    hasWebhook: true,
+                    lastWebhookUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                await db.collection('userProfiles').doc(userId).set(userProfileData, { merge: true });
+                console.log('✅ Profil utilisateur mis à jour dans userProfiles');
+            } catch (profileError) {
+                console.warn('⚠️ Impossible de mettre à jour userProfiles:', profileError);
+                // Ne pas échouer la sauvegarde du webhook pour cette raison
+            }
+
             // Mettre à jour le cache local
             this.webhooks.set(userId, {
                 userId: userId,
                 ...webhookData,
                 createdAt: webhookData.createdAt
             });
+
+            // Mettre à jour la liste des utilisateurs si nécessaire
+            const existingUserIndex = this.users.findIndex(u => u.uid === userId);
+            if (existingUserIndex >= 0) {
+                this.users[existingUserIndex].hasWebhook = true;
+            }
 
             // Rafraîchir l'affichage
             this.renderUsersList(document.getElementById('filterSelect')?.value, document.getElementById('userSearchInput')?.value);
@@ -532,6 +600,22 @@ class AdminWebhookManager {
 
             // Supprimer du cache local
             this.webhooks.delete(userId);
+
+            // Mettre à jour le profil utilisateur pour indiquer qu'il n'a plus de webhook
+            try {
+                await db.collection('userProfiles').doc(userId).update({
+                    hasWebhook: false,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (profileError) {
+                console.warn('⚠️ Impossible de mettre à jour userProfiles:', profileError);
+            }
+
+            // Mettre à jour la liste des utilisateurs
+            const userIndex = this.users.findIndex(u => u.uid === userId);
+            if (userIndex >= 0) {
+                this.users[userIndex].hasWebhook = false;
+            }
 
             // Rafraîchir l'affichage
             this.renderUsersList(document.getElementById('filterSelect')?.value, document.getElementById('userSearchInput')?.value);
