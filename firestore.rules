@@ -4,143 +4,73 @@ service cloud.firestore {
     
     // Collection pour les webhooks utilisateur
     match /userWebhooks/{userId} {
-      
       // Lecture: seuls les utilisateurs authentifiés peuvent lire leur propre webhook
-      allow read: if request.auth != null 
-                  && request.auth.uid == userId
-                  && isValidUserWebhookRequest(request.resource.data);
+      allow read: if request.auth != null && request.auth.uid == userId;
       
       // Écriture: seuls les utilisateurs authentifiés peuvent modifier leur propre webhook
-      // et seulement certains champs
-      allow write: if request.auth != null 
-                   && request.auth.uid == userId
-                   && isValidUserWebhookWrite(request.resource.data);
+      allow write: if request.auth != null && request.auth.uid == userId;
       
       // Création: mêmes règles que l'écriture
-      allow create: if request.auth != null 
-                    && request.auth.uid == userId
-                    && isValidUserWebhookWrite(request.resource.data);
+      allow create: if request.auth != null && request.auth.uid == userId;
       
       // Suppression: seuls les utilisateurs peuvent supprimer leur propre webhook
-      allow delete: if request.auth != null 
-                    && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Collection pour les profils utilisateurs (pour l'admin et auto-création)
+    // Collection pour les profils utilisateurs
     match /userProfiles/{userId} {
       // Lecture: admin peut voir tous les profils, les utilisateurs peuvent voir leur propre profil
       allow read: if request.auth != null && (
-        isAdminUser() ||
+        request.auth.token.email == 'akio963@gmail.com' ||
         request.auth.uid == userId
       );
       
       // Écriture: admin peut modifier tous les profils, utilisateurs peuvent modifier leur propre profil
       allow write: if request.auth != null && (
-        isAdminUser() ||
+        request.auth.token.email == 'akio963@gmail.com' ||
         request.auth.uid == userId
       );
       
       // Création: permet la création automatique par les utilisateurs eux-mêmes
       allow create: if request.auth != null && (
-        isAdminUser() ||
+        request.auth.token.email == 'akio963@gmail.com' ||
         request.auth.uid == userId
       );
-      
-      // Validation des données lors de la création/modification
-      allow create, update: if request.auth != null &&
-        validateUserProfileData(request.resource.data);
     }
     
-    // Collection pour l'administration (optionnelle)
+    // Collection pour l'administration
     match /adminWebhooks/{document=**} {
       // Seul l'admin peut accéder à cette collection
       allow read, write: if request.auth != null
-                         && isAdminUser();
+                         && request.auth.token.email == 'akio963@gmail.com';
     }
     
-    // Collection pour les logs d'utilisation (optionnelle)
+    // Collection système pour la gestion des admins
+    match /system/{documentId} {
+      // Accès limité pour la gestion système
+      allow read, write: if request.auth != null
+                         && request.auth.token.email == 'akio963@gmail.com';
+    }
+    
+    // Collection pour les logs d'utilisation
     match /webhookLogs/{logId} {
       // Lecture: admin seulement
-      allow read: if request.auth != null && isAdminUser();
+      allow read: if request.auth != null && request.auth.token.email == 'akio963@gmail.com';
       
       // Écriture: automatique par les Cloud Functions
-      allow write: if request.auth != null && isCloudFunction();
+      allow write: if request.auth != null && request.auth.token.email == 'akio963@gmail.com';
     }
     
-    // Fonctions de validation
-    
-    // Vérifie si l'utilisateur est un admin
-    function isAdminUser() {
-      // Méthode 1: Vérification par email admin
-      return request.auth != null &&
-             request.auth.token.email == 'akio963@gmail.com' ||
-             // Méthode 2: Claims admin dans le token (si configurés)
-             request.auth.token.admin == true ||
-             request.auth.token.role == 'admin' ||
-             // Méthode 3: Vérification par document adminUsers (fallback)
-             (request.auth != null &&
-              get(/databases/$(database)/documents/adminUsers).data.adminUIDs[request.auth.uid] == true);
+    // Collection de diagnostic (pour les tests)
+    match /_diagnostic/{documentId} {
+      // Accès en lecture/écriture pour les diagnostics
+      allow read, write: if request.auth != null;
     }
     
-    // Vérifie si la requête vient d'une Cloud Function
-    function isCloudFunction() {
-      return request.auth.token.firebase.sign_in_provider == 'firebase' &&
-             request.auth.token.email_verified == true &&
-             (request.auth.token.email.matches('.*@dictamed\\.fr$') ||
-              request.auth.token.email == 'akio963@gmail.com');
-    }
-    
-    // Valide la structure d'un webhook utilisateur
-    function isValidUserWebhookRequest(data) {
-      return data.keys().hasAll(['webhookUrl', 'isActive', 'createdAt']) &&
-             data.webhookUrl is string &&
-             data.isActive is bool &&
-             data.createdAt is timestamp;
-    }
-    
-    // Valide les champs modifiables lors de l'écriture
-    function isValidUserWebhookWrite(data) {
-      // Champs autorisés pour modification
-      return (data.keys().hasAll(['webhookUrl', 'isActive']) ||
-              (data.keys().hasOnly(['webhookUrl']) && data.webhookUrl is string) ||
-              (data.keys().hasOnly(['isActive']) && data.isActive is bool) ||
-              (data.keys().hasOnly(['notes']) && data.notes is string)) &&
-             // Validation des types
-             (data.webhookUrl == null || data.webhookUrl is string) &&
-             (data.isActive == null || data.isActive is bool) &&
-             (data.notes == null || data.notes is string) &&
-             // Validation de l'URL si fournie
-             (data.webhookUrl == null || validateWebhookUrl(data.webhookUrl)) &&
-             // Limitation de la taille des notes
-             (data.notes == null || data.notes.size() <= 500);
-    }
-    
-    // Valide l'URL du webhook
-    function validateWebhookUrl(url) {
-      return url.matches('https://.*') &&
-             url.matches('.*webhook.*') &&
-             url.size() > 10 &&
-             url.size() <= 2048;
-    }
-    
-    // Valide la structure des données de profil utilisateur
-    function validateUserProfileData(data) {
-      return data.keys().hasAll(['uid', 'email']) &&
-             data.uid is string &&
-             data.email is string &&
-             data.email.matches('.*@.*\\..*') && // Email format valide
-             // Champs optionnels avec validation de type
-             (data.displayName == null || data.displayName is string) &&
-             (data.emailVerified == null || data.emailVerified is bool) &&
-             (data.createdAt == null || data.createdAt is timestamp) &&
-             (data.lastSeen == null || data.lastSeen is timestamp) &&
-             (data.hasWebhook == null || data.hasWebhook is bool) &&
-             (data.profileCreatedBy == null || data.profileCreatedBy is string) &&
-             (data.registrationSource == null || data.registrationSource is string) &&
-             // Limitation des tailles pour la sécurité
-             (data.displayName == null || data.displayName.size() <= 100) &&
-             (data.profileCreatedBy == null || data.profileCreatedBy.size() <= 50) &&
-             (data.registrationSource == null || data.registrationSource.size() <= 50);
+    // Collection pour les tests de permissions
+    match /_permission_test/{documentId} {
+      // Accès en lecture/écriture pour les tests
+      allow read, write: if request.auth != null;
     }
   }
 }
