@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Firestore Permissions - DictaMed</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .test-result {
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-danger {
+            background: #dc3545;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Firestore Permissions - DictaMed</h1>
+        <p>Cet outil teste les permissions Firestore après l'application des corrections.</p>
+        
+        <div class="test-section">
+            <h2>🔐 Authentification</h2>
+            <div id="authStatus">En cours de vérification...</div>
+            <button onclick="checkAuth()" class="btn-success">Vérifier Auth</button>
+            <button onclick="signInAdmin()" class="btn-warning">Se connecter Admin</button>
+            <button onclick="signOut()" class="btn-danger">Se déconnecter</button>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Tests Firestore</h2>
+            <button onclick="testUserProfilesRead()" class="btn-success">Test userProfiles (Lecture)</button>
+            <button onclick="testAdminWebhooksRead()" class="btn-success">Test adminWebhooks (Lecture)</button>
+            <button onclick="testUserWebhooksRead()" class="btn-success">Test userWebhooks (Lecture)</button>
+            <button onclick="testWriteOperation()" class="btn-warning">Test Écriture</button>
+        </div>
+
+        <div class="test-section">
+            <h2>🎛️ Test Admin Complet</h2>
+            <button onclick="runFullDiagnostic()" class="btn-success">Diagnostic Complet</button>
+            <button onclick="clearResults()" class="btn-danger">Effacer Résultats</button>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Résultats</h2>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9XYvHxbp3VW0PCW0W7xfoWuiMxsjoUZE",
+            authDomain: "dictamed2025.firebaseapp.com",
+            projectId: "dictamed2025",
+            storageBucket: "dictamed2025.firebasestorage.app",
+            messagingSenderId: "242034923776",
+            appId: "1:242034923776:web:bd315e890c715b1d263be5",
+            measurementId: "G-1B8DZ4B73R"
+        };
+
+        // Initialisation Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Variables globales
+        const adminEmail = 'akio963@gmail.com';
+        let currentUser = null;
+
+        // Fonction d'affichage des résultats
+        function addResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            resultsDiv.appendChild(resultDiv);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        // Vérifier l'authentification
+        function checkAuth() {
+            currentUser = auth.currentUser;
+            const authStatus = document.getElementById('authStatus');
+            
+            if (currentUser) {
+                authStatus.innerHTML = `
+                    <div class="success">
+                        ✅ Connecté: ${currentUser.email} (UID: ${currentUser.uid})<br>
+                        Email vérifié: ${currentUser.emailVerified ? 'Oui' : 'Non'}
+                    </div>
+                `;
+                addResult(`Utilisateur connecté: ${currentUser.email}`, 'success');
+            } else {
+                authStatus.innerHTML = `
+                    <div class="error">
+                        ❌ Aucun utilisateur connecté
+                    </div>
+                `;
+                addResult('Aucun utilisateur connecté', 'error');
+            }
+        }
+
+        // Se connecter en tant qu'admin
+        async function signInAdmin() {
+            try {
+                addResult('Tentative de connexion admin...', 'info');
+                
+                // Pour ce test, utiliser la modal d'authentification existante
+                // ou saisir manuellement les credentials
+                const email = prompt('Email admin:', adminEmail);
+                const password = prompt('Mot de passe admin:', '••••••••');
+                
+                if (email && password) {
+                    await auth.signInWithEmailAndPassword(email, password);
+                    addResult(`Connexion réussie: ${email}`, 'success');
+                    checkAuth();
+                }
+            } catch (error) {
+                addResult(`Erreur de connexion: ${error.message}`, 'error');
+                console.error('Erreur de connexion:', error);
+            }
+        }
+
+        // Se déconnecter
+        async function signOut() {
+            try {
+                await auth.signOut();
+                addResult('Déconnexion réussie', 'success');
+                checkAuth();
+            } catch (error) {
+                addResult(`Erreur de déconnexion: ${error.message}`, 'error');
+            }
+        }
+
+        // Test lecture userProfiles
+        async function testUserProfilesRead() {
+            try {
+                addResult('Test lecture userProfiles...', 'info');
+                
+                const snapshot = await db.collection('userProfiles').limit(5).get();
+                addResult(`✅ Lecture userProfiles: ${snapshot.size} documents trouvés`, 'success');
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    addResult(`   - ${doc.id}: ${data.email || 'Email non défini'}`, 'info');
+                });
+                
+            } catch (error) {
+                addResult(`❌ Erreur lecture userProfiles: ${error.message}`, 'error');
+                console.error('Erreur userProfiles:', error);
+            }
+        }
+
+        // Test lecture adminWebhooks
+        async function testAdminWebhooksRead() {
+            try {
+                addResult('Test lecture adminWebhooks...', 'info');
+                
+                const snapshot = await db.collection('adminWebhooks').limit(5).get();
+                addResult(`✅ Lecture adminWebhooks: ${snapshot.size} documents trouvés`, 'success');
+                
+            } catch (error) {
+                addResult(`❌ Erreur lecture adminWebhooks: ${error.message}`, 'error');
+                console.error('Erreur adminWebhooks:', error);
+            }
+        }
+
+        // Test lecture userWebhooks
+        async function testUserWebhooksRead() {
+            try {
+                addResult('Test lecture userWebhooks...', 'info');
+                
+                const snapshot = await db.collection('userWebhooks').limit(5).get();
+                addResult(`✅ Lecture userWebhooks: ${snapshot.size} documents trouvés`, 'success');
+                
+            } catch (error) {
+                addResult(`❌ Erreur lecture userWebhooks: ${error.message}`, 'error');
+                console.error('Erreur userWebhooks:', error);
+            }
+        }
+
+        // Test opération d'écriture
+        async function testWriteOperation() {
+            try {
+                if (!currentUser) {
+                    addResult('❌ Connectez-vous d\'abord', 'error');
+                    return;
+                }
+                
+                addResult('Test opération d\'écriture...', 'info');
+                
+                const testDoc = db.collection('_permission_test').doc(`test_${currentUser.uid}_${Date.now()}`);
+                await testDoc.set({
+                    userId: currentUser.uid,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    message: 'Test de permission d\'écriture'
+                });
+                
+                addResult('✅ Opération d\'écriture réussie', 'success');
+                
+                // Nettoyer le document test
+                setTimeout(async () => {
+                    try {
+                        await testDoc.delete();
+                        addResult('🧹 Document de test nettoyé', 'info');
+                    } catch (error) {
+                        console.warn('Erreur lors du nettoyage:', error);
+                    }
+                }, 2000);
+                
+            } catch (error) {
+                addResult(`❌ Erreur opération d'écriture: ${error.message}`, 'error');
+                console.error('Erreur écriture:', error);
+            }
+        }
+
+        // Diagnostic complet
+        async function runFullDiagnostic() {
+            addResult('🔍 Démarrage du diagnostic complet...', 'info');
+            
+            // 1. Vérifier l'auth
+            checkAuth();
+            
+            // 2. Tester toutes les lectures
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testUserProfilesRead();
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testAdminWebhooksRead();
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testUserWebhooksRead();
+            
+            // 3. Test d'écriture si connecté
+            if (currentUser) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                await testWriteOperation();
+            }
+            
+            addResult('✅ Diagnostic complet terminé', 'success');
+        }
+
+        // Effacer les résultats
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // Écouter les changements d'état d'auth
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
+            checkAuth();
+            
+            if (user) {
+                addResult(`🔐 Changement d'état auth: ${user.email}`, 'info');
+            } else {
+                addResult('👋 Utilisateur déconnecté', 'info');
+            }
+        });
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            addResult('🚀 Testeur Firestore Permissions initialisé', 'success');
+            checkAuth();
+        });
+    </script>
+</body>
+</html>

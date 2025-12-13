@@ -71,16 +71,23 @@ service cloud.firestore {
     
     // Vérifie si l'utilisateur est un admin
     function isAdminUser() {
-      return request.auth.token.admin == true || 
+      // Méthode 1: Vérification par email admin
+      return request.auth != null &&
+             request.auth.token.email == 'akio963@gmail.com' ||
+             // Méthode 2: Claims admin dans le token (si configurés)
+             request.auth.token.admin == true ||
              request.auth.token.role == 'admin' ||
-             request.auth.uid in get(/databases/$(database)/documents/adminUsers).data.adminUIDs;
+             // Méthode 3: Vérification par document adminUsers (fallback)
+             (request.auth != null &&
+              get(/databases/$(database)/documents/adminUsers).data.adminUIDs[request.auth.uid] == true);
     }
     
     // Vérifie si la requête vient d'une Cloud Function
     function isCloudFunction() {
       return request.auth.token.firebase.sign_in_provider == 'firebase' &&
              request.auth.token.email_verified == true &&
-             request.auth.token.email.matches('.*@dictamed\\.fr$');
+             (request.auth.token.email.matches('.*@dictamed\\.fr$') ||
+              request.auth.token.email == 'akio963@gmail.com');
     }
     
     // Valide la structure d'un webhook utilisateur
