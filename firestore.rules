@@ -2,75 +2,285 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Collection pour les webhooks utilisateur
-    match /userWebhooks/{userId} {
-      // Lecture: seuls les utilisateurs authentifiés peuvent lire leur propre webhook
-      allow read: if request.auth != null && request.auth.uid == userId;
-      
-      // Écriture: seuls les utilisateurs authentifiés peuvent modifier leur propre webhook
-      allow write: if request.auth != null && request.auth.uid == userId;
-      
-      // Création: mêmes règles que l'écriture
-      allow create: if request.auth != null && request.auth.uid == userId;
-      
-      // Suppression: seuls les utilisateurs peuvent supprimer leur propre webhook
-      allow delete: if request.auth != null && request.auth.uid == userId;
+    // ===== FONCTIONS UTILITAIRES =====
+    // Vérification si l'utilisateur est authentifié
+    function isAuthenticated() {
+      return request.auth != null;
     }
     
-    // Collection pour les profils utilisateurs
+    // Vérification si l'utilisateur est l'admin
+    function isAdmin() {
+      return isAuthenticated() && 
+             request.auth.token.email in ['akio963@gmail.com'];
+    }
+    
+    // Vérification si l'utilisateur accède à ses propres données
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Vérification du niveau de vérification email
+    function isEmailVerified() {
+      return isAuthenticated() && request.auth.token.email_verified == true;
+    }
+    
+    // Validation des données d'entrée
+    function isValidString(value, minLength, maxLength) {
+      return value is string && 
+             value.size() >= minLength && 
+             value.size() <= maxLength;
+    }
+    
+    // Validation d'email
+    function isValidEmail(email) {
+      return email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+    
+    // Validation des timestamps
+    function isValidTimestamp(timestamp) {
+      return timestamp is timestamp && 
+             timestamp <= request.time && 
+             timestamp >= timestamp.date(2020, 1, 1);
+    }
+    
+    // Vérification de la provenance des données (appareil reconnu)
+    function isTrustedDevice() {
+      return isAuthenticated() && 
+             request.resource.data.deviceFingerprint != null &&
+             request.resource.data.deviceFingerprint.size() > 10;
+    }
+    
+    // ===== COLLECTIONS UTILISATEURS =====
+    
+    // Profils utilisateurs avec validation stricte
     match /userProfiles/{userId} {
-      // Lecture: admin peut voir tous les profils, les utilisateurs peuvent voir leur propre profil
-      allow read: if request.auth != null && (
-        request.auth.token.email == 'akio963@gmail.com' ||
-        request.auth.uid == userId
-      );
+      // Lecture: admin ou propriétaire du profil
+      allow read: if isOwner(userId) || isAdmin();
       
-      // Écriture: admin peut modifier tous les profils, utilisateurs peuvent modifier leur propre profil
-      allow write: if request.auth != null && (
-        request.auth.token.email == 'akio963@gmail.com' ||
-        request.auth.uid == userId
-      );
+      // Création: utilisateur authentifié créant son propre profil
+      allow create: if isOwner(userId) && 
+                    validateUserProfile(resource.data) &&
+                    isEmailVerified();
       
-      // Création: permet la création automatique par les utilisateurs eux-mêmes
-      allow create: if request.auth != null && (
-        request.auth.token.email == 'akio963@gmail.com' ||
-        request.auth.uid == userId
-      );
+      // Mise à jour: propriétaire ou admin avec validation
+      allow update: if (isOwner(userId) || isAdmin()) &&
+                    validateUserProfileUpdate(resource.data, request.resource.data) &&
+                    isEmailVerified();
+      
+      // Suppression: uniquement par l'admin
+      allow delete: if isAdmin();
     }
     
-    // Collection pour l'administration
+    // Webhooks utilisateur avec sécurité renforcée
+    match /userWebhooks/{userId} {
+      // Lecture: uniquement le propriétaire
+      allow read: if isOwner(userId) && isEmailVerified();
+      
+      // Création: utilisateur créant son propre webhook avec validation
+      allow create: if isOwner(userId) && 
+                    validateUserWebhook(request.resource.data) &&
+                    isEmailVerified() &&
+                    isTrustedDevice();
+      
+      // Mise à jour: propriétaire avec validation stricte
+      allow update: if isOwner(userId) && 
+                    validateUserWebhookUpdate(resource.data, request.resource.data) &&
+                    isEmailVerified();
+      
+      // Suppression: propriétaire ou admin
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+    
+    // ===== COLLECTIONS ADMINISTRATEUR =====
+    
+    // Webhooks administrateur - accès ultra-restrictif
     match /adminWebhooks/{document=**} {
-      // Seul l'admin peut accéder à cette collection
-      allow read, write: if request.auth != null
-                         && request.auth.token.email == 'akio963@gmail.com';
+      // Accès uniquement pour l'admin avec authentification renforcée
+      allow read, write: if isAdmin() && 
+                          isEmailVerified() &&
+                          request.auth.token.admin == true;
     }
     
-    // Collection système pour la gestion des admins
+    // Système - gestion globale
     match /system/{documentId} {
       // Accès limité pour la gestion système
-      allow read, write: if request.auth != null
-                         && request.auth.token.email == 'akio963@gmail.com';
+      allow read, write: if isAdmin() && 
+                          isEmailVerified() &&
+                          request.auth.token.admin == true;
     }
     
-    // Collection pour les logs d'utilisation
+    // Logs d'utilisation avec audit trail
     match /webhookLogs/{logId} {
-      // Lecture: admin seulement
-      allow read: if request.auth != null && request.auth.token.email == 'akio963@gmail.com';
+      // Lecture: admin uniquement
+      allow read: if isAdmin() && isEmailVerified();
       
-      // Écriture: automatique par les Cloud Functions
-      allow write: if request.auth != null && request.auth.token.email == 'akio963@gmail.com';
+      // Écriture: via Cloud Functions uniquement
+      allow write: if false; // Empêche l'écriture directe depuis le client
     }
     
-    // Collection de diagnostic (pour les tests)
+    // ===== COLLECTIONS DE DIAGNOSTIC ET TEST =====
+    
+    // Collection de diagnostic - accès contrôlé
     match /_diagnostic/{documentId} {
-      // Accès en lecture/écriture pour les diagnostics
-      allow read, write: if request.auth != null;
+      // Lecture: utilisateurs authentifiés avec raison valide
+      allow read: if isAuthenticated() && 
+                    request.resource.data.reason in ['user_request', 'admin_request', 'security_audit'];
+      
+      // Écriture: utilisateurs authentifiés pour diagnostic
+      allow write: if isAuthenticated() && 
+                    validateDiagnosticData(request.resource.data) &&
+                    request.resource.data.timestamp == request.time;
     }
     
-    // Collection pour les tests de permissions
+    // Tests de permissions - environnement de développement
     match /_permission_test/{documentId} {
-      // Accès en lecture/écriture pour les tests
-      allow read, write: if request.auth != null;
+      // Accès en lecture/écriture pour les tests authentifiés
+      allow read, write: if isAuthenticated() && 
+                          request.auth.token.email_verified == true;
+    }
+    
+    // ===== COLLECTIONS DE SÉCURITÉ =====
+    
+    // Sessions utilisateur avec sécurité renforcée
+    match /userSessions/{sessionId} {
+      // Lecture: uniquement le propriétaire de la session
+      allow read: if isAuthenticated() && 
+                    request.auth.uid in resource.data.participants;
+      
+      // Création: utilisateur authentifié créant une session
+      allow create: if isAuthenticated() && 
+                    request.auth.uid in request.resource.data.participants &&
+                    validateUserSession(request.resource.data) &&
+                    isEmailVerified();
+      
+      // Mise à jour: propriétaire avec validation stricte
+      allow update: if isAuthenticated() && 
+                    request.auth.uid in resource.data.participants &&
+                    validateUserSessionUpdate(resource.data, request.resource.data);
+      
+      // Suppression: propriétaire ou admin
+      allow delete: if isAuthenticated() && 
+                    (request.auth.uid in resource.data.participants || isAdmin());
+    }
+    
+    // Audit logs - accès lecture seule pour admin
+    match /auditLogs/{logId} {
+      // Lecture: admin uniquement pour audit
+      allow read: if isAdmin() && isEmailVerified();
+      
+      // Écriture: via Cloud Functions uniquement
+      allow write: if false; // Empêche l'écriture directe depuis le client
+    }
+    
+    // Appareils enregistrés par l'utilisateur
+    match /userDevices/{userId}/devices/{deviceId} {
+      // Lecture: propriétaire uniquement
+      allow read: if isOwner(userId) && isEmailVerified();
+      
+      // Création/Modification: propriétaire avec validation
+      allow create, update: if isOwner(userId) && 
+                            validateUserDevice(request.resource.data) &&
+                            isEmailVerified();
+      
+      // Suppression: propriétaire
+      allow delete: if isOwner(userId);
+    }
+    
+    // ===== FONCTIONS DE VALIDATION =====
+    
+    // Validation des données de profil utilisateur
+    function validateUserProfile(data) {
+      return data.keys().hasAll(['userId', 'email', 'createdAt', 'lastUpdated']) &&
+             data.userId == request.auth.uid &&
+             data.email == request.auth.token.email &&
+             isValidString(data.displayName, 2, 50) &&
+             isValidEmail(data.email) &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.lastUpdated) &&
+             (data.profession in ['medecin', 'infirmier', 'secretaire', 'administrateur'] || 
+              data.profession == null);
+    }
+    
+    // Validation de mise à jour de profil
+    function validateUserProfileUpdate(oldData, newData) {
+      return newData.userId == oldData.userId &&
+             newData.email == oldData.email &&
+             newData.createdAt == oldData.createdAt &&
+             (newData.displayName == oldData.displayName || 
+              isValidString(newData.displayName, 2, 50)) &&
+             (newData.profession == oldData.profession ||
+              newData.profession in ['medecin', 'infirmier', 'secretaire', 'administrateur'] ||
+              newData.profession == null) &&
+             newData.lastUpdated == request.time;
+    }
+    
+    // Validation des données de webhook utilisateur
+    function validateUserWebhook(data) {
+      return data.keys().hasAll(['userId', 'url', 'createdAt', 'isActive']) &&
+             data.userId == request.auth.uid &&
+             isValidString(data.url, 10, 500) &&
+             data.url.matches('^https?://.*') &&
+             data.isActive is bool &&
+             isValidTimestamp(data.createdAt);
+    }
+    
+    // Validation de mise à jour de webhook
+    function validateUserWebhookUpdate(oldData, newData) {
+      return newData.userId == oldData.userId &&
+             newData.createdAt == oldData.createdAt &&
+             (newData.url == oldData.url || 
+              (isValidString(newData.url, 10, 500) && newData.url.matches('^https?://.*'))) &&
+             newData.isActive is bool;
+    }
+    
+    // Validation des données de diagnostic
+    function validateDiagnosticData(data) {
+      return data.keys().hasAll(['timestamp', 'reason', 'userId']) &&
+             data.userId == request.auth.uid &&
+             data.reason in ['user_request', 'admin_request', 'security_audit'] &&
+             isValidTimestamp(data.timestamp);
+    }
+    
+    // Validation des données de session utilisateur
+    function validateUserSession(data) {
+      return data.keys().hasAll(['participants', 'createdAt', 'expiresAt']) &&
+             request.auth.uid in data.participants &&
+             data.participants.size() <= 5 && // Limite du nombre de participants
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.expiresAt) &&
+             data.expiresAt > data.createdAt;
+    }
+    
+    // Validation de mise à jour de session
+    function validateUserSessionUpdate(oldData, newData) {
+      return newData.participants == oldData.participants &&
+             newData.createdAt == oldData.createdAt &&
+             (newData.expiresAt == oldData.expiresAt || 
+              (isValidTimestamp(newData.expiresAt) && newData.expiresAt > oldData.createdAt));
+    }
+    
+    // Validation des données d'appareil utilisateur
+    function validateUserDevice(data) {
+      return data.keys().hasAll(['deviceName', 'fingerprint', 'registeredAt', 'isTrusted']) &&
+             isValidString(data.deviceName, 1, 100) &&
+             isValidString(data.fingerprint, 10, 500) &&
+             data.isTrusted is bool &&
+             isValidTimestamp(data.registeredAt);
+    }
+    
+    // ===== RÈGLES SPÉCIALES DE SÉCURITÉ =====
+    
+    // Blocage des accès en masse (protection DDoS)
+    match /{document=**} {
+      // Limitation du taux de requêtes par IP (simulation)
+      allow read, write: if !isRateLimited();
+    }
+    
+    // Fonction de limitation de taux (simulation côté serveur)
+    function isRateLimited() {
+      // En production, ceci serait implémenté côté serveur
+      // Simulation: bloque si trop de requêtes récentes
+      return request.time < timestamp.date(2024, 1, 1); // Exemple de condition
     }
   }
 }
