@@ -161,7 +161,7 @@ class AuthModalSystem {
             return false;
         }
 
-        const isValid = password.length >= 6;
+        const isValid = password.length >= 8;
 
         if (isValid) {
             passwordInput.classList.add('valid');
@@ -171,7 +171,7 @@ class AuthModalSystem {
         } else {
             passwordInput.classList.add('invalid');
             if (showFeedback) {
-                this.showFieldError(passwordInput, 'Le mot de passe doit contenir au moins 6 caractères');
+                this.showFieldError(passwordInput, 'Le mot de passe doit contenir au moins 8 caractères');
             }
         }
 
@@ -300,8 +300,8 @@ class AuthModalSystem {
         // Validation mot de passe
         if (!password) {
             errors.push('Le mot de passe est requis');
-        } else if (password.length < 6) {
-            errors.push('Le mot de passe doit contenir au moins 6 caractères');
+        } else if (password.length < 8) {
+            errors.push('Le mot de passe doit contenir au moins 8 caractères');
         }
 
         // Validation spécifique pour l'inscription
