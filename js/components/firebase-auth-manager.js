@@ -432,20 +432,6 @@ class FirebaseAuthManager {
             feedback.push('Le mot de passe doit contenir au moins 8 caractères');
         }
 
-        // Minuscules
-        if (/[a-z]/.test(password)) {
-            score++;
-        } else {
-            feedback.push('Ajoutez des lettres minuscules');
-        }
-
-        // Majuscules
-        if (/[A-Z]/.test(password)) {
-            score++;
-        } else {
-            feedback.push('Ajoutez des lettres majuscules');
-        }
-
         // Chiffres
         if (/\d/.test(password)) {
             score++;
@@ -453,18 +439,9 @@ class FirebaseAuthManager {
             feedback.push('Ajoutez des chiffres');
         }
 
-        // Caractères spéciaux
-        if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-            score++;
-        } else {
-            feedback.push('Ajoutez des caractères spéciaux');
-        }
-
         // Déterminer la force
-        if (score >= 5) strength = 'Très fort';
-        else if (score >= 4) strength = 'Fort';
-        else if (score >= 3) strength = 'Moyen';
-        else if (score >= 2) strength = 'Faible';
+        if (score >= 2) strength = 'Fort';
+        else if (score >= 1) strength = 'Moyen';
 
         return { score, strength, feedback };
     }
@@ -493,7 +470,7 @@ class FirebaseAuthManager {
         }
 
         const strength = this.evaluatePasswordStrength(password);
-        if (strength.score < 2) {
+        if (strength.score < 1) {
             return { isValid: false, error: 'Le mot de passe est trop faible' };
         }
 
