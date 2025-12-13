@@ -1,6 +1,13 @@
 /**
- * DictaMed - Gestionnaire d'Interface d'Administration des Webhooks
- * Version: 1.1.0 - Corrections des bugs d'authentification et gestion d'erreurs améliorée
+ * DictaMed - Gestionnaire d'Interface d'Administration des Webhooks CORRIGÉ
+ * Version: 1.3.1 - Correction des bugs de configuration admin
+ * 
+ * Corrections appliquées :
+ * - Correction du bug de double écouteur
+ * - Ajout d'un verrou de concurrence pour la détection
+ * - Correction du nettoyage de mémoire
+ * - Optimisation de la recherche d'utilisateurs
+ * - Amélioration de la gestion d'erreurs asynchrones
  */
 
 class AdminWebhookManager {
@@ -10,61 +17,109 @@ class AdminWebhookManager {
         this.isInitializing = false;
         this.adminEmail = 'akio963@gmail.com'; // Email de l'administrateur principal
         this.users = []; // Liste des utilisateurs
+        this.userUidSet = new Set(); // Cache des UIDs pour recherche rapide
         this.webhooks = new Map(); // Cache des webhooks par utilisateur
         this.authListenerAttached = false; // État de l'écouteur d'authentification
+        this.userListenerAttached = false; // État de l'écouteur d'utilisateurs
         this.cleanupCallbacks = []; // Fonctions de nettoyage
+        this.initPromise = null; // Promise pour éviter la double initialisation
+        this.lastUserCount = 0; // Pour détecter les nouveaux utilisateurs
+        this.autoRefreshInterval = null; // Intervalle de rafraîchissement automatique
+        this.detectionLock = false; // Verrou pour éviter la détection concurrente
+        this.processingQueue = []; // File d'attente des opérations en cours
     }
 
     /**
-     * Initialisation du gestionnaire d'admin avec gestion d'erreurs améliorée
+     * Initialisation corrigée du gestionnaire d'admin avec prévention des race conditions
      */
     async init() {
-        // Éviter la double initialisation
+        // Éviter la double initialisation avec Promise
+        if (this.initPromise) {
+            return this.initPromise;
+        }
+
         if (this.isInitialized || this.isInitializing) {
             console.log('ℹ️ AdminWebhookManager déjà initialisé ou en cours d\'initialisation');
             return this.isInitialized;
         }
 
         this.isInitializing = true;
-        console.log('🔧 Initialisation AdminWebhookManager v1.1.0...');
+        this.initPromise = this._performInitialization();
         
         try {
-            // 1. Vérification de l'authentification avec retry
-            if (!await this.waitForAuthInitialization(10000)) {
-                throw new Error('Authentification non initialisée dans les temps');
-            }
+            const result = await this.initPromise;
+            return result;
+        } finally {
+            this.initPromise = null;
+        }
+    }
 
-            if (!this.checkAdminAuth()) {
+    /**
+     * Méthode d'initialisation réelle avec gestion améliorée des erreurs
+     */
+    async _performInitialization() {
+        console.log('🔧 Initialisation AdminWebhookManager v1.3.1...');
+        
+        try {
+            // 1. Attendre l'initialisation de Firebase Auth avec timeout
+            await this.waitForAuthManager(15000);
+            
+            // 2. Vérifier l'authentification admin
+            if (!await this.verifyAdminAuth()) {
                 this.showAccessDenied();
                 return false;
             }
 
-            // 2. Récupération sécurisée de l'utilisateur actuel
+            // 3. Récupérer l'utilisateur admin actuel
             this.currentAdminUser = this.getCurrentUserSecure();
             if (!this.currentAdminUser) {
                 throw new Error('Impossible de récupérer les informations utilisateur');
             }
             console.log('✅ Admin authentifié:', this.currentAdminUser.email);
 
-            // 3. Configuration de l'écouteur d'authentification
+            // 4. Configurer les écouteurs (une seule fois)
             this.setupAuthListener();
+            this.setupUserDetectionListener(); // CORRIGÉ: Écouteur pour détecter nouveaux utilisateurs
 
-            // 4. Chargement des données avec retry
-            await this.loadUsersWithRetry();
-            await this.loadAllWebhooksWithRetry();
+            // 5. Charger les données en parallèle pour améliorer les performances
+            const [usersResult, webhooksResult] = await Promise.allSettled([
+                this.loadUsersWithRetry(),
+                this.loadAllWebhooksWithRetry()
+            ]);
 
-            // 5. Initialisation de l'interface
+            // Gérer les résultats même en cas d'échec partiel
+            if (usersResult.status === 'fulfilled') {
+                this.users = usersResult.value;
+                this.updateUserUidCache(); // CORRIGÉ: Mettre à jour le cache
+                this.lastUserCount = this.users.length;
+            } else {
+                console.warn('⚠️ Échec du chargement des utilisateurs:', usersResult.reason);
+                this.users = [];
+                this.updateUserUidCache();
+            }
+
+            if (webhooksResult.status === 'fulfilled') {
+                this.webhooks = webhooksResult.value;
+            } else {
+                console.warn('⚠️ Échec du chargement des webhooks:', webhooksResult.reason);
+                this.webhooks = new Map();
+            }
+
+            // 6. Initialiser l'interface utilisateur
             this.initAdminInterface();
             this.bindEvents();
 
+            // 7. Démarrer le rafraîchissement automatique (CORRIGÉ)
+            this.startAutoRefresh();
+
             this.isInitialized = true;
-            console.log('✅ AdminWebhookManager v1.1.0 initialisé avec succès');
+            console.log('✅ AdminWebhookManager v1.3.1 initialisé avec succès');
             return true;
 
         } catch (error) {
             console.error('❌ Erreur d\'initialisation AdminWebhookManager:', error);
             this.showError('Erreur lors de l\'initialisation: ' + error.message);
-            this.cleanup(); // Nettoyer en cas d'erreur
+            this.cleanup();
             return false;
         } finally {
             this.isInitializing = false;
@@ -72,15 +127,364 @@ class AdminWebhookManager {
     }
 
     /**
-     * Attendre l'initialisation de l'authentification avec retry
+     * CORRIGÉ: Configuration de l'écouteur pour détecter les nouveaux utilisateurs
      */
-    async waitForAuthInitialization(timeout = 10000) {
+    setupUserDetectionListener() {
+        // CORRIGÉ: Vérification renforcée du statut
+        if (this.userListenerAttached) {
+            console.log('ℹ️ Écouteur de détection utilisateurs déjà configuré');
+            return;
+        }
+
+        try {
+            const authManager = this.getAuthManager();
+            if (authManager && typeof authManager.addAuthStateListener === 'function') {
+                // CORRIGÉ: Marquer comme attaché AVANT d'ajouter l'écouteur
+                this.userListenerAttached = true;
+                
+                authManager.addAuthStateListener(async (user) => {
+                    await this.handleNewUserDetection(user);
+                });
+                
+                console.log('✅ Écouteur de détection utilisateurs configuré');
+            } else {
+                this.userListenerAttached = false; // CORRIGÉ: Reset en cas d'échec
+                console.warn('⚠️ Impossible de configurer l\'écouteur de détection');
+            }
+        } catch (error) {
+            this.userListenerAttached = false; // CORRIGÉ: Reset en cas d'erreur
+            console.warn('⚠️ Erreur lors de la configuration de l\'écouteur utilisateurs:', error);
+        }
+    }
+
+    /**
+     * CORRIGÉ: Gestion de la détection de nouveaux utilisateurs avec verrou de concurrence
+     */
+    async handleNewUserDetection(user) {
+        // CORRIGÉ: Verrou pour éviter la concurrence
+        if (this.detectionLock) {
+            console.log('🔒 Détection déjà en cours, ajout à la file d\'attente');
+            this.processingQueue.push({ type: 'userDetection', user });
+            return;
+        }
+
+        this.detectionLock = true;
+        
+        try {
+            if (!user) {
+                console.log('👋 Utilisateur déconnecté');
+                return;
+            }
+
+            // CORRIGÉ: Utiliser le cache pour la recherche rapide
+            const userExists = this.userUidSet.has(user.uid);
+            
+            if (!userExists) {
+                console.log('🆕 Nouvel utilisateur détecté:', user.email);
+                
+                // Créer automatiquement un profil pour ce nouvel utilisateur
+                await this.createUserProfile(user);
+                
+                // Recharger la liste des utilisateurs
+                await this.refreshUsersList();
+                
+                // Afficher une notification
+                this.showSuccess(`Nouvel utilisateur détecté: ${user.email}`);
+            } else {
+                console.log('ℹ️ Utilisateur déjà connu:', user.email);
+            }
+        } catch (error) {
+            console.error('❌ Erreur lors de la détection du nouvel utilisateur:', error);
+        } finally {
+            this.detectionLock = false;
+            
+            // CORRIGÉ: Traiter la file d'attente
+            this.processQueue();
+        }
+    }
+
+    /**
+     * CORRIGÉ: Traitement de la file d'attente des opérations
+     */
+    async processQueue() {
+        while (this.processingQueue.length > 0 && !this.detectionLock) {
+            const item = this.processingQueue.shift();
+            
+            try {
+                if (item.type === 'userDetection') {
+                    await this.handleNewUserDetection(item.user);
+                }
+            } catch (error) {
+                console.error('❌ Erreur lors du traitement de la file d\'attente:', error);
+            }
+        }
+    }
+
+    /**
+     * CORRIGÉ: Création automatique de profil utilisateur avec gestion d'erreurs améliorée
+     */
+    async createUserProfile(user) {
+        try {
+            console.log('👤 Création du profil pour:', user.email);
+            
+            const userProfileData = {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || user.email.split('@')[0],
+                emailVerified: user.emailVerified || false,
+                createdAt: new Date(),
+                lastSeen: new Date(),
+                hasWebhook: false,
+                profileCreatedBy: 'system_auto',
+                registrationSource: 'firebase_auth'
+            };
+
+            const db = firebase.firestore();
+            await db.collection('userProfiles').doc(user.uid).set(userProfileData, { merge: true });
+            
+            console.log('✅ Profil utilisateur créé dans userProfiles:', user.email);
+            
+        } catch (error) {
+            console.warn('⚠️ Impossible de créer le profil utilisateur:', error);
+            // CORRIGÉ: Ne pas échouer pour cette raison, mais journaliser
+            this.showError(`Impossible de créer le profil pour ${user.email}: ${error.message}`);
+        }
+    }
+
+    /**
+     * CORRIGÉ: Démarrage du rafraîchissement automatique avec vérification
+     */
+    startAutoRefresh() {
+        // CORRIGÉ: Arrêter le précédent intervalle s'il existe
+        if (this.autoRefreshInterval) {
+            clearInterval(this.autoRefreshInterval);
+            this.autoRefreshInterval = null;
+            console.log('✅ Ancien intervalle de rafraîchissement arrêté');
+        }
+
+        // Rafraîchir toutes les 30 secondes pour détecter les nouveaux utilisateurs
+        this.autoRefreshInterval = setInterval(async () => {
+            if (this.isInitialized && !this.detectionLock) {
+                try {
+                    await this.performAutoRefresh();
+                } catch (error) {
+                    console.error('❌ Erreur lors du rafraîchissement automatique:', error);
+                }
+            }
+        }, 30000); // 30 secondes
+
+        console.log('✅ Rafraîchissement automatique démarré (30s)');
+    }
+
+    /**
+     * CORRIGÉ: Rafraîchissement automatique intelligent avec mise à jour du cache
+     */
+    async performAutoRefresh() {
+        try {
+            console.log('🔄 Rafraîchissement automatique en cours...');
+            
+            const previousCount = this.users.length;
+            
+            // Charger les utilisateurs avec une approche plus agressive
+            const newUsers = await this.loadUsersEnhanced();
+            
+            // CORRIGÉ: Vérifier les changements et mettre à jour le cache
+            if (newUsers.length !== previousCount) {
+                console.log(`📈 Changement détecté: ${previousCount} → ${newUsers.length} utilisateurs`);
+                this.users = newUsers;
+                this.updateUserUidCache(); // CORRIGÉ: Mettre à jour le cache
+                this.lastUserCount = newUsers.length;
+                
+                // Recharger aussi les webhooks
+                const newWebhooks = await this.loadAllWebhooks();
+                this.webhooks = newWebhooks;
+                
+                // Rafraîchir l'affichage
+                if (this.isInitialized) {
+                    this.renderStatistics();
+                    this.renderUsersList();
+                }
+                
+                this.showSuccess(`Liste mise à jour: ${newUsers.length} utilisateur(s)`);
+            } else {
+                console.log('ℹ️ Aucun changement détecté');
+            }
+            
+        } catch (error) {
+            console.warn('⚠️ Erreur lors du rafraîchissement automatique:', error);
+        }
+    }
+
+    /**
+     * CORRIGÉ: Chargement amélioré des utilisateurs avec détection renforcée et anti-duplication
+     */
+    async loadUsersEnhanced() {
+        try {
+            console.log('👥 Chargement amélioré des utilisateurs...');
+            
+            const users = [];
+            const seenUids = new Set(); // CORRIGÉ: Anti-duplication
+            
+            // Méthode 1: Charger depuis userProfiles (collection principale)
+            try {
+                const profilesSnapshot = await firebase.firestore().collection('userProfiles').get();
+                if (!profilesSnapshot.empty) {
+                    profilesSnapshot.docs.forEach(doc => {
+                        try {
+                            const userData = doc.data();
+                            // CORRIGÉ: Vérifier les doublons
+                            if (!seenUids.has(doc.id)) {
+                                users.push({
+                                    uid: doc.id,
+                                    ...userData
+                                });
+                                seenUids.add(doc.id);
+                            }
+                        } catch (docError) {
+                            console.warn('⚠️ Erreur lors du traitement du profil:', doc.id, docError);
+                        }
+                    });
+                    console.log(`✅ ${users.length} utilisateurs chargés depuis userProfiles`);
+                }
+            } catch (profileError) {
+                console.log('ℹ️ Collection userProfiles non accessible, utilisation de la méthode alternative');
+            }
+            
+            // Méthode 2: Déduire depuis les webhooks si userProfiles est vide
+            if (users.length === 0) {
+                try {
+                    const webhooksSnapshot = await firebase.firestore().collection('userWebhooks').get();
+                    const webhookUsers = [];
+                    
+                    for (const doc of webhooksSnapshot.docs) {
+                        try {
+                            const webhookData = doc.data();
+                            // CORRIGÉ: Vérifier les doublons et les données valides
+                            if (!seenUids.has(doc.id) && (webhookData.userEmail || webhookData.createdBy)) {
+                                webhookUsers.push({
+                                    uid: doc.id,
+                                    email: webhookData.userEmail || webhookData.createdBy || 'Email non disponible',
+                                    displayName: webhookData.userName || 'Nom non disponible',
+                                    emailVerified: true,
+                                    createdAt: webhookData.createdAt ?
+                                        (webhookData.createdAt.toDate ? webhookData.createdAt.toDate().toISOString() : new Date().toISOString())
+                                        : new Date().toISOString(),
+                                    hasWebhook: true
+                                });
+                                seenUids.add(doc.id);
+                            }
+                        } catch (docError) {
+                            console.warn('⚠️ Erreur lors du traitement du webhook utilisateur:', doc.id, docError);
+                        }
+                    }
+                    
+                    // Ajouter l'utilisateur admin actuel s'il n'est pas dans la liste
+                    const currentUser = this.getCurrentUserSecure();
+                    if (currentUser && !seenUids.has(currentUser.uid)) {
+                        webhookUsers.push({
+                            uid: currentUser.uid,
+                            email: currentUser.email,
+                            displayName: currentUser.displayName || 'Administrateur',
+                            emailVerified: currentUser.emailVerified,
+                            createdAt: currentUser.metadata?.creationTime || new Date().toISOString(),
+                            hasWebhook: false
+                        });
+                        seenUids.add(currentUser.uid);
+                    }
+                    
+                    console.log(`✅ ${webhookUsers.length} utilisateurs déduits depuis les webhooks`);
+                    return webhookUsers;
+                    
+                } catch (webhookError) {
+                    console.warn('⚠️ Impossible de charger depuis les webhooks:', webhookError);
+                }
+            }
+            
+            // Méthode 3: Fallback - au moins l'admin
+            if (users.length === 0) {
+                const currentUser = this.getCurrentUserSecure();
+                if (currentUser && !seenUids.has(currentUser.uid)) {
+                    users.push({
+                        uid: currentUser.uid,
+                        email: currentUser.email,
+                        displayName: currentUser.displayName || 'Administrateur',
+                        emailVerified: currentUser.emailVerified,
+                        createdAt: currentUser.metadata?.creationTime || new Date().toISOString(),
+                        hasWebhook: false
+                    });
+                    seenUids.add(currentUser.uid);
+                }
+            }
+            
+            return users;
+            
+        } catch (error) {
+            console.error('❌ Erreur lors du chargement amélioré des utilisateurs:', error);
+            return [];
+        }
+    }
+
+    /**
+     * CORRIGÉ: Rechargement de la liste utilisateurs avec détection de changements et mise à jour du cache
+     */
+    async refreshUsersList() {
+        try {
+            console.log('🔄 Rechargement de la liste utilisateurs...');
+            
+            const newUsers = await this.loadUsersEnhanced();
+            const oldUsers = this.users;
+            
+            // CORRIGÉ: Utiliser le cache pour la détection des changements
+            const newUserUids = new Set(newUsers.map(u => u.uid));
+            const oldUserUids = this.userUidSet;
+            
+            const addedUsers = newUsers.filter(u => !oldUserUids.has(u.uid));
+            const removedUsers = oldUsers.filter(u => !newUserUids.has(u.uid));
+            
+            if (addedUsers.length > 0) {
+                console.log(`➕ ${addedUsers.length} nouvel(s) utilisateur(s) ajouté(s):`, addedUsers.map(u => u.email));
+            }
+            
+            if (removedUsers.length > 0) {
+                console.log(`➖ ${removedUsers.length} utilisateur(s) retiré(s):`, removedUsers.map(u => u.email));
+            }
+            
+            this.users = newUsers;
+            this.updateUserUidCache(); // CORRIGÉ: Mettre à jour le cache
+            
+            // Recharger les webhooks aussi
+            this.webhooks = await this.loadAllWebhooks();
+            
+            // Rafraîchir l'affichage si nécessaire
+            if (this.isInitialized) {
+                this.renderStatistics();
+                this.renderUsersList();
+            }
+            
+        } catch (error) {
+            console.error('❌ Erreur lors du rechargement de la liste:', error);
+        }
+    }
+
+    /**
+     * CORRIGÉ: Mise à jour du cache des UIDs pour recherche rapide
+     */
+    updateUserUidCache() {
+        this.userUidSet = new Set(this.users.map(u => u.uid));
+        console.log(`🔄 Cache des UIDs mis à jour: ${this.userUidSet.size} utilisateurs`);
+    }
+
+    /**
+     * Attendre l'initialisation du gestionnaire d'authentification
+     */
+    async waitForAuthManager(timeout = 15000) {
         const startTime = Date.now();
         
         while (Date.now() - startTime < timeout) {
             try {
                 const authManager = this.getAuthManager();
                 if (authManager && authManager.isInitialized) {
+                    console.log('✅ FirebaseAuthManager initialisé');
                     return true;
                 }
             } catch (error) {
@@ -90,7 +494,37 @@ class AdminWebhookManager {
             await new Promise(resolve => setTimeout(resolve, 200));
         }
         
-        return false;
+        throw new Error('FirebaseAuthManager non initialisé dans les temps');
+    }
+
+    /**
+     * Vérification de l'authentification admin avec retry
+     */
+    async verifyAdminAuth() {
+        try {
+            const authManager = this.getAuthManager();
+            if (!authManager) {
+                this.showError('Gestionnaire d\'authentification non disponible');
+                return false;
+            }
+
+            const currentUser = authManager.getCurrentUser();
+            if (!currentUser) {
+                this.showError('Vous devez être connecté pour accéder à cette interface.');
+                return false;
+            }
+
+            if (currentUser.email !== this.adminEmail) {
+                this.showError(`Accès refusé. Cette interface est réservée à l'administrateur.`);
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            console.error('❌ Erreur lors de la vérification auth:', error);
+            this.showError('Erreur lors de la vérification d\'authentification');
+            return false;
+        }
     }
 
     /**
@@ -123,8 +557,8 @@ class AdminWebhookManager {
 
             const user = authManager.getCurrentUser();
             if (!user) {
-                throw new Error('Aucun utilisateur connecté');
-            }
+               throw new Error('Aucun utilisateur connecté');
+           }
 
             return {
                 uid: user.uid,
@@ -140,78 +574,83 @@ class AdminWebhookManager {
     }
 
     /**
-     * Configuration de l'écouteur d'authentification
+     * Configuration de l'écouteur d'authentification (version améliorée)
      */
     setupAuthListener() {
-        if (this.authListenerAttached) return;
+        if (this.authListenerAttached) {
+            console.log('ℹ️ Écouteur d\'authentification déjà configuré');
+            return;
+        }
 
         try {
             const authManager = this.getAuthManager();
-            if (authManager && authManager.addAuthStateListener) {
+            if (authManager && typeof authManager.addAuthStateListener === 'function') {
                 authManager.addAuthStateListener((user) => {
                     console.log('🔐 Changement d\'état auth détecté:', user ? user.email : 'null');
                     this.handleAuthStateChange(user);
                 });
                 this.authListenerAttached = true;
                 console.log('✅ Écouteur d\'authentification configuré');
+            } else {
+                console.warn('⚠️ Impossible de configurer l\'écouteur auth');
             }
         } catch (error) {
-            console.warn('⚠️ Impossible de configurer l\'écouteur auth:', error);
+            console.warn('⚠️ Erreur lors de la configuration de l\'écouteur auth:', error);
         }
     }
 
     /**
-     * Gestion des changements d'état d'authentification
+     * Gestion des changements d'état d'authentification (version améliorée)
      */
     async handleAuthStateChange(user) {
-        if (!user || user.email !== this.adminEmail) {
-            console.log('🚫 Accès admin révoqué');
-            this.showAccessDenied();
-            return;
-        }
-
-        // Recharger les données si nécessaire
-        if (this.isInitialized) {
-            try {
-                await this.refreshData();
-            } catch (error) {
-                console.error('❌ Erreur lors du rafraîchissement après changement auth:', error);
-            }
-        }
-    }
-
-    /**
-     * Vérification de l'authentification admin avec gestion d'erreurs
-     */
-    checkAdminAuth() {
         try {
-            const authManager = this.getAuthManager();
-            if (!authManager) {
-                this.showError('Gestionnaire d\'authentification non disponible');
-                return false;
+            if (!user || user.email !== this.adminEmail) {
+                console.log('🚫 Accès admin révoqué');
+                this.showAccessDenied();
+                return;
             }
 
-            const currentUser = authManager.getCurrentUser();
-            if (!currentUser) {
-                this.showError('Vous devez être connecté pour accéder à cette interface.');
-                return false;
+            // Recharger les données si nécessaire
+            if (this.isInitialized) {
+                console.log('🔄 Rechargement des données après changement auth...');
+                await this.refreshDataSafely();
             }
-
-            if (currentUser.email !== this.adminEmail) {
-                this.showError(`Accès refusé. Cette interface est réservée à l'administrateur.`);
-                return false;
-            }
-
-            return true;
         } catch (error) {
-            console.error('❌ Erreur lors de la vérification auth:', error);
-            this.showError('Erreur lors de la vérification d\'authentification');
-            return false;
+            console.error('❌ Erreur lors du rafraîchissement après changement auth:', error);
         }
     }
 
     /**
-     * Chargement des utilisateurs avec retry et gestion d'erreurs améliorée
+     * Rafraîchissement sécurisé des données
+     */
+    async refreshDataSafely() {
+        try {
+            const [usersResult, webhooksResult] = await Promise.allSettled([
+                this.loadUsers(),
+                this.loadAllWebhooks()
+            ]);
+
+            if (usersResult.status === 'fulfilled') {
+                this.users = usersResult.value;
+                this.updateUserUidCache(); // CORRIGÉ: Mettre à jour le cache
+            }
+
+            if (webhooksResult.status === 'fulfilled') {
+                this.webhooks = webhooksResult.value;
+            }
+
+            // Rafraîchir l'affichage si les éléments DOM existent
+            if (this.isInitialized) {
+                this.renderStatistics();
+                this.renderUsersList();
+            }
+        } catch (error) {
+            console.error('❌ Erreur lors du rafraîchissement sécurisé:', error);
+        }
+    }
+
+    /**
+     * Chargement des utilisateurs avec retry amélioré
      */
     async loadUsersWithRetry(maxRetries = 3) {
         let lastError;
@@ -220,7 +659,7 @@ class AdminWebhookManager {
             try {
                 console.log(`👥 Tentative ${attempt}/${maxRetries} de chargement des utilisateurs...`);
                 const users = await this.loadUsers();
-                if (users.length >= 0) { // Accepter 0 utilisateur comme valide
+                if (Array.isArray(users)) {
                     return users;
                 }
                 throw new Error('Résultat invalide du chargement des utilisateurs');
@@ -229,7 +668,7 @@ class AdminWebhookManager {
                 console.warn(`⚠️ Tentative ${attempt} échouée:`, error.message);
                 
                 if (attempt < maxRetries) {
-                    await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Backoff exponentiel
+                    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
                 }
             }
         }
@@ -240,7 +679,7 @@ class AdminWebhookManager {
     }
 
     /**
-     * Chargement de tous les webhooks avec retry
+     * Chargement de tous les webhooks avec retry amélioré
      */
     async loadAllWebhooksWithRetry(maxRetries = 3) {
         let lastError;
@@ -269,72 +708,98 @@ class AdminWebhookManager {
     }
 
     /**
-     * Chargement de tous les utilisateurs (version corrigée côté client)
+     * Chargement de tous les utilisateurs (version corrigée)
      */
     async loadUsers() {
         try {
             console.log('👥 Chargement des utilisateurs...');
             
-            // Vérification Firebase
+            // Vérification Firebase avec gestion d'erreurs améliorée
             if (typeof firebase === 'undefined' || !firebase.firestore) {
                 throw new Error('Firestore non disponible');
             }
 
             const db = firebase.firestore();
-            this.users = [];
+            const users = [];
             
-            // Méthode 1: Essayer de charger depuis une collection userProfiles (si elle existe)
+            // Méthode 1: Essayer de charger depuis userProfiles
             try {
                 const profilesSnapshot = await db.collection('userProfiles').get();
                 if (!profilesSnapshot.empty) {
-                    this.users = profilesSnapshot.docs.map(doc => ({
-                        uid: doc.id,
-                        ...doc.data()
-                    }));
-                    console.log(`✅ ${this.users.length} utilisateurs chargés depuis userProfiles`);
-                    return this.users;
+                    profilesSnapshot.docs.forEach(doc => {
+                        try {
+                            users.push({
+                                uid: doc.id,
+                                ...doc.data()
+                            });
+                        } catch (docError) {
+                            console.warn('⚠️ Erreur lors du traitement du profil utilisateur:', doc.id, docError);
+                        }
+                    });
+                    console.log(`✅ ${users.length} utilisateurs chargés depuis userProfiles`);
+                    return users;
                 }
             } catch (profileError) {
                 console.log('ℹ️ Collection userProfiles non accessible, utilisation de la méthode alternative');
             }
             
             // Méthode 2: Déduire les utilisateurs depuis les webhooks existants
-            const webhooksSnapshot = await db.collection('userWebhooks').get();
-            const webhookUsers = [];
-            
-            for (const doc of webhooksSnapshot.docs) {
-                const webhookData = doc.data();
-                // Essayer de récupérer les infos utilisateur depuis les données du webhook
-                if (webhookData.userEmail || webhookData.createdBy) {
+            try {
+                const webhooksSnapshot = await db.collection('userWebhooks').get();
+                const webhookUsers = [];
+                
+                for (const doc of webhooksSnapshot.docs) {
+                    try {
+                        const webhookData = doc.data();
+                        if (webhookData.userEmail || webhookData.createdBy) {
+                            webhookUsers.push({
+                                uid: doc.id,
+                                email: webhookData.userEmail || webhookData.createdBy || 'Email non disponible',
+                                displayName: webhookData.userName || 'Nom non disponible',
+                                emailVerified: true,
+                                createdAt: webhookData.createdAt ?
+                                    (webhookData.createdAt.toDate ? webhookData.createdAt.toDate().toISOString() : new Date().toISOString())
+                                    : new Date().toISOString(),
+                                hasWebhook: true
+                            });
+                        }
+                    } catch (docError) {
+                        console.warn('⚠️ Erreur lors du traitement du webhook utilisateur:', doc.id, docError);
+                    }
+                }
+                
+                // Ajouter l'utilisateur admin actuel
+                const currentUser = this.getCurrentUserSecure();
+                if (currentUser && !webhookUsers.find(u => u.uid === currentUser.uid)) {
                     webhookUsers.push({
-                        uid: doc.id,
-                        email: webhookData.userEmail || webhookData.createdBy || 'Email non disponible',
-                        displayName: webhookData.userName || 'Nom non disponible',
-                        emailVerified: true,
-                        createdAt: webhookData.createdAt ?
-                            (webhookData.createdAt.toDate ? webhookData.createdAt.toDate().toISOString() : new Date().toISOString())
-                            : new Date().toISOString(),
-                        hasWebhook: true
+                        uid: currentUser.uid,
+                        email: currentUser.email,
+                        displayName: currentUser.displayName || 'Administrateur',
+                        emailVerified: currentUser.emailVerified,
+                        createdAt: currentUser.metadata?.creationTime || new Date().toISOString(),
+                        hasWebhook: false
                     });
                 }
+                
+                console.log(`✅ ${webhookUsers.length} utilisateurs déduits depuis les webhooks`);
+                return webhookUsers;
+                
+            } catch (webhookError) {
+                console.warn('⚠️ Impossible de charger depuis les webhooks:', webhookError);
+                // Fallback: retourner au moins l'admin
+                const currentUser = this.getCurrentUserSecure();
+                if (currentUser) {
+                    return [{
+                        uid: currentUser.uid,
+                        email: currentUser.email,
+                        displayName: currentUser.displayName || 'Administrateur',
+                        emailVerified: currentUser.emailVerified,
+                        createdAt: currentUser.metadata?.creationTime || new Date().toISOString(),
+                        hasWebhook: false
+                    }];
+                }
+                return [];
             }
-            
-            // Méthode 3: Ajouter l'utilisateur admin actuel s'il n'est pas dans la liste
-            const currentUser = this.getCurrentUserSecure();
-            if (currentUser && !webhookUsers.find(u => u.uid === currentUser.uid)) {
-                webhookUsers.push({
-                    uid: currentUser.uid,
-                    email: currentUser.email,
-                    displayName: currentUser.displayName || 'Administrateur',
-                    emailVerified: currentUser.emailVerified,
-                    createdAt: currentUser.metadata?.creationTime || new Date().toISOString(),
-                    hasWebhook: false
-                });
-            }
-            
-            this.users = webhookUsers;
-            console.log(`✅ ${this.users.length} utilisateurs déduits depuis les webhooks`);
-            return this.users;
 
         } catch (error) {
             console.error('❌ Erreur lors du chargement des utilisateurs:', error);
@@ -344,24 +809,24 @@ class AdminWebhookManager {
     }
 
     /**
-     * Chargement de tous les webhooks avec gestion d'erreurs améliorée
+     * Chargement de tous les webhooks (version améliorée)
      */
     async loadAllWebhooks() {
         try {
             console.log('🔗 Chargement des webhooks...');
             
-            // Vérification Firebase
             if (typeof firebase === 'undefined' || !firebase.firestore) {
                 throw new Error('Firestore non disponible');
             }
 
             const db = firebase.firestore();
             const snapshot = await db.collection('userWebhooks').get();
+            const webhooks = new Map();
             
             snapshot.forEach(doc => {
                 try {
                     const data = doc.data();
-                    this.webhooks.set(doc.id, {
+                    webhooks.set(doc.id, {
                         userId: doc.id,
                         ...data,
                         lastUsed: data.lastUsed?.toDate?.() || data.lastUsed,
@@ -373,8 +838,8 @@ class AdminWebhookManager {
                 }
             });
 
-            console.log(`✅ ${this.webhooks.size} webhooks chargés`);
-            return this.webhooks;
+            console.log(`✅ ${webhooks.size} webhooks chargés`);
+            return webhooks;
 
         } catch (error) {
             console.error('❌ Erreur lors du chargement des webhooks:', error);
@@ -384,18 +849,32 @@ class AdminWebhookManager {
     }
 
     /**
-     * Initialisation de l'interface admin avec gestion d'erreurs
+     * Récupération sécurisée du FieldValue Firebase
+     */
+    getFirebaseFieldValue() {
+        try {
+            if (typeof firebase !== 'undefined' && 
+                firebase.firestore && 
+                firebase.firestore.FieldValue && 
+                typeof firebase.firestore.FieldValue.serverTimestamp === 'function') {
+                return firebase.firestore.FieldValue;
+            }
+            console.warn('⚠️ FieldValue Firebase non disponible, utilisation de Date()');
+            return null;
+        } catch (error) {
+            console.warn('⚠️ Erreur lors de l\'accès à FieldValue:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Initialisation de l'interface admin avec gestion d'erreurs améliorée
      */
     initAdminInterface() {
         try {
-            // Créer le conteneur principal si nécessaire
             this.createAdminContainer();
-            
-            // Afficher la liste des utilisateurs
-            this.renderUsersList();
-            
-            // Afficher les statistiques
             this.renderStatistics();
+            this.renderUsersList();
         } catch (error) {
             console.error('❌ Erreur lors de l\'initialisation de l\'interface:', error);
             throw error;
@@ -403,7 +882,7 @@ class AdminWebhookManager {
     }
 
     /**
-     * Création du conteneur d'administration avec gestion d'erreurs
+     * Création du conteneur d'administration avec validation
      */
     createAdminContainer() {
         const container = document.getElementById('adminWebhookContainer');
@@ -417,20 +896,23 @@ class AdminWebhookManager {
             mainContent.appendChild(newContainer);
         }
 
-        // Injection du HTML avec échappement des données utilisateur
         const adminContainer = document.getElementById('adminWebhookContainer');
         if (!adminContainer) {
             throw new Error('Impossible de créer le conteneur admin');
         }
 
-        const adminEmail = this.escapeHtml(this.currentAdminUser.email);
+        const adminEmail = this.escapeHtml(this.currentAdminUser?.email || 'Admin');
         adminContainer.innerHTML = `
             <div class="admin-webhook-header">
-                <h1>🎛️ Administration des Webhooks</h1>
-                <p>Gestion des webhooks utilisateur pour DictaMed</p>
+                <h1>🎛️ Administration des Webhooks (Version Corrigée)</h1>
+                <p>Gestion des webhooks utilisateur pour DictaMed - Détection automatique des nouveaux comptes (Bugs corrigés)</p>
                 <div class="admin-info">
                     <span>Connecté en tant que: <strong>${adminEmail}</strong></span>
-                    <button id="refreshDataBtn" class="btn btn-secondary">🔄 Actualiser</button>
+                    <div class="admin-controls">
+                        <button id="refreshDataBtn" class="btn btn-secondary">🔄 Actualiser</button>
+                        <button id="forceRefreshBtn" class="btn btn-info">⚡ Détection Forcée</button>
+                        <button id="autoRefreshToggle" class="btn btn-warning">⏸️ Pause Auto</button>
+                    </div>
                 </div>
             </div>
 
@@ -449,6 +931,7 @@ class AdminWebhookManager {
                             <option value="withoutWebhook">Sans webhook</option>
                             <option value="active">Webhook actif</option>
                             <option value="inactive">Webhook inactif</option>
+                            <option value="recent">Récemment ajoutés</option>
                         </select>
                     </div>
                     <div id="usersList" class="users-list">
@@ -468,6 +951,7 @@ class AdminWebhookManager {
      * Échappement HTML pour sécuriser l'affichage
      */
     escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
@@ -483,9 +967,17 @@ class AdminWebhookManager {
 
             const totalUsers = this.users.length;
             const totalWebhooks = this.webhooks.size;
-            const activeWebhooks = Array.from(this.webhooks.values()).filter(w => w.isActive).length;
+            const activeWebhooks = Array.from(this.webhooks.values()).filter(w => w?.isActive).length;
             const inactiveWebhooks = totalWebhooks - activeWebhooks;
             const usersWithoutWebhooks = totalUsers - totalWebhooks;
+
+            // Calculer les utilisateurs récents (ajoutés dans les dernières 24h)
+            const recentUsers = this.users.filter(user => {
+                const createdAt = user.createdAt ? new Date(user.createdAt) : new Date();
+                const now = new Date();
+                const diffHours = (now - createdAt) / (1000 * 60 * 60);
+                return diffHours <= 24;
+            }).length;
 
             statsContainer.innerHTML = `
                 <div class="stats-grid">
@@ -494,6 +986,13 @@ class AdminWebhookManager {
                         <div class="stat-content">
                             <div class="stat-number">${totalUsers}</div>
                             <div class="stat-label">Utilisateurs Total</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🆕</div>
+                        <div class="stat-content">
+                            <div class="stat-number">${recentUsers}</div>
+                            <div class="stat-label">Nouveaux (24h)</div>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -508,13 +1007,6 @@ class AdminWebhookManager {
                         <div class="stat-content">
                             <div class="stat-number">${activeWebhooks}</div>
                             <div class="stat-label">Webhooks Actifs</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">⚠️</div>
-                        <div class="stat-content">
-                            <div class="stat-number">${usersWithoutWebhooks}</div>
-                            <div class="stat-label">Sans Webhook</div>
                         </div>
                     </div>
                 </div>
@@ -554,15 +1046,23 @@ class AdminWebhookManager {
                         return webhook && !webhook.isActive;
                     });
                     break;
+                case 'recent':
+                    const now = new Date();
+                    filteredUsers = filteredUsers.filter(user => {
+                        const createdAt = user.createdAt ? new Date(user.createdAt) : new Date();
+                        const diffHours = (now - createdAt) / (1000 * 60 * 60);
+                        return diffHours <= 24;
+                    });
+                    break;
             }
 
             // Appliquer la recherche
             if (searchTerm) {
                 const term = searchTerm.toLowerCase();
                 filteredUsers = filteredUsers.filter(user => 
-                    user.email.toLowerCase().includes(term) ||
-                    user.displayName.toLowerCase().includes(term) ||
-                    user.uid.toLowerCase().includes(term)
+                    user.email?.toLowerCase().includes(term) ||
+                    user.displayName?.toLowerCase().includes(term) ||
+                    user.uid?.toLowerCase().includes(term)
                 );
             }
 
@@ -585,11 +1085,11 @@ class AdminWebhookManager {
     }
 
     /**
-     * Rendu d'une carte utilisateur avec validation des données - VERSION CORRIGÉE
+     * Rendu d'une carte utilisateur avec validation renforcée et gestion sécurisée des événements
      */
     renderUserCard(user, webhook) {
         try {
-            // Validation des données utilisateur
+            // CORRIGÉ: Validation renforcée des données utilisateur
             if (!user || !user.uid || !user.email) {
                 throw new Error('Données utilisateur invalides');
             }
@@ -600,10 +1100,22 @@ class AdminWebhookManager {
             const statusText = hasWebhook ? (isActive ? 'Actif' : 'Inactif') : 'Non configuré';
             const statusIcon = hasWebhook ? (isActive ? '✅' : '❌') : '⚪';
 
+            // Détecter si c'est un utilisateur récent
+            const createdAt = user.createdAt ? new Date(user.createdAt) : new Date();
+            const isRecent = ((new Date() - createdAt) / (1000 * 60 * 60)) <= 24;
+            const recentBadge = isRecent ? '<span class="recent-badge">🆕 Nouveau</span>' : '';
+
             const displayName = this.escapeHtml(user.displayName || 'Nom non disponible');
             const userEmail = this.escapeHtml(user.email);
             const userUid = this.escapeHtml(user.uid);
             const webhookUrl = webhook?.webhookUrl ? this.escapeHtml(webhook.webhookUrl) : '';
+
+            // Générer des IDs uniques pour les éléments
+            const inputId = `webhook_${userUid}`;
+            const saveBtnId = `save_${userUid}`;
+            const toggleBtnId = `toggle_${userUid}`;
+            const deleteBtnId = `delete_${userUid}`;
+            const detailsBtnId = `details_${userUid}`;
 
             return `
                 <div class="user-card ${statusClass}" data-user-id="${userUid}">
@@ -612,7 +1124,7 @@ class AdminWebhookManager {
                             ${displayName.charAt(0).toUpperCase()}
                         </div>
                         <div class="user-details">
-                            <div class="user-name">${displayName}</div>
+                            <div class="user-name">${displayName} ${recentBadge}</div>
                             <div class="user-email">${userEmail}</div>
                             <div class="user-uid">${userUid}</div>
                             <div class="user-status">
@@ -627,28 +1139,28 @@ class AdminWebhookManager {
                         <div class="webhook-input-group">
                             <input type="url" 
                                    class="webhook-input" 
-                                   id="webhook_${userUid}"
+                                   id="${inputId}"
                                    placeholder="https://exemple.com/webhook" 
                                    value="${webhookUrl}">
-                            <button class="btn btn-save" onclick="adminWebhookManager.saveWebhook('${userUid}')">
+                            <button class="btn btn-save" id="${saveBtnId}" data-user-id="${userUid}">
                                 💾 Sauvegarder
                             </button>
                         </div>
                         
                         <div class="webhook-controls">
                             <button class="btn ${isActive ? 'btn-warning' : 'btn-success'}" 
-                                    onclick="adminWebhookManager.toggleWebhookStatus('${userUid}')">
+                                    id="${toggleBtnId}" data-user-id="${userUid}">
                                 ${isActive ? '🚫 Désactiver' : '✅ Activer'}
                             </button>
                             
                             <button class="btn btn-danger" 
-                                    onclick="adminWebhookManager.deleteWebhook('${userUid}')"
+                                    id="${deleteBtnId}" data-user-id="${userUid}"
                                     ${!hasWebhook ? 'disabled' : ''}>
                                 🗑️ Supprimer
                             </button>
                             
                             ${webhook ? `
-                            <button class="btn btn-info" onclick="adminWebhookManager.viewWebhookDetails('${userUid}')">
+                            <button class="btn btn-info" id="${detailsBtnId}" data-user-id="${userUid}">
                                 ℹ️ Détails
                             </button>
                             ` : ''}
@@ -706,6 +1218,18 @@ class AdminWebhookManager {
                 refreshBtn.addEventListener('click', () => this.refreshData());
             }
 
+            // Bouton de détection forcée
+            const forceRefreshBtn = document.getElementById('forceRefreshBtn');
+            if (forceRefreshBtn) {
+                forceRefreshBtn.addEventListener('click', () => this.forceUserDetection());
+            }
+
+            // Bouton de toggle auto-refresh
+            const autoRefreshToggle = document.getElementById('autoRefreshToggle');
+            if (autoRefreshToggle) {
+                autoRefreshToggle.addEventListener('click', () => this.toggleAutoRefresh());
+            }
+
             // Recherche d'utilisateurs
             const searchInput = document.getElementById('userSearchInput');
             if (searchInput) {
@@ -727,14 +1251,80 @@ class AdminWebhookManager {
     }
 
     /**
-     * Liaison des événements des cartes utilisateur
+     * Détection forcée des nouveaux utilisateurs
      */
-    bindUserCardEvents() {
-        // Les événements sont déjà liés via onclick dans le HTML pour éviter les problèmes de scope
+    async forceUserDetection() {
+        try {
+            this.showLoading(true);
+            console.log('⚡ Détection forcée des nouveaux utilisateurs...');
+            
+            // Recharger complètement les données
+            await this.refreshUsersList();
+            
+            this.showSuccess('Détection forcée terminée');
+            
+        } catch (error) {
+            console.error('❌ Erreur lors de la détection forcée:', error);
+            this.showError('Erreur lors de la détection forcée: ' + error.message);
+        } finally {
+            this.showLoading(false);
+        }
     }
 
     /**
-     * Sauvegarde d'un webhook pour un utilisateur (version améliorée avec retry)
+     * Toggle du rafraîchissement automatique
+     */
+    toggleAutoRefresh() {
+        const toggleBtn = document.getElementById('autoRefreshToggle');
+        if (!toggleBtn) return;
+
+        if (this.autoRefreshInterval) {
+            clearInterval(this.autoRefreshInterval);
+            this.autoRefreshInterval = null;
+            toggleBtn.textContent = '▶️ Reprendre Auto';
+            toggleBtn.className = 'btn btn-success';
+            this.showSuccess('Rafraîchissement automatique mis en pause');
+        } else {
+            this.startAutoRefresh();
+            toggleBtn.textContent = '⏸️ Pause Auto';
+            toggleBtn.className = 'btn btn-warning';
+            this.showSuccess('Rafraîchissement automatique repris');
+        }
+    }
+
+    /**
+     * Liaison des événements des cartes utilisateur avec gestion sécurisée
+     */
+    bindUserCardEvents() {
+        try {
+            // Utiliser la délégation d'événements pour éviter les problèmes de scope
+            const usersList = document.getElementById('usersList');
+            if (!usersList) return;
+
+            usersList.addEventListener('click', (event) => {
+                const target = event.target;
+                if (!(target instanceof HTMLElement)) return;
+
+                const userId = target.getAttribute('data-user-id');
+                if (!userId) return;
+
+                if (target.id.startsWith('save_')) {
+                    this.saveWebhook(userId);
+                } else if (target.id.startsWith('toggle_')) {
+                    this.toggleWebhookStatus(userId);
+                } else if (target.id.startsWith('delete_')) {
+                    this.deleteWebhook(userId);
+                } else if (target.id.startsWith('details_')) {
+                    this.viewWebhookDetails(userId);
+                }
+            });
+        } catch (error) {
+            console.error('❌ Erreur lors de la liaison des événements des cartes:', error);
+        }
+    }
+
+    /**
+     * Sauvegarde d'un webhook pour un utilisateur (version améliorée avec validation FieldValue)
      */
     async saveWebhook(userId) {
         try {
@@ -747,7 +1337,7 @@ class AdminWebhookManager {
                 throw new Error('L\'URL du webhook est requise');
             }
 
-            // Validation de l'URL
+            // Validation de l'URL améliorée
             if (!this.validateWebhookUrl(webhookUrl)) {
                 throw new Error('URL de webhook invalide. Doit être une URL HTTPS valide.');
             }
@@ -757,11 +1347,15 @@ class AdminWebhookManager {
                 throw new Error('Utilisateur non trouvé');
             }
 
+            // Récupération sécurisée de FieldValue
+            const FieldValue = this.getFirebaseFieldValue();
+            const timestamp = FieldValue ? FieldValue.serverTimestamp() : new Date();
+
             // Préparer les données du webhook
             const webhookData = {
                 webhookUrl: webhookUrl,
                 isActive: true,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: timestamp,
                 updatedBy: this.currentAdminUser.email,
                 notes: `Mis à jour par l'administrateur le ${new Date().toLocaleDateString('fr-FR')}`
             };
@@ -771,14 +1365,11 @@ class AdminWebhookManager {
             if (existingWebhook) {
                 webhookData.createdAt = existingWebhook.createdAt;
             } else {
-                webhookData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                webhookData.createdAt = timestamp;
             }
 
-            // Sauvegarder dans Firestore avec retry
+            // Sauvegarder dans Firestore
             await this.saveWebhookWithRetry(userId, webhookData);
-
-            // NOUVEAU: Sauvegarder/mettre à jour les infos utilisateur dans userProfiles
-            await this.updateUserProfile(user);
 
             // Mettre à jour le cache local
             this.webhooks.set(userId, {
@@ -808,7 +1399,7 @@ class AdminWebhookManager {
     }
 
     /**
-     * Sauvegarde webhook avec retry
+     * Sauvegarde webhook avec retry amélioré
      */
     async saveWebhookWithRetry(userId, webhookData, maxRetries = 3) {
         let lastError;
@@ -833,32 +1424,6 @@ class AdminWebhookManager {
     }
 
     /**
-     * Mise à jour du profil utilisateur
-     */
-    async updateUserProfile(user) {
-        try {
-            const db = firebase.firestore();
-            const userProfileData = {
-                email: user.email,
-                displayName: user.displayName,
-                emailVerified: user.emailVerified,
-                createdAt: user.createdAt ? 
-                    (user.createdAt.toDate ? user.createdAt.toDate() : new Date(user.createdAt)) 
-                    : firebase.firestore.FieldValue.serverTimestamp(),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                hasWebhook: true,
-                lastWebhookUpdate: firebase.firestore.FieldValue.serverTimestamp()
-            };
-            
-            await db.collection('userProfiles').doc(user.uid).set(userProfileData, { merge: true });
-            console.log('✅ Profil utilisateur mis à jour dans userProfiles');
-        } catch (profileError) {
-            console.warn('⚠️ Impossible de mettre à jour userProfiles:', profileError);
-            // Ne pas échouer la sauvegarde du webhook pour cette raison
-        }
-    }
-
-    /**
      * Basculer le statut d'un webhook avec retry
      */
     async toggleWebhookStatus(userId) {
@@ -873,7 +1438,7 @@ class AdminWebhookManager {
             const newStatus = !webhook.isActive;
             const user = this.users.find(u => u.uid === userId);
             
-            // Mettre à jour dans Firestore avec retry
+            // Mettre à jour dans Firestore
             await this.updateWebhookStatusWithRetry(userId, newStatus);
 
             // Mettre à jour le cache local
@@ -897,7 +1462,7 @@ class AdminWebhookManager {
     }
 
     /**
-     * Mise à jour du statut webhook avec retry
+     * Mise à jour du statut webhook avec retry et validation FieldValue
      */
     async updateWebhookStatusWithRetry(userId, newStatus, maxRetries = 3) {
         let lastError;
@@ -905,11 +1470,21 @@ class AdminWebhookManager {
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
                 const db = firebase.firestore();
-                await db.collection('userWebhooks').doc(userId).update({
+                
+                // Récupération sécurisée de FieldValue
+                const FieldValue = this.getFirebaseFieldValue();
+                const updateData = {
                     isActive: newStatus,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedBy: this.currentAdminUser.email
-                });
+                };
+                
+                if (FieldValue) {
+                    updateData.updatedAt = FieldValue.serverTimestamp();
+                } else {
+                    updateData.updatedAt = new Date();
+                }
+                
+                await db.collection('userWebhooks').doc(userId).update(updateData);
                 console.log(`✅ Statut webhook mis à jour (tentative ${attempt})`);
                 return;
             } catch (error) {
@@ -943,14 +1518,11 @@ class AdminWebhookManager {
 
             this.showLoading(true);
 
-            // Supprimer de Firestore avec retry
+            // Supprimer de Firestore
             await this.deleteWebhookWithRetry(userId);
 
             // Supprimer du cache local
             this.webhooks.delete(userId);
-
-            // Mettre à jour le profil utilisateur pour indiquer qu'il n'a plus de webhook
-            await this.updateUserProfileAfterDeletion(userId);
 
             // Mettre à jour la liste des utilisateurs
             const userIndex = this.users.findIndex(u => u.uid === userId);
@@ -998,23 +1570,7 @@ class AdminWebhookManager {
     }
 
     /**
-     * Mise à jour du profil après suppression
-     */
-    async updateUserProfileAfterDeletion(userId) {
-        try {
-            const db = firebase.firestore();
-            await db.collection('userProfiles').doc(userId).update({
-                hasWebhook: false,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            console.log('✅ Profil utilisateur mis à jour après suppression');
-        } catch (profileError) {
-            console.warn('⚠️ Impossible de mettre à jour userProfiles après suppression:', profileError);
-        }
-    }
-
-    /**
-     * Affichage des détails d'un webhook avec validation
+     * Affichage des détails d'un webhook
      */
     viewWebhookDetails(userId) {
         try {
@@ -1052,13 +1608,20 @@ ${webhook.updatedBy ? `Modifié par: ${webhook.updatedBy}` : ''}
      */
     validateWebhookUrl(url) {
         try {
+            // Validation basique
+            if (!url || typeof url !== 'string') {
+                return false;
+            }
+
             const urlObj = new URL(url);
             const isHttps = urlObj.protocol === 'https:';
             const hasValidHostname = urlObj.hostname && urlObj.hostname.length > 3;
             const validLength = url.length > 10 && url.length <= 2048;
             const noInvalidChars = !url.includes('<') && !url.includes('>') && !url.includes('"');
+            const noSpaces = !url.includes(' ');
+            const validPath = urlObj.pathname && urlObj.pathname.length > 0;
             
-            return isHttps && hasValidHostname && validLength && noInvalidChars;
+            return isHttps && hasValidHostname && validLength && noInvalidChars && noSpaces && validPath;
         } catch (error) {
             console.warn('⚠️ Erreur de validation URL:', error);
             return false;
@@ -1072,9 +1635,19 @@ ${webhook.updatedBy ? `Modifié par: ${webhook.updatedBy}` : ''}
         try {
             this.showLoading(true);
             
-            // Charger les données avec retry
-            await this.loadUsersWithRetry();
-            await this.loadAllWebhooksWithRetry();
+            // Charger les données en parallèle
+            const [usersResult, webhooksResult] = await Promise.allSettled([
+                this.loadUsersWithRetry(),
+                this.loadAllWebhooksWithRetry()
+            ]);
+
+            if (usersResult.status === 'fulfilled') {
+                this.users = usersResult.value;
+                this.updateUserUidCache(); // CORRIGÉ: Mettre à jour le cache
+            }
+            if (webhooksResult.status === 'fulfilled') {
+                this.webhooks = webhooksResult.value;
+            }
             
             this.renderStatistics();
             this.renderUsersList(document.getElementById('filterSelect')?.value, document.getElementById('userSearchInput')?.value);
@@ -1115,7 +1688,7 @@ ${webhook.updatedBy ? `Modifié par: ${webhook.updatedBy}` : ''}
     }
 
     /**
-     * Affichage de l'état de chargement avec validation DOM
+     * Affichage de l'état de chargement
      */
     showLoading(show) {
         try {
@@ -1129,7 +1702,7 @@ ${webhook.updatedBy ? `Modifié par: ${webhook.updatedBy}` : ''}
     }
 
     /**
-     * Affichage d'un message de succès avec fallback amélioré
+     * Affichage d'un message de succès
      */
     showSuccess(message) {
         try {
@@ -1137,7 +1710,6 @@ ${webhook.updatedBy ? `Modifié par: ${webhook.updatedBy}` : ''}
                 window.notificationSystem.success(message, 'Succès');
             } else {
                 console.log('✅ Succès:', message);
-                // Fallback amélioré
                 this.showTemporaryMessage('✅ ' + message, 'success');
             }
         } catch (error) {
@@ -1147,7 +1719,7 @@ ${webhook.updatedBy ? `Modifié par: ${webhook.updatedBy}` : ''}
     }
 
     /**
-     * Affichage d'un message d'erreur avec fallback amélioré
+     * Affichage d'un message d'erreur
      */
     showError(message) {
         try {
@@ -1155,7 +1727,6 @@ ${webhook.updatedBy ? `Modifié par: ${webhook.updatedBy}` : ''}
                 window.notificationSystem.error(message, 'Erreur');
             } else {
                 console.error('❌ Erreur:', message);
-                // Fallback amélioré
                 this.showTemporaryMessage('❌ ' + message, 'error');
             }
         } catch (error) {
@@ -1227,18 +1798,32 @@ ${webhook.updatedBy ? `Modifié par: ${webhook.updatedBy}` : ''}
     }
 
     /**
-     * Nettoyage des ressources
+     * CORRIGÉ: Nettoyage des ressources avec gestion améliorée et vérification renforcée
      */
     cleanup() {
         try {
             console.log('🧹 Nettoyage AdminWebhookManager...');
+            
+            // CORRIGÉ: Arrêter le rafraîchissement automatique avec vérification
+            if (this.autoRefreshInterval) {
+                clearInterval(this.autoRefreshInterval);
+                this.autoRefreshInterval = null;
+                console.log('✅ Intervalle de rafraîchissement automatique arrêté');
+            }
+            
+            // CORRIGÉ: Vider la file d'attente
+            this.processingQueue = [];
+            this.detectionLock = false;
             
             // Réinitialiser les variables d'état
             this.isInitialized = false;
             this.isInitializing = false;
             this.currentAdminUser = null;
             this.users = [];
+            this.userUidSet.clear(); // CORRIGÉ: Vider le cache
             this.webhooks.clear();
+            this.authListenerAttached = false;
+            this.userListenerAttached = false;
             
             // Exécuter les callbacks de nettoyage
             this.cleanupCallbacks.forEach(callback => {
