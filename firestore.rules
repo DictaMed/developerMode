@@ -75,16 +75,18 @@ service cloud.firestore {
     match /userWebhooks/{userId} {
       // Lecture: propriétaire ou admin (plus permissif)
       allow read: if isOwner(userId) || isAdmin();
-      
-      // Création: utilisateur créant son propre webhook (moins restrictif)
-      allow create: if isOwner(userId) &&
-                    validateUserWebhook(request.resource.data) &&
-                    isAuthenticated();
-      
+
+      // Création: utilisateur créant son propre webhook OU admin assignant un webhook
+      allow create: if (isOwner(userId) &&
+                        validateUserWebhook(request.resource.data) &&
+                        isAuthenticated()) ||
+                    (isAdmin() &&
+                     validateAdminWebhookAssignment(request.resource.data));
+
       // Mise à jour: propriétaire ou admin
       allow update: if (isOwner(userId) || isAdmin()) &&
-                    validateUserWebhookUpdate(resource.data, request.resource.data);
-      
+                    validateUserWebhookUpdate(resource.data, request.resource.data, isAdmin());
+
       // Suppression: propriétaire ou admin
       allow delete: if isOwner(userId) || isAdmin();
     }
@@ -219,12 +221,24 @@ service cloud.firestore {
     }
     
     // Validation de mise à jour de webhook
-    function validateUserWebhookUpdate(oldData, newData) {
+    function validateUserWebhookUpdate(oldData, newData, isAdminUpdate) {
       return newData.userId == oldData.userId &&
              newData.createdAt == oldData.createdAt &&
-             (newData.url == oldData.url || 
+             (newData.url == oldData.url ||
               (isValidString(newData.url, 10, 500) && newData.url.matches('^https?://.*'))) &&
-             newData.isActive is bool;
+             newData.isActive is bool &&
+             (isAdminUpdate || newData.updatedAt == request.time);
+    }
+
+    // Validation de l'assignation de webhook par l'admin
+    function validateAdminWebhookAssignment(data) {
+      return data.keys().hasAll(['userId', 'webhookUrl', 'isActive']) &&
+             data.userId == request.resource.data.userId &&
+             isValidString(data.webhookUrl, 10, 500) &&
+             data.webhookUrl.matches('^https?://.*') &&
+             data.isActive is bool &&
+             (data.notes == null || data.notes is string) &&
+             (data.updatedBy == null || data.updatedBy == request.auth.token.email);
     }
     
     // Validation des données de diagnostic

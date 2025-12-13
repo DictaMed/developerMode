@@ -13,6 +13,7 @@
     <!-- Styles CSS -->
     <link rel="stylesheet" href="style-optimized.css">
     <link rel="stylesheet" href="admin-webhook-styles.css">
+    <link rel="stylesheet" href="css/admin-panel-v2.css">
     
     <!-- Styles CSS additionnels pour le design amélioré -->
     <style>
@@ -1008,7 +1009,7 @@
     <script src="js/components/notification.js"></script>
     <script src="js/components/auth-modal.js"></script>
     <script src="js/components/firebase-auth-manager.js"></script>
-    <script src="js/components/admin-webhook-manager-enhanced-firestore.js"></script>
+    <script src="js/components/admin-webhook-manager-enhanced-v2.js"></script>
     
     <script>
         // Variable globale pour éviter la double initialisation
@@ -1126,11 +1127,11 @@
 
                 console.log('✅ Accès admin autorisé pour:', currentUser.email);
                 
-                // Créer l'instance du gestionnaire d'admin (utiliser la version Firestore enhanced)
+                // Créer l'instance du gestionnaire d'admin (utiliser la version V2 améliorée)
                 if (!window.adminWebhookManager) {
-                    window.adminWebhookManager = new AdminWebhookManagerEnhancedFirestore();
+                    window.adminWebhookManager = new AdminWebhookManagerEnhancedV2();
                 }
-                
+
                 const success = await window.adminWebhookManager.init();
                 if (!success) {
                     throw new Error('Échec de l\'initialisation du gestionnaire admin');
