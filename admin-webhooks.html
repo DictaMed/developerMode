@@ -1008,7 +1008,7 @@
     <script src="js/components/notification.js"></script>
     <script src="js/components/auth-modal.js"></script>
     <script src="js/components/firebase-auth-manager.js"></script>
-    <script src="js/components/admin-webhook-manager-fixed.js"></script>
+    <script src="js/components/admin-webhook-manager-enhanced.js"></script>
     
     <script>
         // Variable globale pour éviter la double initialisation
@@ -1126,9 +1126,9 @@
 
                 console.log('✅ Accès admin autorisé pour:', currentUser.email);
                 
-                // Créer l'instance du gestionnaire d'admin (utiliser la version corrigée)
+                // Créer l'instance du gestionnaire d'admin (utiliser la version améliorée)
                 if (!window.adminWebhookManager) {
-                    window.adminWebhookManager = new AdminWebhookManager();
+                    window.adminWebhookManager = new AdminWebhookManagerEnhanced();
                 }
                 
                 const success = await window.adminWebhookManager.init();
