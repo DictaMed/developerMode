@@ -5,17 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administration des Webhooks - DictaMed</title>
     
-    <!-- Firebase SDK v10.7.1 Compatible - MÊME VERSION QUE index.html -->
+    <!-- Firebase SDK v10.7.1 - INCLUT FIRESTORE -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
     <!-- Styles CSS -->
     <link rel="stylesheet" href="style-optimized.css">
     <link rel="stylesheet" href="admin-webhook-styles.css">
     
-    <!-- Configuration Firebase - MÊME CONFIGURATION QUE index.html -->
+    <!-- Configuration Firebase -->
     <script>
-        // Configuration Firebase - Idéntique à index.html
+        // Configuration Firebase - UNIFIÉE
         const firebaseConfig = {
             apiKey: "AIzaSyC9XYvHxbp3VW0PCW0W7xfoWuiMxsjoUZE",
             authDomain: "dictamed2025.firebaseapp.com",
@@ -26,43 +27,36 @@
             measurementId: "G-1B8DZ4B73R"
         };
         
-        // Initialisation Firebase avec gestion d'erreurs améliorée
+        // Initialisation Firebase avec Firestore
         document.addEventListener('DOMContentLoaded', function() {
             try {
-                console.log('🔄 Initialisation Firebase admin avec approche compatible...');
-                console.log('🔑 Configuration API Key:', firebaseConfig.apiKey);
+                console.log('🔄 Initialisation Firebase admin avec Firestore...');
                 
                 // Initialiser Firebase
                 const app = firebase.initializeApp(firebaseConfig);
                 const auth = firebase.auth();
+                const db = firebase.firestore(); // AJOUT DE FIRESTORE
                 
                 console.log('🎯 Firebase App initialisé:', app.name);
                 console.log('🔐 Firebase Auth configuré:', auth.app.options.projectId);
+                console.log('📊 Firebase Firestore configuré');
                 
                 // Configurer la persistence
                 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
                     .then(() => {
                         console.log('💾 Persistence configurée avec succès');
-                        console.log('✅ Firebase SDK compatible initialisé avec succès');
-                        console.log('📊 Projet:', firebaseConfig.projectId);
-                        console.log('🔑 API Key validée');
+                        console.log('✅ Firebase complet (Auth + Firestore) initialisé');
                         
                         // Dispatcher un événement pour informer les autres scripts
                         window.dispatchEvent(new Event('firebaseReady'));
                     })
                     .catch((error) => {
-                        console.error('❌ Erreur de configuration de persistence:', error);
+                        console.error('❌ Erreur de configuration:', error);
                         throw error;
                     });
                     
             } catch (error) {
-                console.error('❌ Erreur Firebase SDK compatible:', error);
-                console.error('📋 Détails de l\'erreur:', {
-                    message: error.message,
-                    code: error.code,
-                    config: firebaseConfig,
-                    stack: error.stack
-                });
+                console.error('❌ Erreur Firebase:', error);
                 throw error;
             }
         });
@@ -172,7 +166,7 @@
         let adminInitializationInProgress = false;
         let adminInitialized = false;
 
-        // Fonction d'initialisation principale corrigée
+        // Fonction d'initialisation principale avec vérification Firestore
         async function initializeAdminInterface() {
             if (adminInitializationInProgress || adminInitialized) {
                 console.log('ℹ️ Initialisation déjà en cours ou terminée');
@@ -183,11 +177,11 @@
             console.log('🚀 Début de l\'initialisation de l\'interface d\'administration...');
 
             try {
-                // 1. Attendre que Firebase soit prêt avec retry
-                await waitForFirebase(15000); // Augmenté à 15 secondes
+                // 1. Attendre que Firebase soit prêt avec vérification Firestore
+                await waitForFirebaseComplete(20000); // Augmenté à 20 secondes
                 
-                // 2. Attendre que FirebaseAuthManager soit initialisé avec retry
-                await waitForFirebaseAuthManager(15000); // Augmenté à 15 secondes
+                // 2. Attendre que FirebaseAuthManager soit initialisé
+                await waitForFirebaseAuthManager(15000);
                 
                 // 3. Initialiser les composants de base
                 await initializeCoreComponents();
@@ -206,23 +200,25 @@
             }
         }
 
-        // Fonction d'attente Firebase avec retry
-        async function waitForFirebase(timeout = 15000) {
+        // Fonction d'attente Firebase + Firestore avec retry amélioré
+        async function waitForFirebaseComplete(timeout = 20000) {
             const startTime = Date.now();
             
             while (Date.now() - startTime < timeout) {
                 if (typeof firebase !== 'undefined' && 
                     firebase.apps && 
                     firebase.apps.length > 0 &&
-                    firebase.auth) {
-                    console.log('✅ Firebase prêt');
+                    firebase.auth &&
+                    firebase.firestore) {
+                    console.log('✅ Firebase complet (Auth + Firestore) prêt');
                     return;
                 }
                 
+                console.log('⏳ Attente Firebase + Firestore...');
                 await new Promise(resolve => setTimeout(resolve, 200));
             }
             
-            throw new Error('Firebase initialization timeout après ' + timeout + 'ms');
+            throw new Error(`Firebase + Firestore non disponibles après ${timeout}ms`);
         }
 
         // Fonction d'attente FirebaseAuthManager avec retry
@@ -372,11 +368,12 @@
             }
         }
 
-        // Fonction de debug
+        // Fonction de debug améliorée
         function showDebugInfo() {
             const debugInfo = {
                 firebase: typeof firebase !== 'undefined' && firebase.apps ? firebase.apps.length : 0,
                 firebaseAuth: typeof firebase !== 'undefined' && firebase.auth ? 'disponible' : 'non disponible',
+                firebaseFirestore: typeof firebase !== 'undefined' && firebase.firestore ? 'disponible' : 'non disponible',
                 firebaseAuthManager: window.FirebaseAuthManager ? 'disponible' : 'non disponible',
                 firebaseAuthManagerInitialized: window.FirebaseAuthManager?.isInitialized || false,
                 currentUser: window.FirebaseAuthManager?.getCurrentUser()?.email || 'non connecté',
