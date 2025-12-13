@@ -1,6 +1,6 @@
 /**
  * DictaMed - Gestionnaire d'Interface d'Administration des Webhooks
- * Version: 1.2.0 - Corrections des bugs de race conditions et amélioration de la stabilité
+ * Version: 1.2.1 - Corrections des bugs de FieldValue et amélioration de la stabilité
  */
 
 class AdminWebhookManager {
@@ -45,7 +45,7 @@ class AdminWebhookManager {
      * Méthode d'initialisation réelle avec gestion améliorée des erreurs
      */
     async _performInitialization() {
-        console.log('🔧 Initialisation AdminWebhookManager v1.2.0...');
+        console.log('🔧 Initialisation AdminWebhookManager v1.2.1...');
         
         try {
             // 1. Attendre l'initialisation de Firebase Auth avec timeout
@@ -93,7 +93,7 @@ class AdminWebhookManager {
             this.bindEvents();
 
             this.isInitialized = true;
-            console.log('✅ AdminWebhookManager v1.2.0 initialisé avec succès');
+            console.log('✅ AdminWebhookManager v1.2.1 initialisé avec succès');
             return true;
 
         } catch (error) {
@@ -189,8 +189,8 @@ class AdminWebhookManager {
 
             const user = authManager.getCurrentUser();
             if (!user) {
-                throw new Error('Aucun utilisateur connecté');
-            }
+               throw new Error('Aucun utilisateur connecté');
+           }
 
             return {
                 uid: user.uid,
@@ -480,6 +480,25 @@ class AdminWebhookManager {
     }
 
     /**
+     * Récupération sécurisée du FieldValue Firebase
+     */
+    getFirebaseFieldValue() {
+        try {
+            if (typeof firebase !== 'undefined' && 
+                firebase.firestore && 
+                firebase.firestore.FieldValue && 
+                typeof firebase.firestore.FieldValue.serverTimestamp === 'function') {
+                return firebase.firestore.FieldValue;
+            }
+            console.warn('⚠️ FieldValue Firebase non disponible, utilisation de Date()');
+            return null;
+        } catch (error) {
+            console.warn('⚠️ Erreur lors de l\'accès à FieldValue:', error);
+            return null;
+        }
+    }
+
+    /**
      * Initialisation de l'interface admin avec gestion d'erreurs améliorée
      */
     initAdminInterface() {
@@ -676,7 +695,7 @@ class AdminWebhookManager {
     }
 
     /**
-     * Rendu d'une carte utilisateur avec validation renforcée
+     * Rendu d'une carte utilisateur avec validation renforcée et gestion sécurisée des événements
      */
     renderUserCard(user, webhook) {
         try {
@@ -695,6 +714,13 @@ class AdminWebhookManager {
             const userEmail = this.escapeHtml(user.email);
             const userUid = this.escapeHtml(user.uid);
             const webhookUrl = webhook?.webhookUrl ? this.escapeHtml(webhook.webhookUrl) : '';
+
+            // Générer des IDs uniques pour les éléments
+            const inputId = `webhook_${userUid}`;
+            const saveBtnId = `save_${userUid}`;
+            const toggleBtnId = `toggle_${userUid}`;
+            const deleteBtnId = `delete_${userUid}`;
+            const detailsBtnId = `details_${userUid}`;
 
             return `
                 <div class="user-card ${statusClass}" data-user-id="${userUid}">
@@ -718,28 +744,28 @@ class AdminWebhookManager {
                         <div class="webhook-input-group">
                             <input type="url" 
                                    class="webhook-input" 
-                                   id="webhook_${userUid}"
+                                   id="${inputId}"
                                    placeholder="https://exemple.com/webhook" 
                                    value="${webhookUrl}">
-                            <button class="btn btn-save" onclick="adminWebhookManager.saveWebhook('${userUid}')">
+                            <button class="btn btn-save" id="${saveBtnId}" data-user-id="${userUid}">
                                 💾 Sauvegarder
                             </button>
                         </div>
                         
                         <div class="webhook-controls">
                             <button class="btn ${isActive ? 'btn-warning' : 'btn-success'}" 
-                                    onclick="adminWebhookManager.toggleWebhookStatus('${userUid}')">
+                                    id="${toggleBtnId}" data-user-id="${userUid}">
                                 ${isActive ? '🚫 Désactiver' : '✅ Activer'}
                             </button>
                             
                             <button class="btn btn-danger" 
-                                    onclick="adminWebhookManager.deleteWebhook('${userUid}')"
+                                    id="${deleteBtnId}" data-user-id="${userUid}"
                                     ${!hasWebhook ? 'disabled' : ''}>
                                 🗑️ Supprimer
                             </button>
                             
                             ${webhook ? `
-                            <button class="btn btn-info" onclick="adminWebhookManager.viewWebhookDetails('${userUid}')">
+                            <button class="btn btn-info" id="${detailsBtnId}" data-user-id="${userUid}">
                                 ℹ️ Détails
                             </button>
                             ` : ''}
@@ -818,14 +844,38 @@ class AdminWebhookManager {
     }
 
     /**
-     * Liaison des événements des cartes utilisateur
+     * Liaison des événements des cartes utilisateur avec gestion sécurisée
      */
     bindUserCardEvents() {
-        // Les événements sont déjà liés via onclick dans le HTML pour éviter les problèmes de scope
+        try {
+            // Utiliser la délégation d'événements pour éviter les problèmes de scope
+            const usersList = document.getElementById('usersList');
+            if (!usersList) return;
+
+            usersList.addEventListener('click', (event) => {
+                const target = event.target;
+                if (!(target instanceof HTMLElement)) return;
+
+                const userId = target.getAttribute('data-user-id');
+                if (!userId) return;
+
+                if (target.id.startsWith('save_')) {
+                    this.saveWebhook(userId);
+                } else if (target.id.startsWith('toggle_')) {
+                    this.toggleWebhookStatus(userId);
+                } else if (target.id.startsWith('delete_')) {
+                    this.deleteWebhook(userId);
+                } else if (target.id.startsWith('details_')) {
+                    this.viewWebhookDetails(userId);
+                }
+            });
+        } catch (error) {
+            console.error('❌ Erreur lors de la liaison des événements des cartes:', error);
+        }
     }
 
     /**
-     * Sauvegarde d'un webhook pour un utilisateur (version améliorée)
+     * Sauvegarde d'un webhook pour un utilisateur (version améliorée avec validation FieldValue)
      */
     async saveWebhook(userId) {
         try {
@@ -838,7 +888,7 @@ class AdminWebhookManager {
                 throw new Error('L\'URL du webhook est requise');
             }
 
-            // Validation de l'URL
+            // Validation de l'URL améliorée
             if (!this.validateWebhookUrl(webhookUrl)) {
                 throw new Error('URL de webhook invalide. Doit être une URL HTTPS valide.');
             }
@@ -848,11 +898,15 @@ class AdminWebhookManager {
                 throw new Error('Utilisateur non trouvé');
             }
 
+            // Récupération sécurisée de FieldValue
+            const FieldValue = this.getFirebaseFieldValue();
+            const timestamp = FieldValue ? FieldValue.serverTimestamp() : new Date();
+
             // Préparer les données du webhook
             const webhookData = {
                 webhookUrl: webhookUrl,
                 isActive: true,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: timestamp,
                 updatedBy: this.currentAdminUser.email,
                 notes: `Mis à jour par l'administrateur le ${new Date().toLocaleDateString('fr-FR')}`
             };
@@ -862,7 +916,7 @@ class AdminWebhookManager {
             if (existingWebhook) {
                 webhookData.createdAt = existingWebhook.createdAt;
             } else {
-                webhookData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                webhookData.createdAt = timestamp;
             }
 
             // Sauvegarder dans Firestore
@@ -959,7 +1013,7 @@ class AdminWebhookManager {
     }
 
     /**
-     * Mise à jour du statut webhook avec retry
+     * Mise à jour du statut webhook avec retry et validation FieldValue
      */
     async updateWebhookStatusWithRetry(userId, newStatus, maxRetries = 3) {
         let lastError;
@@ -967,11 +1021,21 @@ class AdminWebhookManager {
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
                 const db = firebase.firestore();
-                await db.collection('userWebhooks').doc(userId).update({
+                
+                // Récupération sécurisée de FieldValue
+                const FieldValue = this.getFirebaseFieldValue();
+                const updateData = {
                     isActive: newStatus,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedBy: this.currentAdminUser.email
-                });
+                };
+                
+                if (FieldValue) {
+                    updateData.updatedAt = FieldValue.serverTimestamp();
+                } else {
+                    updateData.updatedAt = new Date();
+                }
+                
+                await db.collection('userWebhooks').doc(userId).update(updateData);
                 console.log(`✅ Statut webhook mis à jour (tentative ${attempt})`);
                 return;
             } catch (error) {
@@ -1091,17 +1155,24 @@ ${webhook.updatedBy ? `Modifié par: ${webhook.updatedBy}` : ''}
     }
 
     /**
-     * Validation d'une URL de webhook
+     * Validation d'une URL de webhook améliorée
      */
     validateWebhookUrl(url) {
         try {
+            // Validation basique
+            if (!url || typeof url !== 'string') {
+                return false;
+            }
+
             const urlObj = new URL(url);
             const isHttps = urlObj.protocol === 'https:';
             const hasValidHostname = urlObj.hostname && urlObj.hostname.length > 3;
             const validLength = url.length > 10 && url.length <= 2048;
             const noInvalidChars = !url.includes('<') && !url.includes('>') && !url.includes('"');
+            const noSpaces = !url.includes(' ');
+            const validPath = urlObj.pathname && urlObj.pathname.length > 0;
             
-            return isHttps && hasValidHostname && validLength && noInvalidChars;
+            return isHttps && hasValidHostname && validLength && noInvalidChars && noSpaces && validPath;
         } catch (error) {
             console.warn('⚠️ Erreur de validation URL:', error);
             return false;
