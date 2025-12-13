@@ -1,6 +1,6 @@
 /**
  * DictaMed - Gestionnaire d'authentification Firebase complet
- * Version: 2.0.0 - Architecture modulaire avec sécurité renforcée
+ * Version: 2.1.0 - Architecture modulaire avec sécurité renforcée et initialisation améliorée
  */
 
 class FirebaseAuthManager {
@@ -10,6 +10,7 @@ class FirebaseAuthManager {
         this.isInitialized = false;
         this.authStateListeners = [];
         this.pendingOperations = new Map();
+        this.initializationPromise = null;
         
         // Configuration des règles de sécurité
         this.securityConfig = {
@@ -25,8 +26,21 @@ class FirebaseAuthManager {
      * Initialisation du gestionnaire Firebase Auth
      */
     async init() {
+        // Éviter l'initialisation multiple
+        if (this.initializationPromise) {
+            return this.initializationPromise;
+        }
+
+        this.initializationPromise = this._performInit();
+        return this.initializationPromise;
+    }
+
+    /**
+     * Méthode d'initialisation réelle
+     */
+    async _performInit() {
         try {
-            console.log('🔥 FirebaseAuthManager v2.0.0 init() started');
+            console.log('🔥 FirebaseAuthManager v2.1.0 init() started');
             
             // Attendre que Firebase soit initialisé
             await this.waitForFirebase();
@@ -47,7 +61,7 @@ class FirebaseAuthManager {
             this.checkExistingUser();
             
             this.isInitialized = true;
-            console.log('✅ FirebaseAuthManager v2.0.0 initialized successfully');
+            console.log('✅ FirebaseAuthManager v2.1.0 initialized successfully');
             
             return { success: true };
             
@@ -62,20 +76,25 @@ class FirebaseAuthManager {
     }
 
     /**
-     * Attendre que Firebase soit initialisé
+     * Attendre que Firebase soit initialisé avec timeout amélioré
      */
     async waitForFirebase() {
         return new Promise((resolve, reject) => {
             let attempts = 0;
-            const maxAttempts = 50; // 5 secondes maximum
+            const maxAttempts = 100; // 10 secondes maximum (augmenté de 50 à 100)
             
             const checkFirebase = () => {
                 attempts++;
                 
-                if (typeof firebase !== 'undefined' && firebase.auth) {
+                // Vérifications plus complètes
+                if (typeof firebase !== 'undefined' && 
+                    firebase.auth && 
+                    firebase.app && 
+                    firebase.apps && 
+                    firebase.apps.length > 0) {
                     resolve();
                 } else if (attempts >= maxAttempts) {
-                    reject(new Error('Firebase SDK not loaded within timeout'));
+                    reject(new Error('Firebase SDK not loaded within 10 second timeout'));
                 } else {
                     setTimeout(checkFirebase, 100);
                 }
@@ -133,6 +152,7 @@ class FirebaseAuthManager {
      */
     async signUp(email, password) {
         try {
+            await this.ensureInitialized();
             this.validateOperation('signup', email);
             
             // Validation des données
@@ -178,6 +198,7 @@ class FirebaseAuthManager {
      */
     async signIn(email, password) {
         try {
+            await this.ensureInitialized();
             this.validateOperation('signin', email);
             
             // Validation des données
@@ -230,6 +251,7 @@ class FirebaseAuthManager {
      */
     async signInWithGoogle() {
         try {
+            await this.ensureInitialized();
             this.validateOperation('google_signin');
             
             const provider = new firebase.auth.GoogleAuthProvider();
@@ -263,6 +285,7 @@ class FirebaseAuthManager {
      */
     async signOut() {
         try {
+            await this.ensureInitialized();
             if (this.currentUser) {
                 this.logSecurityEvent('user_logout', { userId: this.currentUser.uid });
             }
@@ -285,6 +308,7 @@ class FirebaseAuthManager {
      */
     async sendPasswordResetEmail(email) {
         try {
+            await this.ensureInitialized();
             this.validateOperation('password_reset', email);
             
             await this.auth.sendPasswordResetEmail(email);
@@ -310,6 +334,7 @@ class FirebaseAuthManager {
      */
     async sendEmailVerification() {
         try {
+            await this.ensureInitialized();
             if (!this.currentUser) {
                 return { success: false, error: 'Aucun utilisateur connecté' };
             }
@@ -332,6 +357,7 @@ class FirebaseAuthManager {
      */
     async updateProfile(updates) {
         try {
+            await this.ensureInitialized();
             if (!this.currentUser) {
                 return { success: false, error: 'Aucun utilisateur connecté' };
             }
@@ -356,6 +382,7 @@ class FirebaseAuthManager {
      */
     async deleteAccount() {
         try {
+            await this.ensureInitialized();
             if (!this.currentUser) {
                 return { success: false, error: 'Aucun utilisateur connecté' };
             }
@@ -490,6 +517,19 @@ class FirebaseAuthManager {
         }
 
         return { isValid: true };
+    }
+
+    /**
+     * S'assurer que le gestionnaire est initialisé
+     */
+    async ensureInitialized() {
+        if (!this.isInitialized) {
+            if (this.initializationPromise) {
+                await this.initializationPromise;
+            } else {
+                await this.init();
+            }
+        }
     }
 
     /**
@@ -717,26 +757,56 @@ if (typeof module !== 'undefined' && module.exports) {
     window.FirebaseAuthManager = FirebaseAuthManager;
 }
 
-// Initialisation automatique quand Firebase est prêt
+// Initialisation automatique avec système d'initialisation amélioré
 if (typeof window !== 'undefined') {
-    // Créer l'instance globale
+    // Créer l'instance globale immédiatement
     window.FirebaseAuthManager = FirebaseAuthManager.getInstance();
     
-    // Initialiser quand Firebase est chargé
-    if (typeof firebase !== 'undefined') {
-        window.FirebaseAuthManager.init().then(result => {
-            if (!result.success) {
-                console.error('Failed to initialize FirebaseAuthManager:', result.error);
-            }
-        });
+    // Système d'initialisation robuste
+    const initializeAuthManager = () => {
+        if (window.FirebaseAuthManager && typeof window.FirebaseAuthManager.init === 'function') {
+            window.FirebaseAuthManager.init()
+                .then(result => {
+                    if (!result.success) {
+                        console.error('❌ FirebaseAuthManager initialization failed:', result.error);
+                        console.error('📋 Config issue detected:', result.needsConfigUpdate);
+                    } else {
+                        console.log('✅ FirebaseAuthManager auto-initialized successfully');
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ FirebaseAuthManager auto-init error:', error);
+                });
+        }
+    };
+
+    // Tentative d'initialisation immédiate si Firebase est déjà chargé
+    if (typeof firebase !== 'undefined' && firebase.app) {
+        console.log('🔄 Firebase already loaded, initializing AuthManager...');
+        initializeAuthManager();
     } else {
         // Écouter l'événement firebaseReady
         window.addEventListener('firebaseReady', () => {
-            window.FirebaseAuthManager.init().then(result => {
-                if (!result.success) {
-                    console.error('Failed to initialize FirebaseAuthManager:', result.error);
-                }
-            });
+            console.log('🔥 Firebase ready event received, initializing AuthManager...');
+            initializeAuthManager();
         });
+
+        // Fallback: vérification périodique pendant 10 secondes
+        let checkCount = 0;
+        const maxChecks = 100; // 10 secondes (100 * 100ms)
+        
+        const checkFirebase = () => {
+            checkCount++;
+            if (typeof firebase !== 'undefined' && firebase.app) {
+                console.log('🔄 Firebase detected during fallback check, initializing...');
+                initializeAuthManager();
+            } else if (checkCount < maxChecks) {
+                setTimeout(checkFirebase, 100);
+            } else {
+                console.warn('⚠️ Firebase not detected within timeout. AuthManager may need manual initialization.');
+            }
+        };
+        
+        setTimeout(checkFirebase, 100);
     }
 }

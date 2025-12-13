@@ -1,6 +1,7 @@
 /**
  * DictaMed - Gestionnaire de Navigation Admin
- * Version: 1.0.0 - Affiche l'onglet admin seulement pour l'administrateur autorisé
+ * Version: 1.1.0 - Affiche l'onglet admin seulement pour l'administrateur autorisé
+ * Compatible avec FirebaseAuthManager v2.1.0
  */
 
 class AdminNavigationManager {
@@ -8,6 +9,8 @@ class AdminNavigationManager {
         this.adminEmail = 'akio963@gmail.com';
         this.adminNavBtn = null;
         this.isInitialized = false;
+        this.authListenerAdded = false;
+        this.checkInterval = null;
     }
 
     /**
@@ -15,7 +18,7 @@ class AdminNavigationManager {
      */
     init() {
         try {
-            console.log('🔧 Initialisation AdminNavigationManager...');
+            console.log('🔧 Initialisation AdminNavigationManager v1.1.0...');
             
             this.adminNavBtn = document.getElementById('adminNavBtn');
             if (!this.adminNavBtn) {
@@ -26,11 +29,13 @@ class AdminNavigationManager {
             // Écouter les changements d'état d'authentification
             this.bindAuthStateListener();
             
-            // Vérifier l'état initial
-            this.checkAdminAccess();
+            // Vérifier l'état initial après un court délai
+            setTimeout(() => {
+                this.checkAdminAccess();
+            }, 1000);
             
             this.isInitialized = true;
-            console.log('✅ AdminNavigationManager initialisé avec succès');
+            console.log('✅ AdminNavigationManager v1.1.0 initialisé avec succès');
             return true;
 
         } catch (error) {
@@ -40,7 +45,7 @@ class AdminNavigationManager {
     }
 
     /**
-     * Liaison de l'écouteur d'état d'authentification
+     * Liaison de l'écouteur d'état d'authentification amélioré
      */
     bindAuthStateListener() {
         // Écouter l'événement personnalisé d'authentification
@@ -49,12 +54,48 @@ class AdminNavigationManager {
             this.checkAdminAccess();
         });
 
-        // Écouter les événements Firebase Auth
+        // Écouter les événements Firebase Auth avec FirebaseAuthManager
         if (typeof window.FirebaseAuthManager !== 'undefined') {
-            // Vérifier périodiquement l'état d'authentification
-            setInterval(() => {
+            // Ajouter un écouteur d'état d'authentification
+            window.FirebaseAuthManager.addAuthStateListener((user) => {
+                console.log('🔐 AdminNavigationManager: FirebaseAuthManager state changed:', user ? user.email : 'null');
                 this.checkAdminAccess();
-            }, 2000); // Vérifier toutes les 2 secondes
+            });
+            
+            this.authListenerAdded = true;
+            console.log('✅ Écouteur FirebaseAuthManager ajouté');
+        } else {
+            // Fallback: vérification périodique si FirebaseAuthManager n'est pas encore disponible
+            console.log('⚠️ FirebaseAuthManager non disponible, utilisation du fallback');
+            this.startPeriodicCheck();
+        }
+    }
+
+    /**
+     * Démarrer la vérification périodique (fallback)
+     */
+    startPeriodicCheck() {
+        if (this.checkInterval) {
+            clearInterval(this.checkInterval);
+        }
+        
+        this.checkInterval = setInterval(() => {
+            this.checkAdminAccess();
+            
+            // Essayer d'ajouter l'écouteur quand FirebaseAuthManager devient disponible
+            if (!this.authListenerAdded && typeof window.FirebaseAuthManager !== 'undefined') {
+                this.bindAuthStateListener();
+            }
+        }, 2000); // Vérifier toutes les 2 secondes
+    }
+
+    /**
+     * Arrêter la vérification périodique
+     */
+    stopPeriodicCheck() {
+        if (this.checkInterval) {
+            clearInterval(this.checkInterval);
+            this.checkInterval = null;
         }
     }
 
@@ -105,14 +146,18 @@ class AdminNavigationManager {
     }
 
     /**
-     * Récupération de l'utilisateur actuel
+     * Récupération de l'utilisateur actuel avec fallback amélioré
      */
     getCurrentUser() {
         try {
-            // Essayer avec FirebaseAuthManager
-            if (typeof window.FirebaseAuthManager !== 'undefined' && window.FirebaseAuthManager.getCurrentUser) {
+            // Essayer avec FirebaseAuthManager d'abord
+            if (typeof window.FirebaseAuthManager !== 'undefined' && 
+                window.FirebaseAuthManager.getCurrentUser && 
+                window.FirebaseAuthManager.isInitialized) {
+                
                 const user = window.FirebaseAuthManager.getCurrentUser();
                 if (user) {
+                    console.log('👤 Utilisateur récupéré via FirebaseAuthManager:', user.email);
                     return user;
                 }
             }
@@ -121,6 +166,7 @@ class AdminNavigationManager {
             if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
                 const user = window.firebase.auth.currentUser;
                 if (user) {
+                    console.log('👤 Utilisateur récupéré via Firebase direct:', user.email);
                     return {
                         uid: user.uid,
                         email: user.email,
@@ -129,7 +175,9 @@ class AdminNavigationManager {
                 }
             }
 
+            console.log('ℹ️ Aucun utilisateur trouvé');
             return null;
+            
         } catch (error) {
             console.warn('AdminNavigationManager: Erreur lors de la récupération de l\'utilisateur:', error);
             return null;
@@ -161,8 +209,21 @@ class AdminNavigationManager {
             currentUser: currentUser,
             isAdmin: this.isAdmin(),
             adminEmail: this.adminEmail,
-            buttonVisible: this.adminNavBtn ? this.adminNavBtn.style.display !== 'none' : false
+            buttonVisible: this.adminNavBtn ? this.adminNavBtn.style.display !== 'none' : false,
+            isInitialized: this.isInitialized,
+            authListenerAdded: this.authListenerAdded,
+            firebaseAuthManagerAvailable: typeof window.FirebaseAuthManager !== 'undefined',
+            firebaseAuthManagerInitialized: window.FirebaseAuthManager ? window.FirebaseAuthManager.isInitialized : false
         });
+    }
+
+    /**
+     * Nettoyage des ressources
+     */
+    cleanup() {
+        this.stopPeriodicCheck();
+        this.isInitialized = false;
+        console.log('🧹 AdminNavigationManager nettoyé');
     }
 }
 
@@ -182,6 +243,14 @@ if (typeof document !== 'undefined') {
         }, 500);
     }
 }
+
+// Écouter l'événement firebaseReady pour s'assurer que Firebase est initialisé
+window.addEventListener('firebaseReady', () => {
+    console.log('🔥 Firebase ready event reçu par AdminNavigationManager');
+    if (window.adminNavigationManager && !window.adminNavigationManager.isInitialized) {
+        window.adminNavigationManager.init();
+    }
+});
 
 // Export pour utilisation dans d'autres modules
 if (typeof module !== 'undefined' && module.exports) {
