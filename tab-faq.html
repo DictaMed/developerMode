@@ -3,386 +3,326 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Questions fréquentes sur DictaMed - Solution de dictée médicale intelligente. Trouvez rapidement les réponses à vos questions sur notre service de transcription médicale.">
+    <meta name="keywords" content="DictaMed, dictée médicale, transcription médicale, FAQ, questions fréquentes">
+    <meta name="author" content="DictaMed">
+    <meta property="og:title" content="Questions Fréquentes - DictaMed">
+    <meta property="og:description" content="Trouvez rapidement les réponses à vos questions sur DictaMed">
+    <meta property="og:type" content="website">
+    
     <title>Questions Fréquentes - DictaMed</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .faq-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-        }
-
-        .faq-header {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-            padding: 40px 30px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .faq-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: pulse 3s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.7; }
-            50% { transform: scale(1.1); opacity: 0.3; }
-        }
-
-        .faq-header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .faq-header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            position: relative;
-            z-index: 1;
-        }
-
-        .faq-content {
-            padding: 0;
-        }
-
-        .faq-item {
-            border-bottom: 1px solid #f0f0f0;
-            transition: all 0.3s ease;
-        }
-
-        .faq-item:last-child {
-            border-bottom: none;
-        }
-
-        .faq-question {
-            padding: 25px 30px;
-            background: white;
-            border: none;
-            width: 100%;
-            text-align: left;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #2c3e50;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.3s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .faq-question:hover {
-            background: #f8f9fa;
-            color: #4CAF50;
-        }
-
-        .faq-question:focus {
-            outline: none;
-            background: #f8f9fa;
-        }
-
-        .faq-question::after {
-            content: '+';
-            font-size: 1.5rem;
-            font-weight: 300;
-            color: #4CAF50;
-            transition: transform 0.3s ease;
-            min-width: 30px;
-            text-align: center;
-        }
-
-        .faq-question.active::after {
-            transform: rotate(45deg);
-        }
-
-        .faq-answer {
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            background: #fafbfc;
-        }
-
-        .faq-answer.active {
-            max-height: 500px;
-            padding: 0 30px 25px 30px;
-        }
-
-        .faq-answer p {
-            color: #555;
-            font-size: 1rem;
-            line-height: 1.7;
-            padding-top: 15px;
-        }
-
-        .faq-answer p:first-child {
-            padding-top: 0;
-        }
-
-        .highlight {
-            color: #4CAF50;
-            font-weight: 600;
-        }
-
-        .number-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-align: center;
-            line-height: 25px;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-
-        .contact-info {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-            margin-top: 20px;
-            border-radius: 15px;
-            margin: 20px;
-        }
-
-        .contact-info h3 {
-            margin-bottom: 15px;
-            font-size: 1.3rem;
-        }
-
-        .contact-info a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 600;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-            transition: border-color 0.3s ease;
-        }
-
-        .contact-info a:hover {
-            border-bottom-color: white;
-        }
-
-        @media (max-width: 768px) {
-            .faq-header h1 {
-                font-size: 2rem;
-            }
-            
-            .faq-question {
-                padding: 20px 20px;
-                font-size: 1rem;
-            }
-            
-            .faq-answer.active {
-                padding: 0 20px 20px 20px;
-            }
-            
-            .contact-info {
-                margin: 10px;
-                padding: 20px;
-            }
-        }
-
-        /* Animation for smooth scrolling */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #4CAF50;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #45a049;
-        }
-    </style>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="css/faq-styles.css" as="style">
+    <link rel="preload" href="js/faq-script.js" as="script">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/faq-styles.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
 </head>
 <body>
-    <div class="faq-container">
-        <div class="faq-header">
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+    
+    <div class="faq-container" role="main" id="main-content">
+        <header class="faq-header">
             <h1>Questions Fréquentes</h1>
             <p>Trouvez rapidement les réponses à vos questions sur DictaMed</p>
-        </div>
+        </header>
 
-        <div class="faq-content">
-            <div class="faq-item">
-                <button class="faq-question">
-                    <span><span class="number-badge">1</span>Qu'est-ce que DictaMed ?</span>
-                </button>
-                <div class="faq-answer">
-                    <p>DictaMed est une solution innovante de <span class="highlight">dictée médicale intelligente</span> qui permet aux professionnels de santé de transformer leurs enregistrements vocaux en données structurées pour faciliter la collecte de données médicales et la création de fichiers SPSS.</p>
-                </div>
+        <section class="faq-content" aria-label="Questions fréquemment posées">
+            <div class="faq-accordion" role="region" aria-labelledby="faq-heading">
+                <h2 id="faq-heading" class="sr-only">Liste des questions et réponses</h2>
+                
+                <!-- FAQ Item 1 -->
+                <article class="faq-item">
+                    <h3 class="sr-only">Question 1</h3>
+                    <button 
+                        class="faq-question" 
+                        id="faq-q-1"
+                        aria-expanded="false"
+                        aria-controls="faq-a-1"
+                        data-question-number="1">
+                        <span class="question-content">
+                            <span class="number-badge" aria-hidden="true">1</span>
+                            Qu'est-ce que DictaMed ?
+                        </span>
+                        <span class="icon" aria-hidden="true">+</span>
+                    </button>
+                    <div 
+                        class="faq-answer" 
+                        id="faq-a-1"
+                        role="region" 
+                        aria-labelledby="faq-q-1"
+                        aria-hidden="true">
+                        <p>DictaMed est une solution innovante de <span class="highlight">dictée médicale intelligente</span> qui permet aux professionnels de santé de transformer leurs enregistrements vocaux en données structurées pour faciliter la collecte de données médicales et la création de fichiers SPSS.</p>
+                    </div>
+                </article>
+
+                <!-- FAQ Item 2 -->
+                <article class="faq-item">
+                    <h3 class="sr-only">Question 2</h3>
+                    <button 
+                        class="faq-question" 
+                        id="faq-q-2"
+                        aria-expanded="false"
+                        aria-controls="faq-a-2"
+                        data-question-number="2">
+                        <span class="question-content">
+                            <span class="number-badge" aria-hidden="true">2</span>
+                            Comment fonctionne le Mode Test ?
+                        </span>
+                        <span class="icon" aria-hidden="true">+</span>
+                    </button>
+                    <div 
+                        class="faq-answer" 
+                        id="faq-a-2"
+                        role="region" 
+                        aria-labelledby="faq-q-2"
+                        aria-hidden="true">
+                        <p>Le <span class="highlight">Mode Test</span> est une démonstration gratuite accessible sans authentification. Il vous permet d'enregistrer des données fictives et de voir en temps réel comment elles sont transcrites dans un Google Sheet public. C'est l'occasion idéale pour découvrir DictaMed avant de vous engager.</p>
+                    </div>
+                </article>
+
+                <!-- FAQ Item 3 -->
+                <article class="faq-item">
+                    <h3 class="sr-only">Question 3</h3>
+                    <button 
+                        class="faq-question" 
+                        id="faq-q-3"
+                        aria-expanded="false"
+                        aria-controls="faq-a-3"
+                        data-question-number="3">
+                        <span class="question-content">
+                            <span class="number-badge" aria-hidden="true">3</span>
+                            Mes données sont-elles sécurisées ?
+                        </span>
+                        <span class="icon" aria-hidden="true">+</span>
+                    </button>
+                    <div 
+                        class="faq-answer" 
+                        id="faq-a-3"
+                        role="region" 
+                        aria-labelledby="faq-q-3"
+                        aria-hidden="true">
+                        <p>Absolument. DictaMed est <span class="highlight">conforme au RGPD</span> et utilise un chiffrement de bout en bout pour toutes les données en Mode Normal. Les enregistrements sont stockés de manière sécurisée et ne sont accessibles qu'aux personnes autorisées avec leurs identifiants personnels.</p>
+                    </div>
+                </article>
+
+                <!-- FAQ Item 4 -->
+                <article class="faq-item">
+                    <h3 class="sr-only">Question 4</h3>
+                    <button 
+                        class="faq-question" 
+                        id="faq-q-4"
+                        aria-expanded="false"
+                        aria-controls="faq-a-4"
+                        data-question-number="4">
+                        <span class="question-content">
+                            <span class="number-badge" aria-hidden="true">4</span>
+                            Quels navigateurs sont compatibles ?
+                        </span>
+                        <span class="icon" aria-hidden="true">+</span>
+                    </button>
+                    <div 
+                        class="faq-answer" 
+                        id="faq-a-4"
+                        role="region" 
+                        aria-labelledby="faq-q-4"
+                        aria-hidden="true">
+                        <p>DictaMed fonctionne sur tous les navigateurs modernes : <span class="highlight">Google Chrome (recommandé)</span>, Mozilla Firefox, Microsoft Edge et Safari. L'application est également optimisée pour mobile et tablette.</p>
+                    </div>
+                </article>
+
+                <!-- FAQ Item 5 -->
+                <article class="faq-item">
+                    <h3 class="sr-only">Question 5</h3>
+                    <button 
+                        class="faq-question" 
+                        id="faq-q-5"
+                        aria-expanded="false"
+                        aria-controls="faq-a-5"
+                        data-question-number="5">
+                        <span class="question-content">
+                            <span class="number-badge" aria-hidden="true">5</span>
+                            Puis-je mettre en pause un enregistrement ?
+                        </span>
+                        <span class="icon" aria-hidden="true">+</span>
+                    </button>
+                    <div 
+                        class="faq-answer" 
+                        id="faq-a-5"
+                        role="region" 
+                        aria-labelledby="faq-q-5"
+                        aria-hidden="true">
+                        <p>Oui, chaque section d'enregistrement dispose d'une <span class="highlight">fonction pause</span> qui vous permet d'interrompre temporairement votre dictée et de la reprendre ensuite. Le timer exclut automatiquement le temps de pause.</p>
+                    </div>
+                </article>
+
+                <!-- FAQ Item 6 -->
+                <article class="faq-item">
+                    <h3 class="sr-only">Question 6</h3>
+                    <button 
+                        class="faq-question" 
+                        id="faq-q-6"
+                        aria-expanded="false"
+                        aria-controls="faq-a-6"
+                        data-question-number="6">
+                        <span class="question-content">
+                            <span class="number-badge" aria-hidden="true">6</span>
+                            Comment obtenir un devis ?
+                        </span>
+                        <span class="icon" aria-hidden="true">+</span>
+                    </button>
+                    <div 
+                        class="faq-answer" 
+                        id="faq-a-6"
+                        role="region" 
+                        aria-labelledby="faq-q-6"
+                        aria-hidden="true">
+                        <p>Contactez-nous par email à <a href="mailto:DictaMed.SPSS@gmail.com" class="contact-link">DictaMed.SPSS@gmail.com</a> en fournissant les informations listées dans l'onglet Contact. Nous vous répondrons sous <span class="highlight">48 heures ouvrées</span> avec un devis personnalisé adapté à vos besoins.</p>
+                    </div>
+                </article>
+
+                <!-- FAQ Item 7 -->
+                <article class="faq-item">
+                    <h3 class="sr-only">Question 7</h3>
+                    <button 
+                        class="faq-question" 
+                        id="faq-q-7"
+                        aria-expanded="false"
+                        aria-controls="faq-a-7"
+                        data-question-number="7">
+                        <span class="question-content">
+                            <span class="number-badge" aria-hidden="true">7</span>
+                            Quelle est la précision de la transcription ?
+                        </span>
+                        <span class="icon" aria-hidden="true">+</span>
+                    </button>
+                    <div 
+                        class="faq-answer" 
+                        id="faq-a-7"
+                        role="region" 
+                        aria-labelledby="faq-q-7"
+                        aria-hidden="true">
+                        <p>Notre système d'intelligence artificielle atteint une précision <span class="highlight">supérieure à 95%</span> pour les données médicales structurées, particulièrement lorsque les consignes de dictée sont respectées (parler clairement, environnement calme).</p>
+                    </div>
+                </article>
+
+                <!-- FAQ Item 8 -->
+                <article class="faq-item">
+                    <h3 class="sr-only">Question 8</h3>
+                    <button 
+                        class="faq-question" 
+                        id="faq-q-8"
+                        aria-expanded="false"
+                        aria-controls="faq-a-8"
+                        data-question-number="8">
+                        <span class="question-content">
+                            <span class="number-badge" aria-hidden="true">8</span>
+                            Puis-je personnaliser les paramètres ?
+                        </span>
+                        <span class="icon" aria-hidden="true">+</span>
+                    </button>
+                    <div 
+                        class="faq-answer" 
+                        id="faq-a-8"
+                        role="region" 
+                        aria-labelledby="faq-q-8"
+                        aria-hidden="true">
+                        <p>Oui, chaque client en Mode Normal reçoit une <span class="highlight">configuration personnalisée</span> adaptée à ses variables SPSS spécifiques. Le nombre de sections et les champs peuvent être ajustés selon vos besoins.</p>
+                    </div>
+                </article>
+
+                <!-- FAQ Item 9 -->
+                <article class="faq-item">
+                    <h3 class="sr-only">Question 9</h3>
+                    <button 
+                        class="faq-question" 
+                        id="faq-q-9"
+                        aria-expanded="false"
+                        aria-controls="faq-a-9"
+                        data-question-number="9">
+                        <span class="question-content">
+                            <span class="number-badge" aria-hidden="true">9</span>
+                            Y a-t-il une limite au nombre d'enregistrements ?
+                        </span>
+                        <span class="icon" aria-hidden="true">+</span>
+                    </button>
+                    <div 
+                        class="faq-answer" 
+                        id="faq-a-9"
+                        role="region" 
+                        aria-labelledby="faq-q-9"
+                        aria-hidden="true">
+                        <p>En Mode Test, vous pouvez effectuer un <span class="highlight">nombre illimité</span> d'essais. En Mode Normal, le nombre d'enregistrements est défini selon votre forfait (nombre de patients de votre étude).</p>
+                    </div>
+                </article>
+
+                <!-- FAQ Item 10 -->
+                <article class="faq-item">
+                    <h3 class="sr-only">Question 10</h3>
+                    <button 
+                        class="faq-question" 
+                        id="faq-q-10"
+                        aria-expanded="false"
+                        aria-controls="faq-a-10"
+                        data-question-number="10">
+                        <span class="question-content">
+                            <span class="number-badge" aria-hidden="true">10</span>
+                            Que se passe-t-il après la transcription ?
+                        </span>
+                        <span class="icon" aria-hidden="true">+</span>
+                    </button>
+                    <div 
+                        class="faq-answer" 
+                        id="faq-a-10"
+                        role="region" 
+                        aria-labelledby="faq-q-10"
+                        aria-hidden="true">
+                        <p>Les données transcrites sont <span class="highlight">automatiquement ajoutées</span> à votre Google Sheet personnalisé où vous pouvez les vérifier et les corriger si nécessaire. Une fois validées, elles sont exportées vers votre fichier SPSS prêt pour l'analyse statistique.</p>
+                    </div>
+                </article>
             </div>
+        </section>
 
-            <div class="faq-item">
-                <button class="faq-question">
-                    <span><span class="number-badge">2</span>Comment fonctionne le Mode Test ?</span>
-                </button>
-                <div class="faq-answer">
-                    <p>Le <span class="highlight">Mode Test</span> est une démonstration gratuite accessible sans authentification. Il vous permet d'enregistrer des données fictives et de voir en temps réel comment elles sont transcrites dans un Google Sheet public. C'est l'occasion idéale pour découvrir DictaMed avant de vous engager.</p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <button class="faq-question">
-                    <span><span class="number-badge">3</span>Mes données sont-elles sécurisées ?</span>
-                </button>
-                <div class="faq-answer">
-                    <p>Absolument. DictaMed est <span class="highlight">conforme au RGPD</span> et utilise un chiffrement de bout en bout pour toutes les données en Mode Normal. Les enregistrements sont stockés de manière sécurisée et ne sont accessibles qu'aux personnes autorisées avec leurs identifiants personnels.</p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <button class="faq-question">
-                    <span><span class="number-badge">4</span>Quels navigateurs sont compatibles ?</span>
-                </button>
-                <div class="faq-answer">
-                    <p>DictaMed fonctionne sur tous les navigateurs modernes : <span class="highlight">Google Chrome (recommandé)</span>, Mozilla Firefox, Microsoft Edge et Safari. L'application est également optimisée pour mobile et tablette.</p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <button class="faq-question">
-                    <span><span class="number-badge">5</span>Puis-je mettre en pause un enregistrement ?</span>
-                </button>
-                <div class="faq-answer">
-                    <p>Oui, chaque section d'enregistrement dispose d'une <span class="highlight">fonction pause</span> qui vous permet d'interrompre temporairement votre dictée et de la reprendre ensuite. Le timer exclut automatiquement le temps de pause.</p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <button class="faq-question">
-                    <span><span class="number-badge">6</span>Comment obtenir un devis ?</span>
-                </button>
-                <div class="faq-answer">
-                    <p>Contactez-nous par email à <a href="mailto:DictaMed.SPSS@gmail.com">DictaMed.SPSS@gmail.com</a> en fournissant les informations listées dans l'onglet Contact. Nous vous répondrons sous <span class="highlight">48 heures ouvrées</span> avec un devis personnalisé adapté à vos besoins.</p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <button class="faq-question">
-                    <span><span class="number-badge">7</span>Quelle est la précision de la transcription ?</span>
-                </button>
-                <div class="faq-answer">
-                    <p>Notre système d'intelligence artificielle atteint une précision <span class="highlight">supérieure à 95%</span> pour les données médicales structurées, particulièrement lorsque les consignes de dictée sont respectées (parler clairement, environnement calme).</p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <button class="faq-question">
-                    <span><span class="number-badge">8</span>Puis-je personnaliser les paramètres ?</span>
-                </button>
-                <div class="faq-answer">
-                    <p>Oui, chaque client en Mode Normal reçoit une <span class="highlight">configuration personnalisée</span> adaptée à ses variables SPSS spécifiques. Le nombre de sections et les champs peuvent être ajustés selon vos besoins.</p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <button class="faq-question">
-                    <span><span class="number-badge">9</span>Y a-t-il une limite au nombre d'enregistrements ?</span>
-                </button>
-                <div class="faq-answer">
-                    <p>En Mode Test, vous pouvez effectuer un <span class="highlight">nombre illimité</span> d'essais. En Mode Normal, le nombre d'enregistrements est défini selon votre forfait (nombre de patients de votre étude).</p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <button class="faq-question">
-                    <span><span class="number-badge">10</span>Que se passe-t-il après la transcription ?</span>
-                </button>
-                <div class="faq-answer">
-                    <p>Les données transcrites sont <span class="highlight">automatiquement ajoutées</span> à votre Google Sheet personnalisé où vous pouvez les vérifier et les corriger si nécessaire. Une fois validées, elles sont exportées vers votre fichier SPSS prêt pour l'analyse statistique.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="contact-info">
+        <aside class="contact-info" role="complementary">
             <h3>Besoin d'aide supplémentaire ?</h3>
-            <p>Notre équipe est là pour vous accompagner. Contactez-nous à <a href="mailto:DictaMed.SPSS@gmail.com">DictaMed.SPSS@gmail.com</a></p>
-        </div>
+            <p>Notre équipe est là pour vous accompagner. Contactez-nous à 
+                <a href="mailto:DictaMed.SPSS@gmail.com" class="contact-link">DictaMed.SPSS@gmail.com</a>
+            </p>
+        </aside>
     </div>
 
-    <script>
-        // FAQ Accordion functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const faqQuestions = document.querySelectorAll('.faq-question');
-            
-            faqQuestions.forEach(question => {
-                question.addEventListener('click', function() {
-                    const answer = this.nextElementSibling;
-                    const isActive = this.classList.contains('active');
-                    
-                    // Close all other FAQ items
-                    faqQuestions.forEach(q => {
-                        q.classList.remove('active');
-                        q.nextElementSibling.classList.remove('active');
-                    });
-                    
-                    // Toggle current item
-                    if (!isActive) {
-                        this.classList.add('active');
-                        answer.classList.add('active');
-                    }
-                });
-            });
-
-            // Add smooth scroll animation when page loads
-            setTimeout(() => {
-                document.querySelector('.faq-container').style.transform = 'scale(1)';
-                document.querySelector('.faq-container').style.opacity = '1';
-            }, 100);
-        });
-
-        // Keyboard navigation for accessibility
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                if (e.target.classList.contains('faq-question')) {
-                    e.preventDefault();
-                    e.target.click();
+    <!-- Scripts -->
+    <script src="js/faq-script.js" defer></script>
+    
+    <!-- Schema.org structured data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Qu'est-ce que DictaMed ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "DictaMed est une solution innovante de dictée médicale intelligente qui permet aux professionnels de santé de transformer leurs enregistrements vocaux en données structurées pour faciliter la collecte de données médicales et la création de fichiers SPSS."
+                }
+            },
+            {
+                "@type": "Question", 
+                "name": "Comment fonctionne le Mode Test ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Le Mode Test est une démonstration gratuite accessible sans authentification. Il vous permet d'enregistrer des données fictives et de voir en temps réel comment elles sont transcrites dans un Google Sheet public."
                 }
             }
-        });
+        ]
+    }
     </script>
 </body>
 </html>
