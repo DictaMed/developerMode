@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administration des Webhooks - DictaMed</title>
     
-    <!-- Firebase SDK v10+ Compatible - MÊME VERSION QUE index.html -->
+    <!-- Firebase SDK v10.7.1 Compatible - MÊME VERSION QUE index.html -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     
@@ -165,144 +165,267 @@
     <script src="js/components/notification.js"></script>
     <script src="js/components/auth-modal.js"></script>
     <script src="js/components/firebase-auth-manager.js"></script>
-    <script src="js/components/admin-webhook-manager.js"></script>
+    <script src="js/components/admin-webhook-manager-fixed.js"></script>
     
     <script>
-        // Initialisation de l'application d'administration avec gestion d'erreurs améliorée
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('🚀 Initialisation de l\'interface d\'administration des webhooks...');
-            
-            // Attendre que Firebase soit initialisé avec timeout
-            await new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => {
-                    reject(new Error('Firebase initialization timeout'));
-                }, 10000); // 10 secondes timeout
+        // Variable globale pour éviter la double initialisation
+        let adminInitializationInProgress = false;
+        let adminInitialized = false;
 
-                const checkFirebase = setInterval(() => {
-                    if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
-                        clearTimeout(timeout);
-                        clearInterval(checkFirebase);
-                        console.log('✅ Firebase initialisé avec succès');
-                        resolve();
-                    }
-                }, 100);
-            });
-            
-            // Attendre que FirebaseAuthManager soit initialisé
-            await new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => {
-                    reject(new Error('FirebaseAuthManager initialization timeout'));
-                }, 10000); // 10 secondes timeout
+        // Fonction d'initialisation principale corrigée
+        async function initializeAdminInterface() {
+            if (adminInitializationInProgress || adminInitialized) {
+                console.log('ℹ️ Initialisation déjà en cours ou terminée');
+                return;
+            }
 
-                const checkAuthManager = setInterval(() => {
-                    if (window.FirebaseAuthManager && window.FirebaseAuthManager.isInitialized) {
-                        clearTimeout(timeout);
-                        clearInterval(checkAuthManager);
-                        console.log('✅ FirebaseAuthManager initialisé avec succès');
-                        resolve();
-                    }
-                }, 200);
-            });
-            
-            // Initialiser les composants
+            adminInitializationInProgress = true;
+            console.log('🚀 Début de l\'initialisation de l\'interface d\'administration...');
+
             try {
-                if (window.notificationSystem) {
-                    window.notificationSystem.init();
-                    console.log('✅ NotificationSystem initialisé');
-                }
+                // 1. Attendre que Firebase soit prêt avec retry
+                await waitForFirebase(15000); // Augmenté à 15 secondes
+                
+                // 2. Attendre que FirebaseAuthManager soit initialisé avec retry
+                await waitForFirebaseAuthManager(15000); // Augmenté à 15 secondes
+                
+                // 3. Initialiser les composants de base
+                await initializeCoreComponents();
+                
+                // 4. Initialiser l'interface admin
+                await initializeAdminInterfaceContent();
+                
+                adminInitialized = true;
+                console.log('✅ Interface d\'administration initialisée avec succès');
+                
             } catch (error) {
-                console.warn('⚠️ Erreur lors de l\'initialisation de NotificationSystem:', error);
+                console.error('❌ Erreur lors de l\'initialisation:', error);
+                showInitializationError(error);
+            } finally {
+                adminInitializationInProgress = false;
+            }
+        }
+
+        // Fonction d'attente Firebase avec retry
+        async function waitForFirebase(timeout = 15000) {
+            const startTime = Date.now();
+            
+            while (Date.now() - startTime < timeout) {
+                if (typeof firebase !== 'undefined' && 
+                    firebase.apps && 
+                    firebase.apps.length > 0 &&
+                    firebase.auth) {
+                    console.log('✅ Firebase prêt');
+                    return;
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 200));
             }
             
-            // Initialiser l'interface admin après authentification
-            let adminInitialized = false;
+            throw new Error('Firebase initialization timeout après ' + timeout + 'ms');
+        }
+
+        // Fonction d'attente FirebaseAuthManager avec retry
+        async function waitForFirebaseAuthManager(timeout = 15000) {
+            const startTime = Date.now();
             
-            const initAdminInterface = async () => {
-                if (adminInitialized) return;
+            while (Date.now() - startTime < timeout) {
+                if (window.FirebaseAuthManager && 
+                    typeof window.FirebaseAuthManager.isInitialized !== 'undefined' &&
+                    window.FirebaseAuthManager.isInitialized) {
+                    console.log('✅ FirebaseAuthManager prêt');
+                    return;
+                }
                 
-                try {
-                    const currentUser = window.FirebaseAuthManager.getCurrentUser();
-                    if (currentUser) {
-                        if (currentUser.email === 'akio963@gmail.com') {
-                            console.log('✅ Accès admin autorisé pour:', currentUser.email);
-                            
-                            // Créer l'instance du gestionnaire d'admin
-                            window.adminWebhookManager = new AdminWebhookManager();
-                            const success = await window.adminWebhookManager.init();
-                            adminInitialized = success;
-                            
-                            if (success) {
-                                console.log('✅ AdminWebhookManager initialisé avec succès');
-                            }
-                        } else {
-                            // Afficher message d'accès refusé
-                            document.getElementById('adminWebhookContainer').innerHTML = `
-                                <div class="access-denied">
-                                    <div class="access-denied-content">
-                                        <h1>🚫 Accès Refusé</h1>
-                                        <p>Cette interface est réservée à l'administrateur.</p>
-                                        <p>Veuillez vous connecter avec le compte administrateur : <strong>akio963@gmail.com</strong></p>
-                                        <p>Vous êtes connecté avec : <strong>${currentUser.email}</strong></p>
-                                        <button class="btn btn-primary" onclick="location.reload()">
-                                            🔄 Actualiser la page
-                                        </button>
-                                        <button class="btn btn-secondary" onclick="window.FirebaseAuthManager.signOut()">
-                                            🚪 Se déconnecter
-                                        </button>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    } else {
-                        // Si pas d'utilisateur, afficher message de connexion
-                        document.getElementById('adminWebhookContainer').innerHTML = `
-                            <div class="access-denied">
-                                <div class="access-denied-content">
-                                    <h1>🔐 Connexion Requise</h1>
-                                    <p>Veuillez vous connecter pour accéder à l'interface d'administration.</p>
-                                    <p>Compte administrateur requis : <strong>akio963@gmail.com</strong></p>
-                                    <button class="btn btn-primary" onclick="document.getElementById('authButton').click()">
-                                        🔑 Se connecter
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    }
-                } catch (error) {
-                    console.error('❌ Erreur lors de l\'initialisation de l\'interface admin:', error);
-                    document.getElementById('adminWebhookContainer').innerHTML = `
-                        <div class="access-denied">
-                            <div class="access-denied-content">
-                                <h1>⚠️ Erreur de Chargement</h1>
-                                <p>Une erreur s'est produite lors du chargement de l'interface d'administration.</p>
-                                <p>Erreur: ${error.message}</p>
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+            
+            throw new Error('FirebaseAuthManager initialization timeout après ' + timeout + 'ms');
+        }
+
+        // Initialisation des composants de base
+        async function initializeCoreComponents() {
+            try {
+                // Initialiser le système de notifications
+                if (window.notificationSystem && !window.notificationSystem.initialized) {
+                    await window.notificationSystem.init();
+                    console.log('✅ NotificationSystem initialisé');
+                }
+                
+                // Initialiser le modal d'authentification si nécessaire
+                if (window.AuthModal && !window.AuthModal.initialized) {
+                    window.AuthModal.init();
+                    console.log('✅ AuthModal initialisé');
+                }
+                
+            } catch (error) {
+                console.warn('⚠️ Erreur lors de l\'initialisation des composants:', error);
+                // Ne pas échouer pour autant l'initialisation
+            }
+        }
+
+        // Initialisation du contenu admin
+        async function initializeAdminInterfaceContent() {
+            try {
+                const currentUser = window.FirebaseAuthManager.getCurrentUser();
+                
+                if (!currentUser) {
+                    showLoginRequired();
+                    return;
+                }
+
+                if (currentUser.email !== 'akio963@gmail.com') {
+                    showAccessDenied(currentUser);
+                    return;
+                }
+
+                console.log('✅ Accès admin autorisé pour:', currentUser.email);
+                
+                // Créer l'instance du gestionnaire d'admin (utiliser la version corrigée)
+                if (!window.adminWebhookManager) {
+                    window.adminWebhookManager = new AdminWebhookManager();
+                }
+                
+                const success = await window.adminWebhookManager.init();
+                if (!success) {
+                    throw new Error('Échec de l\'initialisation du gestionnaire admin');
+                }
+                
+                console.log('✅ AdminWebhookManager initialisé avec succès');
+                
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'initialisation de l\'interface admin:', error);
+                throw error;
+            }
+        }
+
+        // Affichage des erreurs d'initialisation
+        function showInitializationError(error) {
+            const container = document.getElementById('adminWebhookContainer');
+            if (container) {
+                container.innerHTML = `
+                    <div class="access-denied">
+                        <div class="access-denied-content">
+                            <h1>⚠️ Erreur de Chargement</h1>
+                            <p>Une erreur s'est produite lors du chargement de l'interface d'administration.</p>
+                            <p><strong>Erreur:</strong> ${escapeHtml(error.message)}</p>
+                            <div class="error-actions">
                                 <button class="btn btn-primary" onclick="location.reload()">
-                                    🔄 Actualiser la page
+                                    🔄 Réessayer
+                                </button>
+                                <button class="btn btn-secondary" onclick="showDebugInfo()">
+                                    🔍 Informations de debug
                                 </button>
                             </div>
                         </div>
-                    `;
-                }
+                    </div>
+                `;
+            }
+        }
+
+        // Affichage de l'accès refusé
+        function showAccessDenied(user) {
+            const container = document.getElementById('adminWebhookContainer');
+            if (container) {
+                container.innerHTML = `
+                    <div class="access-denied">
+                        <div class="access-denied-content">
+                            <h1>🚫 Accès Refusé</h1>
+                            <p>Cette interface est réservée à l'administrateur.</p>
+                            <p><strong>Compte requis:</strong> akio963@gmail.com</p>
+                            <p><strong>Votre compte:</strong> ${escapeHtml(user.email)}</p>
+                            <div class="error-actions">
+                                <button class="btn btn-primary" onclick="location.reload()">
+                                    🔄 Actualiser
+                                </button>
+                                <button class="btn btn-secondary" onclick="window.FirebaseAuthManager.signOut()">
+                                    🚪 Se déconnecter
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Affichage de la connexion requise
+        function showLoginRequired() {
+            const container = document.getElementById('adminWebhookContainer');
+            if (container) {
+                container.innerHTML = `
+                    <div class="access-denied">
+                        <div class="access-denied-content">
+                            <h1>🔐 Connexion Requise</h1>
+                            <p>Veuillez vous connecter pour accéder à l'interface d'administration.</p>
+                            <p><strong>Compte administrateur requis:</strong> akio963@gmail.com</p>
+                            <div class="error-actions">
+                                <button class="btn btn-primary" onclick="document.getElementById('authButton').click()">
+                                    🔑 Se connecter
+                                </button>
+                                <button class="btn btn-secondary" onclick="showDebugInfo()">
+                                    🔍 Debug
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Fonction de debug
+        function showDebugInfo() {
+            const debugInfo = {
+                firebase: typeof firebase !== 'undefined' && firebase.apps ? firebase.apps.length : 0,
+                firebaseAuth: typeof firebase !== 'undefined' && firebase.auth ? 'disponible' : 'non disponible',
+                firebaseAuthManager: window.FirebaseAuthManager ? 'disponible' : 'non disponible',
+                firebaseAuthManagerInitialized: window.FirebaseAuthManager?.isInitialized || false,
+                currentUser: window.FirebaseAuthManager?.getCurrentUser()?.email || 'non connecté',
+                adminEmail: 'akio963@gmail.com',
+                adminWebhookManager: window.adminWebhookManager ? 'initialisé' : 'non initialisé',
+                timestamp: new Date().toISOString()
             };
             
-            // Écouter les changements d'état d'authentification
-            window.addEventListener('authStateChanged', async (event) => {
-                console.log('🔐 Changement d\'état d\'authentification détecté');
-                await initAdminInterface();
+            console.log('🐛 Debug Info:', debugInfo);
+            alert('Informations de debug sauvegardées dans la console');
+        }
+
+        // Gestionnaire d'événements d'authentification
+        function handleAuthStateChange() {
+            console.log('🔐 Changement d\'état d\'authentification détecté');
+            if (!adminInitializationInProgress && !adminInitialized) {
+                initializeAdminInterface();
+            }
+        }
+
+        // Échappement HTML pour sécuriser l'affichage
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialisation quand le DOM est prêt
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOM chargé, démarrage de l\'initialisation...');
+            
+            // Écouter l'événement firebaseReady
+            window.addEventListener('firebaseReady', () => {
+                console.log('🔥 Événement firebaseReady reçu');
+                if (!adminInitialized && !adminInitializationInProgress) {
+                    initializeAdminInterface();
+                }
             });
             
-            // Écouter les changements d'état Firebase Auth
-            if (window.FirebaseAuthManager) {
-                window.FirebaseAuthManager.addAuthStateListener(async (user) => {
-                    console.log('🔐 Firebase Auth state changed:', user ? user.email : 'null');
-                    await initAdminInterface();
-                });
-            }
-            
-            // Vérifier l'état initial
-            await initAdminInterface();
+            // Démarrer l'initialisation après un court délai
+            setTimeout(() => {
+                initializeAdminInterface();
+            }, 500);
         });
-        
+
+        // Écouter les changements d'état d'authentification
+        window.addEventListener('authStateChanged', handleAuthStateChange);
+
         // Gestion du menu mobile
         document.addEventListener('DOMContentLoaded', function() {
             const navToggle = document.querySelector('.nav-toggle');
@@ -312,6 +435,31 @@
                 navToggle.addEventListener('click', () => {
                     navMenu.classList.toggle('active');
                 });
+            }
+        });
+
+        // Gestion des erreurs globales
+        window.addEventListener('error', function(event) {
+            console.error('❌ Erreur globale:', event.error);
+            if (!adminInitialized) {
+                showInitializationError(event.error);
+            }
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('❌ Promesse rejetée:', event.reason);
+            if (!adminInitialized) {
+                showInitializationError(new Error(event.reason));
+            }
+        });
+
+        // Nettoyage lors de la fermeture de la page
+        window.addEventListener('beforeunload', function() {
+            if (window.adminWebhookManager && typeof window.adminWebhookManager.cleanup === 'function') {
+                window.adminWebhookManager.cleanup();
+            }
+            if (window.adminNavigationManager && typeof window.adminNavigationManager.cleanup === 'function') {
+                window.adminNavigationManager.cleanup();
             }
         });
     </script>
