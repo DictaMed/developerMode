@@ -162,12 +162,14 @@ class TabNavigationSystem {
         // Sync fixed navigation buttons
         this.updateFixedNavButtons(tabId);
 
+        // Update current mode FIRST - before loading tab content
+        // This ensures onTabLoad() methods see the correct mode
+        this.updateAppMode(tabId);
+        console.log(`🔄 Mode changed to: ${tabId}`);
+
         // Load tab content if not already loaded
         await this.loadTabContent(tabId);
 
-        // Update current mode
-        this.updateAppMode(tabId);
-        
         this.activeTab = tabId;
     }
 
