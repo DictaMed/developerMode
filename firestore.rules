@@ -51,22 +51,48 @@ service cloud.firestore {
     }
     
     // ===== COLLECTIONS UTILISATEURS =====
-    
-    // Profils utilisateurs avec validation stricte
+
+    // Collection "users" - Profils utilisateurs (principale)
+    match /users/{userId} {
+      // Lecture: propriétaire ou admin
+      allow read: if isOwner(userId) || isAdmin();
+
+      // Création: utilisateur authentifié créant son propre profil
+      allow create: if isOwner(userId) && isAuthenticated();
+
+      // Mise à jour: propriétaire ou admin
+      allow update: if (isOwner(userId) || isAdmin()) && isAuthenticated();
+
+      // Suppression: uniquement par l'admin
+      allow delete: if isAdmin();
+
+      // Sous-collections pour chaque utilisateur
+      match /twoFactorConfig/{document=**} {
+        // Lecture/Écriture: propriétaire uniquement
+        allow read, write: if isOwner(userId) && isAuthenticated();
+      }
+
+      match /devices/{deviceId} {
+        // Lecture/Écriture: propriétaire uniquement
+        allow read, write: if isOwner(userId) && isAuthenticated();
+      }
+    }
+
+    // Profils utilisateurs avec validation stricte (maintenu pour compatibilité)
     match /userProfiles/{userId} {
       // Lecture: admin ou propriétaire du profil
       allow read: if isOwner(userId) || isAdmin();
-      
+
       // Création: utilisateur authentifié créant son propre profil
-      allow create: if isOwner(userId) && 
+      allow create: if isOwner(userId) &&
                     validateUserProfile(resource.data) &&
                     isEmailVerified();
-      
+
       // Mise à jour: propriétaire ou admin avec validation
       allow update: if (isOwner(userId) || isAdmin()) &&
                     validateUserProfileUpdate(resource.data, request.resource.data) &&
                     isEmailVerified();
-      
+
       // Suppression: uniquement par l'admin
       allow delete: if isAdmin();
     }
