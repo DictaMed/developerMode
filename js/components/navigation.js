@@ -141,6 +141,12 @@ class TabNavigationSystem {
             this.normalModeButton.classList.add('auth-required-hidden');
             console.log('🔒 Normal mode button hidden - user not authenticated');
         }
+
+        // BUG FIX: Update all mode visibility based on authentication status
+        // This ensures both Mode Normal and Mode Test visibility is synchronized
+        if (window.DictaMed && typeof window.DictaMed.updateModeVisibility === 'function') {
+            window.DictaMed.updateModeVisibility(isAuthenticated);
+        }
     }
 
     async switchTab(tabId) {

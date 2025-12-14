@@ -689,14 +689,26 @@ async function finalizeInitialization() {
     if (audioRecorderManager) {
         audioRecorderManager.updateSectionCount();
     }
-    
+
     appState.isInitialized = true;
-    
+
     // Make instances globally available for compatibility
     makeInstancesGlobal();
-    
+
     // Initialize global helper functions
     initializeGlobalHelpers();
+
+    // Initialize mode visibility based on current authentication status
+    // This ensures the correct modes are visible when the page loads
+    try {
+        const currentUser = window.FirebaseAuthManager?.getCurrentUser?.();
+        const isAuthenticated = !!currentUser;
+        if (typeof updateModeVisibility === 'function') {
+            updateModeVisibility(isAuthenticated);
+        }
+    } catch (error) {
+        console.warn('Could not initialize mode visibility:', error);
+    }
 }
 
 function makeInstancesGlobal() {
