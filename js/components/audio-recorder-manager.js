@@ -72,13 +72,24 @@ class AudioRecorderManager {
         let count = 0;
         const mode = this.appState.getMode();
         const sections = window.APP_CONFIG.SECTIONS[mode];
-        
-        if (!sections) return 0;
-        
+
+        if (!sections) {
+            console.warn(`⚠️ AudioRecorderManager: No sections found for mode ${mode}`);
+            return 0;
+        }
+
         sections.forEach(sectionId => {
             const recorder = this.recorders.get(sectionId);
-            if (recorder && recorder.hasRecording()) {
-                count++;
+            if (recorder) {
+                const hasRecording = recorder.hasRecording();
+                if (hasRecording) {
+                    count++;
+                    console.log(`   ✅ Section ${sectionId}: has recording (${recorder.audioBlob?.size || 0} bytes)`);
+                } else {
+                    console.log(`   ❌ Section ${sectionId}: no recording`);
+                }
+            } else {
+                console.warn(`   ⚠️ Section ${sectionId}: recorder not found in recorders Map`);
             }
         });
 
@@ -87,28 +98,42 @@ class AudioRecorderManager {
 
     updateSectionCount() {
         const mode = this.appState.getMode();
-        
+
         if (mode === window.APP_CONFIG.MODES.HOME) {
             return;
         }
-        
+
         const count = this.getSectionCount();
-        
-        // Update display
-        const countElements = document.querySelectorAll('.sections-count');
+        console.log(`📊 Section count updated for mode ${mode}: ${count} recording(s)`);
+
+        // Update display - FIX: Use correct CSS class '.progress-count' instead of '.sections-count'
+        const countElements = document.querySelectorAll('.progress-count');
+        if (countElements.length === 0) {
+            console.warn(`⚠️ AudioRecorderManager: No .progress-count elements found in DOM`);
+        }
+
         countElements.forEach(el => {
             if (el.closest(`#mode-${mode}`)) {
                 el.textContent = `${count} section(s) enregistrée(s)`;
+                console.log(`✅ Updated counter element in ${mode} mode: "${el.textContent}"`);
             }
         });
 
         // Enable/disable submit button
-        const submitBtn = mode === window.APP_CONFIG.MODES.NORMAL 
+        const submitBtn = mode === window.APP_CONFIG.MODES.NORMAL
             ? document.getElementById('submitNormal')
             : document.getElementById('submitTest');
-        
+
         if (submitBtn) {
+            const wasDisabled = submitBtn.disabled;
             submitBtn.disabled = count === 0;
+            if (wasDisabled && !submitBtn.disabled) {
+                console.log(`✅ Submit button ENABLED for mode ${mode}`);
+            } else if (!wasDisabled && submitBtn.disabled) {
+                console.log(`❌ Submit button DISABLED for mode ${mode}`);
+            }
+        } else {
+            console.warn(`⚠️ AudioRecorderManager: Submit button not found for mode ${mode}`);
         }
     }
 
