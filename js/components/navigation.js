@@ -102,12 +102,14 @@ class TabNavigationSystem {
             return;
         }
 
-        const isAuthenticated = window.FirebaseAuthManager && window.FirebaseAuthManager.isAuthenticated && window.FirebaseAuthManager.isAuthenticated();
-        
+        // Vérifier si l'utilisateur est authentifié en utilisant getCurrentUser()
+        const currentUser = window.FirebaseAuthManager && window.FirebaseAuthManager.getCurrentUser && window.FirebaseAuthManager.getCurrentUser();
+        const isAuthenticated = !!currentUser; // !!null = false, !!user = true
+
         if (isAuthenticated) {
             this.normalModeButton.style.display = '';
             this.normalModeButton.classList.remove('auth-required-hidden');
-            console.log('🔓 Normal mode button visible - user authenticated');
+            console.log('🔓 Normal mode button visible - user authenticated:', currentUser?.email);
         } else {
             this.normalModeButton.style.display = 'none';
             this.normalModeButton.classList.add('auth-required-hidden');
