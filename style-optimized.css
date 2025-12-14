@@ -3204,10 +3204,14 @@ textarea:focus {
 
 .submit-icon {
     font-size: 1.2rem;
+    pointer-events: none;
+    /* Allow clicks to pass through to parent button */
 }
 
 .submit-text {
     font-weight: 700;
+    pointer-events: none;
+    /* Allow clicks to pass through to parent button */
 }
 
 /* Character Counter Enhanced */
