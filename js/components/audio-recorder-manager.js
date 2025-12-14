@@ -117,18 +117,28 @@ class AudioRecorderManager {
             const count = this.getSectionCount();
             console.log(`📊 Section count updated for mode ${mode}: ${count} recording(s)`);
 
-            // Update display - FIX: Use correct CSS class '.progress-count' instead of '.sections-count'
-            const countElements = document.querySelectorAll('.progress-count');
-            if (countElements.length === 0) {
-                console.warn(`⚠️ AudioRecorderManager: No .progress-count elements found in DOM`);
+            // Update display - FIX: Use direct element IDs instead of searching for parent
+            // Mode-specific counter element IDs:
+            // - normal mode: #sectionsCount
+            // - test mode: #sectionsCountTest
+            let counterElementId;
+            if (mode === window.APP_CONFIG.MODES.NORMAL) {
+                counterElementId = 'sectionsCount';
+            } else if (mode === window.APP_CONFIG.MODES.TEST) {
+                counterElementId = 'sectionsCountTest';
             }
 
-            countElements.forEach(el => {
-                if (el.closest(`#mode-${mode}`)) {
-                    el.textContent = `${count} section(s) enregistrée(s)`;
-                    console.log(`✅ Updated counter element in ${mode} mode: "${el.textContent}"`);
+            if (counterElementId) {
+                const counterEl = document.getElementById(counterElementId);
+                if (counterEl) {
+                    counterEl.textContent = `${count} section(s) enregistrée(s)`;
+                    console.log(`✅ Updated counter element (#${counterElementId}) in ${mode} mode: "${counterEl.textContent}"`);
+                } else {
+                    console.warn(`⚠️ AudioRecorderManager: Counter element #${counterElementId} not found in DOM`);
                 }
-            });
+            } else {
+                console.log(`ℹ️ AudioRecorderManager: No counter element for mode ${mode}`);
+            }
 
             // Enable/disable submit button
             const submitBtn = mode === window.APP_CONFIG.MODES.NORMAL
