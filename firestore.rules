@@ -37,10 +37,8 @@ service cloud.firestore {
     }
     
     // Validation des timestamps
-    function isValidTimestamp(timestamp) {
-      return timestamp is timestamp && 
-             timestamp <= request.time && 
-             timestamp >= timestamp.date(2020, 1, 1);
+    function isValidTimestamp(ts) {
+      return ts is timestamp;
     }
     
     // Vérification de la provenance des données (appareil reconnu)
