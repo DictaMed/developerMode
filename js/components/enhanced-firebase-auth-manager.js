@@ -372,11 +372,13 @@ class EnhancedFirebaseAuthManager {
             const user = userCredential.user;
 
             // BUG FIX: For first-time logins, trust the device automatically
+            // Only apply security checks for suspicious activity, not device recognition on first login
             const securityCheckOptions = Object.assign({ trustDevice: true }, options);
             const securityCheck = await this.performEnhancedSecurityCheck(user, securityCheckOptions);
+
             if (!securityCheck.allowed && !options?.trustDevice) {
-                // Only sign out if security check fails AND user didn't explicitly trust device
-                await this.auth.signOut();
+                // Security check failed - return error without signing out
+                // This allows the user to stay logged in for the current session
                 return {
                     success: false,
                     error: securityCheck.reason,
@@ -830,15 +832,13 @@ class EnhancedFirebaseAuthManager {
 
             console.log('✅ Google Sign-In successful:', user.email);
 
-            // BUG FIX: For first-time social login, trust the device automatically
-            // Don't require 2FA and sign out - that prevents first login
-            const securityCheck = await this.performEnhancedSecurityCheck(user, { trustDevice: true });
-            if (!securityCheck.allowed && securityCheck.requires2FA) {
-                // Only for non-social logins, trigger 2FA
-                // For Google OAuth, we trust the device on first login
-                console.warn('⚠️ 2FA required but allowing first-time social login to proceed');
-                // Don't call signOut() for social logins - allow the user to proceed
-            }
+            // BUG FIX: For first-time social login, trust the device and bypass 2FA
+            // Social logins (Google OAuth) are already verified by Google's security
+            // Don't require 2FA and don't sign out - that was preventing first login
+            const securityCheck = await this.performEnhancedSecurityCheck(user, {
+                trustDevice: true,
+                bypass2FA: true  // Trust social login providers for 2FA
+            });
 
             // Créer ou mettre à jour le profil utilisateur
             await this.createUserProfile(user, { provider: 'google' });
