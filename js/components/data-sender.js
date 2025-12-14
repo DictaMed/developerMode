@@ -302,7 +302,7 @@ class DataSender {
                 throw new Error('Données invalides pour l\'envoi');
             }
 
-            logger.log(`📤 Audio: Envoi de ${data.recordings.length} enregistrement(s)...`);
+            console.log(`📤 Audio: Envoi de ${data.recordings.length} enregistrement(s)...`);
 
             // 🔑 Envoyer CHAQUE enregistrement séparément (pas tous ensemble)
             const results = [];
@@ -333,7 +333,7 @@ class DataSender {
                         metadata: data.metadata
                     };
 
-                    logger.log(`📤 Audio ${i + 1}/${data.recordings.length}: Envoi ${recording.sectionId}...`);
+                    console.log(`📤 Audio ${i + 1}/${data.recordings.length}: Envoi ${recording.sectionId}...`);
 
                     // Envoyer cet audio au webhook
                     const result = await this.sendToEndpoint(audioPayload, mode);
@@ -343,7 +343,7 @@ class DataSender {
                         result: result
                     });
 
-                    logger.log(`✅ Audio ${i + 1}/${data.recordings.length} envoyé: ${recording.sectionId}`);
+                    console.log(`✅ Audio ${i + 1}/${data.recordings.length} envoyé: ${recording.sectionId}`);
 
                 } catch (audioError) {
                     logger.error(`❌ Erreur audio ${i + 1}/${data.recordings.length}: ${recording.sectionId}`, audioError);

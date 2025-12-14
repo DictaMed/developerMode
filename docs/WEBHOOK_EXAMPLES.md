@@ -286,21 +286,49 @@ curl -X POST https://n8n.votre-domaine.com/webhook/photo \
 
 ## 📊 Configuration n8n pour Chaque Type
 
-### Workflow AUDIO
+### Workflow AUDIO (traite 1 audio à la fois)
 
+**⚠️ IMPORTANT v2.2.1**: Le webhook reçoit **UN SEUL audio** à la fois (pas un array)
+
+Structure du payload reçu:
+```
+{
+  uid: "user123",
+  email: "student@med.fr",
+  audioIndex: 1,        ← Index de l'audio (1-based)
+  totalAudios: 3,       ← Nombre total d'audios envoyés
+  recording: {
+    sectionId: "partie1",
+    audioData: "base64...",
+    duration: 45,
+    ...
+  },
+  patientInfo: {...}
+}
+```
+
+**Flux n8n:**
 ```
 [Webhook Trigger]
     ↓
 [Filter: fileType = 'audio']
     ↓
-[Whisper API] → Transcription
+[Extract from payload: recording.audioData]
+    ↓
+[Whisper API] → Transcription (audio-to-text)
     ↓
 [Claude API] → Extraction structurée
     ↓
-[Google Sheets] → Append résultats
+[Google Sheets] → Append résultats (1 ligne par audio)
     ↓
-[Response] 200 OK
+[Response] {success: true, audioIndex: 1, totalAudios: 3}
 ```
+
+**Avantages de ce système:**
+- ✅ Traite 1 audio à la fois (plus rapide que tous à la fois)
+- ✅ Redémarrage automatique si Whisper échoue
+- ✅ Meilleur tracking avec audioIndex/totalAudios
+- ✅ Cohérent avec le système de photos en DMI
 
 ### Workflow TEXT
 
