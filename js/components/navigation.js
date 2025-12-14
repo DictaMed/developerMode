@@ -417,13 +417,14 @@ class TabNavigationSystem {
             return true;
         }
 
-        // DMI mode is accessible to everyone (no authentication required)
-        if (tabId === window.APP_CONFIG.MODES.DMI) {
-            return true;
+        // DMI mode now requires authentication
+        if (tabId === window.APP_CONFIG.MODES.DMI && window.FirebaseAuthManager && !window.FirebaseAuthManager.isAuthenticated()) {
+            window.notificationSystem.warning('Veuillez vous connecter pour accéder au mode DMI', 'Authentification requise');
+            return false;
         }
 
         // Normal mode requires authentication
-        if (tabId === window.APP_CONFIG.MODES.NORMAL && window.FirebaseAuthManager && window.FirebaseAuthManager.isAuthenticated && !window.FirebaseAuthManager.isAuthenticated()) {
+        if (tabId === window.APP_CONFIG.MODES.NORMAL && window.FirebaseAuthManager && !window.FirebaseAuthManager.isAuthenticated()) {
             window.notificationSystem.warning('Veuillez vous connecter pour accéder à ce mode', 'Authentification requise');
             return false;
         }

@@ -761,25 +761,29 @@ function initializeGlobalHelpers() {
 /**
  * Update the visibility of mode buttons based on authentication status
  * - Mode Normal: visible only when authenticated
+ * - Mode DMI: visible only when authenticated
  * - Mode Test: visible only when NOT authenticated
  */
 function updateModeVisibility(isAuthenticated) {
     const modeNormalBtn = document.getElementById('modeNormalBtn');
+    const modeDmiBtn = document.getElementById('modeDmiBtn');
     const modeTestBtn = document.getElementById('modeTestBtn');
 
-    if (!modeNormalBtn || !modeTestBtn) {
-        console.warn('Mode buttons not found in DOM');
+    if (!modeNormalBtn || !modeDmiBtn || !modeTestBtn) {
+        console.warn('One or more mode buttons not found in DOM');
         return;
     }
 
     if (isAuthenticated) {
-        // User is logged in: show Normal mode, hide Test mode
+        // User is logged in: show Normal and DMI modes, hide Test mode
         modeNormalBtn.style.display = '';
+        modeDmiBtn.style.display = '';
         modeTestBtn.style.display = 'none';
-        console.log('✅ Mode Normal enabled (user authenticated)');
+        console.log('✅ Mode Normal and Mode DMI enabled (user authenticated)');
     } else {
-        // User is not logged in: hide Normal mode, show Test mode
+        // User is not logged in: hide Normal and DMI modes, show Test mode
         modeNormalBtn.style.display = 'none';
+        modeDmiBtn.style.display = 'none';
         modeTestBtn.style.display = '';
         console.log('✅ Mode Test enabled (user not authenticated)');
     }

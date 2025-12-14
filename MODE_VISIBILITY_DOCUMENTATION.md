@@ -5,8 +5,8 @@
 The Mode Visibility system controls the visibility of different operation modes based on the user's authentication status:
 
 - **Mode Normal**: Visible only when the user is **authenticated** (logged in)
+- **Mode DMI**: Visible only when the user is **authenticated** (logged in)
 - **Mode Test**: Visible only when the user is **not authenticated** (logged out)
-- **Mode DMI**: Always visible (no restrictions)
 
 ---
 
@@ -22,6 +22,12 @@ The Mode Visibility system controls the visibility of different operation modes 
     Mode Normal
 </button>
 
+<!-- Mode DMI - Hidden by default, shown after login -->
+<button class="fixed-nav-btn" id="modeDmiBtn" data-tab="mode-dmi" style="display: none;">
+    <span class="nav-icon">📝</span>
+    mode DMI
+</button>
+
 <!-- Mode Test - Visible by default, hidden after login -->
 <button class="fixed-nav-btn" id="modeTestBtn" data-tab="mode-test">
     <span class="nav-icon">🧪</span>
@@ -34,19 +40,23 @@ The Mode Visibility system controls the visibility of different operation modes 
 /**
  * Update the visibility of mode buttons based on authentication status
  * - Mode Normal: visible only when authenticated
+ * - Mode DMI: visible only when authenticated
  * - Mode Test: visible only when NOT authenticated
  */
 function updateModeVisibility(isAuthenticated) {
     const modeNormalBtn = document.getElementById('modeNormalBtn');
+    const modeDmiBtn = document.getElementById('modeDmiBtn');
     const modeTestBtn = document.getElementById('modeTestBtn');
 
     if (isAuthenticated) {
-        // User is logged in: show Normal mode, hide Test mode
+        // User is logged in: show Normal and DMI modes, hide Test mode
         modeNormalBtn.style.display = '';
+        modeDmiBtn.style.display = '';
         modeTestBtn.style.display = 'none';
     } else {
-        // User is not logged in: hide Normal mode, show Test mode
+        // User is not logged in: hide Normal and DMI modes, show Test mode
         modeNormalBtn.style.display = 'none';
+        modeDmiBtn.style.display = 'none';
         modeTestBtn.style.display = '';
     }
 }

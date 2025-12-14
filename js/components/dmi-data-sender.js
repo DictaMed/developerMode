@@ -11,6 +11,16 @@ class DMIDataSender {
 
     async send() {
         try {
+            // Check authentication - DMI mode now requires authentication
+            const currentUser = window.FirebaseAuthManager?.getCurrentUser?.() || null;
+            if (!currentUser) {
+                console.error('❌ DMIDataSender: User not authenticated');
+                if (window.notificationSystem) {
+                    window.notificationSystem.error('Vous devez être connecté pour accéder au mode DMI', 'Authentification requise');
+                }
+                return;
+            }
+
             const submitBtn = document.getElementById('submitDMI');
             if (!submitBtn) {
                 console.error('❌ DMIDataSender: submitBtn element not found');
@@ -18,6 +28,7 @@ class DMIDataSender {
             }
 
             console.log('📤 DMI: Starting data send...');
+            console.log('   Current user:', currentUser.email);
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span style="display: inline-block; animation: spin 1s linear infinite;">⏳</span> Envoi en cours...';
 
@@ -101,11 +112,12 @@ class DMIDataSender {
             photos: []
         };
 
-        // Add Firebase user email if connected
-        if (window.FirebaseAuthManager && window.FirebaseAuthManager.getCurrentUser && window.FirebaseAuthManager.getCurrentUser()) {
+        // Add Firebase user email (always available since authentication is now required)
+        if (window.FirebaseAuthManager && window.FirebaseAuthManager.getCurrentUser) {
             const currentUser = window.FirebaseAuthManager.getCurrentUser();
             if (currentUser && currentUser.email) {
                 payload.userEmail = currentUser.email;
+                console.log('   User email added to payload:', currentUser.email);
             }
         }
 
