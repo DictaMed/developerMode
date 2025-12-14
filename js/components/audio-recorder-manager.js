@@ -97,43 +97,58 @@ class AudioRecorderManager {
     }
 
     updateSectionCount() {
-        const mode = this.appState.getMode();
+        try {
+            console.log('🔍 updateSectionCount() CALLED');
 
-        if (mode === window.APP_CONFIG.MODES.HOME) {
-            return;
-        }
-
-        const count = this.getSectionCount();
-        console.log(`📊 Section count updated for mode ${mode}: ${count} recording(s)`);
-
-        // Update display - FIX: Use correct CSS class '.progress-count' instead of '.sections-count'
-        const countElements = document.querySelectorAll('.progress-count');
-        if (countElements.length === 0) {
-            console.warn(`⚠️ AudioRecorderManager: No .progress-count elements found in DOM`);
-        }
-
-        countElements.forEach(el => {
-            if (el.closest(`#mode-${mode}`)) {
-                el.textContent = `${count} section(s) enregistrée(s)`;
-                console.log(`✅ Updated counter element in ${mode} mode: "${el.textContent}"`);
+            if (!this.appState) {
+                console.error('❌ ERROR: this.appState is null/undefined');
+                return;
             }
-        });
 
-        // Enable/disable submit button
-        const submitBtn = mode === window.APP_CONFIG.MODES.NORMAL
-            ? document.getElementById('submitNormal')
-            : document.getElementById('submitTest');
+            const mode = this.appState.getMode();
+            console.log(`   Mode: ${mode}, HOME: ${window.APP_CONFIG.MODES.HOME}`);
 
-        if (submitBtn) {
-            const wasDisabled = submitBtn.disabled;
-            submitBtn.disabled = count === 0;
-            if (wasDisabled && !submitBtn.disabled) {
-                console.log(`✅ Submit button ENABLED for mode ${mode}`);
-            } else if (!wasDisabled && submitBtn.disabled) {
-                console.log(`❌ Submit button DISABLED for mode ${mode}`);
+            if (mode === window.APP_CONFIG.MODES.HOME) {
+                console.log('   → Skipping update (mode is HOME)');
+                return;
             }
-        } else {
-            console.warn(`⚠️ AudioRecorderManager: Submit button not found for mode ${mode}`);
+
+            console.log(`📊 Getting section count for mode: ${mode}`);
+            const count = this.getSectionCount();
+            console.log(`📊 Section count updated for mode ${mode}: ${count} recording(s)`);
+
+            // Update display - FIX: Use correct CSS class '.progress-count' instead of '.sections-count'
+            const countElements = document.querySelectorAll('.progress-count');
+            if (countElements.length === 0) {
+                console.warn(`⚠️ AudioRecorderManager: No .progress-count elements found in DOM`);
+            }
+
+            countElements.forEach(el => {
+                if (el.closest(`#mode-${mode}`)) {
+                    el.textContent = `${count} section(s) enregistrée(s)`;
+                    console.log(`✅ Updated counter element in ${mode} mode: "${el.textContent}"`);
+                }
+            });
+
+            // Enable/disable submit button
+            const submitBtn = mode === window.APP_CONFIG.MODES.NORMAL
+                ? document.getElementById('submitNormal')
+                : document.getElementById('submitTest');
+
+            if (submitBtn) {
+                const wasDisabled = submitBtn.disabled;
+                submitBtn.disabled = count === 0;
+                if (wasDisabled && !submitBtn.disabled) {
+                    console.log(`✅ Submit button ENABLED for mode ${mode}`);
+                } else if (!wasDisabled && submitBtn.disabled) {
+                    console.log(`❌ Submit button DISABLED for mode ${mode}`);
+                }
+            } else {
+                console.warn(`⚠️ AudioRecorderManager: Submit button not found for mode ${mode}`);
+            }
+        } catch (error) {
+            console.error('❌ ERROR in updateSectionCount():', error);
+            console.error('   Stack:', error.stack);
         }
     }
 

@@ -113,8 +113,14 @@ class AudioRecorder {
                     }
 
                     // Update section count to enable submit button
+                    console.log('🔄 [STOP EVENT] Checking if updateSectionCount should be called');
+                    console.log('   window.audioRecorderManager exists:', !!window.audioRecorderManager);
+
                     if (window.audioRecorderManager) {
+                        console.log('   ✅ [STOP EVENT] Calling updateSectionCount()');
                         window.audioRecorderManager.updateSectionCount();
+                    } else {
+                        console.error('   ❌ [STOP EVENT] window.audioRecorderManager is undefined!');
                     }
                 } catch (error) {
                     console.error(`❌ Error in stop event handler for section ${this.sectionId}:`, error);
@@ -224,11 +230,17 @@ class AudioRecorder {
             // IMPORTANT: Ensure button state is updated after recording stops
             // The 'stop' event handler will create the Blob, but we add a safety delay
             // to ensure updateSectionCount() is called AFTER the Blob is created
+            console.log('🔄 [STOP RECORDING] Setting up setTimeout to call updateSectionCount');
             if (window.audioRecorderManager) {
                 setTimeout(() => {
-                    window.audioRecorderManager.updateSectionCount();
-                    console.log('✅ Submit button enabled after recording stop');
+                    console.log('✅ [TIMEOUT] setTimeout callback executed, calling updateSectionCount again');
+                    console.log('   window.audioRecorderManager exists:', !!window.audioRecorderManager);
+                    if (window.audioRecorderManager) {
+                        window.audioRecorderManager.updateSectionCount();
+                    }
                 }, 50);
+            } else {
+                console.warn('⚠️ [STOP RECORDING] window.audioRecorderManager not available for setTimeout');
             }
         }
     }
