@@ -156,7 +156,7 @@ async handleSignOut() {
 | User Status | Mode Normal | Mode Test | Mode DMI |
 |-------------|------------|-----------|----------|
 | Logged In   | ✅ Visible | ❌ Hidden | ✅ Visible |
-| Logged Out  | ❌ Hidden  | ✅ Visible | ✅ Visible |
+| Logged Out  | ❌ Hidden  | ✅ Visible | ❌ Hidden |
 
 ---
 
@@ -221,6 +221,7 @@ console.log('User is authenticated:', isAuthenticated);
 ```javascript
 // Check mode button elements
 console.log('Mode Normal Button:', document.getElementById('modeNormalBtn'));
+console.log('Mode DMI Button:', document.getElementById('modeDmiBtn'));
 console.log('Mode Test Button:', document.getElementById('modeTestBtn'));
 
 // Check current auth status
@@ -245,11 +246,14 @@ window.DictaMed.updateModeVisibility(false);
 
 1. **index.html**
    - Added `id="modeNormalBtn"` to Mode Normal button
+   - Added `id="modeDmiBtn"` to Mode DMI button
    - Changed initial display state of Mode Normal to `display: none`
+   - Changed initial display state of Mode DMI to `display: none`
    - Changed initial display state of Mode Test to default (visible)
 
 2. **js/main.js**
    - Added `updateModeVisibility()` function
+   - Manages visibility of Mode Normal, Mode DMI, and Mode Test
    - Exposed via `window.DictaMed.updateModeVisibility`
    - Called in `finalizeInitialization()` for initial setup
 
@@ -286,11 +290,14 @@ window.DictaMed.updateModeVisibility(false);
 ## Testing Checklist
 
 - [ ] Mode Normal is hidden before login
+- [ ] Mode DMI is hidden before login
 - [ ] Mode Test is visible before login
 - [ ] Mode Normal appears immediately after successful login
+- [ ] Mode DMI appears immediately after successful login
 - [ ] Mode Test disappears immediately after successful login
 - [ ] Mode Test appears immediately after logout
 - [ ] Mode Normal disappears immediately after logout
+- [ ] Mode DMI disappears immediately after logout
 - [ ] Page refresh preserves correct mode visibility
 - [ ] Firebase auth state listener updates modes correctly
 - [ ] Manual calls to `updateModeVisibility()` work correctly
