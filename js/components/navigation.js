@@ -382,16 +382,28 @@ class TabNavigationSystem {
 
     updateAppMode(tabId) {
         let mode = window.APP_CONFIG.MODES.HOME;
-        
-        if (tabId === window.APP_CONFIG.MODES.NORMAL) {
+
+        // FIX: tabId has "mode-" prefix, but APP_CONFIG.MODES values don't
+        // Examples: tabId="mode-normal" but MODES.NORMAL="normal"
+        // Use endsWith() to handle the prefix correctly
+
+        if (tabId.endsWith(window.APP_CONFIG.MODES.NORMAL)) {
             mode = window.APP_CONFIG.MODES.NORMAL;
-        } else if (tabId === window.APP_CONFIG.MODES.TEST) {
+            console.log(`✅ Mode set to NORMAL from tabId: ${tabId}`);
+        } else if (tabId.endsWith(window.APP_CONFIG.MODES.TEST)) {
             mode = window.APP_CONFIG.MODES.TEST;
-        } else if (tabId === window.APP_CONFIG.MODES.DMI) {
+            console.log(`✅ Mode set to TEST from tabId: ${tabId}`);
+        } else if (tabId.endsWith(window.APP_CONFIG.MODES.DMI)) {
             mode = window.APP_CONFIG.MODES.DMI;
+            console.log(`✅ Mode set to DMI from tabId: ${tabId}`);
+        } else {
+            mode = window.APP_CONFIG.MODES.HOME;
+            console.log(`✅ Mode set to HOME from tabId: ${tabId}`);
         }
-        
+
+        console.log(`   Setting appState mode to: "${mode}"`);
         this.appState.setMode(mode);
+        console.log(`   appState.currentMode is now: "${this.appState.currentMode}"`);
     }
 
     updateSectionCount() {
