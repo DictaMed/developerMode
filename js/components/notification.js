@@ -12,6 +12,13 @@ class NotificationSystem {
     }
 
     init() {
+        // Check if container already exists to prevent duplicate creation
+        let existingContainer = document.querySelector('.notification-container');
+        if (existingContainer) {
+            this.container = existingContainer;
+            return;
+        }
+
         this.container = document.createElement('div');
         this.container.className = 'notification-container';
         this.container.style.cssText = `
@@ -77,18 +84,32 @@ class NotificationSystem {
             pointer-events: auto;
             position: relative;
         `;
-        
-        notification.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 1.2em;">${this.getIcon(type)}</span>
-                <span style="flex: 1;">${message}</span>
-                <button onclick="notificationSystem.remove('${id}')" 
-                        style="background: none; border: none; font-size: 1.2em; cursor: pointer; opacity: 0.7;">
-                    ×
-                </button>
-            </div>
-        `;
-        
+
+        // Create notification structure using DOM elements to prevent XSS
+        const container = document.createElement('div');
+        container.style.cssText = 'display: flex; align-items: center; gap: 12px;';
+
+        // Icon (safe emoji)
+        const iconSpan = document.createElement('span');
+        iconSpan.style.fontSize = '1.2em';
+        iconSpan.textContent = this.getIcon(type);
+
+        // Message (safe text content)
+        const messageSpan = document.createElement('span');
+        messageSpan.style.flex = '1';
+        messageSpan.textContent = message;
+
+        // Close button
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = '×';
+        closeBtn.style.cssText = 'background: none; border: none; font-size: 1.2em; cursor: pointer; opacity: 0.7;';
+        closeBtn.addEventListener('click', () => this.remove(id));
+
+        container.appendChild(iconSpan);
+        container.appendChild(messageSpan);
+        container.appendChild(closeBtn);
+        notification.appendChild(container);
+
         return notification;
     }
 

@@ -226,17 +226,24 @@ class AuthModalSystem {
             feedbackDiv = document.createElement('div');
             feedbackDiv.id = 'passwordFeedback';
             feedbackDiv.className = 'password-feedback';
-            
+
             const passwordInput = document.getElementById('modalPasswordInput');
             if (passwordInput && passwordInput.parentNode) {
                 passwordInput.parentNode.appendChild(feedbackDiv);
             }
         }
 
-        feedbackDiv.innerHTML = feedback.map(tip => 
-            `<div class="feedback-item">• ${tip}</div>`
-        ).join('');
-        
+        // Clear previous feedback
+        feedbackDiv.innerHTML = '';
+
+        // Add feedback items using DOM to prevent XSS
+        feedback.forEach(tip => {
+            const feedbackItem = document.createElement('div');
+            feedbackItem.className = 'feedback-item';
+            feedbackItem.textContent = '• ' + tip;
+            feedbackDiv.appendChild(feedbackItem);
+        });
+
         feedbackDiv.classList.remove('hidden');
     }
 

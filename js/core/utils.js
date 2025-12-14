@@ -39,33 +39,61 @@ const Utils = {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
     },
 
-    // Validate email format
+    // Validate email format - with proper null check
     isValidEmail(email) {
+        if (!email || typeof email !== 'string') {
+            return false;
+        }
+        // RFC 5322 simplified regex (basic validation)
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
+        return emailRegex.test(email.trim());
     },
 
-    // Debounce function
+    // Debounce function with validation
     debounce(func, wait) {
+        if (typeof func !== 'function') {
+            console.warn('Utils.debounce: func must be a function');
+            return function() {}; // Return no-op function
+        }
+        if (wait < 0) {
+            console.warn('Utils.debounce: wait must be >= 0');
+            wait = 0;
+        }
         let timeout;
         return function executedFunction(...args) {
             const later = () => {
                 clearTimeout(timeout);
-                func(...args);
+                try {
+                    func(...args);
+                } catch (error) {
+                    console.error('Utils.debounce: Error executing debounced function:', error);
+                }
             };
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
         };
     },
 
-    // Throttle function
+    // Throttle function with validation
     throttle(func, limit) {
+        if (typeof func !== 'function') {
+            console.warn('Utils.throttle: func must be a function');
+            return function() {}; // Return no-op function
+        }
+        if (limit < 0) {
+            console.warn('Utils.throttle: limit must be >= 0');
+            limit = 0;
+        }
         let inThrottle;
         return function() {
             const args = arguments;
             const context = this;
             if (!inThrottle) {
-                func.apply(context, args);
+                try {
+                    func.apply(context, args);
+                } catch (error) {
+                    console.error('Utils.throttle: Error executing throttled function:', error);
+                }
                 inThrottle = true;
                 setTimeout(() => inThrottle = false, limit);
             }

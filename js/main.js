@@ -13,61 +13,76 @@ let homeTab, normalModeTab, testModeTab;
 
 // ===== IMMEDIATE GLOBAL FUNCTION DEFINITIONS =====
 // These functions are made available immediately to prevent onclick handler errors
+window._switchTabRetryCount = 0;
+window._switchTabMaxRetries = 5;
+
 window.switchTab = async function(tabId) {
     // Store the request and execute when system is ready
     console.log(`🔄 switchTab called with: ${tabId}`);
     if (tabNavigationSystem && tabNavigationSystem.switchTab) {
+        window._switchTabRetryCount = 0; // Reset retry counter on success
         await tabNavigationSystem.switchTab(tabId);
-    } else {
-        console.warn('⚠️ switchTab called but navigation system not ready');
-        // Retry after a short delay
+    } else if (window._switchTabRetryCount < window._switchTabMaxRetries) {
+        console.warn(`⚠️ switchTab called but navigation system not ready (attempt ${window._switchTabRetryCount + 1}/${window._switchTabMaxRetries})`);
+        // Retry after a short delay with exponential backoff
+        window._switchTabRetryCount++;
+        const delay = Math.min(100 * Math.pow(1.5, window._switchTabRetryCount), 2000);
         setTimeout(async () => {
-            if (tabNavigationSystem && tabNavigationSystem.switchTab) {
-                await tabNavigationSystem.switchTab(tabId);
-            }
-        }, 100);
+            await window.switchTab(tabId); // Recursive call with retry logic
+        }, delay);
+    } else {
+        console.error('❌ switchTab: Navigation system not ready after max retries');
     }
 };
+
+window._authModalRetryCount = 0;
+window._authModalMaxRetries = 3;
 
 window.toggleAuthModal = function() {
     console.log('🔄 toggleAuthModal called');
     if (authModalSystem && authModalSystem.toggle) {
+        window._authModalRetryCount = 0;
         authModalSystem.toggle();
-    } else {
-        console.warn('⚠️ toggleAuthModal called but auth modal system not ready');
+    } else if (window._authModalRetryCount < window._authModalMaxRetries) {
+        console.warn(`⚠️ toggleAuthModal called but auth modal system not ready (attempt ${window._authModalRetryCount + 1}/${window._authModalMaxRetries})`);
+        window._authModalRetryCount++;
         setTimeout(() => {
-            if (authModalSystem && authModalSystem.toggle) {
-                authModalSystem.toggle();
-            }
+            window.toggleAuthModal();
         }, 100);
+    } else {
+        console.error('❌ toggleAuthModal: Auth modal system not ready after max retries');
     }
 };
 
 window.closeAuthModal = function() {
     console.log('🔄 closeAuthModal called');
     if (authModalSystem && authModalSystem.close) {
+        window._authModalRetryCount = 0;
         authModalSystem.close();
-    } else {
-        console.warn('⚠️ closeAuthModal called but auth modal system not ready');
+    } else if (window._authModalRetryCount < window._authModalMaxRetries) {
+        console.warn(`⚠️ closeAuthModal called but auth modal system not ready (attempt ${window._authModalRetryCount + 1}/${window._authModalMaxRetries})`);
+        window._authModalRetryCount++;
         setTimeout(() => {
-            if (authModalSystem && authModalSystem.close) {
-                authModalSystem.close();
-            }
+            window.closeAuthModal();
         }, 100);
+    } else {
+        console.error('❌ closeAuthModal: Auth modal system not ready after max retries');
     }
 };
 
 window.togglePasswordVisibility = function() {
     console.log('🔄 togglePasswordVisibility called');
     if (authModalSystem && authModalSystem.togglePasswordVisibility) {
+        window._authModalRetryCount = 0;
         authModalSystem.togglePasswordVisibility();
-    } else {
-        console.warn('⚠️ togglePasswordVisibility called but auth modal system not ready');
+    } else if (window._authModalRetryCount < window._authModalMaxRetries) {
+        console.warn(`⚠️ togglePasswordVisibility called but auth modal system not ready (attempt ${window._authModalRetryCount + 1}/${window._authModalMaxRetries})`);
+        window._authModalRetryCount++;
         setTimeout(() => {
-            if (authModalSystem && authModalSystem.togglePasswordVisibility) {
-                authModalSystem.togglePasswordVisibility();
-            }
+            window.togglePasswordVisibility();
         }, 100);
+    } else {
+        console.error('❌ togglePasswordVisibility: Auth modal system not ready after max retries');
     }
 };
 
@@ -78,29 +93,57 @@ window.showForgotPassword = function() {
         console.warn('Modal email input not found');
         return;
     }
-    
+
     const email = emailInput.value.trim();
     if (!email) {
         alert('Veuillez d\'abord entrer votre adresse email pour réinitialiser votre mot de passe.');
         emailInput.focus();
         return;
     }
-    
-    if (typeof firebase !== 'undefined' && firebase.auth) {
+
+    // BUG FIX: Validate email format before sending
+    if (!window.Utils?.isValidEmail?.(email)) {
+        alert('Veuillez entrer une adresse email valide.');
+        emailInput.focus();
+        return;
+    }
+
+    // Rate limiting check for password reset
+    const lastPasswordResetTime = sessionStorage.getItem('dictamed_last_password_reset');
+    const now = Date.now();
+    const resetCooldown = 60000; // 1 minute between attempts
+
+    if (lastPasswordResetTime && (now - parseInt(lastPasswordResetTime) < resetCooldown)) {
+        const waitSeconds = Math.ceil((resetCooldown - (now - parseInt(lastPasswordResetTime))) / 1000);
+        alert(`Veuillez attendre ${waitSeconds} secondes avant de réessayer.`);
+        return;
+    }
+
+    sessionStorage.setItem('dictamed_last_password_reset', now.toString());
+
+    if (typeof firebase !== 'undefined' && firebase?.auth) {
         firebase.auth().sendPasswordResetEmail(email)
             .then(() => {
-                alert('Un email de réinitialisation a été envoyé à ' + email);
+                if (window.notificationSystem) {
+                    window.notificationSystem.success(
+                        'Un email de réinitialisation a été envoyé. Veuillez vérifier votre boîte de réception.',
+                        'Email envoyé',
+                        5000
+                    );
+                } else {
+                    alert('Un email de réinitialisation a été envoyé.');
+                }
             })
             .catch((error) => {
-                console.error('Erreur:', error);
-                if (error.code === 'auth/user-not-found') {
+                console.error('Password reset error:', error);
+                if (error?.code === 'auth/user-not-found') {
                     alert('Aucun compte trouvé avec cet email');
                 } else {
-                    alert('Impossible d\'envoyer l\'email de réinitialisation');
+                    alert('Erreur: Impossible d\'envoyer l\'email de réinitialisation');
                 }
             });
     } else {
-        alert('Un email de réinitialisation sera envoyé à: ' + email);
+        alert('Service de réinitialisation temporairement indisponible.');
     }
 };
 

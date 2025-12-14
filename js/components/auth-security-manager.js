@@ -16,6 +16,9 @@ class AuthSecurityManager {
         };
         this.is2FAEnabled = false;
         this.pending2FAUser = null;
+        // Initialize interval properties for cleanup (BUG FIX)
+        this.sessionCheckInterval = null;
+        this.cleanupInterval = null;
     }
 
     /**
@@ -45,7 +48,7 @@ class AuthSecurityManager {
         ctx.textBaseline = 'top';
         ctx.font = '14px Arial';
         ctx.fillText('DictaMed Device Fingerprint', 2, 2);
-        
+
         const fingerprint = {
             userAgent: navigator.userAgent,
             language: navigator.language,
@@ -55,13 +58,19 @@ class AuthSecurityManager {
             canvas: canvas.toDataURL(),
             timestamp: Date.now()
         };
-        
+
+        // SECURITY: Store in sessionStorage instead of localStorage, and use base64 encoding
+        // TODO: In production, implement proper encryption using a library like libsodium.js
         const fingerprintString = btoa(JSON.stringify(fingerprint));
         this.deviceFingerprint = fingerprintString;
-        
-        // Sauvegarder en localStorage
-        localStorage.setItem('dictamed_device_fingerprint', fingerprintString);
-        
+
+        // Use sessionStorage for temporary device fingerprints (cleared on page close)
+        try {
+            sessionStorage.setItem('dictamed_device_fingerprint_temp', fingerprintString);
+        } catch (e) {
+            console.warn('sessionStorage not available, fingerprint not persisted');
+        }
+
         console.log('🔍 Device fingerprint generated');
     }
 
@@ -381,18 +390,21 @@ class AuthSecurityManager {
 
     /**
      * Persistance des événements critiques
+     * SECURITY FIX: Use sessionStorage instead of localStorage to avoid persistent unencrypted security data
      */
     persistSecurityEvent(event) {
         try {
-            const events = JSON.parse(localStorage.getItem('dictamed_security_events') || '[]');
+            // Use sessionStorage for critical security events - cleared when browser closes
+            const storage = typeof sessionStorage !== 'undefined' ? sessionStorage : localStorage;
+            const events = JSON.parse(storage.getItem('dictamed_security_events_critical') || '[]');
             events.push(event);
-            
-            // Garder seulement les 100 derniers événements
-            if (events.length > 100) {
-                events.splice(0, events.length - 100);
+
+            // Keep only the last 50 critical events (smaller limit in sessionStorage)
+            if (events.length > 50) {
+                events.splice(0, events.length - 50);
             }
-            
-            localStorage.setItem('dictamed_security_events', JSON.stringify(events));
+
+            storage.setItem('dictamed_security_events_critical', JSON.stringify(events));
         } catch (error) {
             console.error('Failed to persist security event:', error);
         }
@@ -400,20 +412,40 @@ class AuthSecurityManager {
 
     /**
      * Démarrage du monitoring de sécurité
+     * BUG FIX: Store interval IDs so they can be cleared later to prevent memory leaks
      */
     startSecurityMonitoring() {
         // Vérification de session toutes les 30 secondes
-        setInterval(() => {
+        // Store interval ID for cleanup
+        this.sessionCheckInterval = setInterval(() => {
             this.checkSessionExpiry();
             this.detectSuspiciousActivity();
         }, 30000);
 
         // Nettoyage des anciennes données toutes les heures
-        setInterval(() => {
+        this.cleanupInterval = setInterval(() => {
             this.cleanupOldData();
         }, 60 * 60 * 1000);
 
         console.log('🛡️ Security monitoring started');
+    }
+
+    /**
+     * Arrêt du monitoring de sécurité
+     * BUG FIX: Add cleanup method to prevent memory leaks when monitoring stops
+     */
+    stopSecurityMonitoring() {
+        if (this.sessionCheckInterval) {
+            clearInterval(this.sessionCheckInterval);
+            this.sessionCheckInterval = null;
+        }
+
+        if (this.cleanupInterval) {
+            clearInterval(this.cleanupInterval);
+            this.cleanupInterval = null;
+        }
+
+        console.log('🛡️ Security monitoring stopped');
     }
 
     /**

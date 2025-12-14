@@ -19,9 +19,27 @@ class AutoSaveSystem {
     }
 
     createIndicator() {
+        // Check if indicator already exists to prevent duplicates
+        let existingIndicator = document.querySelector('.autosave-indicator');
+        if (existingIndicator) {
+            this.indicator = existingIndicator;
+            return;
+        }
+
         this.indicator = document.createElement('div');
         this.indicator.className = 'autosave-indicator';
-        this.indicator.innerHTML = '<div class="icon"></div><span class="text">Sauvegarde automatique</span>';
+
+        // Create child elements using DOM to prevent potential XSS
+        const icon = document.createElement('div');
+        icon.className = 'icon';
+
+        const text = document.createElement('span');
+        text.className = 'text';
+        text.textContent = 'Sauvegarde automatique';
+
+        this.indicator.appendChild(icon);
+        this.indicator.appendChild(text);
+
         this.indicator.style.cssText = `
             position: fixed;
             bottom: 20px;
