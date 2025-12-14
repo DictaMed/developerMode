@@ -1566,4 +1566,6 @@ if (typeof module !== 'undefined' && module.exports) {
 // Initialisation automatique
 if (typeof window !== 'undefined') {
     window.EnhancedFirebaseAuthManager = EnhancedFirebaseAuthManager.getInstance();
+    // Créer un alias pour compatibilité avec les modules existants
+    window.FirebaseAuthManager = window.EnhancedFirebaseAuthManager;
 }
