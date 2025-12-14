@@ -258,7 +258,8 @@
     <!-- Charger les scripts Firebase de manière séquentielle -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
     <script>
         // Configuration Firebase
         const firebaseConfig = {
@@ -280,20 +281,34 @@
                 // Initialiser Firebase
                 const app = firebase.initializeApp(firebaseConfig);
                 const auth = firebase.auth();
-                
+
+                // Initialiser Firestore
+                const db = firebase.firestore();
+                window.db = db;
+
                 console.log('🎯 Firebase App initialisé:', app.name);
                 console.log('🔐 Firebase Auth configuré:', auth.app.options.projectId);
-                
+                console.log('🗄️ Firestore initialisé');
+
+                // Vérifier que GoogleAuthProvider est disponible
+                try {
+                    const testProvider = new firebase.auth.GoogleAuthProvider();
+                    console.log('✅ GoogleAuthProvider disponible');
+                } catch (e) {
+                    console.warn('⚠️ GoogleAuthProvider may not be available:', e.message);
+                }
+
                 // Configurer la persistence
                 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
                     .then(() => {
                         console.log('💾 Persistence configurée avec succès');
-                        
+
                         // Le namespace firebase est déjà disponible globalement
                         console.log('✅ Firebase SDK compatible initialisé avec succès');
                         console.log('📊 Projet:', firebaseConfig.projectId);
                         console.log('🔑 API Key validée');
-                        
+                        console.log('🔐 Google OAuth ready for signInWithPopup');
+
                         // Dispatcher un événement pour informer les autres scripts
                         window.dispatchEvent(new Event('firebaseReady'));
                     })

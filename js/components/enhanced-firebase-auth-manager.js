@@ -810,14 +810,23 @@ class EnhancedFirebaseAuthManager {
             await this.ensureInitialized();
             this.validateOperation('google_signin', 'google-auth');
 
+            // Vérifier que GoogleAuthProvider est disponible
+            if (!firebase || !firebase.auth || !firebase.auth.GoogleAuthProvider) {
+                throw new Error('GoogleAuthProvider not available. Firebase SDK may not be fully loaded.');
+            }
+
             // Créer le provider Google
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.addScope('profile');
             provider.addScope('email');
 
+            console.log('🔓 Initiating Google Sign-In popup...');
+
             // Connexion avec popup
             const result = await this.auth.signInWithPopup(provider);
             const user = result.user;
+
+            console.log('✅ Google Sign-In successful:', user.email);
 
             // Vérifications de sécurité post-connexion
             const securityCheck = await this.performEnhancedSecurityCheck(user, {});
@@ -844,15 +853,40 @@ class EnhancedFirebaseAuthManager {
 
         } catch (error) {
             console.error('Google sign in error:', error);
+            console.error('Error details:', {
+                code: error.code,
+                message: error.message,
+                name: error.name,
+                customData: error.customData
+            });
+
             this.logSecurityEvent('google_signin_failed', {
                 error: error.code,
                 message: error.message
             });
 
+            // Messages d'erreur détaillés pour Google OAuth
+            let errorMessage = this.getErrorMessage(error);
+
+            if (error.code === 'auth/popup-blocked') {
+                errorMessage = 'La popup a été bloquée. Veuillez vérifier que vous avez autorisé les popups pour ce site.';
+            } else if (error.code === 'auth/popup-closed-by-user') {
+                errorMessage = 'Vous avez fermé la fenêtre de connexion.';
+            } else if (error.code === 'auth/cancelled-popup-request') {
+                errorMessage = 'Connexion annulée. Veuillez réessayer.';
+            } else if (error.code === 'auth/operation-not-allowed') {
+                errorMessage = 'Google Sign-In n\'est pas activé. Veuillez contacter le support.';
+            } else if (error.message && error.message.includes('GoogleAuthProvider')) {
+                errorMessage = 'Erreur Firebase: GoogleAuthProvider n\'est pas disponible. Veuillez actualiser la page.';
+            } else if (error.message && error.message.includes('not fully loaded')) {
+                errorMessage = 'Firebase SDK n\'est pas entièrement chargé. Veuillez actualiser la page et réessayer.';
+            }
+
             return {
                 success: false,
-                error: this.getErrorMessage(error),
-                code: error.code
+                error: errorMessage,
+                code: error.code,
+                details: error.message
             };
         }
     }
