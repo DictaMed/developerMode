@@ -1,0 +1,28 @@
+{
+  "name": "dictamed-firestore-setup",
+  "version": "1.0.0",
+  "description": "Script de configuration automatique Firestore pour DictaMed",
+  "main": "setup-firestore.js",
+  "scripts": {
+    "setup": "node setup-firestore.js",
+    "setup:reset": "node setup-firestore.js --reset",
+    "verify": "node verify-firestore.js"
+  },
+  "keywords": [
+    "firestore",
+    "firebase",
+    "dictamed",
+    "setup"
+  ],
+  "author": "DictaMed Team",
+  "license": "MIT",
+  "dependencies": {
+    "firebase-admin": "^11.0.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
