@@ -292,79 +292,89 @@ class DataSender {
     }
 
     async sendToEndpoint(data, mode) {
-        let endpoint;
-        
         try {
             // Récupérer l'utilisateur actuel
             const currentUser = window.FirebaseAuthManager?.getCurrentUser?.() || null;
-            const userId = currentUser?.uid;
-            
-            if (userId) {
-                console.log(`DataSender: Retrieving webhook for user ${userId} in mode ${mode}`);
-                
-                // Précharger les webhooks pour cet utilisateur si pas déjà fait
-                if (window.WebhookManager && !this.webhooksPreloaded) {
-                    window.WebhookManager.preloadUserWebhooks(userId);
-                    this.webhooksPreloaded = true;
-                }
-                
-                // Récupérer le webhook dynamique
-                endpoint = await window.WebhookManager.getUserWebhook(userId, mode);
-            } else {
-                console.log('DataSender: No authenticated user, using default endpoint');
-                endpoint = window.WebhookManager?.getDefaultEndpoint(mode) ||
-                          window.APP_CONFIG?.FALLBACK_ENDPOINTS?.[mode] ||
-                          window.APP_CONFIG?.ENDPOINTS?.[mode];
-            }
-            
-            if (!endpoint) {
-                throw new Error(`Endpoint non configuré pour le mode: ${mode}`);
+
+            if (!currentUser) {
+                throw new Error('User not authenticated. Please sign in first.');
             }
 
-            console.log(`Envoi des données vers: ${endpoint}`);
-            
-            // For demo purposes, we'll simulate the API call
-            // In production, this would be a real API call
-            const response = await this.simulateApiCall(data, endpoint);
-            
+            // Déterminer le webhook en fonction du mode
+            let endpoint;
+            if (mode === window.APP_CONFIG.MODES.TEST) {
+                // Mode TEST: webhook séparé
+                endpoint = window.APP_CONFIG.WEBHOOK_ENDPOINTS.test;
+            } else {
+                // Mode NORMAL et DMI: webhook partagé
+                endpoint = window.APP_CONFIG.WEBHOOK_ENDPOINTS.default;
+            }
+
+            if (!endpoint) {
+                throw new Error(`Webhook endpoint not configured for mode: ${mode}`);
+            }
+
+            // Enrichir les données avec les informations utilisateur
+            const payload = {
+                uid: currentUser.uid,
+                email: currentUser.email,
+                displayName: currentUser.displayName || '',
+                mode: mode,
+                timestamp: new Date().toISOString(),
+                ...data // Inclut patientInfo, recordings, metadata
+            };
+
+            console.log(`DataSender: Sending to endpoint: ${endpoint} (mode: ${mode})`);
+
+            // Faire l'appel réel à l'API
+            const response = await this.makeApiCall(endpoint, payload);
+
+            console.log('DataSender: Données envoyées avec succès', response);
             return response;
+
         } catch (error) {
             console.error('Erreur lors de l\'envoi vers l\'endpoint:', error);
-            
-            // Essayer avec l'endpoint de fallback en cas d'erreur
-            if (endpoint !== (window.APP_CONFIG?.FALLBACK_ENDPOINTS?.[mode])) {
-                console.log('DataSender: Retrying with fallback endpoint');
-                try {
-                    const fallbackEndpoint = window.APP_CONFIG?.FALLBACK_ENDPOINTS?.[mode];
-                    if (fallbackEndpoint) {
-                        const response = await this.simulateApiCall(data, fallbackEndpoint);
-                        return response;
-                    }
-                } catch (fallbackError) {
-                    console.error('Erreur avec l\'endpoint de fallback:', fallbackError);
-                }
-            }
-            
-            throw new Error('Erreur réseau: ' + error.message);
+            throw new Error(`Failed to send data: ${error.message}`);
         }
     }
 
-    async simulateApiCall(data, endpoint) {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-        
-        // Simulate random success/failure for demo
-        const success = Math.random() > 0.1; // 90% success rate
-        
-        if (success) {
+    async makeApiCall(endpoint, payload) {
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+                timeout: window.APP_CONFIG.API_TIMEOUT || 30000
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`HTTP ${response.status}: ${errorText}`);
+
+                if (response.status === 404) {
+                    throw new Error('User not configured in n8n workflow. Contact administrator.');
+                } else if (response.status === 500) {
+                    throw new Error('Server error. Please try again later.');
+                } else {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+            }
+
+            const result = await response.json();
             return {
                 success: true,
                 message: 'Données envoyées avec succès',
-                dataId: 'demo_' + Date.now(),
+                ...result,
                 timestamp: new Date().toISOString()
             };
-        } else {
-            throw new Error('Erreur simulée du serveur');
+
+        } catch (error) {
+            if (error instanceof TypeError) {
+                throw new Error('Network error. Please check your internet connection.');
+            }
+            throw error;
         }
     }
 

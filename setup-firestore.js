@@ -129,61 +129,10 @@ async function setupUserProfiles(db) {
 }
 
 /**
- * Créer la collection userWebhooks
- */
-async function setupUserWebhooks(db) {
-  log.step('2', 'Configuration userWebhooks');
-
-  try {
-    const ref = db.collection('userWebhooks');
-    const snapshot = await ref.limit(1).get();
-
-    if (!snapshot.empty) {
-      log.skip('Collection userWebhooks existe déjà');
-      return;
-    }
-
-    // Webhook 1: Médecin
-    await ref.doc('medecin123').set({
-      userId: 'medecin123',
-      webhookUrl: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMedNormalMode',
-      isActive: true,
-      notes: 'Webhook pour Dr. Jean Dupont',
-      createdAt: admin.firestore.Timestamp.now(),
-      updatedAt: admin.firestore.Timestamp.now(),
-      updatedBy: 'akio963@gmail.com',
-      lastUsed: null,
-      testStatus: 'pending'
-    });
-    log.info('✓ Webhook assigné à: Dr. Jean Dupont');
-
-    // Webhook 2: Infirmier
-    await ref.doc('infirmier123').set({
-      userId: 'infirmier123',
-      webhookUrl: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMedNormalMode',
-      isActive: true,
-      notes: 'Webhook pour Marie Dupont',
-      createdAt: admin.firestore.Timestamp.now(),
-      updatedAt: admin.firestore.Timestamp.now(),
-      updatedBy: 'akio963@gmail.com',
-      lastUsed: null,
-      testStatus: 'pending'
-    });
-    log.info('✓ Webhook assigné à: Marie Dupont');
-
-    log.success('Collection userWebhooks créée avec 2 webhooks');
-
-  } catch (error) {
-    log.error(`Erreur userWebhooks: ${error.message}`);
-    throw error;
-  }
-}
-
-/**
  * Créer la collection userSessions
  */
 async function setupUserSessions(db) {
-  log.step('3', 'Configuration userSessions');
+  log.step('2', 'Configuration userSessions');
 
   try {
     const ref = db.collection('userSessions');
@@ -216,7 +165,7 @@ async function setupUserSessions(db) {
  * Créer la collection auditLogs
  */
 async function setupAuditLogs(db) {
-  log.step('4', 'Configuration auditLogs');
+  log.step('3', 'Configuration auditLogs');
 
   try {
     const ref = db.collection('auditLogs');
@@ -252,7 +201,7 @@ async function setupAuditLogs(db) {
  * Créer la collection webhookLogs
  */
 async function setupWebhookLogs(db) {
-  log.step('5', 'Configuration webhookLogs');
+  log.step('4', 'Configuration webhookLogs');
 
   try {
     const ref = db.collection('webhookLogs');
@@ -287,7 +236,7 @@ async function setupWebhookLogs(db) {
  * Créer la collection system
  */
 async function setupSystem(db) {
-  log.step('6', 'Configuration system');
+  log.step('5', 'Configuration system');
 
   try {
     const ref = db.collection('system');
@@ -321,7 +270,7 @@ async function setupSystem(db) {
  * Créer la collection _diagnostic
  */
 async function setupDiagnostic(db) {
-  log.step('7', 'Configuration _diagnostic');
+  log.step('6', 'Configuration _diagnostic');
 
   try {
     const ref = db.collection('_diagnostic');
@@ -339,7 +288,6 @@ async function setupDiagnostic(db) {
       data: {
         collections: [
           'userProfiles',
-          'userWebhooks',
           'userSessions',
           'auditLogs',
           'webhookLogs',
@@ -348,7 +296,7 @@ async function setupDiagnostic(db) {
         ],
         status: 'initialized',
         method: 'node-script',
-        version: '4.0.0'
+        version: '5.0.0'
       }
     });
     log.info('✓ Document diagnostic créé');
@@ -370,7 +318,6 @@ async function verifySetup(db) {
   try {
     const collections = [
       'userProfiles',
-      'userWebhooks',
       'userSessions',
       'auditLogs',
       'webhookLogs',
@@ -412,7 +359,7 @@ ${colors.green}${colors.bright}
 ║                                            ║
 ║  🎉 Configuration Firestore Réussie!      ║
 ║                                            ║
-║  ✅ 7 Collections créées                  ║
+║  ✅ 6 Collections créées                  ║
 ║  ✅ Documents de test ajoutés              ║
 ║  ✅ Système prêt à l'emploi                ║
 ║                                            ║
@@ -425,14 +372,12 @@ ${colors.bright}Utilisateurs de test créés:${colors.reset}
   👩‍⚕️ Marie Dupont (infirmier@example.com)
 
 ${colors.bright}Prochaines étapes:${colors.reset}
-  1. Ouvrir: /admin-webhooks.html
-  2. Se connecter: akio963@gmail.com
-  3. Voir les utilisateurs créés
-  4. Assigner d'autres webhooks si besoin
+  1. Créer la Google Sheet "DictaMed_Users"
+  2. Configurer le webhook n8n
+  3. Migrer les utilisateurs via le script de migration
 
 ${colors.bright}Support:${colors.reset}
-  📖 Documentation: QUICK_START_GUIDE.md
-  🧪 Tests: window.runAdminWebhookTests()
+  📖 Documentation: docs/ARCHITECTURE_SIMPLIFIEE.md
   📞 Contact: akio963@gmail.com
 `);
 }
@@ -453,7 +398,6 @@ async function main() {
     log.header('Création des Collections');
 
     await setupUserProfiles(db);
-    await setupUserWebhooks(db);
     await setupUserSessions(db);
     await setupAuditLogs(db);
     await setupWebhookLogs(db);

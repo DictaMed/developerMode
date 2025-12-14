@@ -7,7 +7,8 @@
       "Bash(head -10 echo \"\" echo \"✅ Staging only the auth-related files:\" git add js/components/enhanced-firebase-auth-manager.js git add js/components/auth-modal.js echo \"\" echo \"📊 Staged changes:\" git diff --cached --stat })",
       "Bash(git add:*)",
       "Bash(git push:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(wc:*)"
     ]
   }
 }

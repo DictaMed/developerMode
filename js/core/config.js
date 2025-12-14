@@ -22,21 +22,12 @@ const APP_CONFIG = {
         normal: ['partie1', 'partie2', 'partie3', 'partie4'],
         test: ['clinique', 'antecedents', 'biologie']
     },
-    ENDPOINTS: {
-        normal: null, // Sera récupéré dynamiquement via WebhookManager
-        test: null,   // Sera récupéré dynamiquement via WebhookManager
-        dmi: null     // Sera récupéré dynamiquement via WebhookManager
+    // Webhooks n8n centralisés
+    WEBHOOK_ENDPOINTS: {
+        default: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed', // Mode NORMAL et DMI
+        test: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed-Test' // Mode TEST (workflow séparé)
     },
-    FALLBACK_ENDPOINTS: {
-        normal: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMedNormalMode',
-        test: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed',
-        dmi: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed'
-    },
-    WEBHOOK_CONFIG: {
-        CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
-        RETRY_ATTEMPTS: 3,
-        TIMEOUT: 30000 // 30 secondes
-    },
+    API_TIMEOUT: 30000, // 30 secondes
     AUDIO_FORMATS: {
         PRIORITY: [
             'audio/mpeg',              // MP3
