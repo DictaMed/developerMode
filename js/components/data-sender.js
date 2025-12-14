@@ -274,6 +274,7 @@ class DataSender {
 
     /**
      * Méthode classique: envoyer les enregistrements audio (mode hérité)
+     * v2.2.1: Envoyer CHAQUE audio séparément au webhook (comme les photos en DMI)
      */
     async send(mode) {
         if (this.isSending) {
@@ -285,7 +286,13 @@ class DataSender {
         const logger = window.logger?.createLogger('DataSender') || console;
 
         try {
-            logger.info(`Début de l'envoi en mode: ${mode}`);
+            logger.info(`🎵 Début de l'envoi en mode: ${mode}`);
+
+            // Check authentication
+            const currentUser = window.FirebaseAuthManager?.getCurrentUser?.() || null;
+            if (!currentUser) {
+                throw new Error('Utilisateur non authentifié. Veuillez vous connecter.');
+            }
 
             // Collect data based on mode
             const data = await this.collectData(mode);
@@ -295,28 +302,90 @@ class DataSender {
                 throw new Error('Données invalides pour l\'envoi');
             }
 
-            // Send data to appropriate endpoint
-            const result = await this.sendToEndpoint(data, mode);
+            logger.log(`📤 Audio: Envoi de ${data.recordings.length} enregistrement(s)...`);
 
-            logger.info('Données envoyées avec succès', { result });
+            // 🔑 Envoyer CHAQUE enregistrement séparément (pas tous ensemble)
+            const results = [];
 
-            // Show success notification
-            if (window.notificationSystem) {
-                window.notificationSystem.success(
-                    'Données envoyées avec succès!',
-                    'Envoi terminé'
-                );
+            for (let i = 0; i < data.recordings.length; i++) {
+                const recording = data.recordings[i];
+
+                try {
+                    // Créer un payload pour cet enregistrement spécifique
+                    const audioPayload = {
+                        uid: currentUser.uid,
+                        email: currentUser.email,
+                        displayName: currentUser.displayName || '',
+                        mode: mode,
+                        fileType: 'audio',
+                        inputType: 'audio',
+                        timestamp: new Date().toISOString(),
+                        patientInfo: data.patientInfo,
+
+                        // Infos d'indexation pour tracer la progression
+                        audioIndex: i + 1,
+                        totalAudios: data.recordings.length,
+
+                        // L'enregistrement actuel
+                        recording: recording,
+
+                        // Métadonnées
+                        metadata: data.metadata
+                    };
+
+                    logger.log(`📤 Audio ${i + 1}/${data.recordings.length}: Envoi ${recording.sectionId}...`);
+
+                    // Envoyer cet audio au webhook
+                    const result = await this.sendToEndpoint(audioPayload, mode);
+                    results.push({
+                        sectionId: recording.sectionId,
+                        success: true,
+                        result: result
+                    });
+
+                    logger.log(`✅ Audio ${i + 1}/${data.recordings.length} envoyé: ${recording.sectionId}`);
+
+                } catch (audioError) {
+                    logger.error(`❌ Erreur audio ${i + 1}/${data.recordings.length}: ${recording.sectionId}`, audioError);
+                    results.push({
+                        sectionId: recording.sectionId,
+                        success: false,
+                        error: audioError.message
+                    });
+                }
             }
 
-            // Show Google Sheet result for test mode
-            if (mode === window.APP_CONFIG.MODES.TEST) {
-                this.showGoogleSheetResult();
-            }
+            // Vérifier si au moins un audio a été envoyé avec succès
+            const successCount = results.filter(r => r.success).length;
 
-            return result;
+            if (successCount > 0) {
+                logger.info(`✅ Envoi réussi: ${successCount}/${data.recordings.length} enregistrement(s)`);
+
+                // Show success notification
+                if (window.notificationSystem) {
+                    window.notificationSystem.success(
+                        `✅ ${successCount} enregistrement(s) envoyé(s) avec succès!`,
+                        'Envoi terminé'
+                    );
+                }
+
+                // Show Google Sheet result for test mode
+                if (mode === window.APP_CONFIG.MODES.TEST) {
+                    this.showGoogleSheetResult();
+                }
+
+                return {
+                    success: true,
+                    totalAudios: data.recordings.length,
+                    successCount: successCount,
+                    results: results
+                };
+            } else {
+                throw new Error(`Tous les enregistrements ont échoué à l'envoi`);
+            }
 
         } catch (error) {
-            logger.error('Erreur lors de l\'envoi des données', {
+            logger.error('❌ Erreur lors de l\'envoi des données', {
                 error: error.message,
                 stack: error.stack,
                 mode

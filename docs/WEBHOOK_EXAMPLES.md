@@ -62,12 +62,39 @@ const WEBHOOKS_CONFIG = {
 
 ## 📤 Payloads Envoyés Selon le Mode
 
-### Mode NORMAL - Envoie Audio
+### Mode NORMAL - Envoie Audios (SÉPARÉMENT)
 
 **Type détecté:** `audio`
 **Webhook utilisé:** `WEBHOOKS_CONFIG.audio`
 
-**Payload:**
+**⚠️ IMPORTANT v2.2.1**: Chaque audio est envoyé **INDIVIDUELLEMENT** au webhook (pas tous ensemble)
+
+**Flux d'exécution (exemple 3 sections = 3 requêtes HTTP):**
+```
+1. Utilisateur enregistre dans 3 sections (partie1, partie2, partie3)
+   ↓
+2. Clique "Envoyer"
+   ↓
+3. Système envoie PREMIÈRE requête HTTP:
+   - audioIndex: 1
+   - totalAudios: 3
+   - Webhook utilisé: WEBHOOKS_CONFIG.audio
+   - Contient: partie1 audio
+   ↓
+4. Système envoie DEUXIÈME requête HTTP:
+   - audioIndex: 2
+   - totalAudios: 3
+   - Webhook utilisé: WEBHOOKS_CONFIG.audio
+   - Contient: partie2 audio
+   ↓
+5. Système envoie TROISIÈME requête HTTP:
+   - audioIndex: 3
+   - totalAudios: 3
+   - Webhook utilisé: WEBHOOKS_CONFIG.audio
+   - Contient: partie3 audio
+```
+
+**Payload pour CHAQUE audio (exemple partie1):**
 ```json
 {
     "uid": "user123abc",
@@ -81,16 +108,20 @@ const WEBHOOKS_CONFIG = {
         "numeroDossier": "D123456",
         "nomPatient": "Jean Dupont"
     },
-    "recordings": [
-        {
-            "sectionId": "partie1",
-            "audioData": "base64_encoded_audio...",
-            "duration": 45,
-            "format": "webm"
-        }
-    ],
+    "audioIndex": 1,
+    "totalAudios": 3,
+    "recording": {
+        "sectionId": "partie1",
+        "sectionIndex": 1,
+        "inputType": "audio",
+        "duration": 45,
+        "size": 36720,
+        "format": "mp4",
+        "timestamp": "2025-01-15T10:30:00Z",
+        "audioData": "base64_encoded_audio..."
+    },
     "metadata": {
-        "totalRecordings": 1,
+        "totalRecordings": 3,
         "browserInfo": {...}
     }
 }
