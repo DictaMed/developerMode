@@ -321,10 +321,20 @@ async function initializeCore() {
         window.appState = appState;
         window.notificationSystem = notificationSystem;
         window.loadingOverlay = loadingOverlay;
-        
+
+        // Initialize Mode Visibility Manager EARLY (before auth listeners are set up)
+        // This must be done here so it exists when tabNavigationSystem.init() sets up auth listeners
+        try {
+            window.modeVisibilityManager = new ModeVisibilityManager();
+            window.modeVisibilityManager.init();
+            logger.info('✅ ModeVisibilityManager initialisé');
+        } catch (error) {
+            logger.warn('⚠️ Could not initialize ModeVisibilityManager:', error);
+        }
+
         timer();
         logger.info('✅ Modules core initialisés et exposés globalement');
-        
+
     } catch (error) {
         timer();
         logger.error('❌ Erreur lors de l\'initialisation des modules core', {
@@ -698,19 +708,17 @@ async function finalizeInitialization() {
     // Initialize global helper functions
     initializeGlobalHelpers();
 
-    // Initialize the Mode Visibility Manager (handles button visibility based on auth)
+    // Update mode visibility based on current authentication status
+    // ModeVisibilityManager was already created in initializeCore()
     try {
-        window.modeVisibilityManager = new ModeVisibilityManager();
-        window.modeVisibilityManager.init();
-
-        // Set initial mode visibility based on current authentication status
-        const currentUser = window.FirebaseAuthManager?.getCurrentUser?.();
-        const isAuthenticated = !!currentUser;
-        window.modeVisibilityManager.updateVisibility(isAuthenticated);
-
-        console.log('✅ Mode visibility management initialized successfully');
+        if (window.modeVisibilityManager) {
+            const currentUser = window.FirebaseAuthManager?.getCurrentUser?.();
+            const isAuthenticated = !!currentUser;
+            window.modeVisibilityManager.updateVisibility(isAuthenticated);
+            console.log('✅ Mode visibility initialized based on auth state');
+        }
     } catch (error) {
-        console.warn('⚠️ Could not initialize mode visibility manager:', error);
+        console.warn('⚠️ Could not update mode visibility:', error);
     }
 }
 
@@ -1065,10 +1073,21 @@ window.modeVisibilityManager = null;
 /**
  * Fonction wrapper pour la compatibilité avec le code existant
  * Appelle le ModeVisibilityManager
+ *
+ * @param {boolean} isAuthenticated - L'utilisateur est-il authentifié?
  */
 function updateModeVisibility(isAuthenticated) {
     if (!window.modeVisibilityManager) {
-        console.warn('⚠️ ModeVisibilityManager n\'est pas initialisé');
+        console.warn('⚠️ ModeVisibilityManager n\'est pas encore disponible');
+        // Retry after a short delay - ModeVisibilityManager should be created soon
+        setTimeout(() => {
+            if (window.modeVisibilityManager) {
+                console.log('ℹ️ Retrying updateModeVisibility after ModeVisibilityManager became available');
+                window.modeVisibilityManager.updateVisibility(isAuthenticated);
+            } else {
+                console.error('❌ ModeVisibilityManager failed to initialize');
+            }
+        }, 100);
         return;
     }
     window.modeVisibilityManager.updateVisibility(isAuthenticated);
