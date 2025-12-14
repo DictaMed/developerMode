@@ -348,11 +348,14 @@ class EnhancedFirebaseAuthManager {
                 }
             }
 
+            // IMPORTANT: Save the current user so getCurrentUser() works
+            this.currentUser = user;
+
             // Envoyer l'email de vérification
             if (this.securityConfig.requireEmailVerification) {
                 await user.sendEmailVerification();
-                return { 
-                    success: true, 
+                return {
+                    success: true,
                     emailSent: true,
                     twoFactorSetup: this.securityConfig.enable2FA && additionalData.enable2FA,
                     user: this.sanitizeUser(user)
@@ -365,8 +368,8 @@ class EnhancedFirebaseAuthManager {
                 has2FA: additionalData.enable2FA || false
             });
 
-            return { 
-                success: true, 
+            return {
+                success: true,
                 emailSent: false,
                 user: this.sanitizeUser(user)
             };
@@ -445,14 +448,17 @@ class EnhancedFirebaseAuthManager {
                 };
             }
 
-            this.logSecurityEvent('signin_success', { 
-                userId: user.uid, 
+            this.logSecurityEvent('signin_success', {
+                userId: user.uid,
                 email: user.email,
                 deviceFingerprint: this.deviceFingerprint
             });
 
-            return { 
-                success: true, 
+            // IMPORTANT: Save the current user so getCurrentUser() works
+            this.currentUser = user;
+
+            return {
+                success: true,
                 user: this.sanitizeUser(user)
             };
 
@@ -890,6 +896,9 @@ class EnhancedFirebaseAuthManager {
 
             // Créer ou mettre à jour le profil utilisateur
             await this.createUserProfile(user, { provider: 'google' });
+
+            // IMPORTANT: Save the current user so getCurrentUser() works
+            this.currentUser = user;
 
             this.logSecurityEvent('google_signin_success', {
                 userId: user.uid,
