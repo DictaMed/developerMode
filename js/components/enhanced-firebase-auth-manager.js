@@ -15,6 +15,8 @@ class EnhancedFirebaseAuthManager {
         this.deviceFingerprints = new Map();
         this.pendingOperations = new Map();
         this.initializationPromise = null;
+        this.authRestorationPromise = null;
+        this.authRestorationResolve = null;
         
         // Configuration de sécurité renforcée
         this.securityConfig = {
@@ -167,11 +169,18 @@ class EnhancedFirebaseAuthManager {
      */
     setupSecureAuthStateListener() {
         if (!this.auth) return;
-        
+
+        // BUG FIX: Create a promise that resolves once auth state is restored
+        // This allows waiting for Firebase to restore the user from persistence
+        let isFirstCheck = true;
+        this.authRestorationPromise = new Promise((resolve) => {
+            this.authRestorationResolve = resolve;
+        });
+
         this.auth.onAuthStateChanged(async (user) => {
             const previousUser = this.currentUser;
             this.currentUser = user;
-            
+
             // Audit logging des changements d'état
             this.logSecurityEvent('auth_state_change', {
                 from: previousUser?.uid || null,
@@ -179,23 +188,50 @@ class EnhancedFirebaseAuthManager {
                 timestamp: Date.now(),
                 deviceFingerprint: this.deviceFingerprint
             });
-            
+
             this.notifyAuthStateListeners(user);
-            
+
+            // BUG FIX: Resolve auth restoration promise on first check
+            // This indicates Firebase has finished restoring the user
+            if (isFirstCheck && this.authRestorationResolve) {
+                isFirstCheck = false;
+                this.authRestorationResolve();
+            }
+
             if (user) {
                 console.log('✅ User authenticated:', user.email);
-                
+
                 // Vérifications de sécurité lors de la connexion
                 await this.performPostLoginSecurityChecks(user);
-                
+
                 // Enregistrer la session
                 await this.registerSecureSession(user);
-                
+
             } else {
                 console.log('👋 User logged out');
                 await this.cleanupUserSessions();
             }
         });
+    }
+
+    /**
+     * BUG FIX: Wait for Firebase to restore authentication state on page reload
+     * This should be called before checking if the user is authenticated
+     */
+    async waitForAuthRestoration() {
+        if (!this.authRestorationPromise) {
+            // If not set yet, create a default one
+            this.authRestorationPromise = Promise.resolve();
+        }
+        try {
+            await Promise.race([
+                this.authRestorationPromise,
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Auth restoration timeout')), 5000))
+            ]);
+        } catch (error) {
+            console.warn('⚠️ Auth restoration timeout or error:', error);
+            // Continue anyway - user is probably not authenticated
+        }
     }
 
     /**

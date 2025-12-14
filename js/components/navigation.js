@@ -82,13 +82,27 @@ class TabNavigationSystem {
 
     initAuthStateListener() {
         // BUG FIX #8: Use Firebase onAuthStateChanged instead of polling
+        // BUG FIX: Wait for Firebase to restore auth state on page reload
         // This is much more efficient and responds immediately to auth changes
         const checkAuthState = () => {
             this.updateNormalModeButtonVisibility();
         };
 
-        // Check immediately
-        setTimeout(checkAuthState, 500); // Wait for Firebase to initialize (reduced from 1000)
+        // BUG FIX: Wait for auth restoration before checking state
+        // This ensures Firebase has time to restore user from persistence on page reload
+        (async () => {
+            try {
+                if (window.FirebaseAuthManager && window.FirebaseAuthManager.waitForAuthRestoration) {
+                    await window.FirebaseAuthManager.waitForAuthRestoration();
+                    console.log('✅ Auth state restored from persistence');
+                }
+            } catch (error) {
+                console.warn('⚠️ Auth restoration error:', error);
+            }
+
+            // Now check the auth state
+            checkAuthState();
+        })();
 
         // Set up Firebase auth state listener for real-time updates
         try {
