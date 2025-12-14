@@ -54,7 +54,7 @@ class DataSender {
      * v2.0: Traiter les données audio (compression si nécessaire)
      */
     async processAudioData(audioBlob, duration) {
-        this.logger.log('🎵 Traitement audio...');
+        this.logger.info('🎵 Traitement audio...');
 
         if (!audioBlob) {
             throw new Error('Audio blob manquant');
@@ -62,7 +62,7 @@ class DataSender {
 
         try {
             const sizeInMB = (audioBlob.size / 1024 / 1024).toFixed(2);
-            this.logger.log(`📦 Taille originale: ${sizeInMB}MB`);
+            this.logger.info(`📦 Taille originale: ${sizeInMB}MB`);
 
             // Convertir en base64
             const base64 = await this.blobToBase64(audioBlob);
@@ -83,7 +83,7 @@ class DataSender {
      * v2.0: Traiter les données texte (nettoyage basique)
      */
     processTextData(text) {
-        this.logger.log('📝 Traitement texte...');
+        this.logger.info('📝 Traitement texte...');
 
         if (!text || text.trim().length === 0) {
             throw new Error('Texte vide');
@@ -100,7 +100,7 @@ class DataSender {
      * v2.0: Traiter les données photo (validation et base64)
      */
     async processPhotoData(photoBlob, mimeType, description = '') {
-        this.logger.log('📷 Traitement photo...');
+        this.logger.info('📷 Traitement photo...');
 
         try {
             // Valider format
