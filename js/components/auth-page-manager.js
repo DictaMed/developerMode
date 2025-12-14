@@ -432,6 +432,12 @@ class AuthPageManager {
                 // Mise à jour du profil
                 this.updateProfileDisplay();
 
+                // BUG FIX: Update mode visibility after successful sign in
+                // This ensures Mode Normal is shown when user logs in
+                if (window.DictaMed && typeof window.DictaMed.updateModeVisibility === 'function') {
+                    window.DictaMed.updateModeVisibility(true);
+                }
+
                 // Redirection automatique vers Mode Normal après 1.5 secondes
                 setTimeout(() => {
                     if (window.switchTab) {
@@ -562,6 +568,12 @@ class AuthPageManager {
             }
 
             this.updateProfileDisplay();
+
+            // BUG FIX: Update mode visibility after sign out
+            // This ensures Mode Test is shown when user logs out
+            if (window.DictaMed && typeof window.DictaMed.updateModeVisibility === 'function') {
+                window.DictaMed.updateModeVisibility(false);
+            }
 
             // Redirection vers l'accueil
             setTimeout(() => {
