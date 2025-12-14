@@ -22,11 +22,9 @@ const APP_CONFIG = {
         normal: ['partie1', 'partie2', 'partie3', 'partie4'],
         test: ['clinique', 'antecedents', 'biologie']
     },
-    // Webhooks n8n centralisés
-    WEBHOOK_ENDPOINTS: {
-        default: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed', // Mode NORMAL et DMI
-        test: 'https://n8n.srv1104707.hstgr.cloud/webhook/DictaMed-Test' // Mode TEST (workflow séparé)
-    },
+    // Webhooks n8n centralisés - À MODIFIER dans js/config/webhooks-config.js
+    // Ce fichier est importé depuis js/config/webhooks-config.js
+    WEBHOOK_ENDPOINTS: null, // Will be set by webhooks-config.js
     API_TIMEOUT: 30000, // 30 secondes
     AUDIO_FORMATS: {
         PRIORITY: [
