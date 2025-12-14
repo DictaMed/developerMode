@@ -121,20 +121,19 @@ p {
 }
 
 /* ========== NAVIGATION ========== */
+/* OPTIMIZED: Reduced backdrop-filter, simplified shadows, lighter gradient */
 .fixed-nav-header {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: var(--z-nav);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.98) 100%);
-    backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: 
-        0 8px 32px rgba(37, 99, 235, 0.08),
-        0 2px 16px rgba(0,0,0,0.04),
-        inset 0 1px 0 rgba(255,255,255,0.9);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-    transition: var(--transition-base);
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s ease;
+    will-change: transform;
 }
 
 .fixed-nav-container {
@@ -178,6 +177,7 @@ p {
     gap: var(--space-sm);
 }
 
+/* OPTIMIZED: Removed max-width constraints, simplified transitions, added focus state */
 .fixed-nav-btn {
     background: transparent;
     border: none;
@@ -187,7 +187,7 @@ p {
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
-    transition: var(--transition-slow);
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -197,56 +197,54 @@ p {
     white-space: nowrap;
     text-decoration: none;
     min-height: 40px;
-    height: 40px;
-    min-width: 120px;
-    max-width: 140px;
+    padding: 8px 14px;
     box-sizing: border-box;
     text-align: center;
-    line-height: 1.2;
+    line-height: 1.4;
+    will-change: color, background;
 }
 
+/* Keyboard focus state for accessibility */
+.fixed-nav-btn:focus-visible {
+    outline: 2px solid var(--blue-primary);
+    outline-offset: 2px;
+}
+
+/* OPTIMIZED: Use width transition instead of transform for better performance */
 .fixed-nav-btn::before {
     content: '';
     position: absolute;
     bottom: 0;
-    left: 50%;
+    left: 0;
     width: 0;
     height: 3px;
-    background: linear-gradient(90deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
-    transform: translateX(-50%);
-    transition: var(--transition-slow);
+    background: var(--blue-primary);
+    transition: width 0.3s ease;
     border-radius: 3px 3px 0 0;
 }
 
+/* OPTIMIZED: Removed expensive transform, use simple background change */
 .fixed-nav-btn:hover {
     color: var(--blue-primary);
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.06) 0%, 
-        rgba(16, 185, 129, 0.06) 100%);
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+    background: rgba(37, 99, 235, 0.08);
 }
 
+/* OPTIMIZED: Simplified active state, use solid color instead of gradient text */
 .fixed-nav-btn.active {
     font-weight: 700;
-    background: linear-gradient(135deg, 
-        rgba(37, 99, 235, 0.15) 0%, 
-        rgba(29, 78, 216, 0.15) 50%,
-        rgba(16, 185, 129, 0.15) 100%);
-    color: transparent;
-    background-image: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--blue-primary);
 }
 
 .fixed-nav-btn.active::before {
-    width: 80%;
+    width: 100%;
 }
 
+/* OPTIMIZED: Removed transform on hover icon, use opacity only */
 .fixed-nav-btn .nav-icon {
     font-size: 1.1rem;
     opacity: 0.8;
-    transition: var(--transition-base);
+    transition: opacity 0.2s ease;
 }
 
 .fixed-nav-btn:hover .nav-icon,
@@ -254,25 +252,21 @@ p {
     opacity: 1;
 }
 
-.fixed-nav-btn:hover .nav-icon {
-    transform: scale(1.1);
-}
-
-.fixed-nav-btn.active .nav-icon {
-    filter: drop-shadow(0 0 3px currentColor);
-}
-
-/* Auth Button */
+/* Auth Button - OPTIMIZED: Simplified gradient, removed expensive transform */
 .fixed-nav-btn.auth-btn {
-    background: linear-gradient(135deg, var(--blue-primary) 0%, var(--green-secondary) 100%);
+    background: var(--blue-primary);
     color: white;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .fixed-nav-btn.auth-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    background: linear-gradient(135deg, var(--blue-light) 0%, var(--green-light) 100%);
+    background: var(--blue-light);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.fixed-nav-btn.auth-btn:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 .fixed-nav-btn.auth-btn .nav-icon {
@@ -4584,11 +4578,12 @@ textarea:focus {
         padding: 14px 24px;
     }
     
+    /* OPTIMIZED: Tablet navigation - better spacing and flexibility */
     .fixed-nav-container {
         gap: var(--space-md);
         padding: var(--space-md) var(--space-lg);
     }
-    
+
     .nav-tabs-right {
         gap: var(--space-xs);
         overflow-x: auto;
@@ -4596,18 +4591,20 @@ textarea:focus {
         -ms-overflow-style: auto;
         flex: 1;
     }
-    
+
     .fixed-nav-btn {
-        padding: 12px 16px;
+        padding: 10px 14px;
         font-size: 0.9rem;
         flex-shrink: 0;
         min-height: 44px;
-        height: 44px;
-        min-width: 100px;
-        max-width: 120px;
         gap: var(--space-xs);
     }
-    
+
+    .fixed-nav-btn[data-tab="guide"],
+    .fixed-nav-btn[data-tab="faq"] {
+        display: none;
+    }
+
     .header-logo {
         font-size: 1.5rem;
         flex-shrink: 0;
@@ -4839,35 +4836,54 @@ textarea:focus {
         font-size: 1.1rem;
     }
     
+    /* OPTIMIZED: Better mobile navigation with improved touch targets */
     .fixed-nav-container {
-        gap: var(--space-sm);
+        gap: var(--space-xs);
         padding: var(--space-sm) var(--space-md);
+        flex-wrap: wrap;
     }
-    
+
     .nav-tabs-right {
         gap: var(--space-xs);
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex: 1;
+        justify-content: flex-start;
     }
-    
+
+    .nav-tabs-right::-webkit-scrollbar {
+        display: none;
+    }
+
     .fixed-nav-btn {
-        padding: 10px 14px;
-        font-size: 0.85rem;
+        padding: 8px 12px;
+        font-size: 0.8rem;
         gap: var(--space-xs);
-        min-height: 40px;
-        height: 40px;
-        min-width: 80px;
-        max-width: 100px;
+        min-height: 44px;
+        min-width: auto;
+        flex-shrink: 0;
+        white-space: nowrap;
     }
-    
+
     .fixed-nav-btn .nav-icon {
         font-size: 1rem;
     }
-    
+
+    /* Hide less important buttons on mobile - keep only essential */
+    .fixed-nav-btn[data-tab="guide"],
+    .fixed-nav-btn[data-tab="faq"] {
+        display: none;
+    }
+
     .header-logo {
         font-size: 1.3rem;
+        flex-shrink: 0;
     }
-    
+
     main.container {
-        margin-top: 65px;
+        margin-top: 70px;
     }
     
     .hero-section-modern {
