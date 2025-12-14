@@ -2991,10 +2991,16 @@ textarea:focus {
 
 .btn-icon {
     font-size: 1.1rem;
+    pointer-events: none;
 }
 
 .btn-text {
     font-weight: 600;
+    pointer-events: none;
+}
+
+.btn-ripple {
+    pointer-events: none;
 }
 
 /* Enhanced Recorded Badge */
@@ -3078,6 +3084,19 @@ textarea:focus {
 
 .btn-toggle-enhanced.expanded .toggle-arrow {
     transform: rotate(180deg);
+}
+
+/* Universal pointer-events fix for all button children */
+.btn-record-enhanced * {
+    pointer-events: none;
+}
+
+.btn-control-enhanced * {
+    pointer-events: none;
+}
+
+.btn-toggle-enhanced * {
+    pointer-events: none;
 }
 
 /* Enhanced Submit Section */
@@ -3212,6 +3231,24 @@ textarea:focus {
     font-weight: 700;
     pointer-events: none;
     /* Allow clicks to pass through to parent button */
+}
+
+.submit-ripple {
+    pointer-events: none;
+    /* Allow clicks to pass through to parent button */
+}
+
+/* Universal pointer-events fix for all button children */
+.btn-submit-enhanced * {
+    pointer-events: none;
+}
+
+.test-btn-submit * {
+    pointer-events: none;
+}
+
+.dmi-submit-btn * {
+    pointer-events: none;
 }
 
 /* Character Counter Enhanced */
