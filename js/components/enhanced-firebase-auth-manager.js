@@ -397,8 +397,8 @@ class EnhancedFirebaseAuthManager {
                 };
             }
 
-            // Gestion 2FA
-            if (securityCheck.requires2FA) {
+            // Gestion 2FA - Only if not explicitly bypassed
+            if (securityCheck.requires2FA && !options?.bypass2FA) {
                 await this.auth.signOut();
                 const challengeResult = await this.initiate2FAChallenge(user);
                 return {
@@ -839,6 +839,18 @@ class EnhancedFirebaseAuthManager {
                 trustDevice: true,
                 bypass2FA: true  // Trust social login providers for 2FA
             });
+
+            // For social login with trustDevice: true and bypass2FA: true,
+            // we only reject if there's suspicious activity
+            // All other security checks (device/2FA) are bypassed for social logins
+            if (!securityCheck.allowed && securityCheck.challengeType === 'suspicious_activity') {
+                return {
+                    success: false,
+                    error: securityCheck.reason || 'Authentification échouée - Activité suspecte détectée',
+                    requires2FA: false  // Don't require 2FA for social login
+                };
+            }
+            // For all other cases, allow the social login to proceed
 
             // Créer ou mettre à jour le profil utilisateur
             await this.createUserProfile(user, { provider: 'google' });
