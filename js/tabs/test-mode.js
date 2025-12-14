@@ -67,36 +67,51 @@ class TestModeTab {
     initEventListeners() {
         // Configuration du bouton de soumission
         const submitBtn = document.getElementById('submitTest');
+        console.log('🔧 TestModeTab.initEventListeners() - submitBtn:', submitBtn);
+        console.log('   submitBtn?.disabled:', submitBtn?.disabled);
+        console.log('   submitBtn?.className:', submitBtn?.className);
+
         if (submitBtn) {
-            submitBtn.addEventListener('click', () => {
+            submitBtn.addEventListener('click', async (event) => {
+                console.log('🖱️ Submit button CLICKED!');
+                console.log('   event:', event);
+                console.log('   this.validateForm:', typeof this.validateForm);
+
+                // BUG FIX #7: Valider le formulaire avant d'envoyer
+                const isValid = this.validateForm();
+                console.log('   Form validation result:', isValid);
+
+                if (!isValid) {
+                    console.warn('⚠️ Form validation failed, not sending data');
+                    return;
+                }
+
+                console.log('✅ Form validation passed, proceeding with send');
+
+                if (window.loadingOverlay) {
+                    window.loadingOverlay.show('Envoi en cours...');
+                }
+
+                // BUG FIX #4: Ajouter un .catch() pour la gestion d'erreur
                 try {
-                    if (window.loadingOverlay) {
-                        window.loadingOverlay.show('Envoi en cours...');
-                    }
-                    
-                    if (!this.dataSender) {
-                        console.error('DataSender non disponible');
-                        if (window.notificationSystem) {
-                            window.notificationSystem.error('Système d\'envoi non disponible', 'Erreur');
-                        }
-                        return;
-                    }
-                    
-                    this.dataSender.send(window.APP_CONFIG.MODES.TEST).finally(() => {
-                        if (window.loadingOverlay) {
-                            window.loadingOverlay.hide();
-                        }
-                    });
+                    console.log('📤 Calling dataSender.send()');
+                    await this.dataSender.send(window.APP_CONFIG.MODES.TEST);
+                    // Success notification is handled in dataSender.send()
+                    console.log('✅ dataSender.send() completed successfully');
                 } catch (error) {
-                    console.error('Erreur lors de l\'envoi:', error);
+                    console.error('❌ TestModeTab: Error sending data:', error);
                     if (window.notificationSystem) {
-                        window.notificationSystem.error('Erreur lors de l\'envoi des données', 'Erreur');
+                        window.notificationSystem.error('Erreur lors de l\'envoi des données');
                     }
+                } finally {
                     if (window.loadingOverlay) {
                         window.loadingOverlay.hide();
                     }
                 }
             });
+            console.log('✅ Click listener attached to submitTest button');
+        } else {
+            console.error('❌ TestModeTab: submitTest button not found!');
         }
 
         // Configuration des compteurs de caractères

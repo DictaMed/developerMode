@@ -712,7 +712,7 @@ function makeInstancesGlobal() {
 function initializeGlobalHelpers() {
     // Create DictaMed namespace for organized global access
     window.DictaMed = window.DictaMed || {};
-    
+
     // Essential helper functions for backward compatibility
     window.DictaMed.updateSectionCount = () => {
         if (audioRecorderManager) {
@@ -727,7 +727,12 @@ function initializeGlobalHelpers() {
             testModeTab.resetForm();
         }
     };
-    
+
+    // Mode visibility management based on authentication status
+    window.DictaMed.updateModeVisibility = (isAuthenticated) => {
+        updateModeVisibility(isAuthenticated);
+    };
+
     // Debug access (only in development)
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         window.DictaMed.debug = {
@@ -737,6 +742,34 @@ function initializeGlobalHelpers() {
             tabNavigationSystem
         };
         console.log('🔧 Debug mode enabled - Access via DictaMed.debug');
+    }
+}
+
+// ===== MODE VISIBILITY MANAGEMENT =====
+/**
+ * Update the visibility of mode buttons based on authentication status
+ * - Mode Normal: visible only when authenticated
+ * - Mode Test: visible only when NOT authenticated
+ */
+function updateModeVisibility(isAuthenticated) {
+    const modeNormalBtn = document.getElementById('modeNormalBtn');
+    const modeTestBtn = document.getElementById('modeTestBtn');
+
+    if (!modeNormalBtn || !modeTestBtn) {
+        console.warn('Mode buttons not found in DOM');
+        return;
+    }
+
+    if (isAuthenticated) {
+        // User is logged in: show Normal mode, hide Test mode
+        modeNormalBtn.style.display = '';
+        modeTestBtn.style.display = 'none';
+        console.log('✅ Mode Normal enabled (user authenticated)');
+    } else {
+        // User is not logged in: hide Normal mode, show Test mode
+        modeNormalBtn.style.display = 'none';
+        modeTestBtn.style.display = '';
+        console.log('✅ Mode Test enabled (user not authenticated)');
     }
 }
 

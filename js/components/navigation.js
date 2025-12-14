@@ -346,6 +346,27 @@ class TabNavigationSystem {
                 console.warn('⚠️ DmiModeTab not available');
             }
 
+            // Initialize DMI submit button listener
+            const submitDMIBtn = document.getElementById('submitDMI');
+            console.log('🔧 Initializing submitDMI button listener');
+            if (submitDMIBtn && window.dmiDataSender) {
+                submitDMIBtn.addEventListener('click', async () => {
+                    console.log('🖱️ DMI Submit button CLICKED!');
+                    try {
+                        await window.dmiDataSender.send();
+                    } catch (error) {
+                        console.error('❌ Error sending DMI data:', error);
+                        if (window.notificationSystem) {
+                            window.notificationSystem.error('Erreur lors de l\'envoi des données DMI');
+                        }
+                    }
+                });
+                console.log('✅ Click listener attached to submitDMI button');
+            } else {
+                if (!submitDMIBtn) console.warn('⚠️ submitDMI button not found');
+                if (!window.dmiDataSender) console.warn('⚠️ dmiDataSender not available');
+            }
+
             // Initialize DMI specific listeners
             const texteLibre = document.getElementById('texteLibre');
             const texteLibreCounter = document.getElementById('texteLibreCounter');
