@@ -108,6 +108,7 @@ class DMIDataSender {
             recordedAt: new Date().toISOString(),
             NumeroDeDossier: numeroDossier,
             NomDuPatient: nomPatient,
+            inputType: 'text', // ✅ Specify data type: text (primary input)
             texte: texteLibre,
             photos: []
         };
@@ -123,8 +124,27 @@ class DMIDataSender {
 
         // Convert photos to Base64
         if (this.photoManagementSystem) {
-            payload.photos = await this.photoManagementSystem.getPhotosAsBase64();
+            const photosData = await this.photoManagementSystem.getPhotosAsBase64();
+            // ✅ Add type information for each photo
+            payload.photos = photosData.map((photo, index) => ({
+                data: photo,
+                inputType: 'photo', // Specify data type: photo
+                index: index,
+                timestamp: new Date().toISOString()
+            }));
+
+            if (payload.photos.length > 0) {
+                console.log(`   ${payload.photos.length} photos added with inputType: 'photo'`);
+            }
         }
+
+        // Log payload structure for debugging
+        console.log('   Payload inputTypes:', {
+            primaryInput: payload.inputType,
+            hasText: !!payload.texte,
+            photoCount: payload.photos.length,
+            photoInputType: payload.photos.length > 0 ? 'photo' : 'none'
+        });
 
         return payload;
     }

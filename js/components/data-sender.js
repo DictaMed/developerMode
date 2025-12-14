@@ -73,6 +73,8 @@ class DataSender {
     async collectData(mode) {
         const data = {
             mode: mode,
+            inputType: 'audio', // ✅ Primary input type for Normal and Test modes
+            inputTypes: ['audio'], // ✅ List of all input types in this payload
             timestamp: new Date().toISOString(),
             userAgent: navigator.userAgent,
             patientInfo: {},
@@ -83,13 +85,21 @@ class DataSender {
         try {
             // Collect patient information based on mode
             data.patientInfo = this.collectPatientInfo(mode);
-            
+
             // Collect recordings
             data.recordings = await this.collectRecordings(mode);
-            
+
             // Collect metadata
             data.metadata = this.collectMetadata(mode);
-            
+
+            // Log payload structure
+            console.log(`DataSender: Payload structure for ${mode}:`, {
+                inputType: data.inputType,
+                inputTypes: data.inputTypes,
+                recordingCount: data.recordings.length,
+                hasPatientInfo: Object.keys(data.patientInfo).length > 0
+            });
+
             return data;
         } catch (error) {
             console.error('Erreur lors de la collecte des données:', error);
@@ -162,6 +172,7 @@ class DataSender {
                         const recording = {
                             sectionId: sectionId,
                             sectionIndex: sections.indexOf(sectionId) + 1,
+                            inputType: 'audio', // ✅ Specify data type: audio
                             duration: this.safeGetRecordingDuration(recorder),
                             size: this.safeGetRecordingSize(recorder),
                             format: this.safeGetRecordingFormat(recorder),
