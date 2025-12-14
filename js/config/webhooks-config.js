@@ -21,17 +21,17 @@ const WEBHOOKS_CONFIG = {
     // Webhook pour les fichiers AUDIO enregistrés
     // Utilisé dans: Mode NORMAL, Mode TEST, Mode DMI
     // Change this URL to your n8n webhook for audio files
-    audio: '',
+    audio: 'https://n8n.srv1104707.hstgr.cloud/webhook-test/Audio',
 
     // Webhook pour les TEXTES libres
     // Utilisé dans: Mode DMI uniquement
     // Change this URL to your n8n webhook for text data
-    text: '',
+    text: 'https://n8n.srv1104707.hstgr.cloud/webhook-test/text',
 
     // Webhook pour les PHOTOS
     // Utilisé dans: Mode DMI uniquement
     // Change this URL to your n8n webhook for photos
-    photo: ''
+    photo: 'https://n8n.srv1104707.hstgr.cloud/webhook-test/photos'
 };
 
 /**
