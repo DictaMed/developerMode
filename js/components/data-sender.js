@@ -273,8 +273,127 @@ class DataSender {
     }
 
     /**
+     * v2.3: Fusionner les enregistrements audio en un seul fichier
+     * Utilise Web Audio API pour un vrai mixage
+     */
+    async mergeAudioRecordings(recordings) {
+        this.logger.info('🔀 Fusion des enregistrements audio...');
+
+        try {
+            // Étape 1: Convertir les base64 en blobs
+            const blobs = recordings.map(rec => {
+                try {
+                    const binaryString = atob(rec.audioData);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    return new Blob([bytes], { type: 'audio/mp4' });
+                } catch (error) {
+                    throw new Error(`Erreur conversion base64 pour ${rec.sectionId}: ${error.message}`);
+                }
+            });
+
+            // Étape 2: Charger les ArrayBuffers
+            const audioBuffers = await Promise.all(
+                blobs.map(blob => blob.arrayBuffer())
+            );
+
+            // Étape 3: Décoder les audio buffers
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const decodedBuffers = await Promise.all(
+                audioBuffers.map(buffer => audioContext.decodeAudioData(buffer))
+            );
+
+            // Étape 4: Calculer la durée totale et créer le buffer fusionné
+            const totalDuration = decodedBuffers.reduce((sum, buf) => sum + buf.duration, 0);
+            const mergedBuffer = audioContext.createBuffer(
+                1, // mono
+                audioContext.sampleRate * totalDuration,
+                audioContext.sampleRate
+            );
+
+            const mergedData = mergedBuffer.getChannelData(0);
+            let offset = 0;
+
+            // Étape 5: Copier les données audio (concaténation)
+            for (let i = 0; i < decodedBuffers.length; i++) {
+                const source = decodedBuffers[i].getChannelData(0);
+                mergedData.set(source, offset);
+                offset += source.length;
+                this.logger.info(`  ✓ Audio ${i + 1}/${decodedBuffers.length} fusionné`);
+            }
+
+            // Étape 6: Encoder en WAV (format plus compatible)
+            const wavBlob = await this.audioBufferToWav(mergedBuffer);
+
+            // Étape 7: Convertir en base64
+            const mergedBase64 = await this.blobToBase64(wavBlob);
+
+            this.logger.info(`✅ Fusion réussie: ${(wavBlob.size / 1024).toFixed(2)}KB`);
+
+            return {
+                audioData: mergedBase64,
+                duration: totalDuration,
+                format: 'wav',
+                size: wavBlob.size,
+                recordingCount: recordings.length,
+                originalSections: recordings.map(r => r.sectionId)
+            };
+
+        } catch (error) {
+            this.logger.error('❌ Erreur fusion audio:', error);
+            throw new Error(`Impossible de fusionner les audios: ${error.message}`);
+        }
+    }
+
+    /**
+     * Convertir un AudioBuffer en WAV Blob
+     */
+    async audioBufferToWav(audioBuffer) {
+        const channelData = audioBuffer.getChannelData(0);
+        const sampleRate = audioBuffer.sampleRate;
+        const numberOfChannels = 1;
+
+        const bufferLength = channelData.length;
+        const arrayBuffer = new ArrayBuffer(44 + bufferLength * 2);
+        const view = new DataView(arrayBuffer);
+
+        // WAV header
+        const writeString = (offset, string) => {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        };
+
+        writeString(0, 'RIFF');
+        view.setUint32(4, 36 + bufferLength * 2, true);
+        writeString(8, 'WAVE');
+        writeString(12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, numberOfChannels, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * 2, true);
+        view.setUint16(32, numberOfChannels * 2, true);
+        view.setUint16(34, 16, true);
+        writeString(36, 'data');
+        view.setUint32(40, bufferLength * 2, true);
+
+        // Copier les données PCM
+        let offset = 44;
+        for (let i = 0; i < bufferLength; i++) {
+            const value = Math.max(-1, Math.min(1, channelData[i]));
+            view.setInt16(offset, value < 0 ? value * 0x8000 : value * 0x7FFF, true);
+            offset += 2;
+        }
+
+        return new Blob([arrayBuffer], { type: 'audio/wav' });
+    }
+
+    /**
      * Méthode classique: envoyer les enregistrements audio (mode hérité)
-     * v2.2.1: Envoyer CHAQUE audio séparément au webhook (comme les photos en DMI)
+     * v2.3: Fusionne tous les audios avant envoi
      */
     async send(mode) {
         if (this.isSending) {
@@ -302,69 +421,47 @@ class DataSender {
                 throw new Error('Données invalides pour l\'envoi');
             }
 
-            console.log(`📤 Audio: Envoi de ${data.recordings.length} enregistrement(s)...`);
+            console.log(`📤 Audio: Fusion de ${data.recordings.length} enregistrement(s)...`);
 
-            // 🔑 Envoyer CHAQUE enregistrement séparément (pas tous ensemble)
-            const results = [];
+            // 🔑 NOUVEAU: Fusionner tous les audios en un seul fichier
+            const mergedAudio = await this.mergeAudioRecordings(data.recordings);
 
-            for (let i = 0; i < data.recordings.length; i++) {
-                const recording = data.recordings[i];
+            try {
+                // Créer un payload UNIQUE avec l'audio fusionné
+                const audioPayload = {
+                    uid: currentUser.uid,
+                    email: currentUser.email,
+                    displayName: currentUser.displayName || '',
+                    mode: mode,
+                    fileType: 'audio',
+                    inputType: 'audio',
+                    timestamp: new Date().toISOString(),
+                    patientInfo: data.patientInfo,
 
-                try {
-                    // Créer un payload pour cet enregistrement spécifique
-                    const audioPayload = {
-                        uid: currentUser.uid,
-                        email: currentUser.email,
-                        displayName: currentUser.displayName || '',
-                        mode: mode,
-                        fileType: 'audio',
-                        inputType: 'audio',
-                        timestamp: new Date().toISOString(),
-                        patientInfo: data.patientInfo,
+                    // Audio fusionné (un seul)
+                    audioData: mergedAudio.audioData,
+                    duration: mergedAudio.duration,
+                    format: mergedAudio.format,
+                    size: mergedAudio.size,
+                    recordingCount: mergedAudio.recordingCount,
+                    originalSections: mergedAudio.originalSections,
 
-                        // Infos d'indexation pour tracer la progression
-                        audioIndex: i + 1,
-                        totalAudios: data.recordings.length,
+                    // Métadonnées
+                    metadata: data.metadata
+                };
 
-                        // L'enregistrement actuel
-                        recording: recording,
+                console.log(`✅ Fusion réussie: ${mergedAudio.recordingCount} audios combinés`);
+                console.log(`📤 Envoi du fichier fusionné au webhook...`);
 
-                        // Métadonnées
-                        metadata: data.metadata
-                    };
+                // Envoyer le fichier fusionné au webhook
+                const result = await this.sendToEndpoint(audioPayload, mode);
 
-                    console.log(`📤 Audio ${i + 1}/${data.recordings.length}: Envoi ${recording.sectionId}...`);
-
-                    // Envoyer cet audio au webhook
-                    const result = await this.sendToEndpoint(audioPayload, mode);
-                    results.push({
-                        sectionId: recording.sectionId,
-                        success: true,
-                        result: result
-                    });
-
-                    console.log(`✅ Audio ${i + 1}/${data.recordings.length} envoyé: ${recording.sectionId}`);
-
-                } catch (audioError) {
-                    logger.error(`❌ Erreur audio ${i + 1}/${data.recordings.length}: ${recording.sectionId}`, audioError);
-                    results.push({
-                        sectionId: recording.sectionId,
-                        success: false,
-                        error: audioError.message
-                    });
-                }
-            }
-
-            // Vérifier si au moins un audio a été envoyé avec succès
-            const successCount = results.filter(r => r.success).length;
-
-            if (successCount > 0) {
-                logger.info(`✅ Envoi réussi: ${successCount}/${data.recordings.length} enregistrement(s)`);
+                logger.info(`✅ Envoi réussi: ${mergedAudio.recordingCount} enregistrement(s) fusionnés`);
 
                 // Show success notification
                 if (window.notificationSystem) {
                     window.notificationSystem.success(
-                        `✅ ${successCount} enregistrement(s) envoyé(s) avec succès!`,
+                        `✅ ${mergedAudio.recordingCount} enregistrement(s) fusionnés et envoyés!`,
                         'Envoi terminé'
                     );
                 }
@@ -377,11 +474,21 @@ class DataSender {
                 return {
                     success: true,
                     totalAudios: data.recordings.length,
-                    successCount: successCount,
-                    results: results
+                    mergedFile: mergedAudio,
+                    result: result
                 };
-            } else {
-                throw new Error(`Tous les enregistrements ont échoué à l'envoi`);
+
+            } catch (audioError) {
+                logger.error(`❌ Erreur lors de l'envoi de l'audio fusionné`, audioError);
+
+                if (window.notificationSystem) {
+                    window.notificationSystem.error(
+                        'Erreur lors de l\'envoi: ' + audioError.message,
+                        'Erreur d\'envoi'
+                    );
+                }
+
+                throw audioError;
             }
 
         } catch (error) {
