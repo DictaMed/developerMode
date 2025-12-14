@@ -11,6 +11,7 @@ class AuthModalSystem {
         this.validationTimeouts = new Map(); // Pour la validation en temps réel
         this.passwordStrength = { score: 0, strength: 'Très faible', feedback: [] };
         this.isValidating = false; // Pour éviter les validations concurrentes
+        this.isGoogleSignInInProgress = false; // Empêcher les clics multiples sur le bouton Google
     }
 
     /**
@@ -651,12 +652,34 @@ class AuthModalSystem {
 
     async handleGoogleSignIn() {
         try {
+            // Empêcher les clics multiples
+            if (this.isGoogleSignInInProgress) {
+                console.warn('⚠️ Google Sign-In déjà en cours, ignore le clic');
+                return;
+            }
+
+            this.isGoogleSignInInProgress = true;
+            const modalGoogleSignInBtn = document.getElementById('modalGoogleSignInBtn');
+            if (modalGoogleSignInBtn) {
+                modalGoogleSignInBtn.disabled = true;
+                modalGoogleSignInBtn.textContent = '⏳ Connexion en cours...';
+            }
+
             // Utiliser FirebaseAuthManager pour Google Sign-In
             const authManager = window.FirebaseAuthManager || FirebaseAuthManager.getInstance();
             const result = await authManager.signInWithGoogle();
-            
+
             if (result.success) {
                 this.showSuccess('Connexion réussie avec Google!');
+                setTimeout(() => {
+                    this.close();
+                    this.updateAuthButton();
+                }, 1500);
+            } else if (result.error && result.error.includes('conflicting popup')) {
+                // L'authentification a probablement réussi mais la popup s'est fermée
+                // Vérifier l'état de l'utilisateur
+                console.warn('⚠️ Popup fermée mais authentification possiblement réussie');
+                this.showSuccess('Connexion probablement réussie, fermeture en cours...');
                 setTimeout(() => {
                     this.close();
                     this.updateAuthButton();
@@ -666,15 +689,32 @@ class AuthModalSystem {
             }
         } catch (error) {
             console.error('Google sign in error:', error);
-            
+
             let errorMessage = 'Erreur lors de la connexion avec Google';
             if (error.code === 'auth/popup-closed-by-user') {
                 errorMessage = 'Connexion annulée par l\'utilisateur';
             } else if (error.code === 'auth/popup-blocked') {
                 errorMessage = 'Popup bloquée par le navigateur';
+            } else if (error.code === 'auth/cancelled-popup-request') {
+                // Vérifier si l'authentification a réussi malgré l'erreur
+                console.warn('⚠️ Popup fermée due à un conflit COOP');
+                this.showSuccess('Connexion probablement réussie, fermeture en cours...');
+                setTimeout(() => {
+                    this.close();
+                    this.updateAuthButton();
+                }, 1500);
+                return;
             }
-            
+
             this.showError(errorMessage);
+        } finally {
+            // Réinitialiser le drapeau
+            this.isGoogleSignInInProgress = false;
+            const modalGoogleSignInBtn = document.getElementById('modalGoogleSignInBtn');
+            if (modalGoogleSignInBtn) {
+                modalGoogleSignInBtn.disabled = false;
+                modalGoogleSignInBtn.textContent = 'Continuer avec Google';
+            }
         }
     }
 

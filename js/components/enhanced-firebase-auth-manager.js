@@ -860,6 +860,34 @@ class EnhancedFirebaseAuthManager {
                 customData: error.customData
             });
 
+            // Gestion spéciale pour l'erreur COOP conflicting popup
+            if (error.code === 'auth/cancelled-popup-request' &&
+                error.message &&
+                error.message.includes('conflicting popup')) {
+
+                console.warn('⚠️ Popup fermée due à conflit COOP - vérification de l\'authentification');
+
+                // Vérifier si l'utilisateur actuel est authentifié
+                try {
+                    const currentUser = this.auth.currentUser;
+                    if (currentUser) {
+                        console.log('✅ Utilisateur authentifié malgré l\'erreur popup:', currentUser.email);
+
+                        // Créer ou mettre à jour le profil utilisateur
+                        await this.createUserProfile(currentUser, { provider: 'google' });
+
+                        this.logSecurityEvent('google_signin_success_after_popup_error', {
+                            userId: currentUser.uid,
+                            email: currentUser.email
+                        });
+
+                        return { success: true, user: this.sanitizeUser(currentUser) };
+                    }
+                } catch (checkError) {
+                    console.error('Error checking auth state:', checkError);
+                }
+            }
+
             this.logSecurityEvent('google_signin_failed', {
                 error: error.code,
                 message: error.message
@@ -873,7 +901,7 @@ class EnhancedFirebaseAuthManager {
             } else if (error.code === 'auth/popup-closed-by-user') {
                 errorMessage = 'Vous avez fermé la fenêtre de connexion.';
             } else if (error.code === 'auth/cancelled-popup-request') {
-                errorMessage = 'Connexion annulée. Veuillez réessayer.';
+                errorMessage = 'La fenêtre de connexion a été fermée. Si vous êtes déjà connecté, veuillez rafraîchir la page.';
             } else if (error.code === 'auth/operation-not-allowed') {
                 errorMessage = 'Google Sign-In n\'est pas activé. Veuillez contacter le support.';
             } else if (error.message && error.message.includes('GoogleAuthProvider')) {
