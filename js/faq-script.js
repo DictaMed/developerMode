@@ -121,14 +121,8 @@ class FAQAccordion {
     }
 
     preloadCriticalResources() {
-        // Preload email link for better performance
-        const emailLink = document.querySelector('a[href^="mailto:"]');
-        if (emailLink) {
-            const preloadLink = document.createElement('link');
-            preloadLink.rel = 'prefetch';
-            preloadLink.href = emailLink.href;
-            document.head.appendChild(preloadLink);
-        }
+        // Preload critical resources if needed
+        // Note: mailto: links cannot be prefetched
     }
 
     logAnalytics() {
@@ -210,7 +204,7 @@ class FAQAccordion {
         // Recalculate any size-dependent properties
         this.answers.forEach(answer => {
             if (answer.classList.contains('active')) {
-                answer.style.maxHeight = 'none';
+                answer.style.maxHeight = answer.scrollHeight + 'px';
             }
         });
     }

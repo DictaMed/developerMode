@@ -266,7 +266,7 @@ body {
 }
 
 .faq-answer.active {
-    max-height: 600px;
+    max-height: 1000px;
     padding: 0 30px 25px 30px;
     animation: slideDown var(--transition-slow);
 }
@@ -380,7 +380,7 @@ body {
         opacity: 0;
     }
     to {
-        max-height: 600px;
+        max-height: 1000px;
         opacity: 1;
     }
 }
