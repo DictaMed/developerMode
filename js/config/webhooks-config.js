@@ -1,24 +1,37 @@
 /**
- * DictaMed - Webhook Configuration
- * Version: 5.0.0
+ * DictaMed - Webhook Configuration by File Type
+ * Version: 5.1.0
  *
  * FICHIER À MODIFIER POUR CHANGER LES WEBHOOKS
  *
  * À chaque fois que vous voulez changer les URLs des webhooks,
  * modifiez UNIQUEMENT ce fichier et aucun autre.
+ *
+ * Webhooks sont organisés par TYPE DE FICHIER:
+ * - audio: Pour les fichiers audio enregistrés (modes NORMAL, TEST, DMI)
+ * - text: Pour les textes libres (mode DMI uniquement)
+ * - photo: Pour les photos (mode DMI uniquement)
  */
 
-// ===== WEBHOOKS N8N CONFIGURATION =====
+// ===== WEBHOOKS N8N CONFIGURATION BY FILE TYPE =====
 // Modifiez ces URLs pour pointer vers vos webhooks n8n
+// Laissez VIDE ("") si vous n'utilisez pas ce type de fichier
 
 const WEBHOOKS_CONFIG = {
-    // Webhook pour les modes NORMAL et DMI
-    // Change this URL to your n8n webhook for normal/dmi modes
-    default: 'https://n8n.srv1104707.hstgr.cloud/webhook-test/DeveloperMode',
+    // Webhook pour les fichiers AUDIO enregistrés
+    // Utilisé dans: Mode NORMAL, Mode TEST, Mode DMI
+    // Change this URL to your n8n webhook for audio files
+    audio: '',
 
-    // Webhook pour le mode TEST (optionnel)
-    // Change this URL to your n8n webhook for test mode
-    test: 'https://n8n.srv1104707.hstgr.cloud/webhook-test/DeveloperMode'
+    // Webhook pour les TEXTES libres
+    // Utilisé dans: Mode DMI uniquement
+    // Change this URL to your n8n webhook for text data
+    text: '',
+
+    // Webhook pour les PHOTOS
+    // Utilisé dans: Mode DMI uniquement
+    // Change this URL to your n8n webhook for photos
+    photo: ''
 };
 
 /**
@@ -27,13 +40,17 @@ const WEBHOOKS_CONFIG = {
  */
 function initializeWebhookConfig() {
     if (window.APP_CONFIG) {
+        // Mapper les webhooks par type de fichier
         window.APP_CONFIG.WEBHOOK_ENDPOINTS = {
-            default: WEBHOOKS_CONFIG.default,
-            test: WEBHOOKS_CONFIG.test
+            audio: WEBHOOKS_CONFIG.audio,
+            text: WEBHOOKS_CONFIG.text,
+            photo: WEBHOOKS_CONFIG.photo
         };
-        console.log('✅ Webhook configuration loaded:', {
-            default: WEBHOOKS_CONFIG.default,
-            test: WEBHOOKS_CONFIG.test
+
+        console.log('✅ Webhook configuration loaded (by file type):', {
+            audio: WEBHOOKS_CONFIG.audio || '(empty)',
+            text: WEBHOOKS_CONFIG.text || '(empty)',
+            photo: WEBHOOKS_CONFIG.photo || '(empty)'
         });
     } else {
         console.warn('⚠️ APP_CONFIG not found. Webhook configuration will be set later.');

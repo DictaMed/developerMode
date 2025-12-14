@@ -598,22 +598,21 @@ class DataSender {
                 };
             }
 
-            // Déterminer le webhook en fonction du mode
-            let endpoint;
-            if (mode === window.APP_CONFIG.MODES.TEST) {
-                // Mode TEST: webhook séparé
-                endpoint = window.APP_CONFIG.WEBHOOK_ENDPOINTS.test;
-            } else {
-                // Mode NORMAL et DMI: webhook partagé
-                endpoint = window.APP_CONFIG.WEBHOOK_ENDPOINTS.default || window.APP_CONFIG.WEBHOOK_ENDPOINTS.normal;
-            }
+            // 🔑 Déterminer le webhook en fonction du TYPE DE FICHIER (audio, text, photo)
+            // Webhooks sont organisés par type de données, pas par mode
+            const fileType = payload.inputType || 'audio'; // Default to 'audio'
+            const endpoint = window.APP_CONFIG.WEBHOOK_ENDPOINTS?.[fileType];
 
             if (!endpoint) {
-                throw new Error(`Webhook endpoint not configured for mode: ${mode}`);
+                throw new Error(
+                    `❌ Webhook endpoint not configured for file type: ${fileType}. ` +
+                    `Please configure it in js/config/webhooks-config.js`
+                );
             }
 
-            console.log(`DataSender: Sending to endpoint: ${endpoint} (mode: ${mode})`);
-            console.log(`DataSender: Payload type: ${payload.inputType || 'legacy'}`);
+            console.log(`✅ DataSender: Using webhook for file type: ${fileType}`);
+            console.log(`DataSender: Webhook endpoint: ${endpoint}`);
+            console.log(`DataSender: Mode: ${mode}, File Type: ${fileType}`);
 
             // Faire l'appel réel à l'API
             const response = await this.makeApiCall(endpoint, payload);
