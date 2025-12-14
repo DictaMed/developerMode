@@ -141,20 +141,40 @@ class AudioRecorderManager {
             }
 
             // Enable/disable submit button
-            const submitBtn = mode === window.APP_CONFIG.MODES.NORMAL
-                ? document.getElementById('submitNormal')
-                : document.getElementById('submitTest');
+            const submitBtnId = mode === window.APP_CONFIG.MODES.NORMAL
+                ? 'submitNormal'
+                : mode === window.APP_CONFIG.MODES.TEST
+                ? 'submitTest'
+                : null;
 
-            if (submitBtn) {
-                const wasDisabled = submitBtn.disabled;
-                submitBtn.disabled = count === 0;
-                if (wasDisabled && !submitBtn.disabled) {
-                    console.log(`✅ Submit button ENABLED for mode ${mode}`);
-                } else if (!wasDisabled && submitBtn.disabled) {
-                    console.log(`❌ Submit button DISABLED for mode ${mode}`);
+            if (submitBtnId) {
+                const submitBtn = document.getElementById(submitBtnId);
+                if (submitBtn) {
+                    const wasDisabled = submitBtn.disabled;
+                    const shouldBeDisabled = count === 0;
+
+                    console.log(`🔘 Submit button (#${submitBtnId}):
+                       - Count: ${count}
+                       - Was disabled: ${wasDisabled}
+                       - Should be disabled: ${shouldBeDisabled}`);
+
+                    submitBtn.disabled = shouldBeDisabled;
+
+                    console.log(`   - After update: disabled=${submitBtn.disabled}`);
+                    console.log(`   - classList: ${submitBtn.className}`);
+
+                    if (wasDisabled && !shouldBeDisabled) {
+                        console.log(`✅ Submit button ENABLED for mode ${mode}`);
+                    } else if (!wasDisabled && shouldBeDisabled) {
+                        console.log(`❌ Submit button DISABLED for mode ${mode}`);
+                    } else {
+                        console.log(`ℹ️ Submit button state unchanged`);
+                    }
+                } else {
+                    console.warn(`⚠️ AudioRecorderManager: Submit button #${submitBtnId} not found in DOM`);
                 }
             } else {
-                console.warn(`⚠️ AudioRecorderManager: Submit button not found for mode ${mode}`);
+                console.log(`ℹ️ AudioRecorderManager: No submit button for mode ${mode}`);
             }
         } catch (error) {
             console.error('❌ ERROR in updateSectionCount():', error);
