@@ -16,12 +16,15 @@ class DMIDataSender {
                 console.error('❌ DMIDataSender: submitBtn element not found');
                 return;
             }
+
+            console.log('📤 DMI: Starting data send...');
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Envoi en cours...';
+            submitBtn.innerHTML = '<span style="display: inline-block; animation: spin 1s linear infinite;">⏳</span> Envoi en cours...';
 
             // Prepare payload
             const payload = await this.preparePayload();
             if (!payload) {
+                console.warn('⚠️ DMI: Payload validation failed - missing required fields');
                 if (window.notificationSystem) {
                     window.notificationSystem.warning('Le numéro de dossier est obligatoire pour envoyer les données.', 'Champ requis');
                 }
@@ -29,6 +32,8 @@ class DMIDataSender {
                 submitBtn.textContent = 'Envoyer les données DMI';
                 return;
             }
+
+            console.log('✅ DMI: Payload prepared, sending to server...');
 
             // Send to webhook
             const response = await fetch(window.APP_CONFIG.ENDPOINTS.dmi, {

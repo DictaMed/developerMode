@@ -90,18 +90,35 @@ class AudioRecorder {
                 }
             });
 
-            // Recording end event
+            // Recording end event - CRITICAL for button state
             this.mediaRecorder.addEventListener('stop', () => {
-                this.audioBlob = new Blob(this.audioChunks, { 
-                    type: this.supportedMimeType || 'audio/webm' 
-                });
-                if (this.audioPlayer) {
-                    const audioUrl = URL.createObjectURL(this.audioBlob);
-                    this.audioPlayer.src = audioUrl;
-                    this.audioPlayer.classList.remove('hidden');
+                try {
+                    this.audioBlob = new Blob(this.audioChunks, {
+                        type: this.supportedMimeType || 'audio/webm'
+                    });
+
+                    console.log(`🎵 Recording stopped for section ${this.sectionId}`);
+                    console.log(`   - Blob size: ${this.audioBlob.size} bytes`);
+                    console.log(`   - Chunks: ${this.audioChunks.length}`);
+                    console.log(`   - Mime type: ${this.supportedMimeType || 'audio/webm'}`);
+
+                    if (this.audioBlob.size === 0) {
+                        console.warn(`⚠️ Warning: Blob size is 0 for section ${this.sectionId}`);
+                    }
+
+                    if (this.audioPlayer) {
+                        const audioUrl = URL.createObjectURL(this.audioBlob);
+                        this.audioPlayer.src = audioUrl;
+                        this.audioPlayer.classList.remove('hidden');
+                    }
+
+                    // Update section count to enable submit button
+                    if (window.audioRecorderManager) {
+                        window.audioRecorderManager.updateSectionCount();
+                    }
+                } catch (error) {
+                    console.error(`❌ Error in stop event handler for section ${this.sectionId}:`, error);
                 }
-                
-                window.audioRecorderManager.updateSectionCount();
             });
 
             // Error handling during recording
@@ -176,7 +193,7 @@ class AudioRecorder {
         if (this.mediaRecorder) {
             this.mediaRecorder.stop();
             this.stopTimer();
-            
+
             // Stop all stream tracks
             if (this.stream) {
                 this.stream.getTracks().forEach(track => track.stop());
@@ -194,14 +211,24 @@ class AudioRecorder {
             if (this.btnReplay) this.btnReplay.classList.remove('hidden');
             if (this.btnDelete) this.btnDelete.classList.remove('hidden');
             if (this.recordedBadge) this.recordedBadge.classList.remove('hidden');
-            
+
             // Mark section as recorded
             this.section.classList.remove('is-recording', 'is-paused');
             this.section.classList.add('recorded');
-            
+
             // Feedback for mobile users
             if ('vibrate' in navigator) {
                 navigator.vibrate(200);
+            }
+
+            // IMPORTANT: Ensure button state is updated after recording stops
+            // The 'stop' event handler will create the Blob, but we add a safety delay
+            // to ensure updateSectionCount() is called AFTER the Blob is created
+            if (window.audioRecorderManager) {
+                setTimeout(() => {
+                    window.audioRecorderManager.updateSectionCount();
+                    console.log('✅ Submit button enabled after recording stop');
+                }, 50);
             }
         }
     }
