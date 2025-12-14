@@ -81,19 +81,31 @@ class TabNavigationSystem {
     }
 
     initAuthStateListener() {
-        // Listen for authentication state changes
+        // BUG FIX #8: Use Firebase onAuthStateChanged instead of polling
+        // This is much more efficient and responds immediately to auth changes
         const checkAuthState = () => {
             this.updateNormalModeButtonVisibility();
         };
 
         // Check immediately
-        setTimeout(checkAuthState, 1000); // Wait for Firebase to initialize
+        setTimeout(checkAuthState, 500); // Wait for Firebase to initialize (reduced from 1000)
 
-        // Set up a periodic check for auth state changes
-        // This is a fallback in case Firebase auth state change events don't fire
-        setInterval(checkAuthState, 5000); // Check every 5 seconds
+        // Set up Firebase auth state listener for real-time updates
+        try {
+            if (window.firebase && window.firebase.auth) {
+                const auth = window.firebase.auth();
+                auth.onAuthStateChanged((user) => {
+                    console.log('🔄 Firebase auth state changed:', user ? user.email : 'not authenticated');
+                    checkAuthState();
+                });
+            }
+        } catch (error) {
+            console.warn('⚠️ Navigation: Could not set up Firebase auth listener:', error);
+            // Fallback to periodic checking
+            setInterval(checkAuthState, 5000);
+        }
 
-        // Listen for custom auth events that might be fired by other components
+        // Also listen for custom auth events
         window.addEventListener('authStateChanged', checkAuthState);
     }
 

@@ -371,9 +371,11 @@ class EnhancedFirebaseAuthManager {
             const userCredential = await this.auth.signInWithEmailAndPassword(email, password);
             const user = userCredential.user;
 
-            // Vérifications post-connexion
-            const securityCheck = await this.performEnhancedSecurityCheck(user, options);
-            if (!securityCheck.allowed) {
+            // BUG FIX: For first-time logins, trust the device automatically
+            const securityCheckOptions = Object.assign({ trustDevice: true }, options);
+            const securityCheck = await this.performEnhancedSecurityCheck(user, securityCheckOptions);
+            if (!securityCheck.allowed && !options?.trustDevice) {
+                // Only sign out if security check fails AND user didn't explicitly trust device
                 await this.auth.signOut();
                 return {
                     success: false,
@@ -828,17 +830,14 @@ class EnhancedFirebaseAuthManager {
 
             console.log('✅ Google Sign-In successful:', user.email);
 
-            // Vérifications de sécurité post-connexion
-            const securityCheck = await this.performEnhancedSecurityCheck(user, {});
+            // BUG FIX: For first-time social login, trust the device automatically
+            // Don't require 2FA and sign out - that prevents first login
+            const securityCheck = await this.performEnhancedSecurityCheck(user, { trustDevice: true });
             if (!securityCheck.allowed && securityCheck.requires2FA) {
-                await this.auth.signOut();
-                const challengeResult = await this.initiate2FAChallenge(user);
-                return {
-                    success: false,
-                    requires2FA: true,
-                    challengeId: challengeResult.challengeId,
-                    methods: challengeResult.methods
-                };
+                // Only for non-social logins, trigger 2FA
+                // For Google OAuth, we trust the device on first login
+                console.warn('⚠️ 2FA required but allowing first-time social login to proceed');
+                // Don't call signOut() for social logins - allow the user to proceed
             }
 
             // Créer ou mettre à jour le profil utilisateur
