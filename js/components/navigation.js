@@ -301,7 +301,33 @@ class TabNavigationSystem {
             }
         }
 
-        if (tabId === 'mode-normal' || tabId === 'mode-test') {
+        if (tabId === 'mode-normal') {
+            // Initialize Normal Mode tab - MUST be called AFTER HTML is loaded
+            console.log('🔧 Initializing NormalModeTab after HTML loaded');
+            if (typeof normalModeTab !== 'undefined' && normalModeTab) {
+                normalModeTab.init();
+            } else {
+                console.warn('⚠️ NormalModeTab not available');
+            }
+
+            // Initialize audio recorders through manager (will handle retry logic)
+            if (window.audioRecorderManager) {
+                window.audioRecorderManager.init();
+            }
+
+            // Update section count
+            this.updateSectionCount();
+        }
+
+        if (tabId === 'mode-test') {
+            // Initialize Test Mode tab - MUST be called AFTER HTML is loaded
+            console.log('🔧 Initializing TestModeTab after HTML loaded');
+            if (typeof testModeTab !== 'undefined' && testModeTab) {
+                testModeTab.init();
+            } else {
+                console.warn('⚠️ TestModeTab not available');
+            }
+
             // Initialize audio recorders through manager (will handle retry logic)
             if (window.audioRecorderManager) {
                 window.audioRecorderManager.init();
@@ -312,21 +338,29 @@ class TabNavigationSystem {
         }
 
         if (tabId === 'mode-dmi') {
+            // Initialize DMI Mode tab - MUST be called AFTER HTML is loaded
+            console.log('🔧 Initializing DmiModeTab after HTML loaded');
+            if (typeof dmiModeTab !== 'undefined' && dmiModeTab) {
+                dmiModeTab.init();
+            } else {
+                console.warn('⚠️ DmiModeTab not available');
+            }
+
             // Initialize DMI specific listeners
             const texteLibre = document.getElementById('texteLibre');
             const texteLibreCounter = document.getElementById('texteLibreCounter');
-            
+
             if (texteLibre && texteLibreCounter) {
                 texteLibre.addEventListener('input', () => {
                     texteLibreCounter.textContent = texteLibre.value.length;
                 });
             }
-            
+
             // Initialize photo upload
             if (window.photoManagementSystem) {
                 window.photoManagementSystem.init();
             }
-            
+
             // DMI validation
             if (window.formValidationSystem) {
                 window.formValidationSystem.validateDMIMode();
