@@ -698,16 +698,19 @@ async function finalizeInitialization() {
     // Initialize global helper functions
     initializeGlobalHelpers();
 
-    // Initialize mode visibility based on current authentication status
-    // This ensures the correct modes are visible when the page loads
+    // Initialize the Mode Visibility Manager (handles button visibility based on auth)
     try {
+        window.modeVisibilityManager = new ModeVisibilityManager();
+        window.modeVisibilityManager.init();
+
+        // Set initial mode visibility based on current authentication status
         const currentUser = window.FirebaseAuthManager?.getCurrentUser?.();
         const isAuthenticated = !!currentUser;
-        if (typeof updateModeVisibility === 'function') {
-            updateModeVisibility(isAuthenticated);
-        }
+        window.modeVisibilityManager.updateVisibility(isAuthenticated);
+
+        console.log('✅ Mode visibility management initialized successfully');
     } catch (error) {
-        console.warn('Could not initialize mode visibility:', error);
+        console.warn('⚠️ Could not initialize mode visibility manager:', error);
     }
 }
 
@@ -757,36 +760,318 @@ function initializeGlobalHelpers() {
     }
 }
 
-// ===== MODE VISIBILITY MANAGEMENT =====
+// ===== MODE VISIBILITY MANAGEMENT SYSTEM =====
 /**
- * Update the visibility of mode buttons based on authentication status
- * - Mode Normal: visible only when authenticated
- * - Mode DMI: visible only when authenticated
- * - Mode Test: visible only when NOT authenticated
+ * Classe pour gérer la visibilité des modes en fonction de l'état d'authentification
+ *
+ * Responsabilités:
+ * - Cacher/afficher les boutons de mode selon l'authentification
+ * - Gérer les transitions entre les modes
+ * - Gérer le cache des éléments DOM
+ * - Fournir des callbacks pour les changements d'état
+ *
+ * Architecture:
+ * - Mode Normal: visible uniquement si authentifié
+ * - Mode DMI: visible uniquement si authentifié
+ * - Mode Test: visible uniquement si NON authentifié
+ */
+class ModeVisibilityManager {
+    constructor() {
+        // État interne
+        this.currentAuthState = null;
+        this.isInitialized = false;
+        this.modeElements = {
+            normal: null,
+            dmi: null,
+            test: null
+        };
+
+        // Callbacks pour les changements d'état
+        this.callbacks = {
+            onAuthStateChange: [],
+            onModeVisibilityChange: []
+        };
+
+        // Constantes
+        this.MODES = {
+            AUTHENTICATED: 'authenticated',
+            UNAUTHENTICATED: 'unauthenticated'
+        };
+    }
+
+    /**
+     * Initialiser le gestionnaire de visibilité des modes
+     * Doit être appelé une seule fois au démarrage de l'app
+     */
+    init() {
+        if (this.isInitialized) {
+            console.warn('⚠️ ModeVisibilityManager déjà initialisé');
+            return;
+        }
+
+        try {
+            // Cacher les éléments DOM
+            this.cacheDOMElements();
+
+            // Vérifier que tous les éléments sont trouvés
+            if (!this.validateElements()) {
+                throw new Error('Un ou plusieurs boutons de mode manquent dans le DOM');
+            }
+
+            // Appliquer les styles CSS pour les transitions
+            this.setupTransitionStyles();
+
+            this.isInitialized = true;
+            console.log('✅ ModeVisibilityManager initialisé avec succès');
+        } catch (error) {
+            console.error('❌ Erreur lors de l\'initialisation ModeVisibilityManager:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Cacher tous les éléments DOM dans les propriétés de l'instance
+     * Cela améliore les performances en évitant les recherches répétées
+     */
+    cacheDOMElements() {
+        this.modeElements.normal = document.getElementById('modeNormalBtn');
+        this.modeElements.dmi = document.getElementById('modeDmiBtn');
+        this.modeElements.test = document.getElementById('modeTestBtn');
+    }
+
+    /**
+     * Valider que tous les éléments ont été trouvés
+     */
+    validateElements() {
+        const missingElements = Object.entries(this.modeElements)
+            .filter(([, element]) => !element)
+            .map(([name]) => name);
+
+        if (missingElements.length > 0) {
+            console.warn(`⚠️ Éléments manquants: ${missingElements.join(', ')}`);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Appliquer les styles CSS pour les transitions fluides
+     */
+    setupTransitionStyles() {
+        // Ajouter une classe pour les transitions si elle n'existe pas
+        const style = document.createElement('style');
+        style.textContent = `
+            .mode-btn-transition {
+                transition: opacity 0.3s ease, visibility 0.3s ease;
+            }
+
+            .mode-btn-hidden {
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+            }
+
+            .mode-btn-visible {
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Ajouter les classes de transition à tous les boutons de mode
+        Object.values(this.modeElements).forEach(element => {
+            if (element) {
+                element.classList.add('mode-btn-transition');
+            }
+        });
+    }
+
+    /**
+     * Mettre à jour la visibilité des modes en fonction de l'état d'authentification
+     * @param {boolean} isAuthenticated - L'utilisateur est-il authentifié?
+     */
+    updateVisibility(isAuthenticated) {
+        // Éviter les mises à jour redondantes
+        if (this.currentAuthState === isAuthenticated) {
+            console.log('ℹ️ État d\'authentification inchangé, pas de mise à jour nécessaire');
+            return;
+        }
+
+        this.currentAuthState = isAuthenticated;
+
+        if (isAuthenticated) {
+            this.showAuthenticatedModes();
+        } else {
+            this.showUnauthenticatedModes();
+        }
+
+        // Exécuter les callbacks
+        this.executeCallbacks('onAuthStateChange', isAuthenticated);
+    }
+
+    /**
+     * Afficher les modes pour utilisateur authentifié
+     * Mode Normal + Mode DMI visibles
+     * Mode Test caché
+     */
+    showAuthenticatedModes() {
+        console.log('🔓 Affichage des modes pour utilisateur authentifié');
+
+        // Afficher Mode Normal avec animation
+        this.showElement(this.modeElements.normal, 'modeNormalBtn');
+
+        // Afficher Mode DMI avec animation
+        this.showElement(this.modeElements.dmi, 'modeDmiBtn');
+
+        // Cacher Mode Test
+        this.hideElement(this.modeElements.test, 'modeTestBtn');
+
+        console.log('✅ Mode Normal et Mode DMI activés');
+        this.executeCallbacks('onModeVisibilityChange', {
+            state: this.MODES.AUTHENTICATED,
+            visible: ['normal', 'dmi'],
+            hidden: ['test']
+        });
+    }
+
+    /**
+     * Afficher les modes pour utilisateur NON authentifié
+     * Mode Test visible
+     * Mode Normal + Mode DMI cachés
+     */
+    showUnauthenticatedModes() {
+        console.log('🔒 Affichage des modes pour utilisateur NON authentifié');
+
+        // Cacher Mode Normal avec animation
+        this.hideElement(this.modeElements.normal, 'modeNormalBtn');
+
+        // Cacher Mode DMI avec animation
+        this.hideElement(this.modeElements.dmi, 'modeDmiBtn');
+
+        // Afficher Mode Test
+        this.showElement(this.modeElements.test, 'modeTestBtn');
+
+        console.log('✅ Mode Test activé');
+        this.executeCallbacks('onModeVisibilityChange', {
+            state: this.MODES.UNAUTHENTICATED,
+            visible: ['test'],
+            hidden: ['normal', 'dmi']
+        });
+    }
+
+    /**
+     * Afficher un élément avec transition
+     * @param {HTMLElement} element - L'élément à afficher
+     * @param {string} elementId - L'ID pour le logging
+     */
+    showElement(element, elementId) {
+        if (!element) return;
+
+        // Utiliser display pour accessible + classes pour l'animation
+        element.style.display = '';
+        element.classList.remove('mode-btn-hidden');
+        element.classList.add('mode-btn-visible');
+
+        console.log(`  → Affichage de ${elementId}`);
+    }
+
+    /**
+     * Cacher un élément avec transition
+     * @param {HTMLElement} element - L'élément à cacher
+     * @param {string} elementId - L'ID pour le logging
+     */
+    hideElement(element, elementId) {
+        if (!element) return;
+
+        element.classList.remove('mode-btn-visible');
+        element.classList.add('mode-btn-hidden');
+
+        // Cacher avec display après la transition pour l'accessibilité
+        setTimeout(() => {
+            if (!element.classList.contains('mode-btn-visible')) {
+                element.style.display = 'none';
+            }
+        }, 300); // Match la durée de transition en CSS
+
+        console.log(`  → Masquage de ${elementId}`);
+    }
+
+    /**
+     * Ajouter un callback pour les changements d'état
+     * @param {string} event - Type d'événement (onAuthStateChange, onModeVisibilityChange)
+     * @param {function} callback - Fonction à appeler
+     */
+    onAuthStateChange(callback) {
+        if (typeof callback === 'function') {
+            this.callbacks.onAuthStateChange.push(callback);
+        }
+    }
+
+    /**
+     * Ajouter un callback pour les changements de visibilité
+     * @param {string} event - Type d'événement
+     * @param {function} callback - Fonction à appeler
+     */
+    onModeVisibilityChange(callback) {
+        if (typeof callback === 'function') {
+            this.callbacks.onModeVisibilityChange.push(callback);
+        }
+    }
+
+    /**
+     * Exécuter tous les callbacks pour un événement donné
+     * @param {string} eventType - Type d'événement
+     * @param {*} data - Données à passer aux callbacks
+     */
+    executeCallbacks(eventType, data) {
+        if (!this.callbacks[eventType]) {
+            return;
+        }
+
+        this.callbacks[eventType].forEach(callback => {
+            try {
+                callback(data);
+            } catch (error) {
+                console.error(`❌ Erreur lors de l'exécution du callback ${eventType}:`, error);
+            }
+        });
+    }
+
+    /**
+     * Obtenir l'état actuel d'authentification
+     */
+    getCurrentAuthState() {
+        return this.currentAuthState;
+    }
+
+    /**
+     * Obtenir l'état actuel des modes visibles
+     */
+    getModeVisibilityState() {
+        return {
+            isAuthenticated: this.currentAuthState,
+            normalVisible: this.modeElements.normal?.style.display !== 'none',
+            dmiVisible: this.modeElements.dmi?.style.display !== 'none',
+            testVisible: this.modeElements.test?.style.display !== 'none'
+        };
+    }
+}
+
+// Créer l'instance globale du gestionnaire de visibilité des modes
+window.modeVisibilityManager = null;
+
+/**
+ * Fonction wrapper pour la compatibilité avec le code existant
+ * Appelle le ModeVisibilityManager
  */
 function updateModeVisibility(isAuthenticated) {
-    const modeNormalBtn = document.getElementById('modeNormalBtn');
-    const modeDmiBtn = document.getElementById('modeDmiBtn');
-    const modeTestBtn = document.getElementById('modeTestBtn');
-
-    if (!modeNormalBtn || !modeDmiBtn || !modeTestBtn) {
-        console.warn('One or more mode buttons not found in DOM');
+    if (!window.modeVisibilityManager) {
+        console.warn('⚠️ ModeVisibilityManager n\'est pas initialisé');
         return;
     }
-
-    if (isAuthenticated) {
-        // User is logged in: show Normal and DMI modes, hide Test mode
-        modeNormalBtn.style.display = '';
-        modeDmiBtn.style.display = '';
-        modeTestBtn.style.display = 'none';
-        console.log('✅ Mode Normal and Mode DMI enabled (user authenticated)');
-    } else {
-        // User is not logged in: hide Normal and DMI modes, show Test mode
-        modeNormalBtn.style.display = 'none';
-        modeDmiBtn.style.display = 'none';
-        modeTestBtn.style.display = '';
-        console.log('✅ Mode Test enabled (user not authenticated)');
-    }
+    window.modeVisibilityManager.updateVisibility(isAuthenticated);
 }
 
 // ===== MODULE SYSTEM FOR DYNAMIC LOADING =====
