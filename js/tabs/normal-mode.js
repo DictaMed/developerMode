@@ -21,15 +21,31 @@ class NormalModeTab {
         // Configuration du bouton de soumission
         const submitBtn = document.getElementById('submitNormal');
         if (submitBtn) {
-            submitBtn.addEventListener('click', () => {
+            submitBtn.addEventListener('click', async () => {
+                // BUG FIX #7: Valider le formulaire avant d'envoyer
+                if (!this.validateForm()) {
+                    console.warn('⚠️ Form validation failed, not sending data');
+                    return;
+                }
+
                 if (window.loadingOverlay) {
                     window.loadingOverlay.show('Envoi en cours...');
                 }
-                this.dataSender.send(window.APP_CONFIG.MODES.NORMAL).finally(() => {
+
+                // BUG FIX #4: Ajouter un .catch() pour la gestion d'erreur
+                try {
+                    await this.dataSender.send(window.APP_CONFIG.MODES.NORMAL);
+                    // Success notification is handled in dataSender.send()
+                } catch (error) {
+                    console.error('❌ NormalModeTab: Error sending data:', error);
+                    if (window.notificationSystem) {
+                        window.notificationSystem.error('Erreur lors de l\'envoi des données');
+                    }
+                } finally {
                     if (window.loadingOverlay) {
                         window.loadingOverlay.hide();
                     }
-                });
+                }
             });
         }
 

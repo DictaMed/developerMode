@@ -340,14 +340,24 @@ class DataSender {
 
     async makeApiCall(endpoint, payload) {
         try {
+            // BUG FIX #9: Implement proper timeout using AbortController
+            // Note: fetch timeout parameter is NOT standard, so use AbortController instead
+            const controller = new AbortController();
+            const timeoutId = setTimeout(
+                () => controller.abort(),
+                window.APP_CONFIG.API_TIMEOUT || 30000
+            );
+
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(payload),
-                timeout: window.APP_CONFIG.API_TIMEOUT || 30000
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -371,6 +381,9 @@ class DataSender {
             };
 
         } catch (error) {
+            if (error.name === 'AbortError') {
+                throw new Error('Request timeout. Please check your internet connection and try again.');
+            }
             if (error instanceof TypeError) {
                 throw new Error('Network error. Please check your internet connection.');
             }
@@ -382,10 +395,29 @@ class DataSender {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => {
-                const base64 = reader.result.split(',')[1];
-                resolve(base64);
+                try {
+                    if (!reader.result) {
+                        reject(new Error('FileReader result is empty'));
+                        return;
+                    }
+                    const parts = reader.result.split(',');
+                    if (parts.length < 2) {
+                        reject(new Error('Invalid base64 format from FileReader'));
+                        return;
+                    }
+                    const base64 = parts[1];
+                    if (!base64) {
+                        reject(new Error('Base64 data is empty'));
+                        return;
+                    }
+                    resolve(base64);
+                } catch (error) {
+                    reject(new Error(`Failed to convert blob to base64: ${error.message}`));
+                }
             };
-            reader.onerror = reject;
+            reader.onerror = () => {
+                reject(new Error(`FileReader error: ${reader.error}`));
+            };
             reader.readAsDataURL(blob);
         });
     }

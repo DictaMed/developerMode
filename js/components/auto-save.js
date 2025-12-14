@@ -9,6 +9,8 @@ class AutoSaveSystem {
         this.appState = appState;
         this.indicator = null;
         this.debounceTimer = null;
+        this.debouncedSave = null;
+        this.autoSaveInterval = null;
     }
 
     init() {
@@ -83,17 +85,39 @@ class AutoSaveSystem {
 
     startAutoSave() {
         if (this.appState) {
-            this.appState.autoSaveInterval = setInterval(() => {
+            this.autoSaveInterval = setInterval(() => {
                 this.save();
             }, window.APP_CONFIG.AUTOSAVE_INTERVAL);
         }
-        
+
         // Debounced save on form changes
-        const debouncedSave = window.Utils.debounce(() => {
+        // BUG FIX #5: Store reference to debouncedSave so we can remove listener later
+        this.debouncedSave = window.Utils.debounce(() => {
             this.save();
         }, 1000);
-        
-        document.addEventListener('input', debouncedSave);
+
+        document.addEventListener('input', this.debouncedSave);
+    }
+
+    /**
+     * Stop auto-save and cleanup event listeners
+     * BUG FIX #5: Add cleanup method to prevent memory leaks
+     */
+    stop() {
+        if (this.autoSaveInterval) {
+            clearInterval(this.autoSaveInterval);
+            this.autoSaveInterval = null;
+        }
+
+        if (this.debouncedSave) {
+            document.removeEventListener('input', this.debouncedSave);
+            this.debouncedSave = null;
+        }
+
+        if (this.indicator && this.indicator.parentNode) {
+            this.indicator.parentNode.removeChild(this.indicator);
+            this.indicator = null;
+        }
     }
 
     showIndicator(state) {

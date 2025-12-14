@@ -186,6 +186,7 @@ class TabNavigationSystem {
             // Map tab IDs to file names avec validation
             const tabFiles = {
                 'home': 'tab-home.html',
+                'connexion': 'tab-connexion.html',
                 'mode-normal': 'tab-mode-normal.html',
                 'mode-test': 'tab-mode-test.html',
                 'mode-dmi': 'tab-mode-dmi.html',
@@ -264,6 +265,14 @@ class TabNavigationSystem {
 
     initTabContentEventListeners(tabId) {
         // Initialize specific event listeners based on tab type
+        if (tabId === 'connexion') {
+            // Initialize authentication page manager
+            if (window.authPageManager) {
+                console.log('🔐 Initializing AuthPageManager for connexion tab');
+                window.authPageManager.init();
+            }
+        }
+
         if (tabId === 'mode-normal' || tabId === 'mode-test') {
             // Initialize audio recorders through manager (will handle retry logic)
             if (window.audioRecorderManager) {
@@ -273,7 +282,7 @@ class TabNavigationSystem {
             // Update section count
             this.updateSectionCount();
         }
-        
+
         if (tabId === 'mode-dmi') {
             // Initialize DMI specific listeners
             const texteLibre = document.getElementById('texteLibre');
@@ -314,17 +323,22 @@ class TabNavigationSystem {
     }
 
     checkTabAccess(tabId) {
-        // Test mode, guide, FAQ and home are always accessible
-        if (tabId === window.APP_CONFIG.MODES.TEST || tabId === 'guide' || tabId === 'faq' || tabId === window.APP_CONFIG.MODES.HOME) {
+        // Test mode, guide, FAQ, home, and connexion are always accessible
+        if (tabId === window.APP_CONFIG.MODES.TEST || tabId === 'guide' || tabId === 'faq' || tabId === window.APP_CONFIG.MODES.HOME || tabId === 'connexion') {
             return true;
         }
-        
-        // Normal mode and DMI mode require authentication
-        if ((tabId === window.APP_CONFIG.MODES.NORMAL || tabId === window.APP_CONFIG.MODES.DMI) && window.FirebaseAuthManager && window.FirebaseAuthManager.isAuthenticated && !window.FirebaseAuthManager.isAuthenticated()) {
+
+        // DMI mode is accessible to everyone (no authentication required)
+        if (tabId === window.APP_CONFIG.MODES.DMI) {
+            return true;
+        }
+
+        // Normal mode requires authentication
+        if (tabId === window.APP_CONFIG.MODES.NORMAL && window.FirebaseAuthManager && window.FirebaseAuthManager.isAuthenticated && !window.FirebaseAuthManager.isAuthenticated()) {
             window.notificationSystem.warning('Veuillez vous connecter pour accéder à ce mode', 'Authentification requise');
             return false;
         }
-        
+
         return true;
     }
 

@@ -12,6 +12,10 @@ class DMIDataSender {
     async send() {
         try {
             const submitBtn = document.getElementById('submitDMI');
+            if (!submitBtn) {
+                console.error('❌ DMIDataSender: submitBtn element not found');
+                return;
+            }
             submitBtn.disabled = true;
             submitBtn.textContent = 'Envoi en cours...';
 
@@ -44,7 +48,12 @@ class DMIDataSender {
                     this.resetForm();
                 }
             } else {
-                const errorText = await response.text();
+                let errorText = 'Pas de détails d\'erreur';
+                try {
+                    errorText = await response.text();
+                } catch (parseError) {
+                    console.warn('⚠️ Impossible de parser la réponse d\'erreur:', parseError);
+                }
                 if (window.notificationSystem) {
                     window.notificationSystem.error(`Le serveur a renvoyé une erreur (${response.status}). Veuillez réessayer ou contactez le support.`, 'Erreur d\'envoi');
                 }
@@ -58,8 +67,10 @@ class DMIDataSender {
             }
         } finally {
             const submitBtn = document.getElementById('submitDMI');
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Envoyer les données DMI';
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Envoyer les données DMI';
+            }
         }
     }
 
@@ -102,19 +113,23 @@ class DMIDataSender {
     }
 
     resetForm() {
-        document.getElementById('numeroDossierDMI').value = '';
-        document.getElementById('nomPatientDMI').value = '';
-        document.getElementById('texteLibre').value = '';
-        
+        const numeroDossierElement = document.getElementById('numeroDossierDMI');
+        const nomPatientElement = document.getElementById('nomPatientDMI');
+        const texteLibreElement = document.getElementById('texteLibre');
+
+        if (numeroDossierElement) numeroDossierElement.value = '';
+        if (nomPatientElement) nomPatientElement.value = '';
+        if (texteLibreElement) texteLibreElement.value = '';
+
         const texteLibreCounter = document.getElementById('texteLibreCounter');
         if (texteLibreCounter) {
             texteLibreCounter.textContent = '0';
         }
-        
+
         if (this.photoManagementSystem) {
             this.photoManagementSystem.clear();
         }
-        
+
         const submitBtn = document.getElementById('submitDMI');
         if (submitBtn) {
             submitBtn.disabled = true;
