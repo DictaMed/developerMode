@@ -20,13 +20,26 @@ class NormalModeTab {
     initEventListeners() {
         // Configuration du bouton de soumission
         const submitBtn = document.getElementById('submitNormal');
+        console.log('🔧 NormalModeTab.initEventListeners() - submitBtn:', submitBtn);
+        console.log('   submitBtn?.disabled:', submitBtn?.disabled);
+        console.log('   submitBtn?.className:', submitBtn?.className);
+
         if (submitBtn) {
-            submitBtn.addEventListener('click', async () => {
+            submitBtn.addEventListener('click', async (event) => {
+                console.log('🖱️ Submit button CLICKED!');
+                console.log('   event:', event);
+                console.log('   this.validateForm:', typeof this.validateForm);
+
                 // BUG FIX #7: Valider le formulaire avant d'envoyer
-                if (!this.validateForm()) {
+                const isValid = this.validateForm();
+                console.log('   Form validation result:', isValid);
+
+                if (!isValid) {
                     console.warn('⚠️ Form validation failed, not sending data');
                     return;
                 }
+
+                console.log('✅ Form validation passed, proceeding with send');
 
                 if (window.loadingOverlay) {
                     window.loadingOverlay.show('Envoi en cours...');
@@ -34,8 +47,10 @@ class NormalModeTab {
 
                 // BUG FIX #4: Ajouter un .catch() pour la gestion d'erreur
                 try {
+                    console.log('📤 Calling dataSender.send()');
                     await this.dataSender.send(window.APP_CONFIG.MODES.NORMAL);
                     // Success notification is handled in dataSender.send()
+                    console.log('✅ dataSender.send() completed successfully');
                 } catch (error) {
                     console.error('❌ NormalModeTab: Error sending data:', error);
                     if (window.notificationSystem) {
@@ -47,6 +62,9 @@ class NormalModeTab {
                     }
                 }
             });
+            console.log('✅ Click listener attached to submitNormal button');
+        } else {
+            console.error('❌ NormalModeTab: submitNormal button not found!');
         }
 
         // Configuration des compteurs de caractères
