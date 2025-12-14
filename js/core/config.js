@@ -12,6 +12,43 @@ const APP_CONFIG = {
     AUTOSAVE_INTERVAL: 30000, // 30 seconds
     AUTOSAVE_RETENTION: 24 * 60 * 60 * 1000, // 24 hours
     TIMEOUT_DURATION: 30000, // 30 seconds
+
+    // ===== v2.0: INPUT TYPES =====
+    INPUT_TYPES: {
+        AUDIO: 'audio',
+        TEXT: 'text',
+        PHOTO: 'photo'
+    },
+
+    // ===== v2.0: AUDIO CONFIGURATION =====
+    AUDIO_CONFIG: {
+        maxDuration: 300,                    // 5 minutes
+        maxSizeBytes: 25 * 1024 * 1024,      // 25MB
+        compression: {
+            enabled: true,
+            targetSizeBytes: 5 * 1024 * 1024, // 5MB compressed
+            sampleRate: 16000                 // Whisper optimal
+        }
+    },
+
+    // ===== v2.0: TEXT CONFIGURATION =====
+    TEXT_CONFIG: {
+        minLength: 5,
+        maxLength: 50000,
+        allowedFormats: ['text/plain']
+    },
+
+    // ===== v2.0: PHOTO CONFIGURATION =====
+    PHOTO_CONFIG: {
+        maxSizeBytes: 20 * 1024 * 1024,      // 20MB
+        maxCount: 5,
+        allowedMimes: ['image/jpeg', 'image/png', 'image/webp'],
+        compression: {
+            enabled: true,
+            targetSizeBytes: 5 * 1024 * 1024  // 5MB compressed
+        }
+    },
+
     MODES: {
         NORMAL: 'normal',
         TEST: 'test',

@@ -1,6 +1,7 @@
 /**
  * DictaMed - Système d'envoi de données
- * Version: 2.1 - Système centralisé d'envoi des données
+ * Version: 2.2 - Multi-inputs (Audio, Texte, Photos) avec agent OpenAI
+ * Supporte 3 types d'entrée avec logique conditionnelle n8n v2.0
  */
 
 class DataSender {
@@ -8,8 +9,272 @@ class DataSender {
         this.appState = appState;
         this.audioRecorderManager = audioRecorderManager;
         this.isSending = false;
+        this.logger = window.logger?.createLogger('DataSender') || console;
     }
 
+    /**
+     * v2.0: Déterminer le type d'entrée basé sur les données disponibles
+     */
+    determineInputType(recordingData) {
+        if (recordingData && recordingData.audioData) return 'audio';
+        if (recordingData && recordingData.audioBlob) return 'audio';
+        if (recordingData && recordingData.text) return 'text';
+        if (recordingData && recordingData.photoData) return 'photo';
+        if (recordingData && recordingData.photoBlob) return 'photo';
+        return 'unknown';
+    }
+
+    /**
+     * v2.0: Valider les données selon le type d'entrée
+     */
+    validateInputData(inputType, data) {
+        const result = { valid: true, errors: [] };
+
+        if (inputType === 'audio') {
+            if (!data.audioData && !data.audioBlob) result.errors.push('Audio data manquant');
+            if (!data.duration && data.duration !== 0) result.errors.push('Durée audio manquante');
+            if (!data.format) result.errors.push('Format audio manquant');
+        } else if (inputType === 'text') {
+            if (!data.text) result.errors.push('Texte manquant');
+            if (data.text && data.text.trim().length < 5) result.errors.push('Texte trop court (min 5 caractères)');
+            if (data.text && data.text.length > 50000) result.errors.push('Texte trop long (max 50000 caractères)');
+        } else if (inputType === 'photo') {
+            if (!data.photoData && !data.photoBlob) result.errors.push('Photo data manquante');
+            if (!data.mimeType) result.errors.push('MIME type manquant');
+            if (data.mimeType && !window.APP_CONFIG.PHOTO_CONFIG.allowedMimes.includes(data.mimeType)) {
+                result.errors.push(`Format invalide: ${data.mimeType}`);
+            }
+        }
+
+        result.valid = result.errors.length === 0;
+        return result;
+    }
+
+    /**
+     * v2.0: Traiter les données audio (compression si nécessaire)
+     */
+    async processAudioData(audioBlob, duration) {
+        this.logger.log('🎵 Traitement audio...');
+
+        if (!audioBlob) {
+            throw new Error('Audio blob manquant');
+        }
+
+        try {
+            const sizeInMB = (audioBlob.size / 1024 / 1024).toFixed(2);
+            this.logger.log(`📦 Taille originale: ${sizeInMB}MB`);
+
+            // Convertir en base64
+            const base64 = await this.blobToBase64(audioBlob);
+
+            return {
+                audioData: base64,
+                duration: duration,
+                format: 'webm',
+                size: sizeInMB
+            };
+        } catch (error) {
+            this.logger.error('❌ Erreur audio:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * v2.0: Traiter les données texte (nettoyage basique)
+     */
+    processTextData(text) {
+        this.logger.log('📝 Traitement texte...');
+
+        if (!text || text.trim().length === 0) {
+            throw new Error('Texte vide');
+        }
+
+        return {
+            text: text.trim(),
+            format: 'text/plain',
+            length: text.length
+        };
+    }
+
+    /**
+     * v2.0: Traiter les données photo (validation et base64)
+     */
+    async processPhotoData(photoBlob, mimeType, description = '') {
+        this.logger.log('📷 Traitement photo...');
+
+        try {
+            // Valider format
+            const allowedTypes = window.APP_CONFIG.PHOTO_CONFIG.allowedMimes;
+            if (!allowedTypes.includes(mimeType)) {
+                throw new Error(`Format invalide: ${mimeType}`);
+            }
+
+            // Valider taille
+            const sizeInMB = (photoBlob.size / 1024 / 1024).toFixed(2);
+            if (photoBlob.size > window.APP_CONFIG.PHOTO_CONFIG.maxSizeBytes) {
+                throw new Error(`Image trop grosse: ${sizeInMB}MB (max ${window.APP_CONFIG.PHOTO_CONFIG.maxSizeBytes / 1024 / 1024}MB)`);
+            }
+
+            // Convertir en base64
+            const base64 = await this.blobToBase64(photoBlob);
+
+            return {
+                photoData: base64,
+                mimeType: mimeType,
+                description: description.trim(),
+                size: sizeInMB
+            };
+        } catch (error) {
+            this.logger.error('❌ Erreur photo:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * v2.0: Construire le payload unifié pour tous les types
+     */
+    buildPayload(recordingData, currentUser, mode) {
+        const inputType = this.determineInputType(recordingData);
+
+        // Valider les données
+        const validation = this.validateInputData(inputType, recordingData);
+        if (!validation.valid) {
+            throw new Error(`Données invalides (${inputType}): ${validation.errors.join(', ')}`);
+        }
+
+        // Construire le wrapper "data"
+        let dataWrapper = {};
+        if (inputType === 'audio') {
+            dataWrapper = {
+                audioData: recordingData.audioData,
+                duration: recordingData.duration,
+                format: recordingData.format || 'webm'
+            };
+        } else if (inputType === 'text') {
+            dataWrapper = {
+                text: recordingData.text,
+                format: recordingData.format || 'text/plain'
+            };
+        } else if (inputType === 'photo') {
+            dataWrapper = {
+                photoData: recordingData.photoData,
+                mimeType: recordingData.mimeType,
+                description: recordingData.description || ''
+            };
+        }
+
+        // Construire le payload complet
+        const payload = {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName || 'Anonymous',
+            mode: mode,
+            timestamp: new Date().toISOString(),
+            patientInfo: this.collectPatientInfo(mode),
+            inputType: inputType,
+            data: dataWrapper,
+            metadata: {
+                appVersion: '2.2.0',
+                clientType: this.getClientType(),
+                userAgent: navigator.userAgent
+            }
+        };
+
+        return payload;
+    }
+
+    /**
+     * Déterminer le type de client
+     */
+    getClientType() {
+        if (/mobile|android|iphone/i.test(navigator.userAgent)) return 'mobile';
+        if (/tablet|ipad/i.test(navigator.userAgent)) return 'tablet';
+        return 'desktop';
+    }
+
+    /**
+     * v2.0: Envoyer des données directement (audio, texte ou photo)
+     * API simple pour support 3 types d'entrée
+     */
+    async sendRecordingData(recordingData, mode = 'normal') {
+        if (this.isSending) {
+            this.logger.warn('Envoi déjà en cours...');
+            return Promise.resolve();
+        }
+
+        this.isSending = true;
+
+        try {
+            this.logger.info(`🚀 Début envoi ${mode} - Type: ${this.determineInputType(recordingData)}`);
+
+            // 1. Récupérer l'utilisateur actuel
+            const currentUser = window.FirebaseAuthManager?.getCurrentUser?.() || null;
+            if (!currentUser) {
+                throw new Error('Utilisateur non authentifié. Veuillez vous connecter.');
+            }
+
+            // 2. Traiter les données selon le type
+            let processedData;
+            const inputType = this.determineInputType(recordingData);
+
+            if (inputType === 'audio' && recordingData.audioBlob) {
+                processedData = await this.processAudioData(
+                    recordingData.audioBlob,
+                    recordingData.duration
+                );
+            } else if (inputType === 'text') {
+                processedData = this.processTextData(recordingData.text);
+            } else if (inputType === 'photo' && recordingData.photoBlob) {
+                processedData = await this.processPhotoData(
+                    recordingData.photoBlob,
+                    recordingData.mimeType,
+                    recordingData.description
+                );
+            } else {
+                throw new Error('Type d\'entrée non supporté ou données manquantes');
+            }
+
+            // 3. Construire le payload
+            const payload = this.buildPayload(processedData, currentUser, mode);
+
+            // 4. Envoyer
+            const result = await this.sendToEndpoint(payload, mode);
+
+            this.logger.info('✅ Données envoyées avec succès', { result });
+
+            // Notifications
+            if (window.notificationSystem) {
+                window.notificationSystem.success(
+                    `✅ ${inputType.toUpperCase()} envoyé avec succès!`,
+                    'Envoi terminé'
+                );
+            }
+
+            return result;
+
+        } catch (error) {
+            this.logger.error('❌ Erreur lors de l\'envoi:', {
+                error: error.message,
+                stack: error.stack,
+                mode
+            });
+
+            if (window.notificationSystem) {
+                window.notificationSystem.error(
+                    `❌ Erreur lors de l'envoi: ${error.message}`,
+                    'Erreur'
+                );
+            }
+
+            throw error;
+        } finally {
+            this.isSending = false;
+        }
+    }
+
+    /**
+     * Méthode classique: envoyer les enregistrements audio (mode hérité)
+     */
     async send(mode) {
         if (this.isSending) {
             console.warn('Envoi déjà en cours...');
@@ -24,7 +289,7 @@ class DataSender {
 
             // Collect data based on mode
             const data = await this.collectData(mode);
-            
+
             // Validate data
             if (!this.validateData(data, mode)) {
                 throw new Error('Données invalides pour l\'envoi');
@@ -32,9 +297,9 @@ class DataSender {
 
             // Send data to appropriate endpoint
             const result = await this.sendToEndpoint(data, mode);
-            
+
             logger.info('Données envoyées avec succès', { result });
-            
+
             // Show success notification
             if (window.notificationSystem) {
                 window.notificationSystem.success(
@@ -302,13 +567,35 @@ class DataSender {
         }
     }
 
+    /**
+     * Envoyer les données au webhook n8n
+     * Supporte deux formats: ancien (data) et nouveau (payload v2.0)
+     */
     async sendToEndpoint(data, mode) {
         try {
-            // Récupérer l'utilisateur actuel
-            const currentUser = window.FirebaseAuthManager?.getCurrentUser?.() || null;
+            let payload = data;
 
-            if (!currentUser) {
-                throw new Error('User not authenticated. Please sign in first.');
+            // v2.0: Si data est un payload complet (contient uid, inputType, data wrapper)
+            if (data && data.uid && data.inputType && data.data) {
+                // Payload v2.0: déjà formaté, utiliser tel quel
+                payload = data;
+                console.log(`✅ v2.0 Payload detected: ${data.inputType}`);
+            } else {
+                // Format classique: enrichir avec user info
+                const currentUser = window.FirebaseAuthManager?.getCurrentUser?.() || null;
+
+                if (!currentUser) {
+                    throw new Error('User not authenticated. Please sign in first.');
+                }
+
+                payload = {
+                    uid: currentUser.uid,
+                    email: currentUser.email,
+                    displayName: currentUser.displayName || '',
+                    mode: mode,
+                    timestamp: new Date().toISOString(),
+                    ...data // Inclut patientInfo, recordings, metadata
+                };
             }
 
             // Déterminer le webhook en fonction du mode
@@ -318,33 +605,24 @@ class DataSender {
                 endpoint = window.APP_CONFIG.WEBHOOK_ENDPOINTS.test;
             } else {
                 // Mode NORMAL et DMI: webhook partagé
-                endpoint = window.APP_CONFIG.WEBHOOK_ENDPOINTS.default;
+                endpoint = window.APP_CONFIG.WEBHOOK_ENDPOINTS.default || window.APP_CONFIG.WEBHOOK_ENDPOINTS.normal;
             }
 
             if (!endpoint) {
                 throw new Error(`Webhook endpoint not configured for mode: ${mode}`);
             }
 
-            // Enrichir les données avec les informations utilisateur
-            const payload = {
-                uid: currentUser.uid,
-                email: currentUser.email,
-                displayName: currentUser.displayName || '',
-                mode: mode,
-                timestamp: new Date().toISOString(),
-                ...data // Inclut patientInfo, recordings, metadata
-            };
-
             console.log(`DataSender: Sending to endpoint: ${endpoint} (mode: ${mode})`);
+            console.log(`DataSender: Payload type: ${payload.inputType || 'legacy'}`);
 
             // Faire l'appel réel à l'API
             const response = await this.makeApiCall(endpoint, payload);
 
-            console.log('DataSender: Données envoyées avec succès', response);
+            console.log('✅ DataSender: Données envoyées avec succès', response);
             return response;
 
         } catch (error) {
-            console.error('Erreur lors de l\'envoi vers l\'endpoint:', error);
+            console.error('❌ Erreur lors de l\'envoi vers l\'endpoint:', error);
             throw new Error(`Failed to send data: ${error.message}`);
         }
     }
