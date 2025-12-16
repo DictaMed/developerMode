@@ -53,11 +53,12 @@ class TabNavigationSystem {
     }
 
     initNormalModeButton() {
-        // Find the normal mode button in the fixed navigation
+        // Find the normal mode and DMI buttons in the fixed navigation
         this.normalModeButton = document.querySelector('.fixed-nav-btn[data-tab="mode-normal"]');
-        
-        // Initialize the visibility based on current authentication status
-        this.updateNormalModeButtonVisibility();
+        this.dmiModeButton = document.querySelector('.fixed-nav-btn[data-tab="mode-dmi"]');
+
+        // Initialize the visual state based on current authentication status
+        this.updateProtectedButtonsState();
     }
 
     initAuthStateListener() {
@@ -65,7 +66,7 @@ class TabNavigationSystem {
         // BUG FIX: Wait for Firebase to restore auth state on page reload
         // This is much more efficient and responds immediately to auth changes
         const checkAuthState = () => {
-            this.updateNormalModeButtonVisibility();
+            this.updateProtectedButtonsState();
         };
 
         // BUG FIX: Wait for auth restoration before checking state
@@ -103,27 +104,31 @@ class TabNavigationSystem {
         window.addEventListener('authStateChanged', checkAuthState);
     }
 
-    updateNormalModeButtonVisibility() {
-        if (!this.normalModeButton) {
-            return;
-        }
-
+    updateProtectedButtonsState() {
         // Vérifier si l'utilisateur est authentifié en utilisant getCurrentUser()
         const currentUser = window.FirebaseAuthManager && window.FirebaseAuthManager.getCurrentUser && window.FirebaseAuthManager.getCurrentUser();
         const isAuthenticated = !!currentUser; // !!null = false, !!user = true
 
-        if (isAuthenticated) {
-            this.normalModeButton.style.display = '';
-            this.normalModeButton.classList.remove('auth-required-hidden');
-            console.log('🔓 Normal mode button visible - user authenticated:', currentUser?.email);
-        } else {
-            this.normalModeButton.style.display = 'none';
-            this.normalModeButton.classList.add('auth-required-hidden');
-            console.log('🔒 Normal mode button hidden - user not authenticated');
-        }
+        // Liste des boutons protégés (nécessitent authentification)
+        const protectedButtons = [this.normalModeButton, this.dmiModeButton];
+
+        protectedButtons.forEach(button => {
+            if (!button) return;
+
+            if (isAuthenticated) {
+                // Utilisateur connecté : activer les boutons
+                button.classList.remove('auth-required-disabled');
+                button.removeAttribute('title');
+                console.log(`🔓 ${button.dataset.tab} button enabled - user authenticated:`, currentUser?.email);
+            } else {
+                // Utilisateur non connecté : désactiver visuellement les boutons
+                button.classList.add('auth-required-disabled');
+                button.setAttribute('title', 'Connexion requise pour accéder à ce mode');
+                console.log(`🔒 ${button.dataset.tab} button disabled - user not authenticated`);
+            }
+        });
 
         // BUG FIX: Update all mode visibility based on authentication status
-        // This ensures both Mode Normal and Mode Test visibility is synchronized
         if (window.DictaMed && typeof window.DictaMed.updateModeVisibility === 'function') {
             window.DictaMed.updateModeVisibility(isAuthenticated);
         }
