@@ -243,6 +243,9 @@ class DataSender {
 
             this.logger.info('✅ Données envoyées avec succès', { result });
 
+            // Enregistrer les statistiques
+            await this.recordStats(mode, inputType, processedData);
+
             // Notifications
             if (window.notificationSystem) {
                 window.notificationSystem.success(
@@ -457,6 +460,9 @@ class DataSender {
                 const result = await this.sendToEndpoint(audioPayload, mode);
 
                 logger.info(`✅ Envoi réussi: ${mergedAudio.recordingCount} enregistrement(s) fusionnés`);
+
+                // Enregistrer les statistiques
+                await this.recordStats(mode, 'audio', { duration: mergedAudio.duration });
 
                 // Show success notification
                 if (window.notificationSystem) {
@@ -902,6 +908,35 @@ class DataSender {
 
     isCurrentlySending() {
         return this.isSending;
+    }
+
+    /**
+     * Enregistrer les statistiques après un envoi réussi
+     */
+    async recordStats(mode, inputType, processedData) {
+        try {
+            if (!window.userStatsService) {
+                return;
+            }
+
+            const duration = processedData?.duration || 0;
+
+            if (mode === window.APP_CONFIG?.MODES?.NORMAL) {
+                await window.userStatsService.recordNormalModeSend(1, duration);
+            } else if (mode === window.APP_CONFIG?.MODES?.DMI) {
+                const hasPhoto = inputType === 'photo';
+                const hasAudio = inputType === 'audio';
+                const hasText = inputType === 'text';
+                const textLength = processedData?.length || 0;
+                await window.userStatsService.recordDMIModeSend(hasPhoto, hasAudio, hasText, duration, textLength);
+            } else if (mode === window.APP_CONFIG?.MODES?.TEST) {
+                await window.userStatsService.recordTestModeSend(1, duration);
+            }
+
+            this.logger.info('📊 Statistiques enregistrées');
+        } catch (error) {
+            this.logger.warn('⚠️ Erreur enregistrement statistiques:', error.message);
+        }
     }
 }
 

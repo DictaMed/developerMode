@@ -715,32 +715,38 @@ class ModeVisibilityManager {
     /**
      * Mettre à jour la visibilité des modes en fonction de l'état d'authentification
      * @param {boolean} isAuthenticated - L'utilisateur est-il authentifié?
+     * @param {object} user - L'objet utilisateur Firebase (optionnel)
      */
-    updateVisibility(isAuthenticated) {
-        // Éviter les mises à jour redondantes
-        if (this.currentAuthState === isAuthenticated) {
+    updateVisibility(isAuthenticated, user = null) {
+        // Éviter les mises à jour redondantes (sauf si on a un nouvel utilisateur)
+        if (this.currentAuthState === isAuthenticated && !user) {
             console.log('ℹ️ État d\'authentification inchangé, pas de mise à jour nécessaire');
             return;
         }
 
         this.currentAuthState = isAuthenticated;
 
+        // Si pas d'utilisateur fourni, essayer de le récupérer
+        if (isAuthenticated && !user && window.FirebaseAuthManager?.getCurrentUser) {
+            user = window.FirebaseAuthManager.getCurrentUser();
+        }
+
         if (isAuthenticated) {
-            this.showAuthenticatedModes();
+            this.showAuthenticatedModes(user);
         } else {
             this.showUnauthenticatedModes();
         }
 
         // Exécuter les callbacks
-        this.executeCallbacks('onAuthStateChange', isAuthenticated);
+        this.executeCallbacks('onAuthStateChange', { isAuthenticated, user });
     }
 
     /**
      * Afficher les modes pour utilisateur authentifié
-     * Mode Normal + Mode DMI visibles
+     * Mode Normal + Mode DMI + Guide + FAQ + Accueil + Connexion (avec nom)
      * Mode Test caché
      */
-    showAuthenticatedModes() {
+    showAuthenticatedModes(user = null) {
         console.log('🔓 Affichage des modes pour utilisateur authentifié');
 
         // Afficher Mode Normal avec animation
@@ -752,17 +758,26 @@ class ModeVisibilityManager {
         // Cacher Mode Test
         this.hideElement(this.modeElements.test, 'modeTestBtn');
 
+        // Mettre à jour le bouton Connexion avec le nom de l'utilisateur
+        this.updateConnectionButton(user);
+
+        // Initialiser le service de stats et enregistrer la session
+        if (user && window.userStatsService) {
+            window.userStatsService.setCurrentUser(user.uid);
+            window.userStatsService.recordSession();
+        }
+
         console.log('✅ Mode Normal et Mode DMI activés');
         this.executeCallbacks('onModeVisibilityChange', {
             state: this.MODES.AUTHENTICATED,
-            visible: ['normal', 'dmi'],
+            visible: ['normal', 'dmi', 'guide', 'faq', 'home', 'connexion'],
             hidden: ['test']
         });
     }
 
     /**
      * Afficher les modes pour utilisateur NON authentifié
-     * Mode Test visible
+     * Mode Test + Guide + FAQ + Accueil + Connexion visibles
      * Mode Normal + Mode DMI cachés
      */
     showUnauthenticatedModes() {
@@ -777,12 +792,38 @@ class ModeVisibilityManager {
         // Afficher Mode Test
         this.showElement(this.modeElements.test, 'modeTestBtn');
 
+        // Réinitialiser le bouton Connexion
+        this.updateConnectionButton(null);
+
         console.log('✅ Mode Test activé');
         this.executeCallbacks('onModeVisibilityChange', {
             state: this.MODES.UNAUTHENTICATED,
-            visible: ['test'],
+            visible: ['test', 'guide', 'faq', 'home', 'connexion'],
             hidden: ['normal', 'dmi']
         });
+    }
+
+    /**
+     * Mettre à jour le bouton Connexion avec le nom de l'utilisateur
+     */
+    updateConnectionButton(user) {
+        const authButtonText = document.getElementById('authButtonText');
+        if (!authButtonText) return;
+
+        if (user) {
+            // Extraire le prénom du displayName ou utiliser l'email
+            let displayText = 'Mon Profil';
+            if (user.displayName) {
+                const firstName = user.displayName.split(' ')[0];
+                displayText = firstName.length > 12 ? firstName.substring(0, 12) + '...' : firstName;
+            } else if (user.email) {
+                const emailName = user.email.split('@')[0];
+                displayText = emailName.length > 12 ? emailName.substring(0, 12) + '...' : emailName;
+            }
+            authButtonText.textContent = displayText;
+        } else {
+            authButtonText.textContent = 'Connexion';
+        }
     }
 
     /**

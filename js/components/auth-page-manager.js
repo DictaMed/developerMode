@@ -593,7 +593,7 @@ class AuthPageManager {
     /**
      * Mise à jour de l'affichage du profil
      */
-    updateProfileDisplay() {
+    async updateProfileDisplay() {
         const authManager = window.FirebaseAuthManager;
         if (!authManager) {
             console.warn('⚠️ AuthPageManager: FirebaseAuthManager not available for profile display');
@@ -601,43 +601,135 @@ class AuthPageManager {
         }
         const currentUser = authManager.getCurrentUser?.();
 
-        const formContainer = document.getElementById('pageEmailAuthForm');
+        const formContainer = document.getElementById('authFormContainer');
         const profileContainer = document.getElementById('pageUserProfile');
+        const authTitle = document.getElementById('authPageTitle');
+        const authSubtitle = document.getElementById('authPageSubtitle');
 
         if (currentUser) {
             // Afficher le profil
             if (formContainer) formContainer.classList.add('hidden');
             if (profileContainer) profileContainer.classList.remove('hidden');
 
-            // Mettre à jour les informations
+            // Mettre à jour le titre
+            if (authTitle) authTitle.textContent = 'Mon Profil';
+            if (authSubtitle) authSubtitle.textContent = 'Bienvenue sur votre espace personnel';
+
+            // Mettre à jour les informations utilisateur
             const nameEl = document.getElementById('pageUserName');
             const emailEl = document.getElementById('pageUserEmail');
 
             if (nameEl) nameEl.textContent = currentUser.displayName || 'Utilisateur';
             if (emailEl) emailEl.textContent = currentUser.email || 'email@example.com';
 
-            // Mettre à jour le bouton de navigation
-            const authButton = document.querySelector('[data-tab="connexion"]');
-            if (authButton) {
-                const buttonText = authButton.querySelector('#authButtonText');
-                if (buttonText) {
-                    buttonText.textContent = currentUser.displayName || 'Profil';
-                }
-            }
+            // Charger et afficher les statistiques
+            await this.loadAndDisplayStats(currentUser.uid);
+
+            // Configurer les event listeners des boutons d'action
+            this.setupActionButtons();
+
         } else {
             // Afficher le formulaire
             if (formContainer) formContainer.classList.remove('hidden');
             if (profileContainer) profileContainer.classList.add('hidden');
 
-            // Reset button text
-            const authButton = document.querySelector('[data-tab="connexion"]');
-            if (authButton) {
-                const buttonText = authButton.querySelector('#authButtonText');
-                if (buttonText) {
-                    buttonText.textContent = 'Connexion';
-                }
-            }
+            // Réinitialiser le titre
+            if (authTitle) authTitle.textContent = 'Connexion';
+            if (authSubtitle) authSubtitle.textContent = 'Connectez-vous pour accéder à vos outils';
         }
+    }
+
+    /**
+     * Charger et afficher les statistiques utilisateur
+     */
+    async loadAndDisplayStats(userId) {
+        try {
+            if (!window.userStatsService) {
+                console.warn('⚠️ UserStatsService non disponible');
+                return;
+            }
+
+            window.userStatsService.setCurrentUser(userId);
+            const stats = await window.userStatsService.getFormattedStats(userId);
+
+            // Mettre à jour les cartes de statistiques
+            this.updateStatElement('statTotalSends', stats.totalEnvois);
+            this.updateStatElement('statNormalSends', stats.envoisNormal);
+            this.updateStatElement('statDMISends', stats.envoisDMI);
+            this.updateStatElement('statPhotos', stats.photosEnvoyees);
+            this.updateStatElement('statAudioCount', stats.enregistrementsAudio);
+            this.updateStatElement('statAudioDuration', stats.dureeAudioFormatee);
+
+            // Mettre à jour les détails
+            this.updateStatElement('statSessions', stats.nombreSessions);
+
+            if (stats.premiereUtilisation) {
+                this.updateStatElement('statFirstUse', this.formatDate(stats.premiereUtilisation));
+            }
+
+            if (stats.derniereActivite) {
+                this.updateStatElement('statLastActivity', this.formatRelativeDate(stats.derniereActivite));
+            }
+
+            console.log('✅ Statistiques chargées:', stats);
+
+        } catch (error) {
+            console.error('❌ Erreur chargement statistiques:', error);
+        }
+    }
+
+    /**
+     * Mettre à jour un élément de statistique
+     */
+    updateStatElement(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = value;
+        }
+    }
+
+    /**
+     * Formater une date
+     */
+    formatDate(date) {
+        if (!date) return '-';
+        const options = { day: 'numeric', month: 'short', year: 'numeric' };
+        return new Date(date).toLocaleDateString('fr-FR', options);
+    }
+
+    /**
+     * Formater une date relative
+     */
+    formatRelativeDate(date) {
+        if (!date) return '-';
+
+        const now = new Date();
+        const diff = now - new Date(date);
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+
+        if (minutes < 1) return 'À l\'instant';
+        if (minutes < 60) return `Il y a ${minutes} min`;
+        if (hours < 24) return `Il y a ${hours}h`;
+        if (days < 7) return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
+
+        return this.formatDate(date);
+    }
+
+    /**
+     * Configurer les boutons d'action rapide
+     */
+    setupActionButtons() {
+        const actionButtons = document.querySelectorAll('.action-btn[data-tab]');
+        actionButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.getAttribute('data-tab');
+                if (tab && window.switchTab) {
+                    window.switchTab(tab);
+                }
+            });
+        });
     }
 }
 

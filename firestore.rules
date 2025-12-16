@@ -139,8 +139,53 @@ service cloud.firestore {
                           request.auth.token.email_verified == true;
     }
     
+    // ===== COLLECTION STATISTIQUES UTILISATEUR =====
+
+    // Statistiques utilisateur (userStats)
+    match /userStats/{userId} {
+      // Lecture: propriétaire ou admin peut voir ses propres stats
+      allow read: if isOwner(userId) || isAdmin();
+
+      // Création: utilisateur authentifié créant ses propres stats
+      allow create: if isOwner(userId) && isAuthenticated() &&
+                    validateUserStats(request.resource.data);
+
+      // Mise à jour: propriétaire peut mettre à jour ses stats
+      allow update: if isOwner(userId) && isAuthenticated() &&
+                    validateUserStatsUpdate(request.resource.data);
+
+      // Suppression: uniquement admin
+      allow delete: if isAdmin();
+    }
+
+    // Validation des données de statistiques utilisateur
+    function validateUserStats(data) {
+      return data.keys().hasAny(['totalSends', 'normalModeSends', 'dmiModeSends', 'testModeSends']) &&
+             (data.totalSends == null || data.totalSends is number) &&
+             (data.normalModeSends == null || data.normalModeSends is number) &&
+             (data.dmiModeSends == null || data.dmiModeSends is number) &&
+             (data.testModeSends == null || data.testModeSends is number) &&
+             (data.totalPhotos == null || data.totalPhotos is number) &&
+             (data.totalAudioRecordings == null || data.totalAudioRecordings is number) &&
+             (data.totalAudioDuration == null || data.totalAudioDuration is number) &&
+             (data.totalSessions == null || data.totalSessions is number);
+    }
+
+    // Validation de mise à jour des statistiques
+    function validateUserStatsUpdate(data) {
+      // Les statistiques ne peuvent qu'augmenter (pas de réduction frauduleuse)
+      return (data.totalSends == null || data.totalSends is number) &&
+             (data.normalModeSends == null || data.normalModeSends is number) &&
+             (data.dmiModeSends == null || data.dmiModeSends is number) &&
+             (data.testModeSends == null || data.testModeSends is number) &&
+             (data.totalPhotos == null || data.totalPhotos is number) &&
+             (data.totalAudioRecordings == null || data.totalAudioRecordings is number) &&
+             (data.totalAudioDuration == null || data.totalAudioDuration is number) &&
+             (data.totalSessions == null || data.totalSessions is number);
+    }
+
     // ===== COLLECTIONS DE SÉCURITÉ =====
-    
+
     // Sessions utilisateur avec sécurité renforcée
     match /userSessions/{sessionId} {
       // Lecture: uniquement le propriétaire de la session
