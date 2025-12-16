@@ -174,9 +174,10 @@ class DataSender {
             inputType: inputType,
             data: dataWrapper,
             metadata: {
-                appVersion: '2.2.0',
+                appVersion: '3.0.0',
                 clientType: this.getClientType(),
-                userAgent: navigator.userAgent
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString()
             }
         };
 
@@ -435,7 +436,6 @@ class DataSender {
                     mode: mode,
                     fileType: 'audio',
                     inputType: 'audio',
-                    timestamp: new Date().toISOString(),
                     patientInfo: data.patientInfo,
 
                     // Audio fusionné (un seul)
@@ -516,7 +516,6 @@ class DataSender {
             mode: mode,
             inputType: 'audio', // ✅ Primary input type for Normal and Test modes
             inputTypes: ['audio'], // ✅ List of all input types in this payload
-            timestamp: new Date().toISOString(),
             userAgent: navigator.userAgent,
             patientInfo: {},
             recordings: [],
@@ -610,14 +609,15 @@ class DataSender {
 
                     if (recorder.hasRecording()) {
                         // Création d'un objet recording cohérent et complet
+                        const sectionIndex = sections.indexOf(sectionId) + 1;
                         const recording = {
                             sectionId: sectionId,
-                            sectionIndex: sections.indexOf(sectionId) + 1,
+                            sectionIndex: sectionIndex,
+                            fileName: `partie${sectionIndex}`, // Fixed naming: partie1, partie2, partie3, etc.
                             inputType: 'audio', // ✅ Specify data type: audio
                             duration: this.safeGetRecordingDuration(recorder),
                             size: this.safeGetRecordingSize(recorder),
                             format: this.safeGetRecordingFormat(recorder),
-                            timestamp: new Date().toISOString(),
                             audioData: null, // Sera rempli si nécessaire
                             metadata: {
                                 hasAudioData: !!recorder.audioBlob,
@@ -702,6 +702,7 @@ class DataSender {
 
     collectMetadata(mode) {
         return {
+            timestamp: new Date().toISOString(),
             totalRecordings: this.audioRecorderManager?.getSectionCount() || 0,
             browserInfo: {
                 userAgent: navigator.userAgent,
@@ -769,7 +770,6 @@ class DataSender {
                     email: currentUser.email,
                     displayName: currentUser.displayName || '',
                     mode: mode,
-                    timestamp: new Date().toISOString(),
                     ...data // Inclut patientInfo, recordings, metadata
                 };
             }

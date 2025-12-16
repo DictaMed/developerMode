@@ -825,15 +825,102 @@ class EnhancedFirebaseAuthManager {
      */
     getCurrentUser() {
         if (!this.currentUser) return null;
-        
+
         // Vérifier la validité de la session
         if (!this.isSessionValid(this.currentUser.uid)) {
             console.warn('Session invalid, clearing user');
             this.currentUser = null;
             return null;
         }
-        
+
         return this.sanitizeUser(this.currentUser);
+    }
+
+    /**
+     * Vérifier si l'utilisateur est authentifié
+     * Méthode de compatibilité pour les appels existants
+     */
+    isAuthenticated() {
+        return !!this.getCurrentUser();
+    }
+
+    /**
+     * Évaluer la force d'un mot de passe
+     * Utilisé par AuthModalSystem pour l'indicateur de force
+     */
+    evaluatePasswordStrength(password) {
+        const result = {
+            score: 0,
+            strength: 'Très faible',
+            feedback: []
+        };
+
+        if (!password) return result;
+
+        // Critères de force
+        if (password.length >= 8) result.score++;
+        if (password.length >= 12) result.score++;
+        if (/[a-z]/.test(password)) result.score++;
+        if (/[A-Z]/.test(password)) result.score++;
+        if (/[0-9]/.test(password)) result.score++;
+        if (/[^a-zA-Z0-9]/.test(password)) result.score++;
+
+        // Feedback
+        if (password.length < 8) {
+            result.feedback.push('Utilisez au moins 8 caractères');
+        }
+        if (!/[A-Z]/.test(password)) {
+            result.feedback.push('Ajoutez une majuscule');
+        }
+        if (!/[0-9]/.test(password)) {
+            result.feedback.push('Ajoutez un chiffre');
+        }
+        if (!/[^a-zA-Z0-9]/.test(password)) {
+            result.feedback.push('Ajoutez un caractère spécial');
+        }
+
+        // Niveau de force
+        const strengthLevels = ['Très faible', 'Faible', 'Moyen', 'Bon', 'Fort', 'Très fort'];
+        result.strength = strengthLevels[Math.min(result.score, 5)];
+
+        return result;
+    }
+
+    /**
+     * Envoyer un email de réinitialisation de mot de passe
+     */
+    async sendPasswordResetEmail(email) {
+        try {
+            await this.ensureInitialized();
+
+            if (!email) {
+                return { success: false, error: 'Email requis' };
+            }
+
+            // Validation email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                return { success: false, error: 'Email invalide' };
+            }
+
+            // Rate limiting
+            this.checkAdvancedRateLimit('passwordReset', email);
+
+            await this.auth.sendPasswordResetEmail(email);
+
+            this.logSecurityEvent('password_reset_sent', { email });
+
+            return { success: true };
+
+        } catch (error) {
+            console.error('Password reset error:', error);
+            this.logSecurityEvent('password_reset_failed', { email, error: error.code });
+
+            return {
+                success: false,
+                error: this.getErrorMessage(error)
+            };
+        }
     }
 
     /**

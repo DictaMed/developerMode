@@ -1,6 +1,6 @@
 /**
  * DictaMed - Système de navigation entre onglets
- * Version: 2.0.0 - Refactorisé pour une meilleure organisation
+ * Version: 3.0.0 - Refactorisé avec gestion des event listeners et simplification
  */
 
 // ===== TAB NAVIGATION SYSTEM =====
@@ -9,66 +9,46 @@ class TabNavigationSystem {
         this.appState = appState;
         this.activeTab = 'home';
         this.normalModeButton = null;
+        // Gestionnaire d'événements pour éviter les memory leaks
+        this.tabEventListeners = new Map();
+        this.boundHandlers = new Map();
     }
 
     init() {
         try {
-            this.initTabButtons();
-            this.initFixedNavButtons();
-            this.initGlobalNavButtons();
+            this.initAllNavButtons();
             this.initNormalModeButton();
             this.initAuthStateListener();
-            console.log('✅ TabNavigationSystem initialisé');
+            console.log('✅ TabNavigationSystem v3.0 initialisé');
         } catch (error) {
             console.error('❌ Erreur lors de l\'initialisation de TabNavigationSystem:', error);
             throw error;
         }
     }
 
-    initTabButtons() {
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        tabButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const targetTab = btn.getAttribute('data-tab');
-                this.switchTab(targetTab);
-            });
-        });
-    }
-
-    initFixedNavButtons() {
-        const fixedNavBtns = document.querySelectorAll('.fixed-nav-btn');
-        fixedNavBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const targetTab = btn.getAttribute('data-tab');
-                if (targetTab) {
-                    this.switchTab(targetTab);
-                }
-            });
-        });
-    }
-
-    initGlobalNavButtons() {
-        // Handle navigation buttons that don't have the fixed-nav-btn class
-        const globalNavButtons = document.querySelectorAll('[data-tab]');
-        globalNavButtons.forEach(btn => {
-            // Skip if it's already handled by initFixedNavButtons
-            if (btn.classList.contains('fixed-nav-btn')) {
-                return;
-            }
-            
-            btn.addEventListener('click', () => {
+    /**
+     * Initialise tous les boutons de navigation en une seule passe
+     * Évite la duplication de code et les listeners multiples
+     */
+    initAllNavButtons() {
+        const allNavButtons = document.querySelectorAll('[data-tab]');
+        allNavButtons.forEach(btn => {
+            const handler = () => {
                 const targetTab = btn.getAttribute('data-tab');
                 const action = btn.getAttribute('data-action');
-                
-                if (targetTab && (!action || action === 'close-after-nav')) {
+
+                if (targetTab) {
                     this.switchTab(targetTab).then(() => {
-                        // Close modal if action requires it
                         if (action === 'close-after-nav' && window.authModalSystem) {
                             window.authModalSystem.close();
                         }
                     });
                 }
-            });
+            };
+
+            // Stocker le handler pour pouvoir le supprimer plus tard si nécessaire
+            this.boundHandlers.set(btn, handler);
+            btn.addEventListener('click', handler);
         });
     }
 
@@ -297,135 +277,144 @@ class TabNavigationSystem {
         }
     }
 
+    /**
+     * Nettoie les event listeners d'un onglet avant d'en ajouter de nouveaux
+     * Évite les memory leaks et les événements dupliqués
+     */
+    cleanupTabEventListeners(tabId) {
+        const listeners = this.tabEventListeners.get(tabId);
+        if (listeners) {
+            listeners.forEach(({ element, event, handler }) => {
+                if (element) {
+                    element.removeEventListener(event, handler);
+                }
+            });
+            this.tabEventListeners.delete(tabId);
+        }
+    }
+
+    /**
+     * Ajoute un event listener avec tracking pour nettoyage ultérieur
+     */
+    addTabEventListener(tabId, element, event, handler) {
+        if (!element) return;
+
+        element.addEventListener(event, handler);
+
+        if (!this.tabEventListeners.has(tabId)) {
+            this.tabEventListeners.set(tabId, []);
+        }
+        this.tabEventListeners.get(tabId).push({ element, event, handler });
+    }
+
     initTabContentEventListeners(tabId) {
-        // Initialize specific event listeners based on tab type
-        if (tabId === 'connexion') {
-            // Initialize authentication page manager
-            if (window.authPageManager) {
-                console.log('🔐 Initializing AuthPageManager for connexion tab');
-                window.authPageManager.init();
-            }
-        }
+        // Nettoyer les anciens listeners avant d'en ajouter de nouveaux
+        this.cleanupTabEventListeners(tabId);
 
-        if (tabId === 'mode-normal') {
-            // Initialize Normal Mode tab - MUST be called AFTER HTML is loaded
-            console.log('🔧 Initializing NormalModeTab after HTML loaded');
-            if (typeof normalModeTab !== 'undefined' && normalModeTab) {
-                normalModeTab.init();
-            } else {
-                console.warn('⚠️ NormalModeTab not available');
-            }
+        // Configuration des initialiseurs par onglet
+        const tabInitializers = {
+            'connexion': () => {
+                if (window.authPageManager) {
+                    console.log('🔐 Initializing AuthPageManager for connexion tab');
+                    window.authPageManager.init();
+                }
+            },
 
-            // Initialize audio recorders through manager (will handle retry logic)
-            if (window.audioRecorderManager) {
-                window.audioRecorderManager.init();
-            }
+            'mode-normal': () => {
+                console.log('🔧 Initializing NormalModeTab after HTML loaded');
+                if (typeof normalModeTab !== 'undefined' && normalModeTab) {
+                    normalModeTab.init();
+                }
+                if (window.audioRecorderManager) {
+                    window.audioRecorderManager.init();
+                }
+                this.updateSectionCount();
 
-            // Update section count
-            this.updateSectionCount();
-        }
+                // Toggle Partie 4 optionnelle
+                const toggleBtn = document.getElementById('togglePartie4');
+                const partie4 = document.querySelector('[data-section="partie4"]');
+                if (toggleBtn && partie4) {
+                    const handler = () => {
+                        const isHidden = partie4.classList.contains('hidden');
+                        partie4.classList.toggle('hidden');
+                        toggleBtn.textContent = isHidden
+                            ? 'Masquer Partie 4'
+                            : 'Afficher Partie 4 (optionnelle)';
+                    };
+                    this.addTabEventListener(tabId, toggleBtn, 'click', handler);
+                }
+            },
 
-        if (tabId === 'mode-test') {
-            // Initialize Test Mode tab - MUST be called AFTER HTML is loaded
-            console.log('🔧 Initializing TestModeTab after HTML loaded');
-            if (typeof testModeTab !== 'undefined' && testModeTab) {
-                testModeTab.init();
-            } else {
-                console.warn('⚠️ TestModeTab not available');
-            }
+            'mode-test': () => {
+                console.log('🔧 Initializing TestModeTab after HTML loaded');
+                if (typeof testModeTab !== 'undefined' && testModeTab) {
+                    testModeTab.init();
+                }
+                if (window.audioRecorderManager) {
+                    window.audioRecorderManager.init();
+                }
+                this.updateSectionCount();
+            },
 
-            // Initialize audio recorders through manager (will handle retry logic)
-            if (window.audioRecorderManager) {
-                window.audioRecorderManager.init();
-            }
+            'mode-dmi': () => {
+                console.log('🔧 Initializing DmiModeTab after HTML loaded');
+                if (typeof dmiModeTab !== 'undefined' && dmiModeTab) {
+                    dmiModeTab.init();
+                }
 
-            // Update section count
-            this.updateSectionCount();
-        }
-
-        if (tabId === 'mode-dmi') {
-            // Initialize DMI Mode tab - MUST be called AFTER HTML is loaded
-            console.log('🔧 Initializing DmiModeTab after HTML loaded');
-            if (typeof dmiModeTab !== 'undefined' && dmiModeTab) {
-                dmiModeTab.init();
-            } else {
-                console.warn('⚠️ DmiModeTab not available');
-            }
-
-            // Initialize DMI submit button listener
-            const submitDMIBtn = document.getElementById('submitDMI');
-            console.log('🔧 Initializing submitDMI button listener');
-            if (submitDMIBtn && window.dmiDataSender) {
-                submitDMIBtn.addEventListener('click', async () => {
-                    console.log('🖱️ DMI Submit button CLICKED!');
-                    try {
-                        await window.dmiDataSender.send();
-                    } catch (error) {
-                        console.error('❌ Error sending DMI data:', error);
-                        if (window.notificationSystem) {
-                            window.notificationSystem.error('Erreur lors de l\'envoi des données DMI');
+                // Submit DMI button
+                const submitDMIBtn = document.getElementById('submitDMI');
+                if (submitDMIBtn && window.dmiDataSender) {
+                    const submitHandler = async () => {
+                        console.log('🖱️ DMI Submit button CLICKED!');
+                        try {
+                            await window.dmiDataSender.send();
+                        } catch (error) {
+                            console.error('❌ Error sending DMI data:', error);
+                            window.notificationSystem?.error('Erreur lors de l\'envoi des données DMI');
                         }
-                    }
-                });
-                console.log('✅ Click listener attached to submitDMI button');
-            } else {
-                if (!submitDMIBtn) console.warn('⚠️ submitDMI button not found');
-                if (!window.dmiDataSender) console.warn('⚠️ dmiDataSender not available');
-            }
+                    };
+                    this.addTabEventListener(tabId, submitDMIBtn, 'click', submitHandler);
+                    console.log('✅ Click listener attached to submitDMI button');
+                }
 
-            // Initialize DMI specific listeners
-            const texteLibre = document.getElementById('texteLibre');
-            const texteLibreCounter = document.getElementById('texteLibreCounter');
+                // Texte libre counter
+                const texteLibre = document.getElementById('texteLibre');
+                const texteLibreCounter = document.getElementById('texteLibreCounter');
+                if (texteLibre && texteLibreCounter) {
+                    const inputHandler = () => {
+                        texteLibreCounter.textContent = texteLibre.value.length;
+                    };
+                    this.addTabEventListener(tabId, texteLibre, 'input', inputHandler);
+                }
 
-            if (texteLibre && texteLibreCounter) {
-                texteLibre.addEventListener('input', () => {
-                    texteLibreCounter.textContent = texteLibre.value.length;
-                });
+                // Photo management et validation
+                window.photoManagementSystem?.init();
+                window.formValidationSystem?.validateDMIMode();
             }
+        };
 
-            // Initialize photo upload
-            if (window.photoManagementSystem) {
-                window.photoManagementSystem.init();
-            }
-
-            // DMI validation
-            if (window.formValidationSystem) {
-                window.formValidationSystem.validateDMIMode();
-            }
-        }
-        
-        if (tabId === 'mode-normal') {
-            // Initialize optional section toggle
-            const toggleBtn = document.getElementById('togglePartie4');
-            const partie4 = document.querySelector('[data-section="partie4"]');
-            
-            if (toggleBtn && partie4) {
-                toggleBtn.addEventListener('click', () => {
-                    const isHidden = partie4.classList.contains('hidden');
-                    partie4.classList.toggle('hidden');
-                    toggleBtn.textContent = isHidden 
-                        ? 'Masquer Partie 4' 
-                        : 'Afficher Partie 4 (optionnelle)';
-                });
-            }
+        // Exécuter l'initialiseur correspondant
+        const initializer = tabInitializers[tabId];
+        if (initializer) {
+            initializer();
         }
     }
 
     checkTabAccess(tabId) {
-        // Test mode, guide, FAQ, home, and connexion are always accessible
-        if (tabId === window.APP_CONFIG.MODES.TEST || tabId === 'guide' || tabId === 'faq' || tabId === window.APP_CONFIG.MODES.HOME || tabId === 'connexion') {
+        // Onglets toujours accessibles
+        const publicTabs = [window.APP_CONFIG.MODES.TEST, 'guide', 'faq', window.APP_CONFIG.MODES.HOME, 'connexion'];
+        if (publicTabs.includes(tabId)) {
             return true;
         }
 
-        // DMI mode now requires authentication
-        if (tabId === window.APP_CONFIG.MODES.DMI && window.FirebaseAuthManager && !window.FirebaseAuthManager.isAuthenticated()) {
-            window.notificationSystem.warning('Veuillez vous connecter pour accéder au mode DMI', 'Authentification requise');
-            return false;
-        }
+        // Vérifier l'authentification via getCurrentUser (pas isAuthenticated qui n'existe pas)
+        const isAuthenticated = !!(window.FirebaseAuthManager?.getCurrentUser?.());
 
-        // Normal mode requires authentication
-        if (tabId === window.APP_CONFIG.MODES.NORMAL && window.FirebaseAuthManager && !window.FirebaseAuthManager.isAuthenticated()) {
-            window.notificationSystem.warning('Veuillez vous connecter pour accéder à ce mode', 'Authentification requise');
+        // Onglets nécessitant une authentification
+        const protectedTabs = [window.APP_CONFIG.MODES.DMI, window.APP_CONFIG.MODES.NORMAL];
+        if (protectedTabs.includes(tabId) && !isAuthenticated) {
+            window.notificationSystem?.warning('Veuillez vous connecter pour accéder à ce mode', 'Authentification requise');
             return false;
         }
 

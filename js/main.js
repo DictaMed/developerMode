@@ -1,6 +1,6 @@
 /**
  * DictaMed - Point d'entrée principal
- * Version: 2.0.0 - Architecture modulaire refactorisée
+ * Version: 3.0.0 - Architecture modulaire simplifiée
  */
 
 // ===== GLOBAL APPLICATION INSTANCES =====
@@ -11,82 +11,64 @@ let formValidationSystem, photoManagementSystem, dmiDataSender, authModalSystem;
 // ===== TAB INSTANCES =====
 let homeTab, normalModeTab, testModeTab;
 
-// ===== IMMEDIATE GLOBAL FUNCTION DEFINITIONS =====
-// These functions are made available immediately to prevent onclick handler errors
-window._switchTabRetryCount = 0;
-window._switchTabMaxRetries = 5;
+// ===== UTILITY: FONCTION RETRY GÉNÉRIQUE =====
+/**
+ * Crée une fonction avec logique de retry automatique
+ * Élimine la duplication de code pour les fonctions globales
+ */
+function createRetryableFunction(name, getTarget, method, maxRetries = 5) {
+    let retryCount = 0;
 
-window.switchTab = async function(tabId) {
-    // Store the request and execute when system is ready
-    console.log(`🔄 switchTab called with: ${tabId}`);
-    if (tabNavigationSystem && tabNavigationSystem.switchTab) {
-        window._switchTabRetryCount = 0; // Reset retry counter on success
-        await tabNavigationSystem.switchTab(tabId);
-    } else if (window._switchTabRetryCount < window._switchTabMaxRetries) {
-        console.warn(`⚠️ switchTab called but navigation system not ready (attempt ${window._switchTabRetryCount + 1}/${window._switchTabMaxRetries})`);
-        // Retry after a short delay with exponential backoff
-        window._switchTabRetryCount++;
-        const delay = Math.min(100 * Math.pow(1.5, window._switchTabRetryCount), 2000);
-        setTimeout(async () => {
-            await window.switchTab(tabId); // Recursive call with retry logic
-        }, delay);
-    } else {
-        console.error('❌ switchTab: Navigation system not ready after max retries');
-    }
-};
+    return function(...args) {
+        const target = getTarget();
+        if (target && typeof target[method] === 'function') {
+            retryCount = 0;
+            return target[method](...args);
+        }
 
-window._authModalRetryCount = 0;
-window._authModalMaxRetries = 3;
+        if (retryCount < maxRetries) {
+            retryCount++;
+            const delay = Math.min(100 * Math.pow(1.5, retryCount), 2000);
+            console.warn(`⚠️ ${name}: système non prêt (tentative ${retryCount}/${maxRetries})`);
+            return new Promise(resolve => {
+                setTimeout(() => resolve(window[name](...args)), delay);
+            });
+        }
 
-window.toggleAuthModal = function() {
-    console.log('🔄 toggleAuthModal called');
-    if (authModalSystem && authModalSystem.toggle) {
-        window._authModalRetryCount = 0;
-        authModalSystem.toggle();
-    } else if (window._authModalRetryCount < window._authModalMaxRetries) {
-        console.warn(`⚠️ toggleAuthModal called but auth modal system not ready (attempt ${window._authModalRetryCount + 1}/${window._authModalMaxRetries})`);
-        window._authModalRetryCount++;
-        setTimeout(() => {
-            window.toggleAuthModal();
-        }, 100);
-    } else {
-        console.error('❌ toggleAuthModal: Auth modal system not ready after max retries');
-    }
-};
+        console.error(`❌ ${name}: système non disponible après ${maxRetries} tentatives`);
+        return Promise.resolve();
+    };
+}
 
-window.closeAuthModal = function() {
-    console.log('🔄 closeAuthModal called');
-    if (authModalSystem && authModalSystem.close) {
-        window._authModalRetryCount = 0;
-        authModalSystem.close();
-    } else if (window._authModalRetryCount < window._authModalMaxRetries) {
-        console.warn(`⚠️ closeAuthModal called but auth modal system not ready (attempt ${window._authModalRetryCount + 1}/${window._authModalMaxRetries})`);
-        window._authModalRetryCount++;
-        setTimeout(() => {
-            window.closeAuthModal();
-        }, 100);
-    } else {
-        console.error('❌ closeAuthModal: Auth modal system not ready after max retries');
-    }
-};
+// ===== GLOBAL FUNCTIONS (SIMPLIFIÉES) =====
+window.switchTab = createRetryableFunction(
+    'switchTab',
+    () => tabNavigationSystem,
+    'switchTab'
+);
 
-window.togglePasswordVisibility = function() {
-    console.log('🔄 togglePasswordVisibility called');
-    if (authModalSystem && authModalSystem.togglePasswordVisibility) {
-        window._authModalRetryCount = 0;
-        authModalSystem.togglePasswordVisibility();
-    } else if (window._authModalRetryCount < window._authModalMaxRetries) {
-        console.warn(`⚠️ togglePasswordVisibility called but auth modal system not ready (attempt ${window._authModalRetryCount + 1}/${window._authModalMaxRetries})`);
-        window._authModalRetryCount++;
-        setTimeout(() => {
-            window.togglePasswordVisibility();
-        }, 100);
-    } else {
-        console.error('❌ togglePasswordVisibility: Auth modal system not ready after max retries');
-    }
-};
+window.toggleAuthModal = createRetryableFunction(
+    'toggleAuthModal',
+    () => authModalSystem,
+    'toggle',
+    3
+);
 
-window.showForgotPassword = function() {
+window.closeAuthModal = createRetryableFunction(
+    'closeAuthModal',
+    () => authModalSystem,
+    'close',
+    3
+);
+
+window.togglePasswordVisibility = createRetryableFunction(
+    'togglePasswordVisibility',
+    () => authModalSystem,
+    'togglePasswordVisibility',
+    3
+);
+
+window.showForgotPassword = async function() {
     console.log('🔄 showForgotPassword called');
     const emailInput = document.getElementById('modalEmailInput');
     if (!emailInput) {
@@ -96,54 +78,25 @@ window.showForgotPassword = function() {
 
     const email = emailInput.value.trim();
     if (!email) {
-        alert('Veuillez d\'abord entrer votre adresse email pour réinitialiser votre mot de passe.');
+        window.notificationSystem?.warning('Veuillez d\'abord entrer votre adresse email.', 'Email requis');
         emailInput.focus();
         return;
     }
 
-    // BUG FIX: Validate email format before sending
-    if (!window.Utils?.isValidEmail?.(email)) {
-        alert('Veuillez entrer une adresse email valide.');
-        emailInput.focus();
-        return;
-    }
-
-    // Rate limiting check for password reset
-    const lastPasswordResetTime = sessionStorage.getItem('dictamed_last_password_reset');
-    const now = Date.now();
-    const resetCooldown = 60000; // 1 minute between attempts
-
-    if (lastPasswordResetTime && (now - parseInt(lastPasswordResetTime) < resetCooldown)) {
-        const waitSeconds = Math.ceil((resetCooldown - (now - parseInt(lastPasswordResetTime))) / 1000);
-        alert(`Veuillez attendre ${waitSeconds} secondes avant de réessayer.`);
-        return;
-    }
-
-    sessionStorage.setItem('dictamed_last_password_reset', now.toString());
-
-    if (typeof firebase !== 'undefined' && firebase?.auth) {
-        firebase.auth().sendPasswordResetEmail(email)
-            .then(() => {
-                if (window.notificationSystem) {
-                    window.notificationSystem.success(
-                        'Un email de réinitialisation a été envoyé. Veuillez vérifier votre boîte de réception.',
-                        'Email envoyé',
-                        5000
-                    );
-                } else {
-                    alert('Un email de réinitialisation a été envoyé.');
-                }
-            })
-            .catch((error) => {
-                console.error('Password reset error:', error);
-                if (error?.code === 'auth/user-not-found') {
-                    alert('Aucun compte trouvé avec cet email');
-                } else {
-                    alert('Erreur: Impossible d\'envoyer l\'email de réinitialisation');
-                }
-            });
+    // Utiliser FirebaseAuthManager au lieu d'appeler directement Firebase
+    const authManager = window.FirebaseAuthManager;
+    if (authManager?.sendPasswordResetEmail) {
+        const result = await authManager.sendPasswordResetEmail(email);
+        if (result.success) {
+            window.notificationSystem?.success(
+                'Un email de réinitialisation a été envoyé.',
+                'Email envoyé'
+            );
+        } else {
+            window.notificationSystem?.error(result.error, 'Erreur');
+        }
     } else {
-        alert('Service de réinitialisation temporairement indisponible.');
+        window.notificationSystem?.error('Service temporairement indisponible.', 'Erreur');
     }
 };
 
@@ -346,244 +299,107 @@ async function initializeCore() {
     }
 }
 
+/**
+ * Fonction utilitaire pour initialiser un composant de manière sécurisée
+ */
+async function safeInit(Constructor, name, ...args) {
+    if (typeof Constructor === 'undefined') {
+        console.warn(`⚠️ ${name} non disponible`);
+        return null;
+    }
+    try {
+        const instance = new Constructor(...args);
+        if (typeof instance.init === 'function') {
+            await instance.init();
+        }
+        return instance;
+    } catch (error) {
+        console.warn(`⚠️ Erreur lors de l'initialisation de ${name}:`, error.message);
+        return null;
+    }
+}
+
 async function initializeComponents() {
     const logger = window.logger?.createLogger('Component Initialization') || console;
-    const timer = logger.time('Component Initialization');
-    
-    logger.info('🔧 Initialisation des composants...');
-    
-    try {
-        // Initialize audio recorder manager first (critical dependency)
-        if (typeof AudioRecorderManager === 'undefined') {
-            throw new Error('AudioRecorderManager constructor not available');
-        }
-        audioRecorderManager = new AudioRecorderManager(appState);
-        // Note: init() will be called when tabs load to ensure DOM elements exist
+    const timer = logger.time?.('Component Initialization') || (() => {});
 
-        // Expose audio recorder manager globally
+    logger.info('🔧 Initialisation des composants...');
+
+    try {
+        // Composants critiques
+        audioRecorderManager = await safeInit(AudioRecorderManager, 'AudioRecorderManager', appState);
         window.audioRecorderManager = audioRecorderManager;
-        
-        // Initialize navigation system
-        if (typeof TabNavigationSystem === 'undefined') {
-            throw new Error('TabNavigationSystem constructor not available');
-        }
-        tabNavigationSystem = new TabNavigationSystem(appState);
-        await tabNavigationSystem.init();
-        
-        // Expose navigation system globally
+
+        tabNavigationSystem = await safeInit(TabNavigationSystem, 'TabNavigationSystem', appState);
         window.tabNavigationSystem = tabNavigationSystem;
-        
-        // Make switchTab function available immediately for onclick handlers
-        // This will be properly set up once navigation system is initialized
-        window.switchTab = async (tabId) => {
-            if (tabNavigationSystem && tabNavigationSystem.switchTab) {
-                await tabNavigationSystem.switchTab(tabId);
-            } else {
-                console.warn('⚠️ switchTab called before navigation system ready');
-                // Retry after a short delay
-                setTimeout(async () => {
-                    if (tabNavigationSystem && tabNavigationSystem.switchTab) {
-                        await tabNavigationSystem.switchTab(tabId);
-                    }
-                }, 100);
-            }
-        };
-        
-        // Initialize other components with proper error handling
-        const componentPromises = [];
-        
-        // Helper function for safe async operations
-        const safeAsyncOperation = async (operation, context, fallbackMessage) => {
-            try {
-                if (window.errorHandler && typeof window.errorHandler.handleAsync === 'function') {
-                    return await window.errorHandler.handleAsync(operation, context, fallbackMessage);
-                } else {
-                    // Fallback if errorHandler not available
-                    return await operation();
-                }
-            } catch (error) {
-                logger.warning(`Erreur lors de l'initialisation de ${context}`, {
-                    error: error.message,
-                    stack: error.stack
-                });
-                // Don't throw, just log and continue
-                return null;
-            }
-        };
-        
-        // Form validation system
-        if (typeof FormValidationSystem !== 'undefined') {
-            formValidationSystem = new FormValidationSystem();
-            componentPromises.push(
-                safeAsyncOperation(
-                    () => formValidationSystem.init(),
-                    'FormValidationSystem',
-                    'Erreur lors de l\'initialisation du système de validation'
-                )
-            );
-        }
-        
-        // Photo management system
-        if (typeof PhotoManagementSystem !== 'undefined') {
-            photoManagementSystem = new PhotoManagementSystem();
-            componentPromises.push(
-                safeAsyncOperation(
-                    () => photoManagementSystem.init(),
-                    'PhotoManagementSystem',
-                    'Erreur lors de l\'initialisation du système de gestion des photos'
-                )
-            );
-        }
-        
-        // DMI data sender
+
+        // Composants secondaires (en parallèle)
+        const [formVal, photoMgmt, authModal, autoSave] = await Promise.all([
+            safeInit(FormValidationSystem, 'FormValidationSystem'),
+            safeInit(PhotoManagementSystem, 'PhotoManagementSystem'),
+            safeInit(AuthModalSystem, 'AuthModalSystem'),
+            safeInit(AutoSaveSystem, 'AutoSaveSystem', appState)
+        ]);
+
+        formValidationSystem = formVal;
+        photoManagementSystem = photoMgmt;
+        authModalSystem = authModal;
+        autoSaveSystem = autoSave;
+
+        // DMI data sender (dépend de photoManagementSystem)
         if (typeof DMIDataSender !== 'undefined') {
             dmiDataSender = new DMIDataSender(photoManagementSystem);
+            window.dmiDataSender = dmiDataSender;
         }
-        
-        // Auth modal system
-        if (typeof AuthModalSystem !== 'undefined') {
-            authModalSystem = new AuthModalSystem();
-            componentPromises.push(
-                safeAsyncOperation(
-                    () => authModalSystem.init(),
-                    'AuthModalSystem',
-                    'Erreur lors de l\'initialisation du modal d\'authentification'
-                )
-            );
-        }
-        
-        // Auto-save system
-        if (typeof AutoSaveSystem !== 'undefined') {
-            autoSaveSystem = new AutoSaveSystem(appState);
-            componentPromises.push(
-                safeAsyncOperation(
-                    () => autoSaveSystem.init(),
-                    'AutoSaveSystem',
-                    'Erreur lors de l\'initialisation du système de sauvegarde automatique'
-                )
-            );
-        }
-        
+
         // Data sender
         if (typeof DataSender !== 'undefined') {
             dataSender = new DataSender(appState, audioRecorderManager);
-            window.dataSender = dataSender; // Expose globally for fallback
+            window.dataSender = dataSender;
         }
-        
-        // Wait for all component initializations to complete
-        const results = await Promise.allSettled(componentPromises);
-        
-        // Log any failed component initializations but don't fail the entire process
-        results.forEach((result, index) => {
-            if (result.status === 'rejected') {
-                logger.warning(`Composant ${index} a échoué lors de l'initialisation`, {
-                    error: result.reason?.message,
-                    stack: result.reason?.stack
-                });
-            }
-        });
-        
-        // Initialize Firebase Auth after other components are ready
+
+        // Firebase Auth (après les autres composants)
         setTimeout(() => {
-            if (typeof FirebaseAuthManager !== 'undefined') {
+            if (window.FirebaseAuthManager?.init) {
                 try {
-                    FirebaseAuthManager.init();
-                } catch (error) {
-                    logger.warning('Erreur lors de l\'initialisation de Firebase Auth', {
-                        error: error.message
-                    });
+                    window.FirebaseAuthManager.init();
+                } catch (e) {
+                    logger.warn?.('Firebase Auth init error:', e.message);
                 }
             }
         }, 200);
-        
+
         timer();
         logger.info('✅ Composants initialisés');
-        
+
     } catch (error) {
         timer();
-        logger.error('❌ Erreur critique lors de l\'initialisation des composants', {
-            error: error.message,
-            stack: error.stack
-        });
-        // Don't throw the error, just log it and continue
-        // The application should still function even if some components fail to initialize
+        logger.error?.('❌ Erreur lors de l\'initialisation des composants', { error: error.message });
     }
 }
 
 async function initializeTabs() {
     const logger = window.logger?.createLogger('Tab Initialization') || console;
-    const timer = logger.time('Tab Initialization');
-    
+    const timer = logger.time?.('Tab Initialization') || (() => {});
+
     try {
-        // Initialize tab-specific modules
-        const tabPromises = [];
-        
-        // Helper function for safe async operations
-        const safeAsyncOperation = async (operation, context, fallbackMessage) => {
-            try {
-                if (window.errorHandler && typeof window.errorHandler.handleAsync === 'function') {
-                    return await window.errorHandler.handleAsync(operation, context, fallbackMessage);
-                } else {
-                    // Fallback if errorHandler not available
-                    return await operation();
-                }
-            } catch (error) {
-                logger.warning(`Erreur lors de l'initialisation de ${context}`, {
-                    error: error.message,
-                    stack: error.stack
-                });
-                // Don't throw, just log and continue
-                return null;
-            }
-        };
-        
-        if (typeof HomeTab !== 'undefined') {
-            homeTab = new HomeTab(appState, tabNavigationSystem);
-            tabPromises.push(
-                safeAsyncOperation(
-                    () => homeTab.init(),
-                    'HomeTab',
-                    'Erreur lors de l\'initialisation de l\'onglet d\'accueil'
-                )
-            );
-        }
-        
-        if (typeof NormalModeTab !== 'undefined') {
-            normalModeTab = new NormalModeTab(appState, tabNavigationSystem, audioRecorderManager, dataSender);
-            tabPromises.push(
-                safeAsyncOperation(
-                    () => normalModeTab.init(),
-                    'NormalModeTab',
-                    'Erreur lors de l\'initialisation du mode normal'
-                )
-            );
-        }
-        
-        if (typeof TestModeTab !== 'undefined') {
-            testModeTab = new TestModeTab(appState, tabNavigationSystem, audioRecorderManager, dataSender);
-            tabPromises.push(
-                safeAsyncOperation(
-                    () => testModeTab.init(),
-                    'TestModeTab',
-                    'Erreur lors de l\'initialisation du mode test'
-                )
-            );
-        }
-        
-        // Wait for all tab initializations to complete
-        await Promise.allSettled(tabPromises);
-        
+        // Initialiser les onglets en parallèle avec safeInit
+        const [home, normal, test] = await Promise.all([
+            safeInit(HomeTab, 'HomeTab', appState, tabNavigationSystem),
+            safeInit(NormalModeTab, 'NormalModeTab', appState, tabNavigationSystem, audioRecorderManager, dataSender),
+            safeInit(TestModeTab, 'TestModeTab', appState, tabNavigationSystem, audioRecorderManager, dataSender)
+        ]);
+
+        homeTab = home;
+        normalModeTab = normal;
+        testModeTab = test;
+
         timer();
         logger.info('✅ Tab modules initialisés');
-        
+
     } catch (error) {
         timer();
-        logger.error('❌ Erreur lors de l\'initialisation des onglets', {
-            error: error.message,
-            stack: error.stack
-        });
-        // Don't throw the error, just log it and continue
-        // The application should still function even if some tabs fail to initialize
+        logger.error?.('❌ Erreur lors de l\'initialisation des onglets', { error: error.message });
     }
 }
 
