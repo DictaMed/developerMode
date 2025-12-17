@@ -18,9 +18,9 @@
 // Laissez VIDE ("") si vous n'utilisez pas ce type de fichier
 
 const WEBHOOKS_CONFIG = {
-    // Webhook pour les fichiers AUDIO enregistrés
+    // Webhook pour les fichiesrs AUDIO enregistrés
     // Utilisé dans: Mode NORMAL, Mode TEST, Mode DMI
-    // Change this URL to your n8n webhook for audio files
+    // Change this URLs to your n8n webhook for audio files
     audio: 'https://n8n.srv1104707.hstgr.cloud/webhook-test/Audio',
 
     // Webhook pour les TEXTES libres
