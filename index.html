@@ -5,75 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DictaMed - Dictée Médicale Intelligente</title>
     <link rel="stylesheet" href="style-optimized.css">
+    <link rel="stylesheet" href="horizontal-tabs.css">
     
     <!-- CSS de Fallback - S'active si styszee-optimized.css ne se charge pas -->
     <link rel="stylesheet" href="style-fallback.css">
 </head>
 <body>
-    <!-- Bouton hamburger pour mobile -->
-    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Ouvrir le menu">
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-    </button>
-
-    <!-- Overlay pour mobile -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <!-- Navigation verticale sidebar -->
-    <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
-        <div class="sidebar-header">
+    <!-- Header avec logo -->
+    <header class="header-section">
+        <div class="header-logo-container">
             <div class="header-logo">
                 <span class="logo-dicta">Dicta</span><span class="logo-med">Med</span>
             </div>
-            <button class="sidebar-close" id="sidebarClose" aria-label="Fermer le menu">×</button>
         </div>
+    </header>
 
-        <nav class="sidebar-nav">
-            <div class="nav-section">
-                <span class="nav-section-title">Navigation</span>
-                <button class="sidebar-nav-btn active" data-tab="home" aria-label="Page d'accueil">
-                    <span class="nav-icon">🏠</span>
-                    <span class="nav-text">Accueil</span>
-                </button>
-            </div>
-
-            <div class="nav-section">
-                <span class="nav-section-title">Modes</span>
-                <button class="sidebar-nav-btn" id="modeNormalBtn" data-tab="mode-normal" aria-label="Mode normal">
-                    <span class="nav-icon">🏥</span>
-                    <span class="nav-text">Mode Normal</span>
-                </button>
-                <button class="sidebar-nav-btn" id="modeTestBtn" data-tab="mode-test" aria-label="Mode test">
-                    <span class="nav-icon">🧪</span>
-                    <span class="nav-text">Mode Test</span>
-                </button>
-                <button class="sidebar-nav-btn" id="modeDmiBtn" data-tab="mode-dmi" aria-label="Mode DMI">
-                    <span class="nav-icon">📝</span>
-                    <span class="nav-text">Mode DMI</span>
-                </button>
-            </div>
-
-            <div class="nav-section">
-                <span class="nav-section-title">Aide</span>
-                <button class="sidebar-nav-btn" data-tab="guide" aria-label="Guide d'utilisation">
-                    <span class="nav-icon">📖</span>
-                    <span class="nav-text">Guide</span>
-                </button>
-                <button class="sidebar-nav-btn" data-tab="faq" aria-label="Questions fréquentes">
-                    <span class="nav-icon">❓</span>
-                    <span class="nav-text">FAQ</span>
-                </button>
-            </div>
-        </nav>
-
-        <div class="sidebar-footer">
-            <button class="sidebar-nav-btn sidebar-auth-btn" data-tab="connexion" aria-label="Connexion / Profil">
-                <span class="nav-icon">🔐</span>
-                <span class="nav-text" id="authButtonText">Connexion</span>
+    <!-- Navigation horizontale -->
+    <nav class="horizontal-tabs" id="horizontalTabs" aria-label="Navigation principale">
+        <div class="tab-container">
+            <button class="tab-btn active" data-tab="home" aria-label="Page d'accueil">
+                <span class="tab-icon">🏠</span>
+                <span class="tab-text">Accueil</span>
+            </button>
+            
+            <button class="tab-btn" id="modeTestBtn" data-tab="mode-test" aria-label="Mode test">
+                <span class="tab-icon">🧪</span>
+                <span class="tab-text">Mode Test</span>
+            </button>
+            
+            <button class="tab-btn" id="modeNormalBtn" data-tab="mode-normal" aria-label="Mode normal">
+                <span class="tab-icon">🏥</span>
+                <span class="tab-text">Mode Normal</span>
+            </button>
+            
+            <button class="tab-btn" id="modeDmiBtn" data-tab="mode-dmi" aria-label="Mode DMI">
+                <span class="tab-icon">📝</span>
+                <span class="tab-text">Mode DMI</span>
+            </button>
+            
+            <button class="tab-btn" data-tab="guide" aria-label="Guide d'utilisation">
+                <span class="tab-icon">📖</span>
+                <span class="tab-text">Guide</span>
+            </button>
+            
+            <button class="tab-btn" data-tab="faq" aria-label="Questions fréquentes">
+                <span class="tab-icon">❓</span>
+                <span class="tab-text">FAQ</span>
+            </button>
+            
+            <div class="tab-spacer"></div>
+            
+            <button class="tab-btn auth-tab" data-tab="connexion" aria-label="Connexion / Profil">
+                <span class="tab-icon">🔐</span>
+                <span class="tab-text" id="authButtonText">Connexion</span>
             </button>
         </div>
-    </aside>
+    </nav>
 
     <main class="container">
         <!-- Page d'accueil -->

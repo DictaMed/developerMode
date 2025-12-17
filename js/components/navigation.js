@@ -1,6 +1,6 @@
 /**
  * DictaMed - Système de navigation entre onglets
- * Version: 3.0.0 - Refactorisé avec gestion des event listeners et simplification
+ * Version: 4.0.0 - Refactorisé pour les onglets horizontaux
  */
 
 // ===== TAB NAVIGATION SYSTEM =====
@@ -13,73 +13,17 @@ class TabNavigationSystem {
         // Gestionnaire d'événements pour éviter les memory leaks
         this.tabEventListeners = new Map();
         this.boundHandlers = new Map();
-        // Sidebar elements
-        this.sidebar = null;
-        this.sidebarToggle = null;
-        this.sidebarOverlay = null;
-        this.sidebarClose = null;
     }
 
     init() {
         try {
-            this.initSidebar();
             this.initAllNavButtons();
             this.initNormalModeButton();
             this.initAuthStateListener();
-            console.log('✅ TabNavigationSystem v3.0 initialisé avec sidebar');
+            console.log('✅ TabNavigationSystem v4.0 initialisé avec onglets horizontaux');
         } catch (error) {
             console.error('❌ Erreur lors de l\'initialisation de TabNavigationSystem:', error);
             throw error;
-        }
-    }
-
-    /**
-     * Initialise le sidebar et ses contrôles pour mobile
-     */
-    initSidebar() {
-        this.sidebar = document.getElementById('sidebar');
-        this.sidebarToggle = document.getElementById('sidebarToggle');
-        this.sidebarOverlay = document.getElementById('sidebarOverlay');
-        this.sidebarClose = document.getElementById('sidebarClose');
-
-        if (this.sidebarToggle) {
-            this.sidebarToggle.addEventListener('click', () => this.toggleSidebar());
-        }
-
-        if (this.sidebarOverlay) {
-            this.sidebarOverlay.addEventListener('click', () => this.closeSidebar());
-        }
-
-        if (this.sidebarClose) {
-            this.sidebarClose.addEventListener('click', () => this.closeSidebar());
-        }
-
-        // Fermer le sidebar lors d'un clic sur un bouton de navigation (mobile)
-        const navButtons = document.querySelectorAll('.sidebar-nav-btn[data-tab]');
-        navButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
-                    this.closeSidebar();
-                }
-            });
-        });
-    }
-
-    toggleSidebar() {
-        if (this.sidebar) {
-            this.sidebar.classList.toggle('open');
-            this.sidebarToggle?.classList.toggle('active');
-            this.sidebarOverlay?.classList.toggle('active');
-            document.body.classList.toggle('sidebar-open');
-        }
-    }
-
-    closeSidebar() {
-        if (this.sidebar) {
-            this.sidebar.classList.remove('open');
-            this.sidebarToggle?.classList.remove('active');
-            this.sidebarOverlay?.classList.remove('active');
-            document.body.classList.remove('sidebar-open');
         }
     }
 
@@ -88,7 +32,7 @@ class TabNavigationSystem {
      * Évite la duplication de code et les listeners multiples
      */
     initAllNavButtons() {
-        const allNavButtons = document.querySelectorAll('[data-tab]');
+        const allNavButtons = document.querySelectorAll('.tab-btn[data-tab]');
         allNavButtons.forEach(btn => {
             const handler = () => {
                 const targetTab = btn.getAttribute('data-tab');
@@ -110,9 +54,9 @@ class TabNavigationSystem {
     }
 
     initNormalModeButton() {
-        // Find the normal mode and DMI buttons in the sidebar navigation
-        this.normalModeButton = document.querySelector('.sidebar-nav-btn[data-tab="mode-normal"]');
-        this.dmiModeButton = document.querySelector('.sidebar-nav-btn[data-tab="mode-dmi"]');
+        // Find the normal mode and DMI buttons in the horizontal navigation
+        this.normalModeButton = document.querySelector('.tab-btn[data-tab="mode-normal"]');
+        this.dmiModeButton = document.querySelector('.tab-btn[data-tab="mode-dmi"]');
 
         // Initialize the visual state based on current authentication status
         this.updateProtectedButtonsState();
@@ -484,9 +428,9 @@ class TabNavigationSystem {
     }
 
     updateFixedNavButtons(activeTabId) {
-        // Update sidebar navigation buttons
-        const sidebarNavBtns = document.querySelectorAll('.sidebar-nav-btn');
-        sidebarNavBtns.forEach(btn => {
+        // Update horizontal navigation buttons
+        const horizontalNavBtns = document.querySelectorAll('.tab-btn');
+        horizontalNavBtns.forEach(btn => {
             btn.classList.remove('active');
             if (btn.getAttribute('data-tab') === activeTabId) {
                 btn.classList.add('active');
