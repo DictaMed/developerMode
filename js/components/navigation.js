@@ -1,6 +1,6 @@
 /**
  * DictaMed - Système de navigation entre onglets
- * Version: 4.0.0 - Refactorisé pour les onglets horizontaux
+ * Version: 3.0.0 - Refactorisé avec gestion des event listeners et simplification
  */
 
 // ===== TAB NAVIGATION SYSTEM =====
@@ -9,7 +9,6 @@ class TabNavigationSystem {
         this.appState = appState;
         this.activeTab = 'home';
         this.normalModeButton = null;
-        this.dmiModeButton = null;
         // Gestionnaire d'événements pour éviter les memory leaks
         this.tabEventListeners = new Map();
         this.boundHandlers = new Map();
@@ -20,7 +19,7 @@ class TabNavigationSystem {
             this.initAllNavButtons();
             this.initNormalModeButton();
             this.initAuthStateListener();
-            console.log('✅ TabNavigationSystem v4.0 initialisé avec onglets horizontaux');
+            console.log('✅ TabNavigationSystem v3.0 initialisé');
         } catch (error) {
             console.error('❌ Erreur lors de l\'initialisation de TabNavigationSystem:', error);
             throw error;
@@ -32,7 +31,7 @@ class TabNavigationSystem {
      * Évite la duplication de code et les listeners multiples
      */
     initAllNavButtons() {
-        const allNavButtons = document.querySelectorAll('.tab-btn[data-tab]');
+        const allNavButtons = document.querySelectorAll('[data-tab]');
         allNavButtons.forEach(btn => {
             const handler = () => {
                 const targetTab = btn.getAttribute('data-tab');
@@ -54,12 +53,11 @@ class TabNavigationSystem {
     }
 
     initNormalModeButton() {
-        // Find the normal mode and DMI buttons in the horizontal navigation
-        this.normalModeButton = document.querySelector('.tab-btn[data-tab="mode-normal"]');
-        this.dmiModeButton = document.querySelector('.tab-btn[data-tab="mode-dmi"]');
-
-        // Initialize the visual state based on current authentication status
-        this.updateProtectedButtonsState();
+        // Find the normal mode button in the fixed navigation
+        this.normalModeButton = document.querySelector('.fixed-nav-btn[data-tab="mode-normal"]');
+        
+        // Initialize the visibility based on current authentication status
+        this.updateNormalModeButtonVisibility();
     }
 
     initAuthStateListener() {
@@ -67,7 +65,7 @@ class TabNavigationSystem {
         // BUG FIX: Wait for Firebase to restore auth state on page reload
         // This is much more efficient and responds immediately to auth changes
         const checkAuthState = () => {
-            this.updateProtectedButtonsState();
+            this.updateNormalModeButtonVisibility();
         };
 
         // BUG FIX: Wait for auth restoration before checking state
@@ -105,31 +103,27 @@ class TabNavigationSystem {
         window.addEventListener('authStateChanged', checkAuthState);
     }
 
-    updateProtectedButtonsState() {
+    updateNormalModeButtonVisibility() {
+        if (!this.normalModeButton) {
+            return;
+        }
+
         // Vérifier si l'utilisateur est authentifié en utilisant getCurrentUser()
         const currentUser = window.FirebaseAuthManager && window.FirebaseAuthManager.getCurrentUser && window.FirebaseAuthManager.getCurrentUser();
         const isAuthenticated = !!currentUser; // !!null = false, !!user = true
 
-        // Liste des boutons protégés (nécessitent authentification)
-        const protectedButtons = [this.normalModeButton, this.dmiModeButton];
-
-        protectedButtons.forEach(button => {
-            if (!button) return;
-
-            if (isAuthenticated) {
-                // Utilisateur connecté : activer les boutons
-                button.classList.remove('auth-required-disabled');
-                button.removeAttribute('title');
-                console.log(`🔓 ${button.dataset.tab} button enabled - user authenticated:`, currentUser?.email);
-            } else {
-                // Utilisateur non connecté : désactiver visuellement les boutons
-                button.classList.add('auth-required-disabled');
-                button.setAttribute('title', 'Connexion requise pour accéder à ce mode');
-                console.log(`🔒 ${button.dataset.tab} button disabled - user not authenticated`);
-            }
-        });
+        if (isAuthenticated) {
+            this.normalModeButton.style.display = '';
+            this.normalModeButton.classList.remove('auth-required-hidden');
+            console.log('🔓 Normal mode button visible - user authenticated:', currentUser?.email);
+        } else {
+            this.normalModeButton.style.display = 'none';
+            this.normalModeButton.classList.add('auth-required-hidden');
+            console.log('🔒 Normal mode button hidden - user not authenticated');
+        }
 
         // BUG FIX: Update all mode visibility based on authentication status
+        // This ensures both Mode Normal and Mode Test visibility is synchronized
         if (window.DictaMed && typeof window.DictaMed.updateModeVisibility === 'function') {
             window.DictaMed.updateModeVisibility(isAuthenticated);
         }
@@ -428,9 +422,8 @@ class TabNavigationSystem {
     }
 
     updateFixedNavButtons(activeTabId) {
-        // Update horizontal navigation buttons
-        const horizontalNavBtns = document.querySelectorAll('.tab-btn');
-        horizontalNavBtns.forEach(btn => {
+        const fixedNavBtns = document.querySelectorAll('.fixed-nav-btn');
+        fixedNavBtns.forEach(btn => {
             btn.classList.remove('active');
             if (btn.getAttribute('data-tab') === activeTabId) {
                 btn.classList.add('active');

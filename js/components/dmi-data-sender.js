@@ -61,7 +61,7 @@ class DMIDataSender {
                     displayName: currentUser.displayName || '',
                     mode: window.APP_CONFIG.MODES.DMI,
                     fileType: 'text',
-                    fileName: 'texte_dmi', // Fixed naming for text
+                    timestamp: new Date().toISOString(),
                     numeroDossier: payload.NumeroDeDossier,
                     nomPatient: payload.NomDuPatient,
                     texte: payload.texte,
@@ -92,7 +92,7 @@ class DMIDataSender {
                         displayName: currentUser.displayName || '',
                         mode: window.APP_CONFIG.MODES.DMI,
                         fileType: 'photo',
-                        fileName: `photo${i + 1}`, // Fixed naming: photo1, photo2, photo3, etc.
+                        timestamp: new Date().toISOString(),
                         numeroDossier: payload.NumeroDeDossier,
                         nomPatient: payload.NomDuPatient,
                         photo: payload.photos[i],
@@ -150,6 +150,7 @@ class DMIDataSender {
 
         const payload = {
             mode: window.APP_CONFIG.MODES.DMI,
+            recordedAt: new Date().toISOString(),
             NumeroDeDossier: numeroDossier,
             NomDuPatient: nomPatient,
             inputType: 'text', // ✅ Specify data type: text (primary input)
@@ -173,8 +174,8 @@ class DMIDataSender {
             payload.photos = photosData.map((photo, index) => ({
                 data: photo,
                 inputType: 'photo', // Specify data type: photo
-                fileName: `photo${index + 1}`, // Fixed naming: photo1, photo2, photo3, etc.
-                index: index
+                index: index,
+                timestamp: new Date().toISOString()
             }));
 
             if (payload.photos.length > 0) {

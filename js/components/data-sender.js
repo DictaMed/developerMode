@@ -169,13 +169,15 @@ class DataSender {
             email: currentUser.email,
             displayName: currentUser.displayName || 'Anonymous',
             mode: mode,
+            timestamp: new Date().toISOString(),
             patientInfo: this.collectPatientInfo(mode),
             inputType: inputType,
             data: dataWrapper,
             metadata: {
                 appVersion: '3.0.0',
                 clientType: this.getClientType(),
-                userAgent: navigator.userAgent
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString()
             }
         };
 
@@ -336,7 +338,6 @@ class DataSender {
 
             return {
                 audioData: mergedBase64,
-                fileName: 'TouslesAUDIO', // Fixed naming for merged audio file
                 duration: totalDuration,
                 format: 'wav',
                 size: wavBlob.size,
@@ -441,7 +442,6 @@ class DataSender {
                     patientInfo: data.patientInfo,
 
                     // Audio fusionné (un seul)
-                    fileName: mergedAudio.fileName, // Fixed name: TouslesAUDIO
                     audioData: mergedAudio.audioData,
                     duration: mergedAudio.duration,
                     format: mergedAudio.format,
@@ -708,6 +708,7 @@ class DataSender {
 
     collectMetadata(mode) {
         return {
+            timestamp: new Date().toISOString(),
             totalRecordings: this.audioRecorderManager?.getSectionCount() || 0,
             browserInfo: {
                 userAgent: navigator.userAgent,
@@ -715,7 +716,8 @@ class DataSender {
                 platform: navigator.platform
             },
             sessionInfo: {
-                startTime: this.appState?.sessionStartTime || ''
+                startTime: this.appState?.sessionStartTime || new Date().toISOString(),
+                currentTime: new Date().toISOString()
             }
         };
     }
@@ -844,7 +846,8 @@ class DataSender {
             return {
                 success: true,
                 message: 'Données envoyées avec succès',
-                ...result
+                ...result,
+                timestamp: new Date().toISOString()
             };
 
         } catch (error) {
